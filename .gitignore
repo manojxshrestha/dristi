@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Virtual environment (our name is venv/, not .venv/)
+venv/
+.venv/
+
+# Environment & secrets
+.env
+.env.*
+*.pem
+*.key
+*.der
+*.crt
+*.p12
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Engagement runtime data (per-pentest output, contains cookies/tokens/creds)
+engagements/*
+
+# User-specific configs with real credentials (keep example-config.yaml only)
+configs/*.yaml
+!configs/example-config.yaml
+
+# MCP server runtime data (findings, tracking, checkpoints, etc.)
+server/data/
+
+# Playwright MCP logs
+.playwright-mcp/
+
+# Tool output & temp files
+*.log
+
+# Per-target recon output (paid tool data)
+manual_recon/*
+recon/*
+scripts/recon/*
+
+# Auto-downloaded external tools (root only, not scripts/tools/)
+/tools/
+
+# Auto-downloaded wordlist caches
+scripts/wordlists/
+
+# Auto-downloaded external scripts
+scripts/tools/filter.sh
+
+# Node modules (Playwright MCP)
+node_modules/

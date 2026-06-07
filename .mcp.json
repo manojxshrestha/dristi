@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "wstg-pentest": {
+      "command": "uv",
+      "args": ["--directory", "./server", "run", "server.py"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp"]
+    }
+  }
+}

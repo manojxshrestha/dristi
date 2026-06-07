@@ -1,0 +1,65 @@
+# Python web application paths (Django, Flask, FastAPI)
+# Use when technology stack identifies Python (csrftoken cookie, Django headers, etc.)
+
+## Django Admin & Debug
+/admin
+/admin/login
+/admin/logout
+/admin/doc
+/__debug__
+/__debug__/sql
+/django-admin
+/djadmin
+/static/admin
+
+## Django REST Framework
+/api
+/api/v1
+/api/v2
+/api-auth
+/api-auth/login
+/api-token-auth
+/api-token-refresh
+/api/schema
+/api/docs
+/api/redoc
+/api/swagger
+
+## Django Config
+/settings.py
+/manage.py
+/requirements.txt
+/Pipfile
+/Pipfile.lock
+/pyproject.toml
+/.env
+/static
+/media
+
+## Flask specific
+/console
+/debug
+/static
+/templates
+/instance
+
+## FastAPI specific
+/docs
+/redoc
+/openapi.json
+/api/openapi.json
+/health
+/healthcheck
+
+## Common Python
+/requirements.txt
+/setup.py
+/Procfile
+/runtime.txt
+/.python-version
+/app.py
+/wsgi.py
+/asgi.py
+/gunicorn.conf.py
+/celeryconfig.py
+/flower

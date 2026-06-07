@@ -1,0 +1,81 @@
+# Java web application paths (Spring Boot, Tomcat, JBoss, etc.)
+# Use when technology stack identifies Java (JSESSIONID cookie, .jsp extensions, etc.)
+
+## Spring Boot Actuator
+/actuator
+/actuator/health
+/actuator/info
+/actuator/env
+/actuator/configprops
+/actuator/mappings
+/actuator/beans
+/actuator/metrics
+/actuator/threaddump
+/actuator/heapdump
+/actuator/loggers
+/actuator/auditevents
+/actuator/httptrace
+/actuator/scheduledtasks
+/actuator/conditions
+/actuator/shutdown
+/actuator/jolokia
+/actuator/gateway/routes
+
+## Spring specific
+/swagger-ui.html
+/swagger-ui
+/v2/api-docs
+/v3/api-docs
+/swagger-resources
+/swagger-resources/configuration
+/h2-console
+/h2
+/console
+
+## Tomcat
+/manager
+/manager/html
+/manager/status
+/host-manager
+/host-manager/html
+/status
+/probe
+/web-console
+/jmx-console
+/admin-console
+
+## JBoss / WildFly
+/jmx-console
+/web-console
+/admin-console
+/invoker/JMXInvokerServlet
+/invoker/EJBInvokerServlet
+
+## JSP & Servlet
+/index.jsp
+/login.jsp
+/admin.jsp
+/test.jsp
+/error.jsp
+/WEB-INF/web.xml
+/WEB-INF/applicationContext.xml
+/META-INF/MANIFEST.MF
+
+## Config & Build
+/pom.xml
+/build.gradle
+/application.properties
+/application.yml
+/application-dev.yml
+/application-prod.yml
+/bootstrap.properties
+/bootstrap.yml
+/.env
+
+## Common Java APIs
+/api
+/api/v1
+/rest
+/services
+/ws
+/graphql

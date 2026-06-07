@@ -1,0 +1,80 @@
+# Dristi Engagement Configuration
+# Copy this file and fill in values for your target application.
+# Load it with: load_engagement_config(engagement_id, config_yaml)
+
+# Optional: Testing mode. "full" (default) or "ctf" (relaxed gates for CTF/small apps).
+# mode: ctf
+
+target:
+  # Required: The main URL of the target application
+  url: https://app.example.com
+
+  # Optional: List of in-scope domains. Each domain is auto-registered via register_scope().
+  scope:
+    - app.example.com
+    - api.example.com
+
+  # Optional: Domains explicitly excluded from testing
+  exclude:
+    - cdn.example.com
+
+authentication:
+  # Required: How the application authenticates users
+  # Options: form | sso | api | manual | none
+  login_type: form
+
+  # URL of the login page (for form/sso types)
+  login_url: https://app.example.com/login
+
+  # Credentials for authenticated testing
+  credentials:
+    username: testuser@example.com
+    password: secret123
+
+  # SSO-specific settings (only needed if login_type: sso)
+  # sso:
+  #   provider: keycloak    # keycloak | auth0 | okta | azure_ad | custom
+  #   auth_domain: auth.example.com
+  #   realm: myrealm
+  #   client_id: my-app
+
+  # Step-by-step login flow instructions (used by browser-auth.py)
+  # Use $username, $password as placeholders for credential values
+  login_flow:
+    - "Type $username into the email field"
+    - "Type $password into the password field"
+    - "Click the 'Sign In' button"
+
+  # How to verify successful login
+  success_condition:
+    # Options: url_contains | cookie_present | text_contains
+    type: url_contains
+    value: "/dashboard"
+
+# Optional: Rules to control testing scope
+rules:
+  # Endpoints/features to SKIP entirely
+  avoid:
+    - description: "Skip logout functionality"
+      type: path              # path | endpoint | feature | parameter
+      url_path: "/logout"
+
+    # - description: "Do not test admin deletion"
+    #   type: endpoint
+    #   method: DELETE
+    #   url_path: "/api/admin/*"
+
+  # Endpoints/features to PRIORITIZE (test first, more depth)
+  focus:
+    - description: "Prioritize API endpoints"
+      type: path
+      url_path: "/api"
+
+    # - description: "Focus on file upload feature"
+    #   type: feature
+    #   feature: file_upload
+
+# Optional: Report metadata
+reporting:
+  tester_name: "Security Team"
+  # organization: "ACME Corp"

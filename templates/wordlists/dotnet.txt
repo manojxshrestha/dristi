@@ -1,0 +1,70 @@
+# .NET / ASP.NET paths
+# Use when technology stack identifies .NET (ASP.NET_SessionId cookie, .aspx extensions, X-AspNet-Version header)
+
+## Default Pages
+/default.aspx
+/default.asp
+/index.aspx
+/index.asp
+/login.aspx
+/web.config
+/Global.asax
+/App_Data
+/App_Code
+/Bin
+
+## Elmah Error Logging
+/elmah.axd
+/elmah
+
+## Trace & Debug
+/trace.axd
+/ScriptResource.axd
+/WebResource.axd
+
+## Common API
+/api
+/api/v1
+/api/values
+/swagger
+/swagger/index.html
+/swagger/v1/swagger.json
+/health
+/healthcheck
+
+## SignalR
+/signalr
+/signalr/negotiate
+/signalr/hubs
+
+## Blazor
+/_blazor
+/_framework
+
+## Identity & Auth
+/account/login
+/account/register
+/account/forgotpassword
+/identity
+/connect/authorize
+/connect/token
+/.well-known/openid-configuration
+
+## Common .NET
+/appsettings.json
+/appsettings.Development.json
+/appsettings.Production.json
+/web.config
+/applicationhost.config
+/machine.config
+/packages.config
+
+## IIS specific
+/iisstart.htm
+/iisstart.png
+/aspnet_client
+/_vti_bin
+/_vti_cnf
+/_vti_log
+/_vti_pvt
+/_vti_txt

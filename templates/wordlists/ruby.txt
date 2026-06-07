@@ -1,0 +1,56 @@
+# Ruby on Rails paths
+# Use when technology stack identifies Rails (_session_id cookie, X-Powered-By: Phusion Passenger, etc.)
+
+## Rails Debug & Dev
+/rails/info
+/rails/info/routes
+/rails/info/properties
+/rails/mailers
+/rails/conductor/action_mailbox/inbound_emails
+
+## Admin & Management
+/admin
+/sidekiq
+/sidekiq/busy
+/sidekiq/queues
+/sidekiq/retries
+/sidekiq/scheduled
+/resque
+/delayed_job
+
+## API
+/api
+/api/v1
+/graphql
+/graphiql
+
+## Config & Files
+/Gemfile
+/Gemfile.lock
+/Rakefile
+/config/database.yml
+/config/secrets.yml
+/config/master.key
+/config/credentials.yml.enc
+/.env
+/config/initializers
+/db/schema.rb
+
+## Assets
+/assets
+/public
+/public/uploads
+/public/system
+
+## Common Rails Routes
+/users
+/users/sign_in
+/users/sign_up
+/users/sign_out
+/users/password/new
+/users/confirmation/new
+
+## Webpacker / Turbo
+/packs
+/cable
+/turbo-stream

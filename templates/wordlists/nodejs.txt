@@ -1,0 +1,72 @@
+# Node.js / Express / Next.js / NestJS paths
+# Use when technology stack identifies Node (Express headers, package.json, etc.)
+
+## Package & Config
+/package.json
+/package-lock.json
+/yarn.lock
+/node_modules
+/.npmrc
+/.env
+/.env.local
+/.env.development
+/.env.production
+/tsconfig.json
+/next.config.js
+/nuxt.config.js
+/nest-cli.json
+
+## Debug & Dev
+/__inspect
+/_next
+/_nuxt
+/.next
+/webpack.config.js
+/nodemon.json
+/pm2.json
+/ecosystem.config.js
+
+## API Endpoints (Express/NestJS common patterns)
+/api
+/api/v1
+/api/health
+/api/status
+/api/docs
+/api/swagger
+/api/graphql
+/graphql
+/graphiql
+/playground
+
+## Authentication (common patterns)
+/api/auth/login
+/api/auth/register
+/api/auth/logout
+/api/auth/refresh
+/api/auth/me
+/api/auth/forgot-password
+/api/auth/reset-password
+/api/users
+/api/users/me
+
+## Next.js specific
+/_next/data
+/api/hello
+/_error
+/404
+/500
+
+## Socket.io
+/socket.io
+/socket.io/socket.io.js
+
+## Common Middleware
+/metrics
+/prometheus
+/actuator
+/health
+/healthz
+/ready
+/readyz
+/live
+/livez

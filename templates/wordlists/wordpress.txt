@@ -1,0 +1,69 @@
+# WordPress-specific paths
+# Use when technology stack identifies WordPress (wp- cookies, /wp-content/, etc.)
+
+## Core Admin
+/wp-admin
+/wp-admin/admin-ajax.php
+/wp-admin/install.php
+/wp-admin/setup-config.php
+/wp-admin/upgrade.php
+/wp-login.php
+/wp-signup.php
+/wp-cron.php
+/wp-trackback.php
+
+## REST API
+/wp-json
+/wp-json/wp/v2
+/wp-json/wp/v2/users
+/wp-json/wp/v2/posts
+/wp-json/wp/v2/pages
+/wp-json/wp/v2/comments
+/wp-json/wp/v2/media
+/wp-json/wp/v2/categories
+/wp-json/wp/v2/tags
+/wp-json/wp/v2/settings
+/wp-json/wp/v2/plugins
+/wp-json/wp/v2/themes
+/?rest_route=/wp/v2/users
+
+## Content & Uploads
+/wp-content
+/wp-content/uploads
+/wp-content/themes
+/wp-content/plugins
+/wp-content/debug.log
+/wp-content/backup-db
+/wp-content/backups
+/wp-content/cache
+/wp-content/upgrade
+
+## Configuration
+/wp-config.php
+/wp-config.php.bak
+/wp-config.php.old
+/wp-config.php.save
+/wp-config.php.swp
+/wp-config.php~
+/wp-config-sample.php
+
+## XML-RPC
+/xmlrpc.php
+
+## Feed & Sitemap
+/feed
+/feed/rss
+/feed/atom
+/wp-sitemap.xml
+/wp-sitemap-posts-post-1.xml
+/wp-sitemap-posts-page-1.xml
+/wp-sitemap-users-1.xml
+
+## Common Plugin Paths
+/wp-content/plugins/akismet
+/wp-content/plugins/contact-form-7
+/wp-content/plugins/woocommerce
+/wp-content/plugins/jetpack
+/wp-content/plugins/wordfence
+/wp-content/plugins/all-in-one-wp-migration
+/wp-content/plugins/updraftplus

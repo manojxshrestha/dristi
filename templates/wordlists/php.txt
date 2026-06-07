@@ -1,0 +1,73 @@
+# PHP application paths
+# Use when technology stack identifies PHP (PHPSESSID cookie, .php extensions, etc.)
+
+## Info & Debug
+/phpinfo.php
+/info.php
+/php_info.php
+/test.php
+/debug.php
+/i.php
+/pi.php
+
+## Common Frameworks (Laravel)
+/telescope
+/horizon
+/nova
+/_debugbar
+/storage
+/storage/logs
+/storage/logs/laravel.log
+/.env
+/artisan
+/public/storage
+
+## Common Frameworks (Symfony)
+/_profiler
+/_wdt
+/app_dev.php
+/config.php
+/bundles
+
+## Common Frameworks (CodeIgniter)
+/application/config
+/system
+/user_guide
+
+## Common Frameworks (CakePHP)
+/cake
+/app/config
+
+## Admin Panels
+/phpmyadmin
+/phpMyAdmin
+/pma
+/myadmin
+/mysql
+/adminer.php
+/adminer
+
+## Config Files
+/config.php
+/config.php.bak
+/config.inc.php
+/configuration.php
+/settings.php
+/database.php
+/db.php
+/connect.php
+/conn.php
+/wp-config.php
+/local.php
+/app/config/parameters.yml
+/.env
+/.env.local
+
+## Common Files
+/composer.json
+/composer.lock
+/vendor
+/vendor/autoload.php
+/cgi-bin
+/cgi-bin/php
+/cgi-bin/php5
