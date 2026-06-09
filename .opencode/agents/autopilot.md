@@ -480,9 +480,9 @@ Run these tests against EVERY domain. They are your highest priority because the
 #### 4.0.1 — API Fuzzing (hidden params that modify behavior)
 ```bash
 # arjun — discover hidden params on auth and API endpoints
-arjun -u https://api.<target>/v1/endpoint -oJ -t 20
-# x8 — similar, focused on API hidden params
-x8 -u https://api.<target>/v1/endpoint -w params.txt
+arjun -u https://api.<target>/v1/endpoint -oJ arjun_results.json -t 20
+# ffuf — parameter fuzzing with wordlists
+ffuf -u https://api.<target>/v1/endpoint?FUZZ=test -w /usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt -t 50 -fc 404
 ```
 Look for params like: `admin`, `role`, `is_admin`, `is_public`, `user_id`, `organization_id`, `debug`, `test`, `bypass`, `override`
 

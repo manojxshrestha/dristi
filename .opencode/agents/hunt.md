@@ -51,7 +51,7 @@ curl -sv https://<target>/api/user/profile -b "session=<cookie>" 2>&1
 
 ### 2. API Fuzzing (Hidden Params)
 - Run `arjun` on every API endpoint
-- Run `x8` with a parameter wordlist
+- Run `ffuf` with a parameter wordlist: `ffuf -u <endpoint>?FUZZ=test -w /usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt`
 - Look for: `admin`, `role`, `is_admin`, `is_public`, `user_id`, `debug`, `bypass`, `override`, `test`
 
 ### 3. HTTP Method Override

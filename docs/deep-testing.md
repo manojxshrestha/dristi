@@ -12,13 +12,14 @@ Hidden parameters can override behavior, toggle debug modes, or bypass access co
 
 ### arjun — URL-based parameter discovery
 ```bash
-arjun -u https://target.com/api/endpoint -oJ -t 20
-arjun -u https://target.com/api/endpoint -oJ -t 20 --headers "Authorization: Bearer <token>"
+arjun -u https://target.com/api/endpoint -oJ results.json -t 20
+arjun -u https://target.com/api/endpoint -oJ results.json -t 20 --headers "Authorization: Bearer <token>"
 ```
 
-### x8 — faster, focused on hidden params
+### ffuf — parameter fuzzing with wordlists
 ```bash
-x8 -u https://target.com/api/endpoint -w /usr/share/wordlists/params.txt
+ffuf -u https://target.com/api/endpoint?FUZZ=test -w /usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt -t 50 -fc 404
+ffuf -u https://target.com/api/endpoint -X POST -d 'FUZZ=test' -H "Content-Type: application/json" -w params.txt -t 50 -fc 404
 ```
 
 ### GF patterns — grep for specific parameter names
