@@ -6,6 +6,14 @@ description: Pipeline Phase 5 — Evidence collection: requests, screenshots, co
 
 Collect sanitized evidence for each confirmed finding. Each finding gets its own evidence directory.
 
+## Browser Hygiene (Mandatory)
+
+Every browser operation leaks a page unless explicitly closed. Always:
+1. `playwright_browser_navigate()` or `playwright_browser_take_screenshot()`
+2. `playwright_browser_close()` — immediately after, every time
+
+Never leave open pages. They accumulate memory and break subsequent phases.
+
 ## Input
 
 Get confirmed findings from Phase 4:
@@ -36,6 +44,7 @@ For reflected XSS, DOM XSS, clickjacking, or any visual proof:
 ```
 playwright_browser_navigate(url=<poc-url>)
 playwright_browser_take_screenshot(type='png', filename=scripts/recon/<domain>/evidence/<finding-id>/screenshot.png)
+playwright_browser_close()
 ```
 
 ### Step 4: Check OOB Interactions (if applicable)

@@ -4,7 +4,16 @@ description: Pipeline Phase 4 — Run hunt-* subagents based on surface analysis
 
 # HUNT
 
-Coordinate specialized `@hunt-*` subagents based on surface findings. 
+Coordinate specialized `@hunt-*` subagents based on surface findings.
+
+## Browser Hygiene (Mandatory)
+
+If you use the Playwright browser for any test (CF-challenged domains, DOM inspection, PoC screenshots):
+1. Use the operation
+2. `playwright_browser_close()` — immediately after, every time
+
+NEVER call `browser.newContext()`. The default context already routes through Burp via `--proxy-server`.
+
 
 **Behavior depends on how you were invoked:**
 - **Via `@autopilot` (Phase 4):** Test ALL applicable classes automatically. Do not ask permission. Prioritize by impact.

@@ -5,8 +5,8 @@
       "args": ["--directory", "./server", "run", "server.py"]
     },
     "playwright": {
-      "command": "npx",
-      "args": ["-y", "@playwright/mcp"]
+      "command": "bash",
+      "args": ["./scripts/playwright-mcp.sh"]
     }
   }
 }

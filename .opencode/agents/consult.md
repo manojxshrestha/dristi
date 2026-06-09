@@ -1,44 +1,94 @@
-# @consult — Interactive Manual Consulting Mode
+# @consult — Interactive Pipeline with Suggestions
 
-Runs the same P1–P7 pipeline as `/autopilot` but **asks for user approval at every phase transition**. Use this when you want visibility and control over each step.
-
-## Quick Start
-
-```
-@consult target.com
-@consult target.com --quick
-@consult targets.txt
-```
+Same P1–P7 pipeline as `/autopilot`, but **you ask the user for approval at every phase transition** AND **suggest what to do next**. You dispatch heavy phases (recon, hunt) via `task()`; lightweight phases (scope, auth, surface, validate, report) run inline so the user can see output and steer.
 
 ## Mode Behavior
 
-This mode explicitly **overrides** the "NO asking" rule from autopilot.md. You MUST:
+1. **Suggest next steps** — After each phase, explain what you found and recommend the next action. Offer alternatives.
+2. **Ask for approval** — "Ready for next phase?" with phase summary.
+3. **Show evidence** — Paste real curl output, tool results, findings.
+4. **Let user steer** — Which classes to test, which domains to prioritize.
 
-1. **Ask before every phase transition** — "Ready for next phase?" with a summary of what was done
-2. **Present findings as they're discovered** — paste real curl commands and tool output
-3. **Let the user decide direction** — which domains to prioritize, which classes to test next
-4. **Show evidence, not just summaries** — raw HTTP requests/responses, tool output files
+## Phase Flow
 
-## Phase-by-Phase Interaction
+### Phase 1: SCOPE
+**You do:** Ask target, register scope, init engagement, create task tree.
+**You ask:** "I'll register <domains> as in-scope. OK?"
+**Suggest:** "Next I'll check for credentials so we can hunt authenticated endpoints."
 
-| Phase | What you do | What you ask |
-|---|---|---|
-| **SCOPE** | Read scope, register domains, classify targets | "I see these domains in scope. Register them and proceed?" |
-| **AUTH** | Check config, request creds, test auth | "I need credentials. Can you provide a session cookie/API key, or should I sign up?" |
-| **RECON** | batch_subdomain_enum → per-domain crawl → params → nuclei → triage_3q | "Found X live hosts, Y endpoints with params. Ready to triage for attack surface?" |
-| **SURFACE** | Load endpoint_map_raw → rank Tier 0/1/2 → save ranked deliverable | "Tier 0: X public endpoints. Tier 1: Y auth-gated. Ready to start hunting?" |
-| **HUNT** | Load auth ctx + ranked endpoints → Step 4.0 entry points → class-based testing | After each class: "Found N findings from XSS. Move to SQLi?" |
-| **CAPTURE** | Evidence collection, redaction | "N findings need evidence capture. OK to proceed?" |
-| **VALIDATE** | 7-Question Gate on each finding | "N findings validated, M flagged, K killed. Ready to report?" |
-| **REPORT** | Coverage check → generate report | "Draft report ready. Want me to format for HackerOne/Bugcrowd/Client?" |
+### Phase 1.5: AUTH
+**You do:** Check for creds, test auth, save `auth_analysis` deliverable.
+**You ask:** "Credentials? Session cookie, API key, or should I sign up?"
+**Suggest if no creds:** "We can proceed unauthenticated. That means focus on: source leaks, CVEs, open buckets, subdomain takeover. No IDOR, no business logic. Want to proceed or try getting creds?"
+**Suggest after creds:** "Auth confirmed working. Next phase is recon — I'll discover subdomains, crawl endpoints, and extract parameters. This takes a while. Ready?"
 
-## Mode Switching
+### Phase 2: RECON (dispatch via task)
+**You do:** Launch via `task(subagent_type="recon", ...)` — wait for completion.
+**Before dispatch, suggest:**
+- "Recon runs ~17 tools across your target. Options:
+   - **Full recon** (default) — all tools, most thorough
+   - `--quick` — skip deep fuzzing, faster but less coverage
+   Which do you prefer?"
+**After dispatch returns, show:** Live hosts found, endpoints with params, tech stack, any secrets/leaks.
+**You ask:** "Recon complete. Found <N> live hosts, <M> endpoints with params. Want me to rank the attack surface next?"
 
-- `@autopilot` — switch to fully autonomous (no questions)
-- `@consult` — back to interactive
+### Phase 3: SURFACE (inline)
+**You do:** Load `endpoint_map_raw`, build Tier 0/1/2, save `endpoint_map_ranked`.
+**Show:** "Tier 0 (public + input): <N> endpoints — test these first. Tier 1 (auth-gated): <M> endpoints."
+**Suggest:** "Next I'll start hunting. I'd recommend starting with the highest-impact classes:
+   1. SSRF — <N> candidate endpoints
+   2. SQLi — <M> candidate endpoints
+   3. XSS — <P> candidate endpoints
+   Or would you like to focus on a specific class?"
+**You ask:** "Ready to start hunting? Which class first?"
+
+### Phase 4: HUNT (dispatch via task)
+**You do:** Launch via `task(subagent_type="hunt", ...)` — but FIRST ask which classes to test.
+**Suggest class order by impact:**
+- "For this target's tech stack (<tech>), I'd prioritize:
+   - <class-1> — <reason>
+   - <class-2> — <reason>
+   - <class-3> — <reason>
+   Want me to run all applicable classes or focus on specific ones?"
+**After dispatch returns, show:** "Findings: <N> Critical, <M> High, <P> Medium"
+**You ask:** "Full hunt complete. Want to capture evidence next, or review specific findings?"
+
+### Phase 5: CAPTURE (inline)
+**You do:** For each finding, capture raw HTTP, screenshot, redact PII.
+**You ask:** "Evidence captured for <N> findings. Validate them next?"
+
+### Phase 6: VALIDATE (inline)
+**You do:** Re-PoC each finding, run 7-Question Gate.
+**Show:** "Results: <N> PASS, <M> DOWNGRADE, <K> KILL"
+**Suggest:** "The <N> PASS findings are report-ready. Want me to draft the report?"
+
+### Phase 7: REPORT (inline)
+**You do:** Coverage check, generate report, ask platform preference.
+**You ask:** "Report ready. Which platform? (HackerOne / Bugcrowd / Client / Other)"
+
+## Suggestion Templates
+
+Use these after every phase gate:
+
+```
+## Phase <N> Complete — What's Next?
+
+**Done:** <brief summary>
+**Findings so far:** <N> total (<severity> breakdown)
+
+**Recommended next step:** <phase-name>
+- <reason-why-this-is-next>
+- <what-it-will-do>
+- <estimated-effort>
+
+**Alternatives:**
+- Skip to <phase> (less thorough but faster)
+- Re-run <current-phase> with --quick/deep if you want
+- Stop here and review results
+
+Ready to proceed?
+```
 
 ## Same Tradecraft
 
-`batch_subdomain_enum.sh` → triage_3q → `endpoint_map_raw` → Tier 0/1/2 → `endpoint_map_ranked` → auth_analysis → deep testing → class hunt → capture → validate_7q → report.
-
-All tool scripts output to `scripts/recon/<domain>/<tool>/` — no changes needed.
+Same tools, same scripts, same deliverables as autopilot. The only difference is you ask — and suggest — at every step.
