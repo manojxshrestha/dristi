@@ -4,40 +4,95 @@ description: Pipeline Phase 3 — Analyze recon output, rank P1/P2/P3 attack sur
 
 # SURFACE
 
-Analyze the recon output and build a ranked attack surface. Walk the user through it.
+Analyze the recon output and build a ranked, actionable attack surface. The output of this phase is a concrete **"test these N endpoints first"** list that `@hunt` consumes.
 
-1. Read `recon/<target>/` outputs
-2. Call `parse_tool_output()` on each result file
-3. Classify findings into tiers, **noting auth status on every item**:
+## Input
 
-   **P1 — Highest impact**
-   - Secrets/API keys exposed
-   - Admin panels / dashboards
-   - Critical CVEs from nuclei
-   - S3 buckets / cloud storage
-   - ⚠ Entry point primitives: auth bypass, SQLi login bypass, race condition on auth, JWT alg bypass
-   - Authenticated endpoints with high-impact params (admin, role, user_id, debug)
+Read the endpoint_map deliverable from Phase 2 (recon):
 
-   **P2 — Secondary**
-   - Auth endpoints (login, register, reset password) — mark as `[AUTH_GATE]`
-   - API endpoints (REST, GraphQL) — mark as `[REST]` or `[GRAPHQL]`
-   - IDOR candidates (numeric UUIDs in paths) — mark as `[IDOR_CANDIDATE]`
-   - File upload endpoints — mark as `[UPLOAD]`
-   - **Auth status**: `[UNAUTHENTICATED]` if you have no session, `[AUTHENTICATED]` if you do
+```
+wstg_get_deliverable(deliverable_type='endpoint_map')
+```
 
-   **P3 — All vulnerability classes** — each with auth status
-   - XSS candidates (params reflected in responses)
-   - SQLi candidates (params in DB context)
-   - SSRF candidates (URL params, redirects)
-   - SSTI candidates (template params)
-   - LFI candidates (file params)
-   - RCE/CMDI candidates (ping, exec params)
-   - Open redirects
-   - CORS misconfigs
-   - And all others
-   
-   **Every P3 item MUST be tested both authenticated and unauthenticated if auth is available.**
+If no deliverable exists, read the raw recon files directly:
+- `scripts/recon/<domain>/crawl/crawledurls.txt`
+- `scripts/recon/<domain>/params/*.txt`
+- `scripts/recon/<domain>/cariddi/cariddi.txt`
+- `scripts/recon/<domain>/nuclei/nuclei_critical_high.txt`
+- `scripts/recon/<domain>/nuclei/nuclei_tech.txt`
+- `scripts/recon/<domain>/directories/discovered_paths.txt`
+- `scripts/recon/<domain>/github_dorks/findings.txt`
 
-4. Call `prioritize_endpoints()` with the discovered endpoints
-5. Show the user a summary: "Found X P1, Y P2, Z P3 items"
-6. Ask: "Ready to start hunting? Type `@hunt` to proceed."
+## Output: The "Test These N First" List
+
+For every endpoint that accepts user input, answer these 3 questions:
+
+**Q1: Input type?** — params, body, headers, cookies, file upload, GraphQL, method
+**Q2: Auth status?** — public (no auth), auth-gated (needs creds), unknown
+**Q3: Impact if exploitable?** — data read (low), data write (medium), code exec (high), auth bypass (critical)
+
+### Tier 0 — Immediate (test right now)
+Endpoints that accept user input AND are public. No auth barrier. These are your highest priority because there's nothing stopping you from testing them.
+
+```
+<tier-0-list>
+<method> <url> [input: <type>] — test: <class>
+</tier-0-list>
+```
+
+**Examples:** public API endpoints, search bars, redirect params, contact forms, public file uploads, registration flows
+
+### Tier 1 — Auth-Gated (60-90% of attack surface)
+Endpoints that accept user input AND need authentication. These are where IDOR, BOLA, business logic, and privilege escalation live.
+
+```
+<tier-1-list>
+<method> <url> [input: <type>] [needs: <cred_type>] — test: <class>
+</tier-1-list>
+```
+
+**Get credentials before testing these** (see Phase 1.5). If you can't get auth, note that Tier 1 is blind and focus on Tier 0.
+
+### Tier 2 — Infrastructure & Passive
+Endpoints and technologies that don't accept input but reveal attack surface:
+- Tech stack (framework, DB, cloud provider)
+- Subdomains (potential takeover targets)
+- CORS headers (need auth to exploit)
+- CSP headers (XSS mitigation)
+- Cookie flags (session security)
+- Server banners
+
+```
+<tier-2-list>
+<finding> <details> — actionable: <yes|no>
+</tier-2-list>
+```
+
+## Prioritization Rules
+
+1. **Public + accepts input** always beats auth-gated + accepts input (no barrier to test)
+2. **Write operations** (POST/PUT/PATCH/DELETE) beat read operations (GET) for same auth level
+3. **File upload** beats structured data (JSON) beats unstructured data (query params)
+4. **GraphQL** beats REST (single endpoint exposes entire schema)
+5. **Known framework** with historical CVEs beats unknown stack
+6. **Secrets in JS/HTML** are always P1 — they bypass all auth
+
+## Save Deliverable for Phase 4
+
+After classification, save the ranked list as a deliverable that `@hunt` consumes:
+
+```
+wstg_save_deliverable(
+  deliverable_type='endpoint_map',
+  content=<the tier-0/tier-1/tier-2 list>,
+  producer_agent='surface'
+)
+```
+
+## Verification
+
+- [ ] Endpoint map deliverable loaded from Phase 2 (or raw files read)
+- [ ] Tier 0 list: public endpoints that accept input
+- [ ] Tier 1 list: auth-gated endpoints that accept input
+- [ ] Tier 2 list: infrastructure findings (not directly exploitable)
+- [ ] Deliverable saved for Phase 4 consumption

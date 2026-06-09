@@ -99,6 +99,26 @@ curl -sv https://<target>/api/user/profile -b "session=<cookie>" 2>&1
 - Focus on auth-free bugs: source leaks, open buckets, CORS, subdomain takeover
 - Accept that the target is hardened — adjust expectations
 
+## Consume Surface Deliverable — Do Not Run Independent Checks
+
+Before running any tests, load the endpoint map from Phase 3:
+
+```
+wstg_get_deliverable(deliverable_type='endpoint_map')
+```
+
+This gives you the **"test these N endpoints first"** list — endpoints already triaged by input type, auth status, and impact potential. **Do NOT run your own independent recon.** The surface analysis already identified:
+- **Tier 0:** Public endpoints that accept input — test these first (no auth barrier)
+- **Tier 1:** Auth-gated endpoints that accept input — test after getting credentials
+- **Tier 2:** Infrastructure findings — test last (lower impact, passive detection)
+
+If no deliverable exists, run the 3-question triage yourself:
+1. Which endpoints accept user input? (params, body, headers, upload)
+2. Which are public? (no auth)
+3. Which need auth? (401/403 without credentials)
+
+Then proceed with deep testing and class-based hunting.
+
 ## Deep Testing — Required Before Class-Based Hunting
 
 Before loading any `@hunt-*` agent, you MUST run the deep testing sequence on every candidate endpoint. See the full reference at [`docs/deep-testing.md`](../docs/deep-testing.md).

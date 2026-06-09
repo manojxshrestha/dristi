@@ -19,48 +19,132 @@ You are about to map infrastructure. **Without an authenticated session, you wil
 
 If you proceed without auth, label every finding `[UNAUTHENTICATED]`.
 
-Guide the user through recon. For each tool, suggest the command, let them run it and paste results. For additional recon tradecraft, invoke `@web2-recon` or `@offensive-osint` for deeper OSINT gathering, or `@osint-methodology` for structured OSINT workflows.
+## The Goal: Answer 3 Questions
 
-You can run the combined orchestrated recon via:
-- `bash scripts/tools/auto_recon.sh <target>` — runs subdomain_enum + dns_bruteforce + web_crawl + cariddi + nuclei + secrets in sequence
-- `bash scripts/tools/recon_engine.sh <target>` — alternative combined recon engine
+Every tool you run during recon must help answer these questions. Everything else (CSP headers, cookie flags, server banners) is nice-to-know but doesn't find exploits.
 
-Or follow the step-by-step order below:
+### Question 1: Which endpoints accept user input?
+- Parameters (GET/POST/JSON/XML)
+- Request body (file upload, JSON body, form data)
+- Headers (User-Agent, Referer, X-Forwarded-For, custom headers)
+- Cookies
+- File paths (LFI/RFI candidates)
+- URL redirect params
+- Content-Type (accepts different formats)
+- HTTP method (accepts POST where GET is expected, etc.)
 
-1. **Subdomains**: `bash scripts/tools/subdomain_enum.sh <target>`
-   - Call `track_tool('subdomain_enum', 'run', 'N hosts found')` after results
-2. **DNS brute-force**: `bash scripts/tools/dns_bruteforce.sh <target>`
-   - `track_tool('dns_bruteforce')`
-3. **Live host discovery**: `httpx -l recon/<target>/all_subdomains.txt -o recon/<target>/live_hosts.txt`
-4. **Web crawl**: `bash scripts/tools/web_crawl.sh -l recon/<target>/live_hosts.txt`
-   - `track_tool('web_crawl')`
-5. **Parameter extraction**: `bash scripts/tools/param_extract.sh recon/<target>/`
-   - `track_tool('param_extract')`
-6. **Parameter discovery (deep)**: `bash scripts/tools/param_discovery.sh <target>`
-   - `track_tool('param_discovery')`
-7. **Cariddi scan** (secrets, endpoints, info disclosure): `bash scripts/tools/cariddi_scan.sh recon/<target>/live_hosts.txt`
-   - `track_tool('cariddi')`
-8. **Directory brute-force**: `bash scripts/tools/dir_bruteforce.sh <target>`
-   - `track_tool('dir_bruteforce')`
-9. **403 bypass**: `bash scripts/tools/bypass_403.sh <target>`
-   - `track_tool('bypass_403')`
-10. **VHost fuzzing**: `bash scripts/tools/vhost_fuzz.sh <target>`
-    - `track_tool('vhost_fuzz')`
-11. **Cloud recon**: `bash scripts/tools/cloud_recon.sh <target>`
-    - `track_tool('cloud_recon')`
-12. **Nuclei scan**: `bash scripts/tools/auto_nuclei.sh recon/<target>/live_hosts.txt`
-    - `track_tool('nuclei')`
-13. **CVE scan**: `bash scripts/tools/cve_scan.sh <target>`
-    - `track_tool('cve_scan')`
-14. **Secrets validation**: `bash scripts/tools/auto_secrets.sh recon/<target>/`
-    - `track_tool('secrets')`
-15. **Subdomain takeover scan**: `bash scripts/tools/takeover_scanner.sh <target>`
-    - `track_tool('takeover_scanner')`
-16. **Zone transfer**: `bash scripts/tools/zone_transfer.sh <target>`
-    - `track_tool('zone_transfer')`
-17. **GitHub dorks**: `bash scripts/tools/github_dork.sh <target>`
-    - `track_tool('github_dork')`
+### Question 2: Which of those are public? (no auth required)
+- Returns data without Authorization header or session cookie
+- Login, register, password reset, public API endpoints
+- Static resources that leak data (JS bundles with API keys, config files)
+- SSRF targets (URL params that make server-side requests)
 
-For each result set, call `parse_tool_output()` to get structured summaries.
+### Question 3: Which of those have auth? (need credentials)
+- Returns 401/403 without auth header/session
+- Require specific role (admin, user, org)
+- Rate-limited differently with vs without auth
+- Return different data when authenticated
 
-After all recon is done, ask: "Ready to rank the attack surface? Type `@surface` to proceed."
+## Recon Workflow
+
+### Step 1: Subdomain & Infrastructure Discovery
+
+Run these to find the attack surface boundaries:
+
+```bash
+# Subdomains
+bash scripts/tools/subdomain_enum.sh <target>
+# DNS brute-force
+bash scripts/tools/dns_bruteforce.sh <target>
+# Live host discovery
+httpx -l scripts/recon/<target>/all_subdomains.txt -o scripts/recon/<target>/live_hosts.txt
+```
+
+**For each live host, answer:** Is this Cloudflare-protected? `curl -svI <host>` — look for `cf-*` headers. If yes, note it and redirect focus to non-CF hosts.
+
+### Step 2: Crawl & URL Collection
+
+```bash
+bash scripts/tools/web_crawl.sh -l scripts/recon/<target>/live_hosts.txt
+```
+
+**From crawled URLs, isolate the input-accepting set:**
+```
+# URLs with query params (already has ?key=value)
+scripts/recon/<target>/crawl/crawledurls.txt
+
+# Wayback URLs (historical endpoints + params)
+scripts/recon/<target>/wayback/urllist.txt
+```
+For each URL with parameters, note whether it's:
+- `[AUTH_REQUIRED]` — returns 401/403 without token
+- `[PUBLIC]` — returns data without auth
+- `[UNKNOWN]` — haven't tested yet
+
+### Step 3: Parameter Extraction
+
+```bash
+bash scripts/tools/param_extract.sh scripts/recon/<target>/
+bash scripts/tools/param_discovery.sh <target>
+```
+
+**For each parameter found, answer:**
+```
+param=<name> endpoint=<url> auth=[yes|no|unknown] method=[GET|POST] type=[query|body|path|header]
+```
+
+### Step 4: Technology Detection
+
+```bash
+bash scripts/tools/auto_nuclei.sh scripts/recon/<target>/live_hosts.txt
+```
+
+**Look for:** framework type (Express, Spring, Django, Laravel, Rails), GraphQL, WebSocket, file upload endpoints, admin panels, debug endpoints.
+
+Technology choice matters for Question 1 — different frameworks accept input differently (Rails = mass assignment, Express = prototype pollution, Spring = SpEL injection).
+
+### Step 5: Secrets & Sensitive Data
+
+```bash
+bash scripts/tools/cariddi_scan.sh scripts/recon/<target>/live_hosts.txt
+bash scripts/tools/auto_secrets.sh scripts/recon/<target>/
+```
+
+**Secrets answer Question 2** — hardcoded API keys, tokens, and passwords in JS/HTML are public by definition. Every secret found is a P1 finding because it bypasses all auth.
+
+### Step 6: Directory & Endpoint Discovery
+
+```bash
+bash scripts/tools/dir_bruteforce.sh <target>
+bash scripts/tools/bypass_403.sh <target>
+bash scripts/tools/vhost_fuzz.sh <target>
+bash scripts/tools/cloud_recon.sh <target>
+```
+
+**For each discovered path, answer:**
+- `[INPUT]` — accepts input (upload, search, form, API endpoint)
+- `[NO_INPUT]` — static page, no user-controlled data
+- `[AUTH_GATE]` — requires authentication
+
+### Step 7: Compiled Endpoint Triage
+
+After all tools have run, compile the answers to the 3 questions:
+
+**Input-accepting endpoints (public):**
+```
+<method> <url> <params|body|headers> [PUBLIC]
+```
+
+**Input-accepting endpoints (auth-gated):**
+```
+<method> <url> <params|body|headers> [AUTH_REQUIRED]
+```
+
+**Input-accepting endpoints (unknown auth):**
+```
+<method> <url> <params|body|headers> [AUTH_UNKNOWN]
+```
+
+This triage IS the output of recon. Everything else (CSP headers, cookie flags, server banners) is interesting but does not find exploits.
+
+Save this triage via `wstg_save_deliverable(deliverable_type='endpoint_map', content=<triage_markdown>)` for Phase 3 to consume.

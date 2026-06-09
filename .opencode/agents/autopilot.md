@@ -308,6 +308,31 @@ bash scripts/tools/auto_secrets.sh <domain>
 ```
 - `wstg_track_tool()`
 
+#### Step 2.17 — Endpoint Triage (Answer the 3 Questions)
+For each crawled URL with parameters, answer:
+1. **Does this endpoint accept user input?** (query params, body, headers, upload, etc.)
+2. **Is it public or auth-gated?** (test with curl — if 401/403, it's auth-gated)
+3. **What's the input type?** (params, JSON body, file upload, GraphQL query, header)
+
+Compile the triage into a structured markdown:
+```
+## Endpoint Triage: <domain>
+
+### Input-Accepting (Public)
+<url> <method> <input_type> [PUBLIC]
+
+### Input-Accepting (Auth-Gated)
+<url> <method> <input_type> [AUTH]
+
+### No Input (Infrastructure Only)
+<url> <method> [NO_INPUT]
+```
+
+Save as deliverable for Phase 3:
+```
+wstg_save_deliverable(deliverable_type='endpoint_map', content=<triage_markdown>, producer_agent='recon')
+```
+
 #### Domain complete — mark done
 ```
 ✓ RECON complete for: <domain>
@@ -341,34 +366,50 @@ PASS → `wstg_save_checkpoint()`, proceed to Phase 3.
 
 ### Steps (run all in order):
 
-1. **Read ALL recon outputs** across ALL domains:
-   - `scripts/recon/<domain>/subdomains/live_urls.txt` — live hosts
-   - `scripts/recon/<domain>/crawl/crawledurls.txt` — crawled endpoints
-   - `scripts/recon/<domain>/nuclei/nuclei_critical_high.txt` — critical/high CVEs
-   - `scripts/recon/<domain>/nuclei/nuclei_medium.txt` — medium CVEs
-   - `scripts/recon/<domain>/nuclei/nuclei_tech.txt` — tech detection
-   - `scripts/recon/<domain>/cariddi/cariddi.txt` — secrets/info disclosure
-   - `scripts/recon/<domain>/directories/discovered_paths.txt` — dir brute results
-   - `scripts/recon/<domain>/github_dorks/findings.txt` — GitHub secrets
+1. **Load endpoint triage from Phase 2** — `wstg_get_deliverable(deliverable_type='endpoint_map')`
 
-2. **Build unified endpoint map** with: method, path, parameters, auth requirements, tech stack, source domain
+2. **Read raw recon outputs** for anything the deliverable missed:
+    - `scripts/recon/<domain>/subdomains/live_urls.txt` — live hosts
+    - `scripts/recon/<domain>/crawl/crawledurls.txt` — crawled endpoints
+    - `scripts/recon/<domain>/nuclei/nuclei_critical_high.txt` — critical/high CVEs
+    - `scripts/recon/<domain>/nuclei/nuclei_medium.txt` — medium CVEs
+    - `scripts/recon/<domain>/nuclei/nuclei_tech.txt` — tech detection
+    - `scripts/recon/<domain>/cariddi/cariddi.txt` — secrets/info disclosure
+    - `scripts/recon/<domain>/directories/discovered_paths.txt` — dir brute results
+    - `scripts/recon/<domain>/github_dorks/findings.txt` — GitHub secrets
 
-3. **Classify findings:**
-   - **P1 (Critical):** secrets, admin panels, critical CVEs, exposed .git/.env, cloud creds
-   - **P2 (High):** auth endpoints, API endpoints, IDOR candidates, file upload, GraphQL
-   - **P3 (Medium):** XSS/SQLi/SSRF/SSTI/LFI/RCE parameter candidates
+3. **Build ranked attack surface** — produce the "test these N first" list:
+
+    **Tier 0 — Immediate (test right now):** Public endpoints that accept user input
+    - No auth barrier
+    - Highest priority — test these first in Phase 4
+    - Examples: search, redirect params, public API endpoints, registration, file upload
+    
+    **Tier 1 — Auth-Gated (needs credentials):** Auth-protected endpoints that accept input
+    - Where IDOR, BOLA, business logic, privilege escalation live
+    - Get credentials before testing (Phase 1.5)
+    - If creds unavailable, note Tier 1 is blind
+    
+    **Tier 2 — Infrastructure (passive):** Everything else
+    - Tech stack, subdomains, CORS headers, CSP, cookie flags
+    - Interesting but does not directly find exploits
 
 4. **Call `wstg_prioritize_endpoints()`** with all discovered endpoints
 
-5. **Show ranked surface** to user (one-time summary, do not pause)
+5. **Save deliverable for Phase 4:**
+    ```
+    wstg_save_deliverable(deliverable_type='endpoint_map', content=<tier_0_1_2_list>, producer_agent='surface')
+    ```
 
 6. **Proceed to Phase 4**
 
 ### Verification checklist:
-- [ ] All recon outputs read across ALL domains
-- [ ] Endpoint map built with tech stack
-- [ ] P1/P2/P3 classification done
+- [ ] Phase 2 endpoint_map deliverable loaded (or raw files read)
+- [ ] Tier 0 list compiled: public endpoints accepting input
+- [ ] Tier 1 list compiled: auth-gated endpoints accepting input
+- [ ] Tier 2 list compiled: infrastructure findings
 - [ ] `wstg_prioritize_endpoints()` called
+- [ ] endpoint_map deliverable saved for Phase 4 consumption
 
 ### Phase gate:
 ```
@@ -397,6 +438,28 @@ If a class returns zero findings after validation, **go deeper before moving on*
 - Manually inspect JS files for hidden endpoints
 - Check the framework-specific agents for that class
 - Do NOT mark it "tested" after one shallow pass
+
+### 🎯 Load Surface Analysis — Do Not Run Independent Checks
+
+Before any testing, load the ranked endpoint list from Phase 3:
+
+```
+wstg_get_deliverable(deliverable_type='endpoint_map')
+```
+
+This gives you exactly what to test:
+- **Tier 0:** Public endpoints that accept input — test these first (no auth barrier)
+- **Tier 1:** Auth-gated endpoints that accept input — test after verifying credentials
+- **Tier 2:** Infrastructure findings — passive detection only
+
+**Do NOT run independent recon or re-discover endpoints.** Phase 2 already collected URLs, params, and auth status. Phase 3 already ranked them. Your job is to test the endpoints in the deliverable, not re-invent the surface analysis.
+
+If no deliverable exists, quickly answer the 3 questions yourself:
+1. Which endpoints accept user input?
+2. Which are public?
+3. Which need auth?
+
+Then proceed with Step 4.0.
 
 ### Step 4.0: Entry Point Testing — Find the Foothold First
 
