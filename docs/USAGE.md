@@ -23,6 +23,11 @@ You don't "learn" the bundle. You install it once, then describe what you're tes
 1. **OpenCode installed** — the CLI app, not a browser chat.
 2. **A target you're authorized to test** — meaning either: (a) you own it, (b) it's on a bug bounty program's in-scope list, (c) you have a signed pentest engagement letter, or (d) it's a deliberately-vulnerable practice site (OWASP Juice Shop, Vulnweb, HackTheBox, etc.).
 3. **The Dristi MCP server running** — see README.md for setup.
+4. **Playwright browsers installed** — for client-side testing, screenshot capture, and auth flows. See [`docs/browser-flow.md`](browser-flow.md) for setup and usage. Quick install:
+   ```bash
+   npx playwright install chromium
+   bash scripts/setup/ensure_browser.sh
+   ```
 
 ### What you DON'T need
 
@@ -237,6 +242,7 @@ Dristi's WSTG MCP server provides 94 tools for methodology, tracking, and engage
 
 - **`offensive-osint` is large**, even after refactor. The 15 reference files load on demand, but the SKILL.md still consumes context on every trigger.
 - **Per-class `hunt-*` agents overlap on borderline classes.** A finding that's both IDOR and business-logic may trigger two agents. Manageable, but worth knowing.
+- **Some `hunt-*` agents still rely on curl-only detection** — adding automated parameter fuzzing (arjun/x8) and request mutation to each is an ongoing effort. See [`docs/deep-testing.md`](deep-testing.md) for the manual workflow.
 - **No HackerOne MCP yet.** Burp MCP works; H1 MCP integration is a future addition.
 - **No engagement-coordinator agent.** Cross-finding tracking and submission ID management is currently manual. Future agent candidate.
 

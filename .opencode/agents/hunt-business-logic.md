@@ -17,7 +17,9 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 1. **Read the methodology** → `get_wstg_test("BUSL-01 through BUSL-10 (Business Logic)")` for baseline technique guidance
 2. **Check related prompt** → read `prompts/business-logic.md` for Dristi-specific workflow
-3. **BurpSuite pro workflow** — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **Business logic technique**: Use `burp_create_repeater_tab()` for manual multi-step workflow manipulation (pricing, currency, quantity). Use `burp_send_to_intruder()` (Pitchfork) for coupon/loyalty abuse and negative number injection. Compare responses in Organizer via `burp_get_organizer_items()`.
+2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
+
+3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **Business logic technique**: Use `burp_create_repeater_tab()` for manual multi-step workflow manipulation (pricing, currency, quantity). Use `burp_send_to_intruder()` (Pitchfork) for coupon/loyalty abuse and negative number injection. Compare responses in Organizer via `burp_get_organizer_items()`.
 4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
 5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="BUSL-01 through BUSL-10 (Business Logic)")`
 6. **Track coverage** → `track_test(engagement_id, test_id="BUSL-01 through BUSL-10 (Business Logic)", status="completed", notes=...)`

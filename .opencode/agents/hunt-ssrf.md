@@ -17,7 +17,9 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 1. **Read the methodology** → `get_wstg_test("WSTG-INPV-07")` for baseline technique guidance
 2. **Check related prompt** → read `prompts/input-validation.md` for Dristi-specific workflow
-3. **BurpSuite pro workflow** — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **SSRF technique**: Use `burp_send_to_intruder()` (Sniper) on URL params with internal IP ranges (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`) and cloud metadata (`169.254.169.254`). Use `burp_generate_collaborator_payload()` for blind OOB — inject in URL param, `Referer`, or `Host`. Use IP encoding bypasses via `h.43z.one/ipconverter`.
+2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
+
+3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **SSRF technique**: Use `burp_send_to_intruder()` (Sniper) on URL params with internal IP ranges (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`) and cloud metadata (`169.254.169.254`). Use `burp_generate_collaborator_payload()` for blind OOB — inject in URL param, `Referer`, or `Host`. Use IP encoding bypasses via `h.43z.one/ipconverter`.
 4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
 5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-INPV-07")`
 6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-INPV-07", status="completed", notes=...)`

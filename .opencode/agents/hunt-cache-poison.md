@@ -17,7 +17,9 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 1. **Read the methodology** → `get_wstg_test("WSTG-CLNT-12")` for baseline technique guidance
 2. **Check related prompt** → read `prompts/client-side.md, configuration.md` for Dristi-specific workflow
-3. **BurpSuite pro workflow** — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **Cache poison technique**: Use `burp_send_to_intruder()` (Sniper) on `Host`, `X-Forwarded-Host`, unkeyed cookies, and unkeyed query params. Use `burp_generate_collaborator_payload()` in `X-Forwarded-Host` for OOB cache poisoning confirmation. Use `burp_create_repeater_tab()` for param cloaking (`;` vs `&`) tests.
+2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
+
+3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **Cache poison technique**: Use `burp_send_to_intruder()` (Sniper) on `Host`, `X-Forwarded-Host`, unkeyed cookies, and unkeyed query params. Use `burp_generate_collaborator_payload()` in `X-Forwarded-Host` for OOB cache poisoning confirmation. Use `burp_create_repeater_tab()` for param cloaking (`;` vs `&`) tests.
 4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
 5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-CLNT-12")`
 6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-CLNT-12", status="completed", notes=...)`

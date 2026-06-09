@@ -17,7 +17,9 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 1. **Read the methodology** → `get_wstg_test("WSTG-ATHN-10")` for baseline technique guidance
 2. **Check related prompt** → read `prompts/authentication.md` for Dristi-specific workflow
-3. **BurpSuite pro workflow** — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **ATO technique**: Use `burp_send_to_intruder()` (Pitchfork) for password-reset token brute and OTP enumeration. Use `burp_generate_collaborator_payload()` for email-based callback on forgot-password flows. Use `burp_create_repeater_tab()` to manually chain 2FA bypass, session hijack, and SSO bypass.
+2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
+
+3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **ATO technique**: Use `burp_send_to_intruder()` (Pitchfork) for password-reset token brute and OTP enumeration. Use `burp_generate_collaborator_payload()` for email-based callback on forgot-password flows. Use `burp_create_repeater_tab()` to manually chain 2FA bypass, session hijack, and SSO bypass.
 4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
 5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-ATHN-10")`
 6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-ATHN-10", status="completed", notes=...)`

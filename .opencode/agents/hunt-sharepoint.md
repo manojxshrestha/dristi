@@ -17,7 +17,9 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 1. **Read the methodology** → `get_wstg_test("CONF-04 (SharePoint)")` for baseline technique guidance
 2. **Check related prompt** → read `prompts/configuration.md, authorization.md` for Dristi-specific workflow
-3. **BurpSuite pro workflow** — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **SharePoint technique**: Use `burp_create_repeater_tab()` for web part manipulation, ViewState deserialization, and workflow abuse. Use `burp_send_to_intruder()` (Sniper) for `/_layouts/`, `/_vti_pvt/`, and `/SitePages/` path enumeration. Use `burp_base64_decode()` on ViewState to inspect serialized payload.
+2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
+
+3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **SharePoint technique**: Use `burp_create_repeater_tab()` for web part manipulation, ViewState deserialization, and workflow abuse. Use `burp_send_to_intruder()` (Sniper) for `/_layouts/`, `/_vti_pvt/`, and `/SitePages/` path enumeration. Use `burp_base64_decode()` on ViewState to inspect serialized payload.
 4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
 5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="CONF-04 (SharePoint)")`
 6. **Track coverage** → `track_test(engagement_id, test_id="CONF-04 (SharePoint)", status="completed", notes=...)`

@@ -17,7 +17,9 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 1. **Read the methodology** → `get_wstg_test("WSTG-INPV-16")` for baseline technique guidance
 2. **Check related prompt** → read `prompts/configuration.md, input-validation.md` for Dristi-specific workflow
-3. **BurpSuite pro workflow** — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **Host header technique**: Use `burp_send_to_intruder()` (Sniper) with payloads: `Host: localhost`, `Host: COLLAB`, `X-Forwarded-Host: COLLAB`, `X-Forwarded-Server: COLLAB`. Use `burp_generate_collaborator_payload()` for password-reset poisoning confirmation via email callback. Use `burp_create_repeater_tab()` for dangling markup tests.
+2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
+
+3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **Host header technique**: Use `burp_send_to_intruder()` (Sniper) with payloads: `Host: localhost`, `Host: COLLAB`, `X-Forwarded-Host: COLLAB`, `X-Forwarded-Server: COLLAB`. Use `burp_generate_collaborator_payload()` for password-reset poisoning confirmation via email callback. Use `burp_create_repeater_tab()` for dangling markup tests.
 4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
 5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-INPV-16")`
 6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-INPV-16", status="completed", notes=...)`

@@ -17,7 +17,9 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 1. **Read the methodology** → `get_wstg_test("WSTG-SESS-05")` for baseline technique guidance
 2. **Check related prompt** → read `prompts/session-management.md` for Dristi-specific workflow
-3. **BurpSuite pro workflow** — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **CSRF technique**: Use `burp_create_repeater_tab()` to manually test anti-CSRF token removal, token tied to non-session cookie, method override (`_method=POST`), and SameSite Lax/Strict bypass. Use `burp_send_to_intruder()` (Sniper) for token pattern analysis via Organizer comparison.
+2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
+
+3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **CSRF technique**: Use `burp_create_repeater_tab()` to manually test anti-CSRF token removal, token tied to non-session cookie, method override (`_method=POST`), and SameSite Lax/Strict bypass. Use `burp_send_to_intruder()` (Sniper) for token pattern analysis via Organizer comparison.
 4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
 5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-SESS-05")`
 6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-SESS-05", status="completed", notes=...)`

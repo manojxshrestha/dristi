@@ -31,6 +31,17 @@ Ask yourself:
 
 Before any class-based hunting, run these techniques. They find the precondition that everything else depends on:
 
+### 0. Cloudflare Check
+
+```bash
+curl -svI https://<target>/ 2>&1 | grep -i "cf-\|cloudflare\|server: cloudflare"
+```
+If Cloudflare is blocking curl (`cf-mitigated`, `cf-challenge`, 403 with CF headers):
+- **Redirect 80% of effort to the API subdomain** (`api.<target>`) — rarely CF-protected
+- Use the **Playwright browser** for testing on CF domains (browser passes CF challenge)
+- Focus on non-CF endpoints: API, mobile API, staging subdomains
+- Document `CF_STATUS: active`
+
 ### 1. Auth Status Check
 ```bash
 curl -sv https://<target>/api/me -H "Authorization: Bearer <token>" 2>&1
@@ -87,6 +98,26 @@ curl -sv https://<target>/api/user/profile -b "session=<cookie>" 2>&1
 - Proceed with `[UNAUTHENTICATED]` label on all findings
 - Focus on auth-free bugs: source leaks, open buckets, CORS, subdomain takeover
 - Accept that the target is hardened — adjust expectations
+
+## Deep Testing — Required Before Class-Based Hunting
+
+Before loading any `@hunt-*` agent, you MUST run the deep testing sequence on every candidate endpoint. See the full reference at [`docs/deep-testing.md`](../docs/deep-testing.md).
+
+### Minimum deep testing per endpoint:
+
+1. **Parameter fuzzing** — `arjun -u <endpoint>` to find hidden params
+2. **HTTP method mutation** — test all verbs (GET/POST/PUT/PATCH/DELETE/OPTIONS) + override headers
+3. **Content-Type switching** — JSON endpoints tested as XML, form, and multipart
+4. **IDOR probes** — numeric enumeration + UUID manipulation + cross-account ID swap
+5. **JSON parameter pollution** — `__proto__`, duplicate keys, array injection
+6. **Race condition** — parallel requests on auth flows (signup, login, reset, OTP)
+7. **JWT decode/manipulate** — if token found, test alg confusion, kid injection
+8. **GraphQL deep probe** — if graphql detected, test introspection, batching, aliases
+9. **Rate limit bypass** — if rate-limited, test X-Forwarded-For rotation, HTTP/2 multiplexing
+
+Each technique takes ~2 minutes. Running all 9 on a single endpoint takes ~15 minutes. If the endpoint has 5 parameters and 10 IDOR probes, budget 30 minutes per critical endpoint.
+
+**Do NOT skip this** and jump to class-specific payloads. The deep testing techniques find the entry point primitive. Class-specific payloads exploit it. Without the primitive, class-specific payloads are just noise.
 
 ## Class-Based Hunting
 

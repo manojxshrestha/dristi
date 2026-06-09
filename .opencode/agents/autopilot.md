@@ -118,6 +118,18 @@ FAIL → fix the blockers, retry. PASS → `wstg_save_checkpoint()`, proceed to 
    ```
    - Confirm `200` or expected auth response
    - If `401`/`403`, debug the auth flow — don't proceed broken
+5. **Cloudflare check — if hitting a CF wall, redirect effort:**
+   ```bash
+   curl -sv <target>/ 2>&1 | head -30
+   ```
+   - If response contains `cf-mitigated`, `cf-challenge`, `Cloudflare`, or returns 403 with `cf-*` headers → **Cloudflare is blocking automated testing**
+   - **Do NOT waste time fighting Cloudflare.** Redirect 80% of testing effort to:
+     - The API subdomain (often `api.<target>.com` — no CF challenge)
+     - The mobile API (different User-Agent, different rate limits)
+     - Alternative subdomains: `admin.<target>`, `dev.<target>`, `staging.<target>`
+     - Any `<target>.ant.dev` or `<target>.stage.*` domains in scope
+   - Test CF-protected domain via the **Playwright browser** (browser passes CF challenge naturally) for client-side testing only
+   - Document: `CF_STATUS: bypassed|api_only|unprotected`
 5. **Document auth context:**
    - `AUTH_METHOD: cookie/token/oauth/apikey`
    - `AUTH_VALUE: <token/cookie>`
@@ -389,6 +401,16 @@ If a class returns zero findings after validation, **go deeper before moving on*
 ### Step 4.0: Entry Point Testing — Find the Foothold First
 
 **WARNING: Do NOT jump to class-based hunting (XSS, SQLi, etc.) until you've done this step. These techniques find the entry point — the primitive you need to make everything else work.**
+
+**⚠ Cloudflare check first:** Before any testing, check if the main domain is Cloudflare-protected:
+```bash
+curl -svI https://<target>/ 2>&1 | grep -i "cf-\|cloudflare\|server: cloudflare"
+```
+If CF detected:
+- **Do NOT fight it.** Redirect 80% of testing to API subdomain (`api.<target>`) or mobile API — these are rarely CF-protected
+- Use the **Playwright browser** (`playwright_browser_navigate`) for any client-side testing on CF domains — browser passes CF challenge naturally
+- Document `CF_STATUS: active` and note that curl-based testing is biased toward non-CF endpoints
+- Proceed with the tests below on the API subdomain primarily
 
 Run these tests against EVERY domain. They are your highest priority because they find the **precondition** that every other bug class depends on.
 

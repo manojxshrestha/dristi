@@ -17,7 +17,9 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 1. **Read the methodology** → `get_wstg_test("WSTG-INPV-10")` for baseline technique guidance
 2. **Check related prompt** → read `prompts/input-validation.md` for Dristi-specific workflow
-3. **BurpSuite pro workflow** — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **Deserialization technique**: Use `burp_create_repeater_tab()` to send ysoserial/phpggc payloads (base64 + gzip encoded) in cookies and session tokens. Use `burp_generate_collaborator_payload()` for OOB RCE confirmation via `Runtime.getRuntime().exec("nslookup COLLAB")`. Install Java Deserialization Scanner extension for fingerprinting.
+2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
+
+3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **Deserialization technique**: Use `burp_create_repeater_tab()` to send ysoserial/phpggc payloads (base64 + gzip encoded) in cookies and session tokens. Use `burp_generate_collaborator_payload()` for OOB RCE confirmation via `Runtime.getRuntime().exec("nslookup COLLAB")`. Install Java Deserialization Scanner extension for fingerprinting.
 4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
 5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-INPV-10")`
 6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-INPV-10", status="completed", notes=...)`

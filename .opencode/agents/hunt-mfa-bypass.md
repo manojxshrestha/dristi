@@ -17,7 +17,9 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 1. **Read the methodology** → `get_wstg_test("WSTG-ATHN-09")` for baseline technique guidance
 2. **Check related prompt** → read `prompts/authentication.md` for Dristi-specific workflow
-3. **BurpSuite pro workflow** — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **MFA bypass technique**: Use `burp_send_to_intruder()` (Pitchfork) for 2FA/OTP code brute (0000-9999). Use `burp_create_repeater_tab()` for token reuse, backup code manipulation, and missing verification parameter tests. Use `burp_get_proxy_http_history()` to capture full auth flow for session analysis.
+2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
+
+3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **MFA bypass technique**: Use `burp_send_to_intruder()` (Pitchfork) for 2FA/OTP code brute (0000-9999). Use `burp_create_repeater_tab()` for token reuse, backup code manipulation, and missing verification parameter tests. Use `burp_get_proxy_http_history()` to capture full auth flow for session analysis.
 4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
 5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-ATHN-09")`
 6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-ATHN-09", status="completed", notes=...)`

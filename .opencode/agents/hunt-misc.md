@@ -17,7 +17,9 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 1. **Read the methodology** → `get_wstg_test("All categories (General)")` for baseline technique guidance
 2. **Check related prompt** → read `prompts/all prompts/` for Dristi-specific workflow
-3. **BurpSuite pro workflow** — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **General technique**: Use `burp_send_to_intruder()` (Sniper/Pitchfork) with relevant payloads from SecLists. Use `burp_create_repeater_tab()` for manual probe. Use `burp_get_proxy_http_history()` and `burp_get_scanner_issues()` for initial discovery. Check `docs/burp-flow.md` for class-specific patterns.
+2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
+
+3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **General technique**: Use `burp_send_to_intruder()` (Sniper/Pitchfork) with relevant payloads from SecLists. Use `burp_create_repeater_tab()` for manual probe. Use `burp_get_proxy_http_history()` and `burp_get_scanner_issues()` for initial discovery. Check `docs/burp-flow.md` for class-specific patterns.
 4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
 5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="All categories (General)")`
 6. **Track coverage** → `track_test(engagement_id, test_id="All categories (General)", status="completed", notes=...)`

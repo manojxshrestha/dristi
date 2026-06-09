@@ -17,7 +17,9 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 1. **Read the methodology** → `get_wstg_test("WSTG-INPV-15")` for baseline technique guidance
 2. **Check related prompt** → read `prompts/input-validation.md` for Dristi-specific workflow
-3. **BurpSuite pro workflow** — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **Open redirect technique**: Use `burp_send_to_intruder()` (Sniper) with payloads: `//evil.com`, `https://evil.com`, `javascript:alert(1)`, `data:text/html`, `///evil.com`, `https://target.com@evil.com`. Use `burp_generate_collaborator_payload()` for callback confirmation. Use `burp_create_repeater_tab()` for parser-diff tests between backend and browser.
+2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
+
+3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **Open redirect technique**: Use `burp_send_to_intruder()` (Sniper) with payloads: `//evil.com`, `https://evil.com`, `javascript:alert(1)`, `data:text/html`, `///evil.com`, `https://target.com@evil.com`. Use `burp_generate_collaborator_payload()` for callback confirmation. Use `burp_create_repeater_tab()` for parser-diff tests between backend and browser.
 4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
 5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-INPV-15")`
 6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-INPV-15", status="completed", notes=...)`

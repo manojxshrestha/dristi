@@ -17,7 +17,9 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 1. **Read the methodology** → `get_wstg_test("CRYP-01 (Weak TLS)")` for baseline technique guidance
 2. **Check related prompt** → read `prompts/cryptography.md` for Dristi-specific workflow
-3. **BurpSuite pro workflow** — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **TLS/network technique**: Use `burp_create_repeater_tab()` with `burp_send_http1_request()` to test weak cipher suites and outdated TLS versions. Use `burp_send_http2_request()` for HTTP/2 downgrade tests. Burp is primary for TLS — use the Repeater response details for certificate chain inspection.
+2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
+
+3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **TLS/network technique**: Use `burp_create_repeater_tab()` with `burp_send_http1_request()` to test weak cipher suites and outdated TLS versions. Use `burp_send_http2_request()` for HTTP/2 downgrade tests. Burp is primary for TLS — use the Repeater response details for certificate chain inspection.
 4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
 5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="CRYP-01 (Weak TLS)")`
 6. **Track coverage** → `track_test(engagement_id, test_id="CRYP-01 (Weak TLS)", status="completed", notes=...)`

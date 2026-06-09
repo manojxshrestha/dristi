@@ -17,7 +17,9 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 1. **Read the methodology** → `get_wstg_test("WSTG-ATHN-05")` for baseline technique guidance
 2. **Check related prompt** → read `prompts/authentication.md` for Dristi-specific workflow
-3. **BurpSuite pro workflow** — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **JWT technique**: Use `burp_create_repeater_tab()` to send modified JWTs with `alg: none`, RS256→HS256 public-key confusion, `kid` injection (SQLi/path-traversal), and blank password signing. Use `burp_base64_decode()` on JWT header/payload before editing, then `burp_base64_encode()` after. Use `burp_generate_collaborator_payload()` in `jwks_uri` for SSRF callback.
+2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
+
+3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **JWT technique**: Use `burp_create_repeater_tab()` to send modified JWTs with `alg: none`, RS256→HS256 public-key confusion, `kid` injection (SQLi/path-traversal), and blank password signing. Use `burp_base64_decode()` on JWT header/payload before editing, then `burp_base64_encode()` after. Use `burp_generate_collaborator_payload()` in `jwks_uri` for SSRF callback.
 4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
 5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-ATHN-05")`
 6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-ATHN-05", status="completed", notes=...)`
