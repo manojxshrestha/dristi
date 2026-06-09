@@ -53,6 +53,18 @@ else
   echo "[playwright-mcp] No proxy (disabled or not detected)" >&2
 fi
 
+# ── Stealth init script (anti-fingerprinting) ───────────────────────────────
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+INIT_SCRIPT="$SCRIPT_DIR/playwright-stealth.js"
+if [ -f "$INIT_SCRIPT" ]; then
+  PROXY_ARGS+=( "--init-script" "$INIT_SCRIPT" )
+  echo "[playwright-mcp] Stealth: $INIT_SCRIPT" >&2
+fi
+
+# Realistic User-Agent (override headless default)
+PROXY_ARGS+=( "--user-agent" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" )
+
 # ── Launch ──────────────────────────────────────────────────────────────────
 
 exec npx -y @playwright/mcp "${PROXY_ARGS[@]}" "$@"
