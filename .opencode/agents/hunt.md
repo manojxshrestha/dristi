@@ -31,7 +31,9 @@ Ask yourself:
 
 Before any class-based hunting, run these techniques. They find the precondition that everything else depends on:
 
-### 0. Cloudflare Check
+### 0. Cloudflare Check (1-curl sanity, NOT recon)
+
+This is a single curl to determine where to aim your testing. Not a recon scan. Do not expand this into full subdomain/crawl/nuclei runs.
 
 ```bash
 curl -svI https://<target>/ 2>&1 | grep -i "cf-\|cloudflare\|server: cloudflare"
@@ -107,7 +109,7 @@ Before running any tests, load the endpoint map from Phase 3:
 wstg_get_deliverable(deliverable_type='endpoint_map')
 ```
 
-This gives you the **"test these N endpoints first"** list — endpoints already triaged by input type, auth status, and impact potential. **Do NOT run your own independent recon.** The surface analysis already identified:
+This gives you the **"test these N endpoints first"** list — endpoints already triaged by input type, auth status, and impact potential. **Do NOT run your own independent recon scans** (no arjun, no nuclei, no crawl, no directory brute-force). The surface analysis already identified:
 - **Tier 0:** Public endpoints that accept input — test these first (no auth barrier)
 - **Tier 1:** Auth-gated endpoints that accept input — test after getting credentials
 - **Tier 2:** Infrastructure findings — test last (lower impact, passive detection)

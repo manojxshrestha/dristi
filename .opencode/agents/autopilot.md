@@ -330,7 +330,7 @@ Compile the triage into a structured markdown:
 
 Save as deliverable for Phase 3:
 ```
-wstg_save_deliverable(deliverable_type='endpoint_map', content=<triage_markdown>, producer_agent='recon')
+wstg_save_deliverable(deliverable_type='endpoint_map_raw', content=<triage_markdown>, producer_agent='recon')
 ```
 
 #### Domain complete — mark done
@@ -350,6 +350,8 @@ Repeat lightweight recon for each NON_CORE_TARGET:
 - [ ] Every tool output verified (file exists, non-empty)
 - [ ] `wstg_track_tool()` called for every tool
 - [ ] `wstg_parse_tool_output()` called for subdomain_enum, web_crawl, cariddi, nuclei, github_dork
+- [ ] Step 2.17 triage compiled (3 questions answered per endpoint: input type, public/auth, impact)
+- [ ] `endpoint_map_raw` deliverable saved via `wstg_save_deliverable()`
 - [ ] Non-core domains got at least subdomain + crawl + nuclei
 
 ### Phase gate:
@@ -366,7 +368,7 @@ PASS → `wstg_save_checkpoint()`, proceed to Phase 3.
 
 ### Steps (run all in order):
 
-1. **Load endpoint triage from Phase 2** — `wstg_get_deliverable(deliverable_type='endpoint_map')`
+1. **Load endpoint triage from Phase 2** — `wstg_get_deliverable(deliverable_type='endpoint_map_raw')`
 
 2. **Read raw recon outputs** for anything the deliverable missed:
     - `scripts/recon/<domain>/subdomains/live_urls.txt` — live hosts
@@ -398,18 +400,18 @@ PASS → `wstg_save_checkpoint()`, proceed to Phase 3.
 
 5. **Save deliverable for Phase 4:**
     ```
-    wstg_save_deliverable(deliverable_type='endpoint_map', content=<tier_0_1_2_list>, producer_agent='surface')
+    wstg_save_deliverable(deliverable_type='endpoint_map_ranked', content=<tier_0_1_2_list>, producer_agent='surface')
     ```
 
 6. **Proceed to Phase 4**
 
 ### Verification checklist:
-- [ ] Phase 2 endpoint_map deliverable loaded (or raw files read)
+- [ ] Phase 2 `endpoint_map_raw` deliverable loaded (or raw files read)
 - [ ] Tier 0 list compiled: public endpoints accepting input
 - [ ] Tier 1 list compiled: auth-gated endpoints accepting input
 - [ ] Tier 2 list compiled: infrastructure findings
 - [ ] `wstg_prioritize_endpoints()` called
-- [ ] endpoint_map deliverable saved for Phase 4 consumption
+- [ ] `endpoint_map_ranked` deliverable saved for Phase 4 consumption
 
 ### Phase gate:
 ```
@@ -441,10 +443,14 @@ If a class returns zero findings after validation, **go deeper before moving on*
 
 ### 🎯 Load Surface Analysis — Do Not Run Independent Checks
 
-Before any testing, load the ranked endpoint list from Phase 3:
+Before any testing, load the ranked endpoint list from Phase 3, falling back to Phase 2 raw triage:
 
 ```
-wstg_get_deliverable(deliverable_type='endpoint_map')
+wstg_get_deliverable(deliverable_type='endpoint_map_ranked')
+```
+If empty, try:
+```
+wstg_get_deliverable(deliverable_type='endpoint_map_raw')
 ```
 
 This gives you exactly what to test:

@@ -8,10 +8,10 @@ Analyze the recon output and build a ranked, actionable attack surface. The outp
 
 ## Input
 
-Read the endpoint_map deliverable from Phase 2 (recon):
+Read the endpoint_map_raw deliverable from Phase 2 (recon):
 
 ```
-wstg_get_deliverable(deliverable_type='endpoint_map')
+wstg_get_deliverable(deliverable_type='endpoint_map_raw')
 ```
 
 If no deliverable exists, read the raw recon files directly:
@@ -31,8 +31,8 @@ For every endpoint that accepts user input, answer these 3 questions:
 **Q2: Auth status?** — public (no auth), auth-gated (needs creds), unknown
 **Q3: Impact if exploitable?** — data read (low), data write (medium), code exec (high), auth bypass (critical)
 
-### Tier 0 — Immediate (test right now)
-Endpoints that accept user input AND are public. No auth barrier. These are your highest priority because there's nothing stopping you from testing them.
+### Tier 0 — Feed Into Entry Point Testing
+Endpoints that accept user input AND are public. No auth barrier. These feed directly into Phase 4's Step 4.0 entry point testing (parameter fuzzing, method mutation, content-type switching, etc.).
 
 ```
 <tier-0-list>
@@ -83,7 +83,7 @@ After classification, save the ranked list as a deliverable that `@hunt` consume
 
 ```
 wstg_save_deliverable(
-  deliverable_type='endpoint_map',
+  deliverable_type='endpoint_map_ranked',
   content=<the tier-0/tier-1/tier-2 list>,
   producer_agent='surface'
 )

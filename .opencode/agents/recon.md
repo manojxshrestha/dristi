@@ -126,6 +126,11 @@ bash scripts/tools/cloud_recon.sh <target>
 - `[NO_INPUT]` — static page, no user-controlled data
 - `[AUTH_GATE]` — requires authentication
 
+**For cloud buckets (S3, GCP, Azure blobs), also answer:**
+- `[PUBLIC_BUCKET]` — accessible without auth, accepts GET/PUT/DELETE
+- `[AUTH_BUCKET]` — requires cloud credentials (AWS keys, GCP SA, Azure SAS)
+- `[OPEN_UPLOAD]` — public + accepts PUT — HIGHEST priority (write access without auth)
+
 ### Step 7: Compiled Endpoint Triage
 
 After all tools have run, compile the answers to the 3 questions:
@@ -147,4 +152,4 @@ After all tools have run, compile the answers to the 3 questions:
 
 This triage IS the output of recon. Everything else (CSP headers, cookie flags, server banners) is interesting but does not find exploits.
 
-Save this triage via `wstg_save_deliverable(deliverable_type='endpoint_map', content=<triage_markdown>)` for Phase 3 to consume.
+Save this triage via `wstg_save_deliverable(deliverable_type='endpoint_map_raw', content=<triage_markdown>)` for Phase 3 to consume.
