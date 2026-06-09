@@ -174,30 +174,49 @@ If you proceeded here **without authentication**, every finding in this phase is
 You MUST run recon against EVERY core target domain before moving to non-core. For each domain, you MUST follow the dependency chain strictly:
 
 ```
-subdomain_enum   (Step 2.1)
+batch_subdomain_enum (Step 2.1) — all core domains in parallel via batch_subdomain_enum.sh
        ↓
-  dns_bruteforce (Step 2.2)
+   dns_bruteforce (Step 2.2) — per domain sequential
        ↓
-    web_crawl    (Step 2.3) ← uses subdomain output
+     web_crawl    (Step 2.3) ← uses subdomain output (https-subs.txt)
        ↓
-param_extract    (Step 2.4) ← uses crawl output
-param_discovery  (Step 2.5) ← uses crawl output
-  cariddi_scan   (Step 2.6) ← consumes crawl/alive-domains.txt
-  auto_nuclei    (Step 2.7) ← consumes crawl/https-subs.txt
+ param_extract    (Step 2.4) ← uses crawl output
+ param_discovery  (Step 2.5) ← uses crawl output
+   cariddi_scan   (Step 2.6) ← consumes live domains
+   auto_nuclei    (Step 2.7) ← consumes live domains
        ↓
-dir_bruteforce   (Step 2.8)
-   bypass_403    (Step 2.9)
-   vhost_fuzz    (Step 2.10)
- zone_transfer   (Step 2.11)
+ dir_bruteforce   (Step 2.8)
+    bypass_403    (Step 2.9)
+    vhost_fuzz    (Step 2.10)
+  zone_transfer   (Step 2.11)
        ↓
-takeover_scanner (Step 2.12) ← uses subdomain output
-  github_dork    (Step 2.13) ← if source in scope
-  cloud_recon    (Step 2.14)
-    cve_scan     (Step 2.15)
- auto_secrets    (Step 2.16)
+ takeover_scanner (Step 2.12) ← uses subdomain output
+   github_dork    (Step 2.13) ← if source in scope
+   cloud_recon    (Step 2.14)
+     cve_scan     (Step 2.15)
+  auto_secrets    (Step 2.16)
+       ↓
+   triage_3q      (Step 2.17) ← answer 3 questions → save endpoint_map_raw
 ```
 
-Steps 2.1–2.3 MUST run sequentially. Steps 2.4–2.7 MUST wait for 2.3. Steps 2.8–2.16 are independent of each other and MAY run in parallel.
+Step 2.1 runs as a batch across all core targets first (domains are independent). Once batch completes, Steps 2.2–2.3 run sequentially per-domain. Steps 2.4–2.7 must wait for 2.3. Steps 2.8–2.16 are independent and MAY run in parallel. Step 2.17 (triage) runs after all per-domain steps complete.
+
+### Step 2.1 — Subdomain Enumeration (all domains in parallel)
+
+**Run subdomain_enum for ALL core targets simultaneously** — domains are independent so parallel saves time:
+```bash
+printf '%s\n' "${CORE_TARGETS[@]}" > /tmp/core-targets.txt
+bash scripts/tools/batch_subdomain_enum.sh -j 3 -f /tmp/core-targets.txt
+```
+- `-j 3` = 3 concurrent jobs (adjust based on system resources)
+- Reduces N× runtime to ~N/3× runtime
+- Each domain's results go into `scripts/recon/<domain>/subdomains/`
+- **Output files:** `all_subdomains.txt` (raw subs), `alive-domains.txt` (clean domains), `https-subs.txt` (HTTPS URLs), `live_domains.txt` (httpx with status/tech/title), `live_urls.txt` (URLs for web_crawl autodetect)
+- Verify each core target has output: `ls scripts/recon/<domain>/subdomains/https-subs.txt`
+- `wstg_track_tool()` for each domain's subdomain_enum
+- If a domain has empty output, retry individually: `bash scripts/tools/subdomain_enum.sh <domain>`
+
+Then proceed to per-domain loop for Steps 2.2–2.17:
 
 ### Per-domain execution (REQUIRED format):
 
@@ -206,14 +225,6 @@ For EACH domain in `CORE_TARGETS`, execute this block:
 ```
 Processing: <domain>
 ```
-
-#### Step 2.1 — Subdomain Enumeration
-```bash
-bash scripts/tools/subdomain_enum.sh <domain>
-```
-- Verify output exists: `ls scripts/recon/<domain>/subdomains/live_urls.txt`
-- `wstg_track_tool()`, `wstg_parse_tool_output()`
-- If output file is empty or missing, retry once. If still fails, log warning and continue.
 
 #### Step 2.2 — DNS Brute Force
 ```bash
@@ -341,12 +352,13 @@ wstg_save_deliverable(deliverable_type='endpoint_map_raw', content=<triage_markd
 ### After ALL core domains complete:
 
 Repeat lightweight recon for each NON_CORE_TARGET:
-- Step 2.1 (subdomain enum)
+- Step 2.1 / `subdomain_enum.sh` (single domain — skip batch for 1 domain)
 - Step 2.3 (web crawl)
 - Step 2.7 (nuclei)
 
 ### Verification checklist:
-- [ ] Steps 2.1–2.16 run for EVERY core domain
+- [ ] Step 2.1: batch_subdomain_enum completed for ALL core domains in parallel
+- [ ] Steps 2.2–2.16 run for EVERY core domain
 - [ ] Every tool output verified (file exists, non-empty)
 - [ ] `wstg_track_tool()` called for every tool
 - [ ] `wstg_parse_tool_output()` called for subdomain_enum, web_crawl, cariddi, nuclei, github_dork

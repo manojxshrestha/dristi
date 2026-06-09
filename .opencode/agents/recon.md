@@ -52,15 +52,26 @@ Every tool you run during recon must help answer these questions. Everything els
 Run these to find the attack surface boundaries:
 
 ```bash
-# Subdomains
+# Single domain:
 bash scripts/tools/subdomain_enum.sh <target>
+
+# Multiple domains in parallel (faster for 2+ targets):
+bash scripts/tools/batch_subdomain_enum.sh -j 3 domain1.com domain2.com domain3.com
+
+# Or from a file (one domain per line):
+bash scripts/tools/batch_subdomain_enum.sh -j 3 -f domains.txt
+
 # DNS brute-force
 bash scripts/tools/dns_bruteforce.sh <target>
-# Live host discovery
-httpx -l scripts/recon/<target>/all_subdomains.txt -o scripts/recon/<target>/live_hosts.txt
 ```
 
 **For each live host, answer:** Is this Cloudflare-protected? `curl -svI <host>` — look for `cf-*` headers. If yes, note it and redirect focus to non-CF hosts.
+
+**httpx now enriches output with status codes, titles, tech detection, and web server** (`live_domains.txt`). Scan this file for:
+- `[401]` or `[403]` statuses → likely auth-gated (feeds Q3)
+- `[200]` with interesting titles → "Admin", "Dashboard", "Login" → high-value targets
+- Tech stack in output → Express/Spring/Django/Laravel/Golang — each has different attack surface
+- Non-standard ports or redirects → potential bypass targets
 
 ### Step 2: Crawl & URL Collection
 

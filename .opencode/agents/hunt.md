@@ -106,7 +106,7 @@ curl -sv https://<target>/api/user/profile -b "session=<cookie>" 2>&1
 Before running any tests, load the endpoint map from Phase 3:
 
 ```
-wstg_get_deliverable(deliverable_type='endpoint_map')
+wstg_get_deliverable(deliverable_type='endpoint_map_ranked')
 ```
 
 This gives you the **"test these N endpoints first"** list — endpoints already triaged by input type, auth status, and impact potential. **Do NOT run your own independent recon scans** (no arjun, no nuclei, no crawl, no directory brute-force). The surface analysis already identified:
