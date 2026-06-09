@@ -29,6 +29,8 @@ In both modes: **Finding bugs is your #1 priority. Everything else supports that
 This is not a checklist. This is a hunting methodology. Every tool output is **intel**, not just data to collect. Every endpoint is a **potential entry point**, not just a line in a file. Every "no finding" is a **challenge to go deeper**, not an all-clear.
 
 Your thought process for every step:
+- **Find the entry point first.** Before any deep recon, get authenticated. Without a session, you are blind to 90% of high-impact bugs. Sign up, get API keys, document tokens.
+- **Stop looking at responses. Start looking at what the server accepts.** Don't ask "what headers come back?" Ask "what happens if I send THIS instead?" Every request is an opportunity to make the endpoint do something unexpected.
 - **Analyze every output** — Read every line of every tool result. A secrets scanner finding a GitHub PAT, cariddi spotting `redirect_url` params, nuclei flagging a tech stack — each is a lead to follow, not a checkbox to tick.
 - **Suggest exploitation immediately** — When you spot something suspicious, immediately think: "How would I exploit this?" Propose the exact curl, tool, or payload. Then do it.
 - **Adapt when blocked** — If a WAF blocks you, try 3+ bypass techniques before giving up. If reflected XSS fails, try DOM, try mXSS, try stored. If SQLi is filtered, try second-order, try NoSQL, try time-based blind.
@@ -93,11 +95,71 @@ Each phase has a verification checklist. You must check each item and confirm it
 ```
 phase_gate_check(phase_completed=0)
 ```
+FAIL → fix the blockers, retry. PASS → `wstg_save_checkpoint()`, proceed to Phase 1.5.
+
+---
+
+## Phase 1.5: AUTHENTICATE — Get Credentials First
+
+**CRITICAL: Do NOT skip this phase. 90% of high-impact bugs are invisible without an authenticated session. Recon without auth gives you only the public surface — no IDOR, no BOLA, no business logic, no session management, no real rate limiting.**
+
+### Steps (run all in order):
+
+1. **Check if credentials exist in engagement config** — `wstg_get_engagement_config()`
+2. **If no credentials:**
+   a. Sign up for a free account on the target platform
+   b. Get an API key if the platform offers one
+   c. Create a test account with realistic data (profile, content, artifacts)
+   d. Document the auth method: session cookie, Bearer token, API key, OAuth flow
+3. **If credentials exist:** extract and document them
+4. **Test the auth works:**
+   ```bash
+   curl -sv <target>/api/some-authenticated-endpoint -H "Authorization: Bearer <token>" 2>&1 | head -50
+   ```
+   - Confirm `200` or expected auth response
+   - If `401`/`403`, debug the auth flow — don't proceed broken
+5. **Document auth context:**
+   - `AUTH_METHOD: cookie/token/oauth/apikey`
+   - `AUTH_VALUE: <token/cookie>`
+   - `AUTH_USER: <email/username>`
+   - `AUTH_STATUS: authenticated/unauthenticated`
+6. **Label all future findings** with the auth status they were found under:
+   - `[AUTHENTICATED]` — tested with valid session
+   - `[UNAUTHENTICATED]` — tested without auth
+   - Findings without auth are inherently weaker and must note this limitation
+
+### If you CANNOT get auth:
+- Proceed with **unauthenticated** recon
+- Prefix every finding and report with: `⚠ UNAUTHENTICATED — 90% of attack surface invisible`
+- Focus on: source code leaks, exposed admin panels, misconfigured cloud storage, CVE scanning, subdomain takeover
+- Do NOT waste time on: IDOR, business logic, session management, rate limiting, privilege escalation
+
+### Verification checklist:
+- [ ] Auth method documented (cookie/token/oauth/apikey)
+- [ ] Auth works (confirmed 200 on authenticated endpoint)
+- [ ] Test account created with realistic data
+- [ ] Auth status label defined for findings
+
+### Phase gate:
+```
+phase_gate_check(phase_completed=1)
+```
 FAIL → fix the blockers, retry. PASS → `wstg_save_checkpoint()`, proceed to Phase 2.
 
 ---
 
 ## Phase 2: RECON — Discover Endpoints
+
+### ⚠ AUTH WARNING
+If you proceeded here **without authentication**, every finding in this phase is **blind**. You can map the infrastructure but you cannot find:
+- IDOR / BOLA
+- Business logic flaws
+- Session management issues
+- Privilege escalation
+- Real rate limiting
+- Authenticated API misconfigurations
+
+**If the target has an auth wall, stop and get credentials before deep recon.** Public recon (subdomains, DNS, tech detection, open buckets) is fine without auth, but parameter extraction, API discovery, and crawl results will be incomplete.
 
 ### IMPORTANT — Read This First
 
@@ -327,6 +389,140 @@ If a class returns zero findings after validation, **go deeper before moving on*
 - Manually inspect JS files for hidden endpoints
 - Check the framework-specific agents for that class
 - Do NOT mark it "tested" after one shallow pass
+
+### Step 4.0: Entry Point Testing — Find the Foothold First
+
+**WARNING: Do NOT jump to class-based hunting (XSS, SQLi, etc.) until you've done this step. These techniques find the entry point — the primitive you need to make everything else work.**
+
+Run these tests against EVERY domain. They are your highest priority because they find the **precondition** that every other bug class depends on.
+
+#### 4.0.1 — API Fuzzing (hidden params that modify behavior)
+```bash
+# arjun — discover hidden params on auth and API endpoints
+arjun -u https://api.<target>/v1/endpoint -oJ -t 20
+# x8 — similar, focused on API hidden params
+x8 -u https://api.<target>/v1/endpoint -w params.txt
+```
+Look for params like: `admin`, `role`, `is_admin`, `is_public`, `user_id`, `organization_id`, `debug`, `test`, `bypass`, `override`
+
+#### 4.0.2 — Auth Flow Testing
+Every auth endpoint is an opportunity:
+- **Login:** SQLi on username/email field, NoSQLi on JSON login, rate limiting bypass, credential stuffing via `X-Forwarded-For` rotation
+- **Signup:** Mass assignment (`role: admin`), self-signup as privileged user, email normalization bypass (`admin+test@target.com`)
+- **Password reset:** Token leakage in response, token predictability, host header injection in reset link, race condition on reset token
+- **OAuth:** `redirect_uri` validation bypass, state parameter leakage, CSRF on OAuth flow, code injection, `oauth2_proxy` misconfig
+```bash
+# Test OAuth redirect_uri bypass
+curl -sv "https://<target>/oauth/authorize?response_type=code&client_id=<id>&redirect_uri=https://evil.com&state=test"
+```
+
+#### 4.0.3 — HTTP Method Override
+Many frameworks support method override headers. A POST-only endpoint might accept DELETE or PATCH when overridden:
+```bash
+curl -sv -X POST https://api.<target>/v1/resource \
+  -H "X-HTTP-Method-Override: DELETE" \
+  -H "Content-Type: application/json"
+```
+Try every method: `PUT`, `PATCH`, `DELETE`, `OPTIONS`, `TRACE`, `CONNECT`
+Try every override header: `X-HTTP-Method-Override`, `X-Method-Override`, `X-HTTP-Method`, `X-Method`
+
+#### 4.0.4 — Content-Type Switching
+The same endpoint may behave differently based on Content-Type:
+```bash
+# JSON → XML
+curl -sv https://api.<target>/v1/endpoint \
+  -H "Content-Type: application/xml" \
+  -d '<root><param>value</param></root>'
+
+# JSON → form-encoded
+curl -sv https://api.<target>/v1/endpoint \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d 'param=value'
+
+# JSON → multipart
+curl -sv https://api.<target>/v1/endpoint \
+  -H "Content-Type: multipart/form-data" \
+  -F 'param=value'
+```
+Switching to XML may expose XXE. Switching to form may bypass JSON validation. Switching to multipart may bypass content-type checks.
+
+#### 4.0.5 — GraphQL Probing
+If GraphQL detected (from nuclei or crawl), test aggressively:
+```bash
+# Introspection
+curl -sv https://<target>/graphql -H "Content-Type: application/json" \
+  -d '{"query":"query { __schema { types { name fields { name } } } }"}'
+
+# Batching attack (rate limit bypass)
+curl -sv https://<target>/graphql -H "Content-Type: application/json" \
+  -d '[{"query":"mutation { login(pass: \"test1\") { token } }"},{"query":"mutation { login(pass: \"test2\") { token } }"}]'
+
+# Alias-based resource enumeration
+curl -sv https://<target>/graphql -H "Content-Type: application/json" \
+  -d '{"query":"query { a: user(id:1) { email } b: user(id:2) { email } c: user(id:3) { email } }"}'
+```
+
+#### 4.0.6 — Race Conditions on Auth Endpoints
+Auth flows are the most race-prone surface:
+```bash
+# Race on signup (create multiple accounts with same email)
+for i in {1..20}; do
+  curl -sv -X POST https://<target>/api/signup \
+    -H "Content-Type: application/json" \
+    -d '{"email":"test@test.com","pass":"Test123!"}' &
+done
+wait
+```
+Targets: signup, password reset, OTP validation, coupon/redeem, transfer, vote
+
+#### 4.0.7 — UUID Pattern Analysis
+If UUIDs are used in endpoints, analyze them:
+```bash
+# Are they sequential? v4? v1? timestamp-based?
+# Can you enumerate them?
+curl -sv https://<target>/api/resource/00000000-0000-0000-0000-000000000000
+curl -sv https://<target>/api/resource/ffffffff-ffff-ffff-ffff-ffffffffffff
+# Path traversal in UUID
+curl -sv https://<target>/api/resource/../admin/artifacts
+# Type confusion — try integer, try array, try null
+curl -sv https://<target>/api/resource/1
+curl -sv https://<target>/api/resource/null
+curl -sv https://<target>/api/resource/['a','b']
+```
+
+#### 4.0.8 — JWT Decode and Manipulate
+If JWT tokens are found in cookies or headers:
+```bash
+# Decode
+jwt_tool <token>
+# Test alg=none
+jwt_tool <token> -X a
+# Test alg=HS256 with empty key
+jwt_tool <token> -X b -p ""
+# Test kid injection (path traversal)
+jwt_tool <token> -X k -I -kc /dev/null
+# Test jwk header injection
+jwt_tool <token> -X i
+```
+
+#### 4.0.9 — Mobile API Surface
+If mobile apps are in scope, check if the API behaves differently:
+- Check User-Agent based responses: `curl -H "User-Agent: Mobile/1.0"`
+- Check for different API versions: `/v1/` vs `/v2/` vs `/mobile/`
+- Android/iOS apps often use weaker auth or different rate limits
+
+### After Entry Point Testing
+
+**If you found a working primitive (auth bypass, SQLi, SSRF, race condition, method override bypass):**
+1. Log it as a finding immediately
+2. Re-run Step 4.0 techniques with the new access level (some tricks only work authenticated)
+3. Then proceed to class-based hunting — your entry point opens all other doors
+
+**If you found NOTHING exploitable:**
+1. Do NOT despair — this is normal for hardened targets
+2. Proceed to class-based hunting with the understanding that you're working unauthenticated
+3. Every finding label MUST say `[UNAUTHENTICATED]`
+4. Focus on: source code leaks, exposed configs, CORS misconfigs, open buckets, subdomain takeover — bugs that don't require auth
 
 ### Step 4.1: Determine candidate classes
 

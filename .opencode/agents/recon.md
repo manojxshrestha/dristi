@@ -4,6 +4,21 @@ description: Pipeline Phase 2 — Full recon: subdomains, live hosts, crawl, par
 
 # RECON
 
+## ⚠ Auth Warning
+
+You are about to map infrastructure. **Without an authenticated session, you will miss:**
+- IDOR / BOLA
+- Business logic flaws
+- Session management issues
+- Privilege escalation
+- Real rate limiting
+- Authenticated API misconfigurations
+- Any finding that requires a logged-in state
+
+**If the target has an auth wall, stop and get credentials first** (see `@autopilot` Phase 1.5). Recon without auth is useful for infrastructure mapping, but your crawl results will be incomplete, your parameter extraction will miss authenticated endpoints, and your nuclei scan will only find public CVEs.
+
+If you proceed without auth, label every finding `[UNAUTHENTICATED]`.
+
 Guide the user through recon. For each tool, suggest the command, let them run it and paste results. For additional recon tradecraft, invoke `@web2-recon` or `@offensive-osint` for deeper OSINT gathering, or `@osint-methodology` for structured OSINT workflows.
 
 You can run the combined orchestrated recon via:
