@@ -38,7 +38,6 @@ ARSENAL_TOOLS=(
   "eyewitness|probe|brew install eyewitness  # or pipx|github.com/RedSiege/EyeWitness"
   # ── URL / endpoint collection ───────────────────────────────────────────
   "katana|crawl|GOBIN=\$HOME/go/bin go install github.com/projectdiscovery/katana/cmd/katana@latest|github.com/projectdiscovery/katana"
-  "gau|crawl|GOBIN=\$HOME/go/bin go install github.com/lc/gau/v2/cmd/gau@latest|github.com/lc/gau"
   "waybackurls|crawl|GOBIN=\$HOME/go/bin go install github.com/tomnomnom/waybackurls@latest|github.com/tomnomnom/waybackurls"
   "waymore|crawl|pipx install waymore|github.com/xnl-h4ck3r/waymore"
   "hakrawler|crawl|GOBIN=\$HOME/go/bin go install github.com/hakluke/hakrawler@latest|github.com/hakluke/hakrawler"

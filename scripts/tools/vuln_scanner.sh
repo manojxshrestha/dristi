@@ -341,6 +341,7 @@ PYEOF
     [ "$DALFOX_COUNT" -gt 0 ] && log_vuln "Dalfox found $DALFOX_COUNT potential XSS" || log_done "Dalfox: no XSS found"
     fi
 fi
+fi
 
 # ── Check 4: SSTI ───────────────────────────────────────────────────────
 if ! skip_has ssti; then

@@ -377,17 +377,20 @@ fi
 echo ""
 log_info "Phase 4: URL Collection"
 
-# GAU - Get All URLs (wayback, commoncrawl, otx, urlscan)
-if command -v gau &>/dev/null; then
-    log_step "Running gau (historical URLs)..."
-    echo "$TARGET" | gau --threads 5 --o "$RECON_DIR/urls/gau.txt" 2>/dev/null || \
-    echo "$TARGET" | gau > "$RECON_DIR/urls/gau.txt" 2>/dev/null || true
-    log_done "gau: $(wc -l < "$RECON_DIR/urls/gau.txt" 2>/dev/null || echo 0) URLs"
+# wayback — historical URLs via Wayback Machine CDX API
+if command -v waybackurls &>/dev/null; then
+    log_step "Running waybackurls (historical URLs)..."
+    echo "$TARGET" | waybackurls > "$RECON_DIR/urls/wayback.txt" 2>/dev/null || true
+    log_done "waybackurls: $(wc -l < "$RECON_DIR/urls/wayback.txt" 2>/dev/null || echo 0) URLs"
+elif command -v waymore &>/dev/null; then
+    log_step "Running waymore (deep archive crawl)..."
+    waymore -i "$TARGET" -o "$RECON_DIR/urls/waymore" 2>/dev/null || true
+    log_done "waymore completed"
 else
-    log_warn "gau not installed — using wayback fallback"
+    log_warn "No archive URL tool found — falling back to direct CDX API"
     curl -s "https://web.archive.org/cdx/search/cdx?url=*.$TARGET/*&output=text&fl=original&collapse=urlkey&limit=5000" \
         > "$RECON_DIR/urls/wayback.txt" 2>/dev/null || true
-    log_done "wayback: $(wc -l < "$RECON_DIR/urls/wayback.txt" 2>/dev/null || echo 0) URLs"
+    log_done "wayback CDX: $(wc -l < "$RECON_DIR/urls/wayback.txt" 2>/dev/null || echo 0) URLs"
 fi
 
 # katana — active crawl on live hosts (5 min cap prevents infinite crawl on
