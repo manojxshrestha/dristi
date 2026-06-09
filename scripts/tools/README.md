@@ -9,9 +9,8 @@ Agents must follow this pipeline; each phase depends on outputs from the previou
 
 ```mermaid
 graph TD
-    subgraph KB["knowledge-base/"]
-        WSTG["web-security-testing-guide/<br/>Full OWASP WSTG methodology"]
-        PS["portswigger-academy/<br/>Lab writeups & solutions"]
+    subgraph WSTG["web-security-testing-guide/"]
+        W["OWASP WSTG test cases<br/>110 files across 12 categories"]
     end
     subgraph P["prompts/"]
         P1["info-gathering.md"]
@@ -34,13 +33,13 @@ graph TD
         T6["xss_payloads.txt"]
     end
 
-    KB -->|"reference material"| S
+    WSTG -->|"reference material"| S
     P -->|"which WSTG tests to run"| S
     S -->|"automated execution"| T
     T4 -->|"gf_*.txt →"| S2
     T6 -->|"payloads →"| S2
 
-    style KB fill:#1a1a2e,stroke:#e94560,color:#fff
+    style WSTG fill:#1a1a2e,stroke:#e94560,color:#fff
     style P fill:#16213e,stroke:#0f3460,color:#fff
     style S fill:#0f3460,stroke:#e94560,color:#fff
     style T fill:#533483,stroke:#e94560,color:#fff
@@ -51,11 +50,11 @@ graph TD
 1. **`prompts/`** — Agent reads the WSTG checklist for the current phase (e.g., `input-validation.md` lists WSTG-INPV-01 for reflected XSS).
 2. **`skills/`** — Agent loads the relevant hunt skill (e.g., `hunt-xss/SKILL.md` for payloads, detection patterns, bypass techniques).
 3. **`scripts/tools/`** — Agent runs the automation scripts (e.g., `param_extract.sh` → `gf_xss.txt` → fire payloads from `xss_payloads.txt`).
-4. **`knowledge-base/`** — Agent references the full OWASP WSTG guide or PortSwigger lab solutions for in-depth technique validation.
+4. **`web-security-testing-guide/`** — Agent references the full OWASP WSTG guide for in-depth technique validation.
 
 | Layer | Directory | Role | Content |
 |-------|-----------|------|---------|
-| Reference | `knowledge-base/` | Full methodology & lab guides | OWASP WSTG (13 categories), PortSwigger Academy (20+ vuln classes) |
+| Reference | `web-security-testing-guide/` | Full OWASP WSTG methodology | 96 test cases across 12 categories |
 | Checklist | `prompts/` | Which WSTG tests to run | 13 brief test lists (WSTG-INFO-01, WSTG-INPV-01, etc.) |
 | Tactical | `skills/` | How to execute each hunt | 69+ agent workflows with commands, payloads, bypass chains |
 | Automation | `scripts/tools/` | Run the recon pipeline | 9 scripts + payloads file + orchestrator |

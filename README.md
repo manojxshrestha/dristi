@@ -301,8 +301,7 @@ dristi/
 │   ├── reconnect-burp.sh            # Burp MCP reconnection
 │   └── refresh-cve-index.py         # CISA KEV refresh
 ├── docs/                            # architecture · credits · CLI reference · verification
-├── knowledge-base/
-│   └── portswigger-academy/         # 31 technique guides
+├── web-security-testing-guide/      # OWASP WSTG test cases (110 files)
 ├── prompts/                         # 12 WSTG category prompts
 ├── engagements/                   # engagement working directories
 ├── gif/                             # assets

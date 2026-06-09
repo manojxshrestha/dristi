@@ -188,7 +188,7 @@ mcp = FastMCP(
     ),
 )
 
-WSTG_DIR = Path(__file__).parent.parent / "knowledge-base" / "web-security-testing-guide"
+WSTG_DIR = Path(__file__).parent.parent / "web-security-testing-guide"
 DATA_DIR = Path(__file__).parent / "data"
 TRACKING_DIR = DATA_DIR / "tracking"
 TOOL_TRACKING_DIR = DATA_DIR / "tool-tracking"
