@@ -25,21 +25,38 @@ warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 hit()  { echo -e "${MAG}[CLOUD]${NC} $1"; }
 err()  { echo -e "${RED}[-]${NC} $1" >&2; }
 
-KEYWORD=""; CF_TARGET=""; S3_ONLY=0
+KEYWORD=""; CF_TARGET=""; S3_ONLY=0; DOMAIN=""
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --keyword)   shift; KEYWORD="${1:-}" ;;
     --cf-bypass) shift; CF_TARGET="${1:-}" ;;
     --s3-only)   S3_ONLY=1 ;;
     -h|--help)   sed -n '2,12p' "$0"; exit 0 ;;
-    *) err "unknown arg: $1"; exit 2 ;;
+    *)
+      # Bare domain → CF bypass mode
+      if echo "$1" | grep -qv '^--'; then
+        DOMAIN="$1"
+        CF_TARGET="$1"
+      else
+        err "unknown arg: $1"
+        exit 2
+      fi
+      ;;
   esac
   shift
 done
 
-[ -z "$KEYWORD" ] && [ -z "$CF_TARGET" ] && { err "--keyword or --cf-bypass required"; exit 2; }
+[ -z "$KEYWORD" ] && [ -z "$CF_TARGET" ] && { err "--keyword, --cf-bypass, or <domain> required"; exit 2; }
 
-OUT_DIR="${CLOUD_OUT_DIR:-$(pwd)/findings/cloud/$(date +%Y%m%d_%H%M%S)}"
+# Derive keyword from domain if not set (e.g. "example.com" → "example", "api.example.co.uk" → "example")
+if [ -z "$KEYWORD" ] && [ -n "$DOMAIN" ]; then
+  KEYWORD=$(echo "$DOMAIN" | sed 's/\.[^.]*$//' | sed 's/.*\.//')
+  log "derived keyword '$KEYWORD' from domain '$DOMAIN'"
+fi
+
+BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+TARGET_DIR="$BASE_DIR/recon/${DOMAIN:-$KEYWORD}"
+OUT_DIR="${CLOUD_OUT_DIR:-$TARGET_DIR/cloud}"
 mkdir -p "$OUT_DIR"
 
 # ── S3 buckets across providers ─────────────────────────────────────────────

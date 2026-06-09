@@ -19,7 +19,7 @@ Inspect the external tool inventory used by this plugin.
 
 - **Recon** — subfinder, amass, assetfinder, bbot, theHarvester, dnsrecon, massdns, puredns, shuffledns, knockpy
 - **Probing** — httpx, dnsx, naabu, smap, aquatone, eyewitness
-- **Crawling** — katana, gau, waybackurls, waymore, hakrawler, gospider, cariddi
+- **Crawling** — katana, waybackurls, waymore, hakrawler, gospider, cariddi
 - **Fuzzing** — ffuf, feroxbuster, gobuster, arjun, x8
 - **Scanning** — nuclei, dalfox, xsstrike, ghauri, sqlmap, fuxploider, log4j-scan, linkfinder
 - **Secrets** — trufflehog, noseyparker, gitleaks, shhgit, git-hound

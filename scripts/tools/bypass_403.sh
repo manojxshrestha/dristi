@@ -21,19 +21,48 @@ ok()   { echo -e "${GREEN}[+]${NC} $1"; }
 hit()  { echo -e "${MAG}[BYPASS]${NC} $1"; }
 err()  { echo -e "${RED}[-]${NC} $1" >&2; }
 
-URL=""; LIST=""
+DOMAIN=""; URL=""; LIST=""
 while [ "$#" -gt 0 ]; do
   case "$1" in
     -l|--list) shift; LIST="${1:-}" ;;
     -h|--help) sed -n '2,10p' "$0"; exit 0 ;;
-    *) URL="$1" ;;
+    *)
+      if echo "$1" | grep -q '://'; then
+        URL="$1"
+      else
+        DOMAIN="$1"
+      fi
+      ;;
   esac
   shift
 done
 
-[ -z "$URL" ] && [ -z "$LIST" ] && { err "url or -l <file> required"; exit 2; }
+# Resolve domain → list mode: auto-discover live URLs
+BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+if [ -n "$DOMAIN" ]; then
+  RECON_DIR="$BASE_DIR/recon/$DOMAIN"
+  LIVE_FILE="$RECON_DIR/subdomains/https-subs.txt"
+  [ -f "$LIVE_FILE" ] && [ -s "$LIVE_FILE" ] && LIST="$LIVE_FILE"
+  # Fallback: try live_urls.txt
+  if [ -z "$LIST" ]; then
+    LIVE_FILE2="$RECON_DIR/subdomains/live_urls.txt"
+    [ -f "$LIVE_FILE2" ] && [ -s "$LIVE_FILE2" ] && LIST="$LIVE_FILE2"
+  fi
+  if [ -n "$LIST" ]; then
+    log "domain mode: using $LIST ($(wc -l < "$LIST" | tr -d ' ') URLs)"
+  else
+    err "no live subdomain output for '$DOMAIN' — run subdomain_enum.sh first"
+    exit 2
+  fi
+fi
 
-OUT_DIR="${BYPASS_OUT_DIR:-$(pwd)/findings/bypass/$(date +%Y%m%d_%H%M%S)}"
+[ -z "$URL" ] && [ -z "$LIST" ] && { err "url, domain, or -l <file> required"; exit 2; }
+
+if [ -n "$DOMAIN" ]; then
+  OUT_DIR="${BYPASS_OUT_DIR:-$RECON_DIR/bypass}"
+else
+  OUT_DIR="${BYPASS_OUT_DIR:-$BASE_DIR/recon/$(echo "${URL:-$(head -1 "$LIST")}" | sed 's|https\?://||;s|/.*||')/bypass}"
+fi
 mkdir -p "$OUT_DIR"
 
 if _have byp4xx; then

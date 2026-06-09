@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# Web Crawling — hakrawler + katana + waymore + gau
+# Web Crawling — hakrawler + katana + waymore
 #
 # Takes live HTTPS URLs and runs multiple crawlers to discover endpoints,
 # then merges all results into a clean deduplicated list.
@@ -9,13 +9,10 @@
 #   ./tools/web_crawl.sh <domain>                    # auto paths under recon/<domain>/
 #   ./tools/web_crawl.sh <domain> <live-file>        # custom live URL file
 #   ./tools/web_crawl.sh <live-file>                 # direct file path, domain from path
-#   ./tools/web_crawl.sh -l <live-file>              # -l flag (convenience)
 #
-# Examples:
-#   ./tools/web_crawl.sh example.com
-#   ./tools/web_crawl.sh example.com /path/to/https-subs.txt
-#   ./tools/web_crawl.sh /home/pwn/dristi/recon/example.com/live_hosts.txt
-#   ./tools/web_crawl.sh -l /path/to/live_urls.txt
+# Notes:
+#   - hakrawler/katana (active) are timeboxed — Cloudflare blocks them on most targets
+#   - waymore (passive, Wayback Machine) produces the bulk of URLs
 # =============================================================================
 
 set -uo pipefail
@@ -70,31 +67,36 @@ NDOMS=$(wc -l < "$OUT_DIR/alive-domains.txt" | tr -d ' ')
 log_ok "alive-domains.txt: $NDOMS unique domains"
 
 # ── Ensure tools ────────────────────────────────────────────────────
-for tool in hakrawler katana gau; do
+for tool in hakrawler katana; do
   if ! command -v "$tool" &>/dev/null; then
     log_info "Installing $tool ..."
     case "$tool" in
       hakrawler) go install github.com/hakluke/hakrawler@latest 2>/dev/null ;;
       katana)    go install github.com/projectdiscovery/katana/cmd/katana@latest 2>/dev/null ;;
-      gau)       go install github.com/lc/gau/v2/cmd/gau@latest 2>/dev/null ;;
     esac
     log_ok "$tool installed"
   fi
 done
 
-# ── Hakrawler ───────────────────────────────────────────────────────
-log_info "Running hakrawler ..."
-cat "$OUT_DIR/https-subs.txt" | hakrawler -subs -u -d 3 \
-  | sort -u > "$OUT_DIR/hakcrawlurls.txt" 2>/dev/null
-NHAK=$(wc -l < "$OUT_DIR/hakcrawlurls.txt" | tr -d ' ')
-log_ok "hakrawler: $NHAK URLs"
+# ── Hakrawler (timeboxed — Cloudflare often blocks it) ──────────────
+log_info "Running hakrawler (30s timeout) ..."
+timeout 30 bash -c \
+  'cat "$1" | hakrawler -subs -u -d 3 2>/dev/null | sort -u > "$2"' \
+  _ "$OUT_DIR/https-subs.txt" "$OUT_DIR/hakcrawlurls.txt"
+NHAK=$(wc -l < "$OUT_DIR/hakcrawlurls.txt" 2>/dev/null | tr -d ' ')
+NHAK=${NHAK:-0}
+[ "$NHAK" -le 2 ] && log_warn "hakrawler: $NHAK URLs (likely CF-blocked)"
+[ "$NHAK" -gt 2 ] && log_ok "hakrawler: $NHAK URLs"
 
-# ── Katana ──────────────────────────────────────────────────────────
-log_info "Running katana ..."
-cat "$OUT_DIR/https-subs.txt" | katana -d 3 -jc -timeout 15 -c 20 -silent \
-  2>/dev/null | anew "$OUT_DIR/cleansubskatanaurls.txt" > /dev/null
-NKAT=$(wc -l < "$OUT_DIR/cleansubskatanaurls.txt" | tr -d ' ')
-log_ok "katana: $NKAT URLs"
+# ── Katana (timeboxed — Cloudflare often blocks it) ─────────────────
+log_info "Running katana (30s timeout) ..."
+timeout 30 bash -c \
+  'cat "$1" | katana -d 2 -jc -k -timeout 10 -c 15 -silent 2>/dev/null | sort -u > "$2"' \
+  _ "$OUT_DIR/https-subs.txt" "$OUT_DIR/cleansubskatanaurls.txt"
+NKAT=$(wc -l < "$OUT_DIR/cleansubskatanaurls.txt" 2>/dev/null | tr -d ' ')
+NKAT=${NKAT:-0}
+[ "$NKAT" -le 2 ] && log_warn "katana: $NKAT URLs (likely CF-blocked)"
+[ "$NKAT" -gt 2 ] && log_ok "katana: $NKAT URLs"
 
 # ── Setup waymore venv ──────────────────────────────────────────────
 WAYMORE_DIR="$BASE_DIR/tools/waymore"
@@ -113,35 +115,18 @@ else
 fi
 
 # ── Waymore ─────────────────────────────────────────────────────────
-log_info "Running waymore ..."
+log_info "Running waymore (primary URL source) ..."
 $WAYMORE_BIN -i "$TARGET" -mode U -oU "$OUT_DIR/wayurls.txt" 2>/dev/null
 NWAY=$(wc -l < "$OUT_DIR/wayurls.txt" 2>/dev/null | tr -d ' ')
+NWAY=${NWAY:-0}
 log_ok "waymore: $NWAY URLs"
 
-# ── Gau ─────────────────────────────────────────────────────────────
-log_info "Running gau ..."
-echo "$TARGET" | gau --threads 10 --subs 2>/dev/null \
-  | anew "$OUT_DIR/gauurls.txt" > /dev/null
-NGAU=$(wc -l < "$OUT_DIR/gauurls.txt" | tr -d ' ')
-log_ok "gau: $NGAU URLs"
-
-# ── Merge historical ────────────────────────────────────────────────
-log_info "Merging historical URLs (waymore + gau) ..."
-if [ -f "$OUT_DIR/wayurls.txt" ] && [ -f "$OUT_DIR/gauurls.txt" ]; then
-  cat "$OUT_DIR/wayurls.txt" "$OUT_DIR/gauurls.txt" \
-    | uro 2>/dev/null | sort -u > "$OUT_DIR/waygauurls.txt"
-  NHIST=$(wc -l < "$OUT_DIR/waygauurls.txt" | tr -d ' ')
-  log_ok "waygauurls.txt: $NHIST historical URLs"
-else
-  log_warn "Skipping historical merge — waymore or gau output missing"
-fi
-
-# ── Merge all crawlers ──────────────────────────────────────────────
+# ── Merge all sources ───────────────────────────────────────────────
 log_info "Merging all crawled results ..."
-cat "$OUT_DIR/waygauurls.txt" \
+cat "$OUT_DIR/wayurls.txt" \
     "$OUT_DIR/cleansubskatanaurls.txt" \
     "$OUT_DIR/hakcrawlurls.txt" \
-  | uro 2>/dev/null | sort -u > "$OUT_DIR/merged-crawl.txt"
+  | sort -u > "$OUT_DIR/merged-crawl.txt"
 NMERGED=$(wc -l < "$OUT_DIR/merged-crawl.txt" | tr -d ' ')
 log_ok "merged-crawl.txt: $NMERGED unique URLs"
 

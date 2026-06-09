@@ -20,8 +20,18 @@ log_ok()   { echo -e "${GREEN}[+]${NC} $1"; }
 log_err()  { echo -e "${RED}[-]${NC} $1" >&2; }
 log_info() { echo -e "${CYAN}[*]${NC} $1"; }
 
-TARGET="${1:?Usage: $0 <domain> [--crawled <file>]}"
-CRAWLED="${3:-$BASE_DIR/recon/$TARGET/crawl/crawledurls.txt}"
+TARGET=""; CRAWLED=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --crawled) shift; CRAWLED="${1:-}" ;;
+    -h|--help) sed -n '6,10p' "$0"; exit 0 ;;
+    *) TARGET="$1" ;;
+  esac
+  shift
+done
+
+[ -z "$TARGET" ] && { echo "Usage: $0 <domain> [--crawled <file>]" >&2; exit 1; }
+[ -z "$CRAWLED" ] && CRAWLED="$BASE_DIR/recon/$TARGET/crawl/crawledurls.txt"
 
 OUT_DIR="$BASE_DIR/recon/$TARGET/params"
 mkdir -p "$OUT_DIR"

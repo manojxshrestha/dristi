@@ -207,7 +207,7 @@ Client -> CDN -> Load Balancer -> App Server -> Database
 | nuclei | Template scanner |
 | katana | Crawl |
 | waybackurls | Archive URLs |
-| gau | Known URLs |
+| waymore | Deep archive URLs |
 | dalfox | XSS scanner |
 | ffuf | Fuzzer |
 | anew | Dedup append |
@@ -306,7 +306,7 @@ cat /tmp/subs.txt | dnsx -silent | httpx -silent -status-code -title -tech-detec
 # Step 3: URL collection
 cat /tmp/live.txt | awk '{print $1}' | katana -d 3 -silent | anew /tmp/urls.txt
 echo TARGET | waybackurls | anew /tmp/urls.txt
-gau TARGET | anew /tmp/urls.txt
+# gau removed — waymore covers Wayback Machine with better results; waymore config at ~/.gau.toml if needed manually
 
 # Step 4: Nuclei scan
 nuclei -l /tmp/live.txt -severity critical,high,medium -silent -o /tmp/nuclei.txt
@@ -2095,7 +2095,7 @@ Before pushing back with "I think we're done because X," do this:
 | Phase | Tools | Why this order |
 |-------|-------|----------------|
 | Recon: Subdomains | `subfinder` -> `amass` -> `puredns` -> `httpx` | Passive first (no detection) -> resolve DNS -> probe HTTP + tech stack |
-| Recon: URLs | `gau` + `waymore` -> `katana` -> `uro` | Archive (forgotten endpoints) -> active crawl (JS-rendered) -> deduplicate |
+| Recon: URLs | `waymore` -> `katana` -> `uro` | Archive (waymore: 340K+ URLs on test target, gau returned 0 — removed) -> active crawl (JS-rendered) -> deduplicate |
 | Recon: JS | `jsluice` + `mantra` + `trufflehog --only-verified` | Extract URLs/secrets -> find API keys -> verify keys actually work |
 | Recon: Ports | `naabu` (wide) -> `rustscan` (deep) | Fast top-1000 sweep -> full 65535 on interesting targets |
 | Recon: Scan | `nuclei -tags cve` -> `nuclei -tags takeover` | Known CVEs first -> then takeover (act immediately) |

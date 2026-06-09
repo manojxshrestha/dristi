@@ -16,13 +16,13 @@
   <img src="https://img.shields.io/badge/WSTG-v4.2-purple" alt="WSTG v4.2">
   <img src="https://img.shields.io/badge/MCP%20tools-86-orange" alt="86 MCP Tools">
   <img src="https://img.shields.io/badge/technique%20guides-31-red" alt="31 Technique Guides">
-  <img src="https://img.shields.io/badge/agents-74-blueviolet" alt="74 Agents">
+  <img src="https://img.shields.io/badge/agents-75-blueviolet" alt="75 Agents">
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs Welcome">
 </p>
 
 <p align="center">
   Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for bug hunting,
-  external red-team work, and authorized pentests — <b>74 agents</b> · <b>86 MCP tools</b> ·
+  external red-team work, and authorized pentests — <b>75 agents</b> · <b>86 MCP tools</b> ·
   <b>681 disclosed-report patterns</b> across core vulnerability classes ·
   enterprise identity + infrastructure attack matrices ·
   engagement management · Burp MCP integration ·
@@ -74,7 +74,7 @@ If you're running an internal red team that includes domain-takeover chains via 
 
 ## Capability Map
 
-74 agents group into 8 pipeline agents + 48 `@hunt-*` + 18 specialty agents. Agents auto-load when their description keywords match what you're describing to OpenCode.
+75 agents group into 9 pipeline agents + 48 `@hunt-*` + 18 specialty agents. Agents auto-load when their description keywords match what you're describing to OpenCode.
 
 ```mermaid
 graph TB
@@ -87,16 +87,17 @@ graph TB
     classDef validate fill:#FFB591,stroke:#DA7756,stroke-width:2px,color:#080705
     classDef report fill:#23201C,stroke:#DA7756,stroke-width:2px,color:#FFE4D1
 
-    subgraph PIPELINE ["8 Pipeline Agents"]
+    subgraph PIPELINE ["9 Pipeline Agents"]
         direction LR
         P0["@autopilot<br/>Fully autonomous"]:::pipeline
-        P1["@scope"]:::pipeline
-        P2["@recon"]:::pipeline
-        P3["@surface"]:::pipeline
-        P4["@hunt"]:::pipeline
-        P5["@capture"]:::pipeline
-        P6["@validate"]:::pipeline
-        P7["@report"]:::pipeline
+        P1["@consult<br/>Interactive mode"]:::pipeline
+        P2["@scope"]:::pipeline
+        P3["@recon"]:::pipeline
+        P4["@surface"]:::pipeline
+        P5["@hunt"]:::pipeline
+        P6["@capture"]:::pipeline
+        P7["@validate"]:::pipeline
+        P8["@report"]:::pipeline
     end
 
     subgraph RECON ["Recon & OSINT (3)"]
@@ -178,12 +179,18 @@ flowchart TD
     RTSetup --> Scope
 
     Scope["1. SCOPE<br/>Parse program rules<br/>Fill scope.md<br/>agent: @bug-bounty"]:::phase
-    Scope --> Recon
+    Scope --> Auth
+
+    Auth["1.5 AUTHENTICATE<br/>Get credentials first<br/>Document auth method<br/>Save auth_analysis deliverable"]:::phase
+    Auth --> Recon
 
     Recon["2. RECON<br/>Subdomain enum · endpoint mapping<br/>JS bundle harvest · identity fabric<br/>agents: @recon, @offensive-osint, @web2-recon"]:::phase
-    Recon --> Hunt
+    Recon --> Surface
 
-    Hunt["3. HUNT<br/>Test bug-class hypotheses<br/>Apply payloads from Pattern Libraries<br/>48 @hunt-* agents auto-load by keyword"]:::phase
+    Surface["3. SURFACE<br/>Rank Tier 0/1/2<br/>endpoint_map_raw → endpoint_map_ranked<br/>agent: @surface"]:::phase
+    Surface --> Hunt
+
+    Hunt["4. HUNT<br/>Test bug-class hypotheses<br/>Apply payloads from Pattern Libraries<br/>48 @hunt-* agents auto-load by keyword"]:::phase
     Hunt --> Found{"Lead<br/>found?"}:::decision
     Found -->|"no"| Hunt
     Found -->|"yes"| Validate
@@ -196,10 +203,10 @@ flowchart TD
     Verdict -->|"CHAIN REQUIRED (needs another primitive)"| Hunt
     Verdict -->|"KILL (any other failure)"| Hunt
 
-    Capture["5. CAPTURE<br/>Cookie redaction · PII black-bar<br/>HAR sanitization · screenshot order<br/>agent: evidence-hygiene"]:::phase
+    Capture["6. CAPTURE<br/>Cookie redaction · PII black-bar<br/>HAR sanitization · screenshot order<br/>agent: evidence-hygiene"]:::phase
     Capture --> Report
 
-    Report["6. REPORT<br/>Draft per platform template<br/>H1 / Bugcrowd VRT / Intigriti / Immunefi<br/>or client-facing DOCX (red-team)<br/>agents: @report-writing, @bugcrowd-reporting,<br/>@redteam-report-template"]:::phase
+    Report["7. REPORT<br/>Draft per platform template<br/>H1 / Bugcrowd VRT / Intigriti / Immunefi<br/>or client-facing DOCX (red-team)<br/>agents: @report-writing, @bugcrowd-reporting,<br/>@redteam-report-template"]:::phase
     Report --> Submit(["Submit"]):::terminal
 
     Submit --> Track["Append UUID to submissions.txt<br/>Cross-reference future chains"]
@@ -218,18 +225,19 @@ flowchart TD
 
 ## How agents work
 
-Dristi agents are flat `.md` files invoked via `@agent-name`. **8 pipeline agents** on Tab: `@autopilot` → `@scope` → `@recon` → `@surface` → `@hunt` → `@capture` → `@validate` → `@report`. **48 `@hunt-*` agents** for per-class tradecraft. **18 specialty agents** for OSINT, enterprise attack, red-team ops, reporting.
+Dristi agents are flat `.md` files invoked via `@agent-name`. **9 pipeline agents** on Tab: `@autopilot` → `@consult` → `@scope` → `@recon` → `@surface` → `@hunt` → `@capture` → `@validate` → `@report`. **48 `@hunt-*` agents** for per-class tradecraft. **18 specialty agents** for OSINT, enterprise attack, red-team ops, reporting.
 
 | How to invoke | What happens |
 |---|---|
 | `@autopilot` | Full P1–P7 autonomous — just provide target + scope |
+| `@consult` | Same P1–P7, interactive — asks at every phase transition |
 | `@scope` → `@recon` → `@surface` → `@hunt` → ... | Step-by-step guided pipeline, prompts at each transition |
 | `@hunt-xss` (or any `@hunt-*`) | Directly jump to a specific bug class |
 | `@m365-entra-attack` (or any specialty) | Enterprise platform / red-team / OSINT agent |
 
 **Choose by mode:**
 
-- **Bug bounty / quick recon?** Use `@autopilot` for hands-off or step through `@scope` → `@recon` → ...
+- **Bug bounty / quick recon?** Use `@autopilot` (hands-off) or `@consult` (interactive) or step through `@scope` → `@recon` → ...
 - **Deep dive on one class?** Jump directly: `@hunt-idor`, `@hunt-xss`, `@hunt-ssrf`, etc.
 - **Enterprise red team?** Use `@m365-entra-attack`, `@enterprise-vpn-attack`, `@cloud-iam-deep`, etc.
 - **Validate before reporting?** Always: `@validate` or `@triage-validation`
@@ -241,7 +249,7 @@ Dristi agents are flat `.md` files invoked via `@agent-name`. **8 pipeline agent
 ```
 dristi/
 ├── .opencode/
-│   ├── agents/                    # 74 flat .md OpenCode agents
+│   ├── agents/                    # 75 flat .md OpenCode agents
 │   │   ├── autopilot.md               # fully autonomous P1–P7 pipeline
 │   │   ├── scope.md                   # engagement scaffold/program rules
 │   │   ├── recon.md                   # recon orchestration
@@ -306,7 +314,7 @@ dristi/
 
 ## Agent Index
 
-74 agents across 8 pipeline + 48 `@hunt-*` + 18 specialty agents. **Agents auto-load by `@name`** — invoke the pipeline agents directly (`@scope` → `@recon` → ...) or describe what you're testing and the matching `@hunt-*` agent loads.
+75 agents across 9 pipeline + 48 `@hunt-*` + 18 specialty agents. **Agents auto-load by `@name`** — invoke the pipeline agents directly (`@scope` → `@recon` → ...) or describe what you're testing and the matching `@hunt-*` agent loads.
 
 ### Quick lookup — find an agent by what you're seeing
 

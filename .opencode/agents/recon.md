@@ -76,8 +76,10 @@ bash scripts/tools/dns_bruteforce.sh <target>
 ### Step 2: Crawl & URL Collection
 
 ```bash
-bash scripts/tools/web_crawl.sh -l scripts/recon/<target>/live_hosts.txt
+bash scripts/tools/web_crawl.sh <target>
 ```
+
+**Note:** `web_crawl.sh` now has timeouts on hakrawler/katana → clean CF-blocked warnings, 0s wasted. **gau removed** — waymore covers Wayback Machine better (340K+ vs 0), `~/.gau.toml` left for manual use.
 
 **From crawled URLs, isolate the input-accepting set:**
 ```
@@ -95,7 +97,7 @@ For each URL with parameters, note whether it's:
 ### Step 3: Parameter Extraction
 
 ```bash
-bash scripts/tools/param_extract.sh scripts/recon/<target>/
+bash scripts/tools/param_extract.sh <target>
 bash scripts/tools/param_discovery.sh <target>
 ```
 
@@ -107,7 +109,7 @@ param=<name> endpoint=<url> auth=[yes|no|unknown] method=[GET|POST] type=[query|
 ### Step 4: Technology Detection
 
 ```bash
-bash scripts/tools/auto_nuclei.sh scripts/recon/<target>/live_hosts.txt
+bash scripts/tools/auto_nuclei.sh <target>
 ```
 
 **Look for:** framework type (Express, Spring, Django, Laravel, Rails), GraphQL, WebSocket, file upload endpoints, admin panels, debug endpoints.
@@ -117,8 +119,8 @@ Technology choice matters for Question 1 — different frameworks accept input d
 ### Step 5: Secrets & Sensitive Data
 
 ```bash
-bash scripts/tools/cariddi_scan.sh scripts/recon/<target>/live_hosts.txt
-bash scripts/tools/auto_secrets.sh scripts/recon/<target>/
+bash scripts/tools/cariddi_scan.sh <target>
+bash scripts/tools/auto_secrets.sh <target>
 ```
 
 **Secrets answer Question 2** — hardcoded API keys, tokens, and passwords in JS/HTML are public by definition. Every secret found is a P1 finding because it bypasses all auth.

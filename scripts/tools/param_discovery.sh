@@ -21,19 +21,46 @@ ok()   { echo -e "${GREEN}[+]${NC} $1"; }
 hit()  { echo -e "${MAG}[PARAM]${NC} $1"; }
 err()  { echo -e "${RED}[-]${NC} $1" >&2; }
 
-URL=""; LIST=""
+DOMAIN=""; URL=""; LIST=""
 while [ "$#" -gt 0 ]; do
   case "$1" in
     -l|--list) shift; LIST="${1:-}" ;;
     -h|--help) sed -n '2,10p' "$0"; exit 0 ;;
-    *) URL="$1" ;;
+    *) 
+      # Detect: URL (has ://) vs domain (has dot, no scheme)
+      if echo "$1" | grep -q '://'; then
+        URL="$1"
+      else
+        DOMAIN="$1"
+      fi
+      ;;
   esac
   shift
 done
 
-[ -z "$URL" ] && [ -z "$LIST" ] && { err "url or -l <file> required"; exit 2; }
+# Resolve domain → list mode: auto-discover crawl output
+BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+if [ -n "$DOMAIN" ]; then
+  RECON_DIR="$BASE_DIR/recon/$DOMAIN"
+  CRAWL_FILE="$RECON_DIR/crawl/crawledurls.txt"
+  if [ -f "$CRAWL_FILE" ] && [ -s "$CRAWL_FILE" ]; then
+    LIST="$CRAWL_FILE"
+    log "domain mode: using $CRAWL_FILE ($(wc -l < "$CRAWL_FILE" | tr -d ' ') URLs)"
+  else
+    err "no crawl output for '$DOMAIN' at $CRAWL_FILE — run web_crawl.sh first"
+    exit 2
+  fi
+fi
 
-OUT_DIR="${PARAM_OUT_DIR:-$(pwd)/findings/params/$(date +%Y%m%d_%H%M%S)}"
+# Must have URL, LIST, or DOMAIN resolved to LIST
+[ -z "$URL" ] && [ -z "$LIST" ] && { err "url, domain, or -l <file> required"; exit 2; }
+
+# Output dir: domain-scoped when domain known, else env override or fallback
+if [ -n "$DOMAIN" ]; then
+  OUT_DIR="${PARAM_OUT_DIR:-$RECON_DIR/params}"
+else
+  OUT_DIR="${PARAM_OUT_DIR:-$BASE_DIR/recon/$(echo "${URL:-$(head -1 "$LIST")}" | sed 's|https\?://||;s|/.*||')/params}"
+fi
 mkdir -p "$OUT_DIR"
 
 if _have arjun; then

@@ -23,26 +23,40 @@ warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 hit()  { echo -e "${MAG}[TAKEOVER]${NC} $1"; }
 err()  { echo -e "${RED}[-]${NC} $1" >&2; }
 
-INPUT=""
+INPUT=""; DOMAIN=""
+BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --recon) shift; INPUT="${1:-}/subdomains/all.txt" ;;
+    --recon) shift; INPUT="${1:-}/subdomains/all.txt"; DOMAIN="${1:-}" ;;
     -h|--help) sed -n '2,12p' "$0"; exit 0 ;;
-    *) INPUT="$1" ;;
+    *)
+      INPUT="$1"
+      # If it looks like a domain (has dot, no path separators), save it
+      if echo "$1" | grep -q '\.' && ! echo "$1" | grep -q '/'; then
+        DOMAIN="$1"
+      fi
+      ;;
   esac
   shift
 done
 
 # If INPUT isn't a file, try as a domain name (look in standard recon path)
 if [ -n "$INPUT" ] && [ ! -f "$INPUT" ]; then
-  BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+  ORIG_DOMAIN="$INPUT"
   DOMAIN_FILE="$BASE_DIR/recon/$INPUT/subdomains/all_subdomains.txt"
-  [ -f "$DOMAIN_FILE" ] && INPUT="$DOMAIN_FILE"
+  if [ -f "$DOMAIN_FILE" ]; then
+    INPUT="$DOMAIN_FILE"
+    DOMAIN="$ORIG_DOMAIN"
+  fi
 fi
 
 [ -z "$INPUT" ] || [ ! -s "$INPUT" ] && { err "subdomains file required and non-empty"; exit 2; }
 
-OUT_DIR="${TAKEOVER_OUT_DIR:-$(pwd)/findings/takeover/$(date +%Y%m%d_%H%M%S)}"
+if [ -n "$DOMAIN" ]; then
+  OUT_DIR="${TAKEOVER_OUT_DIR:-$BASE_DIR/recon/$DOMAIN/takeover}"
+else
+  OUT_DIR="${TAKEOVER_OUT_DIR:-$BASE_DIR/recon/default/takeover}"
+fi
 mkdir -p "$OUT_DIR"
 
 # Strategy 1: dnsReaper (best signal, broadest fingerprint set)

@@ -40,7 +40,7 @@ Endpoints that accept user input AND are public. No auth barrier. These feed dir
 </tier-0-list>
 ```
 
-**Examples:** public API endpoints, search bars, redirect params, contact forms, public file uploads, registration flows
+**Examples:** public API endpoints, GraphQL introspection, WebSocket messages, search bars, redirect params, contact forms, public file uploads, registration flows
 
 ### Tier 1 — Auth-Gated (60-90% of attack surface)
 Endpoints that accept user input AND need authentication. These are where IDOR, BOLA, business logic, and privilege escalation live.
@@ -77,9 +77,24 @@ Endpoints and technologies that don't accept input but reveal attack surface:
 5. **Known framework** with historical CVEs beats unknown stack
 6. **Secrets in JS/HTML** are always P1 — they bypass all auth
 
+## Prioritize Endpoints (Score & Sort)
+
+Before saving, run the MCP prioritization engine to score all endpoints by risk:
+
+```
+wstg_prioritize_endpoints(
+  engagement_id=<eid>,
+  endpoints_json=<json_array_of_endpoints>
+)
+```
+
+Each endpoint JSON object should include: `method`, `path`, `parameters` (list), `auth_required` (bool), `tech_stack`, `has_taint_chain` (bool), `tool_count` (int). The engine scores by: parameter count, tech risk, taint chains, tool convergence, auth requirements, HTTP method, and injectable parameter names.
+
+Higher score = test first. Override the engine's ranking with the 6 prioritization rules below if needed.
+
 ## Save Deliverable for Phase 4
 
-After classification, save the ranked list as a deliverable that `@hunt` consumes:
+After classification (and optional prioritization), save the ranked list as a deliverable that `@hunt` consumes:
 
 ```
 wstg_save_deliverable(
@@ -95,4 +110,5 @@ wstg_save_deliverable(
 - [ ] Tier 0 list: public endpoints that accept input
 - [ ] Tier 1 list: auth-gated endpoints that accept input
 - [ ] Tier 2 list: infrastructure findings (not directly exploitable)
+- [ ] `wstg_prioritize_endpoints()` called with endpoint data
 - [ ] Deliverable saved for Phase 4 consumption

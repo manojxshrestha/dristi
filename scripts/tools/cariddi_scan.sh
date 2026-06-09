@@ -38,7 +38,7 @@ if [[ "$TARGET_RAW" == */* ]]; then
   [ -z "$TARGET" ] && TARGET="target"
 else
   TARGET="$TARGET_RAW"
-  [ -z "$ALIVE_FILE" ] && ALIVE_FILE="$BASE_DIR/recon/$TARGET/crawl/alive-domains.txt"
+  [ -z "$ALIVE_FILE" ] && ALIVE_FILE="$BASE_DIR/recon/$TARGET/subdomains/alive-domains.txt"
 fi
 
 OUT_DIR="$BASE_DIR/recon/$TARGET/cariddi"

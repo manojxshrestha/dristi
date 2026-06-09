@@ -1,6 +1,6 @@
 # Test Flow — Mastering Dristi
 
-All interactions use `@agent-name` — no `/commands`. 8 pipeline agents on Tab: `@autopilot` → `@scope` → `@recon` → `@surface` → `@hunt` → `@capture` → `@validate` → `@report`. 48 specialized `@hunt-*` agents + 18 non-hunt agents (74 total) via `@`.
+All interactions use `@agent-name` — no `/commands`. 9 pipeline agents on Tab: `@autopilot` → `@consult` → `@scope` → `@recon` → `@surface` → `@hunt` → `@capture` → `@validate` → `@report`. 48 specialized `@hunt-*` agents + 18 non-hunt agents (75 total) via `@`.
 
 ## Guided Flow
 
@@ -20,7 +20,7 @@ If stuck: just say *"What should I do next?"*
 ## The 7-Phase Pipeline
 
 ```
-SCOPE → RECON → SURFACE → HUNT → CAPTURE → VALIDATE → REPORT
+SCOPE → AUTH → RECON → SURFACE → HUNT → CAPTURE → VALIDATE → REPORT
 ```
 
 ### P1: SCOPE — Define the Target
@@ -34,7 +34,22 @@ SCOPE → RECON → SURFACE → HUNT → CAPTURE → VALIDATE → REPORT
 | 5 | Provide test credentials (optional) | Held in session memory |
 | 6 | For deep scope methodology | `@bug-bounty` (program rules), `@osint-methodology` (OSINT expansion) |
 
-**→ Transition:** Agent prompts *"Scope registered. Ready to recon? → @recon"*
+**→ Transition:** Agent prompts *"Scope registered. Ready to authenticate?"*
+
+---
+
+### P1.5: AUTHENTICATE — Get Credentials First
+
+| Step | Action | What Happens |
+|------|--------|--------------|
+| 1 | Check existing credentials | `wstg_get_engagement_config()` |
+| 2 | Sign up or provide API key | Test account with realistic data |
+| 3 | Document auth method | `AUTH_METHOD`, `AUTH_VALUE`, `AUTH_STATUS` |
+| 4 | Test auth works | `curl -sv <target>/api/me -H "Authorization: Bearer <token>"` |
+| 5 | Cloudflare check | `cf-mitigated` → redirect 80% effort to API subdomain |
+| 6 | Save auth context | `wstg_save_deliverable(auth_analysis)` with real values |
+
+**→ Transition:** *"Authenticated. Ready to recon?"*
 
 ---
 
@@ -55,10 +70,12 @@ SCOPE → RECON → SURFACE → HUNT → CAPTURE → VALIDATE → REPORT
 
 | Step | Action | What Happens |
 |------|--------|--------------|
-| 1 | `@surface` | P1/P2/P3/Kill List — ranked by impact |
-| 2 | Review P1 (API/GraphQL), P2 (upload/auth), P3 (all classes) | Know where to start |
+| 1 | Load endpoint_map_raw | From Phase 2 deliverable or raw recon files |
+| 2 | Classify into Tiers | Tier 0 (public+input) / Tier 1 (auth+input) / Tier 2 (infra) |
+| 3 | Prioritize endpoints | `wstg_prioritize_endpoints()` for risk scoring |
+| 4 | Save endpoint_map_ranked | Deliverable consumed by Phase 4 (HUNT) |
 
-**→ Transition:** *"Surface ranked. Ready to hunt? → @hunt"*
+**→ Transition:** *"Surface ranked. Ready to hunt?"*
 
 ---
 
@@ -195,14 +212,15 @@ Runs the entire P1–P7 pipeline **autonomously** — no prompts at each step. O
 
 **What it does:**
 1. Asks for target + platform + scope (once at the start)
-2. Runs full recon via scripts (subdomain_enum, web_crawl, cariddi, nuclei, etc.)
-3. Ranks attack surface (P1/P2/P3)
-4. Tests every bug class with candidates using `@hunt-*` tradecraft
-5. Logs findings, validates PoCs, tracks coverage
-6. Generates final report
-7. Presents report + evidence — you review and submit
+2. Gets credentials (Phase 1.5) and saves auth_analysis deliverable
+3. Runs full recon via scripts (batch_subdomain_enum, web_crawl, cariddi, nuclei, etc.)
+4. Ranks attack surface (endpoint_map_raw → endpoint_map_ranked)
+5. Loads auth context, tests every bug class with candidates using `@hunt-*` tradecraft
+6. Logs findings, validates PoCs, tracks coverage
+7. Generates final report
+8. Presents report + evidence — you review and submit
 
-**Checkpoint modes:** `@autopilot` runs fully autonomous. If you want step-by-step control, use the individual pipeline agents (`@scope` → `@recon` → `@surface` → `@hunt` → ...).
+**Checkpoint modes:** `@autopilot` runs fully autonomous. `@consult` runs the same pipeline but asks at every phase. If you want individual control, use the pipeline agents (`@scope` → `@recon` → `@surface` → `@hunt` → ...).
 
 ---
 

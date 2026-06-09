@@ -1,6 +1,6 @@
 ---
 name: recon
-description: Run full recon pipeline on a target — subdomain enum (crt.sh + subfinder), live host discovery (dnsx + httpx), URL crawl (katana + waybackurls + gau), gf pattern classification, nuclei scan. Outputs to recon/<target>/ directory. Usage: /recon target.com
+description: Run full recon pipeline on a target — subdomain enum (crt.sh + subfinder), live host discovery (dnsx + httpx), URL crawl (katana + waybackurls), gf pattern classification, nuclei scan. Outputs to recon/<target>/ directory. Usage: /recon target.com
 ---
 
 # /recon
@@ -11,7 +11,7 @@ Run the full recon pipeline on a target and produce a prioritized attack surface
 
 1. Enumerates subdomains (crt.sh + subfinder + assetfinder)
 2. Resolves DNS and finds live hosts (dnsx + httpx with status/title/tech)
-3. Crawls URLs (katana deep crawl + waybackurls + gau historical)
+3. Crawls URLs (katana deep crawl + waybackurls historical)
 4. Classifies URLs by bug class (gf patterns)
 5. Runs nuclei for known CVEs and misconfigs
 6. Outputs prioritized attack surface summary
@@ -74,9 +74,9 @@ cat recon/$TARGET/live-hosts.txt | awk '{print $1}' \
   | katana -d 3 -jc -kf all -silent \
   | anew recon/$TARGET/urls.txt
 
-# Historical URLs
+# Historical URLs (waybackurls)
 echo $TARGET | waybackurls | anew recon/$TARGET/urls.txt
-gau $TARGET --subs | anew recon/$TARGET/urls.txt
+# gau removed — waymore covers Wayback Machine better; ~/.gau.toml left for manual use
 
 echo "[+] Total URLs: $(wc -l < recon/$TARGET/urls.txt)"
 ```

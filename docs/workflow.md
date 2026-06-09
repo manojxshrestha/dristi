@@ -5,7 +5,7 @@
 Dristi is a security testing platform with two interfaces that work together:
 
 1. **MCP Server** (86 tools) — provides the OWASP WSTG methodology, engagement management, findings database, phase gates, and reporting as callable tools
-2. **OpenCode Agents** (73 agents) — provides per-class bug hunting tradecraft. All agents are accessed via `@agent-name` (no `/commands`).
+2. **OpenCode Agents** (75 agents) — provides per-class bug hunting tradecraft. All agents are accessed via `@agent-name` (no `/commands`).
 
 Together they turn an LLM into a methodical bug hunter: the agents tell it *what to look for and how*, the MCP server gives it the *structured methodology and tracking*, and Burp Suite provides *HTTP request execution*.
 
@@ -41,11 +41,12 @@ graph TB
 
 The loop: **describe → agent loads → MCP tracks → Burp executes → analyze → log finding → validate → report**
 
-All agents are invoked via `@agent-name`. 8 pipeline agents on Tab: `@autopilot` → `@scope` → `@recon` → `@surface` → `@hunt` → `@capture` → `@validate` → `@report`. 48 specialized `@hunt-*` agents + 18 non-hunt agents (74 total) available via `@`.
+All agents are invoked via `@agent-name`. 9 pipeline agents on Tab: `@autopilot` → `@consult` → `@scope` → `@recon` → `@surface` → `@hunt` → `@capture` → `@validate` → `@report`. 48 specialized `@hunt-*` agents + 18 non-hunt agents (75 total) available via `@`.
 
 **Two modes:**
 - **`@autopilot`** — runs P1–P7 fully autonomous, ends with report + PoC for submission
-- **Manual `@scope` → `@recon` → ...** — interactive, prompts at each phase transition
+- **`@consult`** — same P1–P7, interactive — asks at every phase transition
+- **Manual `@scope` → `@recon` → ...** — step-by-step with prompts at each phase
 
 ---
 
@@ -55,7 +56,7 @@ Every engagement follows the same 6-phase loop. At each phase, different agents 
 
 ```mermaid
 flowchart LR
-    SCOPE --> RECON --> HUNT --> VALIDATE --> CAPTURE --> REPORT
+    SCOPE --> AUTH --> RECON --> SURFACE --> HUNT --> VALIDATE --> CAPTURE --> REPORT
 
     VALIDATE -->|PASS| CAPTURE
     VALIDATE -->|KILL| DISCARD["Discard"]
@@ -100,7 +101,27 @@ flowchart LR
 
 ---
 
-### Phase 2: RECON
+### Phase 2: AUTHENTICATE — Get Credentials First
+
+**Goal:** Obtain and persist authentication credentials. 90% of high-impact bugs require a session.
+
+| What happens | Which agents load | Which MCP tools to use |
+|-------------|-------------------|----------------------|
+| Check for existing credentials, sign up, document auth method, save auth_analysis deliverable | `@consult`, `@bug-bounty` | `wstg_get_engagement_config()`, `wstg_save_deliverable('auth_analysis', ...)` |
+
+**How it works:**
+1. Check `wstg_get_engagement_config()` for existing credentials
+2. Sign up for a free account / get API key if none exist
+3. Document: `AUTH_METHOD`, `AUTH_VALUE`, `AUTH_USER`, `AUTH_STATUS`
+4. Test auth works: `curl -sv <target>/api/me -H "Authorization: Bearer <token>"`
+5. If Cloudflare detected (`cf-mitigated`), redirect 80% effort to API subdomain
+6. Save auth_analysis deliverable with real token/cookie values (not placeholders)
+
+**MCP tools used:** `wstg_get_engagement_config`, `wstg_save_deliverable`, `wstg_get_deliverable`
+
+---
+
+### Phase 3: RECON
 
 **Goal:** Discover attack surface — subdomains, endpoints, technologies, secrets, identity fabric.
 
@@ -121,7 +142,32 @@ flowchart LR
 
 ---
 
-### Phase 3: HUNT
+### Phase 4: SURFACE — Rank the Attack Surface
+
+**Goal:** Convert raw recon output into a prioritized "test these N first" list.
+
+| What happens | Which agents load | Which MCP tools to use |
+|-------------|-------------------|----------------------|
+| Load endpoint_map_raw, classify into Tier 0/1/2, save endpoint_map_ranked deliverable | `@surface` | `wstg_get_deliverable('endpoint_map_raw')`, `wstg_prioritize_endpoints()`, `wstg_save_deliverable('endpoint_map_ranked', ...)` |
+
+**How it works:**
+1. Load the endpoint_map_raw deliverable from Phase 3, or fall back to raw recon files
+2. For every endpoint that accepts input, answer 3 questions:
+   - Q1: Input type? (params, body, headers, cookies, file upload, GraphQL)
+   - Q2: Auth status? (public, auth-gated, unknown)
+   - Q3: Impact if exploitable? (data read, data write, code exec, auth bypass)
+3. Classify into Tiers:
+   - **Tier 0** — public + accepts input (no barrier, test first)
+   - **Tier 1** — auth-gated + accepts input (needs credentials)
+   - **Tier 2** — infrastructure findings (passive, not directly exploitable)
+4. Prioritize via `wstg_prioritize_endpoints()` for risk scoring
+5. Save endpoint_map_ranked deliverable for Phase 5 consumption
+
+**MCP tools used:** `wstg_get_deliverable`, `wstg_prioritize_endpoints`, `wstg_save_deliverable`, `get_priority_queue`
+
+---
+
+### Phase 5: HUNT
 
 **Goal:** Test for specific vulnerability classes using per-class tradecraft.
 
@@ -183,7 +229,7 @@ flowchart LR
 
 ---
 
-### Phase 4: VALIDATE
+### Phase 6: VALIDATE
 
 **Goal:** Decide whether a lead is a real, reportable bug before writing anything.
 
@@ -216,7 +262,7 @@ Q7: Is this not on the never-submit list?
 
 ---
 
-### Phase 5: CAPTURE
+### Phase 7: CAPTURE
 
 **Goal:** Capture evidence with proper hygiene — redact cookies, PII, sanitize HAR files.
 
@@ -239,7 +285,7 @@ Q7: Is this not on the never-submit list?
 
 ---
 
-### Phase 6: REPORT
+### Phase 8: REPORT
 
 **Goal:** Draft a submission-ready report using platform-specific templates.
 

@@ -57,7 +57,7 @@ shodan: [YOUR_SHODAN_KEY]
 EOF
 
 # 4. Verify all tools installed
-which subfinder httpx dnsx nuclei katana waybackurls gau dalfox ffuf anew gf interactsh-client
+which subfinder httpx dnsx nuclei katana waybackurls dalfox ffuf anew gf interactsh-client
 ```
 
 ---
@@ -114,7 +114,7 @@ cat /tmp/live.txt | awk '{print $1}' | katana -d 3 -jc -kf all -silent | anew /t
 
 # Step 5: Historical URLs
 echo $TARGET | waybackurls | anew /tmp/urls.txt
-gau $TARGET --subs | anew /tmp/urls.txt
+# gau removed — waymore already covers Wayback Machine (340K+ URLs on test target, gau returned 0)
 
 echo "[+] Total URLs: $(wc -l < /tmp/urls.txt)"
 

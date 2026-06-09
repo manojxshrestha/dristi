@@ -27,20 +27,45 @@ warn() { echo -e "${YELLOW}[!]${NC} $1" >&2; }
 hit()  { echo -e "${MAG}[CVE]${NC} $1" >&2; }
 err()  { echo -e "${RED}[-]${NC} $1" >&2; }
 
-TARGET=""; YEAR=""
+DOMAIN=""; TARGET=""; YEAR=""
+BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --recon) shift; TARGET="${1:-}/live/urls.txt" ;;
     --year)  shift; YEAR="${1:-}" ;;
     -h|--help) sed -n '2,14p' "$0"; exit 0 ;;
-    *) TARGET="$1" ;;
+    *)
+      # Detect: URL (has ://) vs domain (bare)
+      if echo "$1" | grep -q '://'; then
+        TARGET="$1"
+      else
+        DOMAIN="$1"
+        TARGET="$1"
+      fi
+      ;;
   esac
   shift
 done
 
-[ -z "$TARGET" ] && { err "target host or -l <file> required"; exit 2; }
+# Domain mode: auto-discover live URLs from recon path
+if [ -n "$DOMAIN" ]; then
+  RECON_DIR="$BASE_DIR/recon/$DOMAIN"
+  LIVE_FILE="$RECON_DIR/subdomains/https-subs.txt"
+  [ -f "$LIVE_FILE" ] && [ -s "$LIVE_FILE" ] && TARGET="$LIVE_FILE"
+  # Fallback: try crawl output
+  if [ ! -f "$TARGET" ] || [ ! -s "$TARGET" ]; then
+    CRAWL_FILE="$RECON_DIR/crawl/crawledurls.txt"
+    [ -f "$CRAWL_FILE" ] && [ -s "$CRAWL_FILE" ] && TARGET="$CRAWL_FILE"
+  fi
+fi
 
-OUT_DIR="${CVE_OUT_DIR:-$(pwd)/findings/cve/$(date +%Y%m%d_%H%M%S)}"
+[ -z "$TARGET" ] && { err "target, domain, or file required"; exit 2; }
+
+if [ -n "$DOMAIN" ]; then
+  OUT_DIR="${CVE_OUT_DIR:-$BASE_DIR/recon/$DOMAIN/cve}"
+else
+  OUT_DIR="${CVE_OUT_DIR:-$BASE_DIR/recon/default/cve}"
+fi
 mkdir -p "$OUT_DIR"
 
 if ! _have nuclei; then
