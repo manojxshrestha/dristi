@@ -41,7 +41,7 @@ Your thought process for every step:
 ## HARD RULES — DO NOT VIOLATE
 
 1. **NO skipping.** You WILL run every single step listed below. Do not skip any.
-2. **NO jumping.** You MUST complete Phase 1 fully before Phase 2. Phase 2 fully before Phase 3. And so on.
+2. **NO jumping.** You MUST complete Phase 1 fully before Phase 1.5. Phase 1.5 fully before Phase 2. And so on.
 3. **NO asking.** Do not ask the user any questions during the pipeline. Ever.
 4. **NO shortcuts.** If a script exists in `scripts/tools/` that does the job, use it. Do NOT re-implement with raw tool commands.
 5. **NO parallel on dependencies.** Tools with dependency chains (subdomain_enum → web_crawl → auto_nuclei/cariddi) MUST run sequentially. Independent tools MAY run in parallel.
@@ -52,7 +52,7 @@ Your thought process for every step:
 10. **PHASE GATE every phase.** `wstg_phase_gate_check()` must PASS before advancing.
 11. **CHECKPOINT every gate.** `wstg_save_checkpoint()` after every passing gate.
 
-**Repeat: Do NOT skip any step. Do NOT jump ahead. Complete Phase 1 entirely before starting Phase 2.**
+**Repeat: Do NOT skip any step. Do NOT jump ahead. Complete Phase 1 entirely before Phase 1.5. Complete Phase 1.5 before Phase 2.**
 
 ---
 
@@ -61,7 +61,7 @@ Your thought process for every step:
 You MUST process this pipeline as a strict sequence. Do not start a phase until the previous one is verified complete.
 
 ```
-Phase 1 → [gate] → Phase 2 → [gate] → Phase 3 → [gate] → Phase 4 → [gate] → Phase 5 → [gate] → Phase 6 → [gate] → Phase 7
+Phase 1 → [gate] → Phase 1.5 → Phase 2 → [gate] → Phase 3 → [gate] → Phase 4 → [gate] → Phase 5 → [gate] → Phase 6 → [gate] → Phase 7
 ```
 
 Each phase has a verification checklist. You must check each item and confirm it's done before calling the phase gate.
@@ -134,17 +134,13 @@ FAIL → fix the blockers, retry. PASS → `wstg_save_checkpoint()`, proceed to 
 - Focus on: source code leaks, exposed admin panels, misconfigured cloud storage, CVE scanning, subdomain takeover
 - Do NOT waste time on: IDOR, business logic, session management, rate limiting, privilege escalation
 
-### Verification checklist:
+### Verification:
 - [ ] Auth method documented (cookie/token/oauth/apikey)
 - [ ] Auth works (confirmed 200 on authenticated endpoint)
 - [ ] Test account created with realistic data
 - [ ] Auth status label defined for findings
 
-### Phase gate:
-```
-phase_gate_check(phase_completed=1)
-```
-FAIL → fix the blockers, retry. PASS → `wstg_save_checkpoint()`, proceed to Phase 2.
+Once verified, proceed to Phase 2.
 
 ---
 
