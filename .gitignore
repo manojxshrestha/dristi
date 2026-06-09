@@ -60,3 +60,7 @@ scripts/tools/filter.sh
 
 # Node modules (Playwright MCP)
 node_modules/
+
+# Browser test artifacts
+claude-*
+*.playwright-mcp/
