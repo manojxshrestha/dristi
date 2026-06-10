@@ -7,8 +7,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"; BASE_DIR="$(cd "$SCRIPT_DIR/../.." 
 
 ENGAGEMENT="${1:?Usage: $0 <engagement-id> <class> [urls-file]}"
 CLASS="${2:?}"
-URLS_FILE="${3:-$BASE_DIR/engagements/$ENGAGEMENT/recon/urls/$CLASS.txt}"
-OUT_DIR="$BASE_DIR/engagements/$ENGAGEMENT/recon/nuclei"
+URLS_FILE="${3:-$BASE_DIR/runtime/engagements/$ENGAGEMENT/recon/urls/$CLASS.txt}"
+OUT_DIR="$BASE_DIR/runtime/engagements/$ENGAGEMENT/recon/nuclei"
 mkdir -p "$OUT_DIR"
 OUT_FILE="$OUT_DIR/$CLASS.txt"
 

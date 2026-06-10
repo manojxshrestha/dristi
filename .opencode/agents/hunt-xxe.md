@@ -28,7 +28,7 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 ## PayloadsAllTheThings Reference
 
-This agent has a corresponding reference library at `payloads-reference/XXE Injection/` (689 lines).
+This agent has a corresponding reference library at `knowledge/payloads/XXE Injection/` (689 lines).
 Read the README before/during testing for enriched methodology and bypass techniques:
 
 - **Methodology**: Detection techniques for different contexts and frameworks
@@ -453,9 +453,9 @@ When hunting **XML External Entities (XXE)**, use these resources BEFORE and DUR
 
 ### Before You Start
 
-1. **Read the report index:** `docs/hackerone-reports/xxe.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
-2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-xxe.md` — curated techniques with HTTP request/response examples and detection methods
-3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+1. **Read the report index:** `~/dristi-reports/hackerone-reports/xxe.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi-reports/disclosed-reports/hunt-xxe.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `~/dristi-reports/facebook-reports/README.md` if testing Meta-owned surfaces
 
 ### During Testing
 
@@ -476,7 +476,7 @@ When hunting **XML External Entities (XXE)**, use these resources BEFORE and DUR
 | 4 | [#483774] | [XXE on https://duckduckgo.com](https://hackerone.com/reports/483774) |
 | 5 | [#395296] | [Phone Call to XXE via Interactive Voice Response](https://hackerone.com/reports/395296) |
 
-**Full list:** `docs/hackerone-reports/xxe.md` (55 reports)
+**Full list:** `~/dristi-reports/hackerone-reports/xxe.md` (55 reports)
 
 ### Quick Fetch Commands
 
@@ -488,6 +488,6 @@ webfetch https://hackerone.com/reports/248668
 
 ### External Repositories
 
-- **HackerOne Reports:** `docs/hackerone-reports/xxe.md` — per-class disclosed reports
-- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
-- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-xxe.md` (exists)
+- **HackerOne Reports:** `~/dristi-reports/hackerone-reports/xxe.md` — per-class disclosed reports
+- **HackerOne Master Index:** `~/dristi-reports/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi-reports/disclosed-reports/hunt-xxe.md` (exists)

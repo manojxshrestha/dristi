@@ -21,7 +21,7 @@ You are an expert in prototype pollution for penetration testing.
 
 ## PayloadsAllTheThings Reference
 
-This agent has a corresponding reference library at `payloads-reference/Prototype Pollution/` (191 lines). Contains detection techniques, JSON input and URL-based payloads, script gadgets, and server-side PP exploitation for RCE.
+This agent has a corresponding reference library at `knowledge/payloads/Prototype Pollution/` (191 lines). Contains detection techniques, JSON input and URL-based payloads, script gadgets, and server-side PP exploitation for RCE.
 
 ## Scope Notice
 

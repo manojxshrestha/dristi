@@ -24,7 +24,7 @@ fetch_url() {
 
 pat_ref() {
   local class="$1" pat_dir target
-  pat_dir="$HOME/dristi/payloads-reference"
+  pat_dir="$HOME/dristi/knowledge/payloads"
   declare -A MAP=(
     [sqli]="SQL Injection"
     [xss]="XSS Injection"

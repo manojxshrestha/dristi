@@ -4,8 +4,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"; BASE_DIR="$(cd "$SCRIPT_DIR/../.." 
 source "$SCRIPT_DIR/../lib.sh"
 CLASS=cors; PAYLOADS="$SCRIPT_DIR/payloads.txt"
 ENGAGEMENT="${1:?Usage: $0 <engagement-id> [urls-file]}"
-URLS_FILE="${2:-$BASE_DIR/engagements/$ENGAGEMENT/recon/urls/cors.txt}"
-HITS_DIR="$BASE_DIR/engagements/$ENGAGEMENT/recon/hits/$CLASS"
+URLS_FILE="${2:-$BASE_DIR/runtime/engagements/$ENGAGEMENT/recon/urls/cors.txt}"
+HITS_DIR="$BASE_DIR/runtime/engagements/$ENGAGEMENT/recon/hits/$CLASS"
 mkdir -p "$HITS_DIR"
 [ ! -f "$PAYLOADS" ] && err "Missing $PAYLOADS" && exit 1
 [ ! -f "$URLS_FILE" ] && err "Missing $URLS_FILE" && exit 1

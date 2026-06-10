@@ -30,7 +30,7 @@ if [[ -z "$TOKEN_A" || -z "$TOKEN_B" ]]; then
 fi
 
 TOOLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-FINDINGS_DIR="$TOOLS_DIR/../findings/hackerone"
+FINDINGS_DIR="$TOOLS_DIR/../runtime/findings/hackerone"
 mkdir -p "$FINDINGS_DIR/auto"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 LOG="$FINDINGS_DIR/auto/scan_${TIMESTAMP}.log"

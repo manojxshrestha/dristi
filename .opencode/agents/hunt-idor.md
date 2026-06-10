@@ -28,7 +28,7 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 ## PayloadsAllTheThings Reference
 
-This agent has a corresponding reference library at `payloads-reference/Insecure Direct Object References/` (130 lines).
+This agent has a corresponding reference library at `knowledge/payloads/Insecure Direct Object References/` (130 lines).
 Read the README before/during testing for enriched methodology and bypass techniques:
 
 - **Methodology**: Detection techniques for different contexts and frameworks
@@ -433,9 +433,9 @@ When hunting **Insecure Direct Object Reference (IDOR)**, use these resources BE
 
 ### Before You Start
 
-1. **Read the report index:** `docs/hackerone-reports/idor.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
-2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-idor.md` — curated techniques with HTTP request/response examples and detection methods
-3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+1. **Read the report index:** `~/dristi-reports/hackerone-reports/idor.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi-reports/disclosed-reports/hunt-idor.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `~/dristi-reports/facebook-reports/README.md` if testing Meta-owned surfaces
 
 ### During Testing
 
@@ -456,7 +456,7 @@ When hunting **Insecure Direct Object Reference (IDOR)**, use these resources BE
 | 4 | [#1969141] | [Insecure Direct Object Reference (IDOR) - Delete Campaigns](https://hackerone.com/reports/1969141) |
 | 5 | [#380410] | [idor allows you to delete photos and album from a gallery](https://hackerone.com/reports/380410) |
 
-**Full list:** `docs/hackerone-reports/idor.md` (251 reports)
+**Full list:** `~/dristi-reports/hackerone-reports/idor.md` (251 reports)
 
 ### Quick Fetch Commands
 
@@ -468,6 +468,6 @@ webfetch https://hackerone.com/reports/2122671
 
 ### External Repositories
 
-- **HackerOne Reports:** `docs/hackerone-reports/idor.md` — per-class disclosed reports
-- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
-- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-idor.md` (exists)
+- **HackerOne Reports:** `~/dristi-reports/hackerone-reports/idor.md` — per-class disclosed reports
+- **HackerOne Master Index:** `~/dristi-reports/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi-reports/disclosed-reports/hunt-idor.md` (exists)

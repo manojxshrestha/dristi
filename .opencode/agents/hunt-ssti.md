@@ -28,7 +28,7 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 ## PayloadsAllTheThings Reference
 
-This agent has a corresponding reference library at `payloads-reference/Server Side Template Injection/` (229 lines).
+This agent has a corresponding reference library at `knowledge/payloads/Server Side Template Injection/` (229 lines).
 Read the README before/during testing for enriched methodology and bypass techniques:
 
 - **Methodology**: Detection techniques for different contexts and frameworks
@@ -97,9 +97,9 @@ When hunting **Server-Side Template Injection (SSTI)**, use these resources BEFO
 
 ### Before You Start
 
-1. **Read the report index:** `docs/hackerone-reports/ssti.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
-2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-ssti.md` — curated techniques with HTTP request/response examples and detection methods
-3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+1. **Read the report index:** `~/dristi-reports/hackerone-reports/ssti.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi-reports/disclosed-reports/hunt-ssti.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `~/dristi-reports/facebook-reports/README.md` if testing Meta-owned surfaces
 
 ### During Testing
 
@@ -120,7 +120,7 @@ When hunting **Server-Side Template Injection (SSTI)**, use these resources BEFO
 | 4 | [#399462] | [Reflected XSS and Server Side Template Injection  in all HubSpot CMSes](https://hackerone.com/reports/399462) |
 | 5 | [#944359] | [Python : Add query to detect Server Side Template Injection](https://hackerone.com/reports/944359) |
 
-**Full list:** `docs/hackerone-reports/ssti.md` (12 reports)
+**Full list:** `~/dristi-reports/hackerone-reports/ssti.md` (12 reports)
 
 ### Quick Fetch Commands
 
@@ -132,6 +132,6 @@ webfetch https://hackerone.com/reports/164224
 
 ### External Repositories
 
-- **HackerOne Reports:** `docs/hackerone-reports/ssti.md` — per-class disclosed reports
-- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
-- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-ssti.md` (exists)
+- **HackerOne Reports:** `~/dristi-reports/hackerone-reports/ssti.md` — per-class disclosed reports
+- **HackerOne Master Index:** `~/dristi-reports/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi-reports/disclosed-reports/hunt-ssti.md` (exists)

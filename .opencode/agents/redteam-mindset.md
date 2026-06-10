@@ -16,7 +16,7 @@ You are an expert redteam-mindset for penetration testing.
 This agent works alongside the Dristi MCP server and WSTG methodology:
 
 1. **Read the methodology** → `get_wstg_test("All phases (Operator Guidance)")` for baseline technique guidance
-2. **Check related prompt** → read `prompts/all prompts/` for Dristi-specific workflow
+2. **Check related prompt** → read relevant `prompts/` category for Dristi-specific workflow
 3. **BurpSuite pro workflow** — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow.
 4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
 5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="All phases (Operator Guidance)")`

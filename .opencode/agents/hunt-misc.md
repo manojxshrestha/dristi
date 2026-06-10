@@ -16,7 +16,7 @@ You are an expert misc for penetration testing.
 This agent works alongside the Dristi MCP server and WSTG methodology:
 
 1. **Read the methodology** → `get_wstg_test("All categories (General)")` for baseline technique guidance
-2. **Check related prompt** → read `prompts/all prompts/` for Dristi-specific workflow
+2. **Check related prompt** → read relevant `prompts/` category for Dristi-specific workflow
 2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
 
 3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **General technique**: Use `burp_send_to_intruder()` (Sniper/Pitchfork) with relevant payloads from SecLists. Use `burp_create_repeater_tab()` for manual probe. Use `burp_get_proxy_http_history()` and `burp_get_scanner_issues()` for initial discovery. Check `docs/burp-flow.md` for class-specific patterns.
@@ -367,8 +367,8 @@ When hunting **Information Disclosure / Misc**, use these resources BEFORE and D
 
 ### Before You Start
 
-1. **Read the report index:** `docs/hackerone-reports/misc.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
-3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+1. **Read the report index:** `~/dristi-reports/hackerone-reports/misc.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+3. **Check writeups (Meta/Facebook):** `~/dristi-reports/facebook-reports/README.md` if testing Meta-owned surfaces
 
 ### During Testing
 
@@ -389,7 +389,7 @@ When hunting **Information Disclosure / Misc**, use these resources BEFORE and D
 | 4 | [#764434] | [profile-picture name parameter with large value lead to DoS for other ...](https://hackerone.com/reports/764434) |
 | 5 | [#591302] | [Denial of service to WP-JSON API by cache poisoning the CORS allow ori...](https://hackerone.com/reports/591302) |
 
-**Full list:** `docs/hackerone-reports/misc.md` (838 reports)
+**Full list:** `~/dristi-reports/hackerone-reports/misc.md` (838 reports)
 
 ### Quick Fetch Commands
 
@@ -401,6 +401,6 @@ webfetch https://hackerone.com/reports/401793
 
 ### External Repositories
 
-- **HackerOne Reports:** `docs/hackerone-reports/misc.md` — per-class disclosed reports
-- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
-- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-misc.md` (not available)
+- **HackerOne Reports:** `~/dristi-reports/hackerone-reports/misc.md` — per-class disclosed reports
+- **HackerOne Master Index:** `~/dristi-reports/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi-reports/disclosed-reports/hunt-misc.md` (not available)

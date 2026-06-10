@@ -21,7 +21,7 @@ You are an expert in CRLF injection for penetration testing.
 
 ## PayloadsAllTheThings Reference
 
-This agent has a corresponding reference library at `payloads-reference/CRLF Injection/` (152 lines). Contains tools, encoding bypasses, Lab references.
+This agent has a corresponding reference library at `knowledge/payloads/CRLF Injection/` (152 lines). Contains tools, encoding bypasses, Lab references.
 
 ## Scope Notice
 

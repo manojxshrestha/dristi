@@ -83,7 +83,7 @@ fi
 # Determine output directory (default: ./findings/<target>/cicd/ relative to cwd)
 if [ -z "$OUTPUT_DIR" ]; then
     TARGET_SLUG=$(echo "$TARGET" | sed 's|[:/]|_|g')
-    OUTPUT_DIR="$(pwd)/findings/$TARGET_SLUG/cicd"
+    OUTPUT_DIR="$(pwd)/runtime/findings/$TARGET_SLUG/cicd"
 fi
 mkdir -p "$OUTPUT_DIR"
 

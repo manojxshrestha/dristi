@@ -28,7 +28,7 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 ## PayloadsAllTheThings Reference
 
-This agent has a corresponding reference library at `payloads-reference/Open Redirect/` (186 lines).
+This agent has a corresponding reference library at `knowledge/payloads/Open Redirect/` (186 lines).
 Read the README before/during testing for enriched methodology and bypass techniques:
 
 - **Methodology**: Detection techniques for different contexts and frameworks
@@ -214,9 +214,9 @@ When hunting **Open Redirect**, use these resources BEFORE and DURING testing:
 
 ### Before You Start
 
-1. **Read the report index:** `docs/hackerone-reports/open-redirect.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
-2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-open-redirect.md` — curated techniques with HTTP request/response examples and detection methods
-3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+1. **Read the report index:** `~/dristi-reports/hackerone-reports/open-redirect.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi-reports/disclosed-reports/hunt-open-redirect.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `~/dristi-reports/facebook-reports/README.md` if testing Meta-owned surfaces
 
 ### During Testing
 
@@ -237,7 +237,7 @@ When hunting **Open Redirect**, use these resources BEFORE and DURING testing:
 | 4 | [#469803] | [Open redirect at https://inventory.upserve.com/http://google.com/](https://hackerone.com/reports/469803) |
 | 5 | [#1788006] | [Open Redirect in Logout & Login](https://hackerone.com/reports/1788006) |
 
-**Full list:** `docs/hackerone-reports/open-redirect.md` (272 reports)
+**Full list:** `~/dristi-reports/hackerone-reports/open-redirect.md` (272 reports)
 
 ### Quick Fetch Commands
 
@@ -249,6 +249,6 @@ webfetch https://hackerone.com/reports/749338
 
 ### External Repositories
 
-- **HackerOne Reports:** `docs/hackerone-reports/open-redirect.md` — per-class disclosed reports
-- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
-- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-open-redirect.md` (exists)
+- **HackerOne Reports:** `~/dristi-reports/hackerone-reports/open-redirect.md` — per-class disclosed reports
+- **HackerOne Master Index:** `~/dristi-reports/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi-reports/disclosed-reports/hunt-open-redirect.md` (exists)

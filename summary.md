@@ -12,8 +12,8 @@ Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive
 
 **Stats:**
 - 86 MCP tools · 82 agents (54 hunt-* + 28 pipeline/specialty)
-- 13 WSTG categories · 96 test cases · 31 PortSwigger technique guides
-- 681 disclosed HackerOne report patterns (14,682 total entries)
+- 13 WSTG categories · 96 test cases
+- 8,376+ disclosed HackerOne reports (14,682 raw entries in data.csv)
 - 57 CLI tool wrapper scripts · 20 GF patterns for parameter discovery
 - 7-phase autonomous pipeline (autopilot)
 - Burp Suite MCP integration · Playwright browser automation
@@ -47,51 +47,37 @@ Layer 4: Validation + Reporting      — how to ship it (7-Question Gate, VRT, r
 │   ├── task_tree.py            Hierarchical task tree management
 │   ├── server_data.py          WSTG data, payloads, constants, slot types
 │   ├── crypto_utils.py         Secret encryption/decryption
-│   ├── tool_parsers.py         CLI tool output parsers (nmap, nuclei, sqlmap, etc.)
+│   ├── tool_parsers.py         CLI tool output parsers
 │   ├── tool_verification.py    Tool output quality verification
-│   └── data/                   WSTG test cases, technique guides, evidence checklists
+│   └── data/                   WSTG test cases, technique guides
 ├── .opencode/
-│   ├── agents/                 81 agent definition files (YAML frontmatter + prompt)
-│   ├── commands-bughunt/       7 CLI entry points (autopilot, consult, hunt, etc.)
+│   ├── agents/                 81 agent definition files
+│   ├── commands-bughunt/       7 CLI entry points
 │   ├── rules/                  Agent permission rules
 │   └── .mcp.json               MCP server configuration
-├── web-security-testing-guide/ 13 WSTG categories (110+ files)
-├── payloads-reference/         64 PAT reference categories (unlinked from GitHub)
-├── waf-reference/              144 vendor fingerprints, 21 evasion techniques,
-│                               24 bypass files, 15 skills, 23 research papers
+├── knowledge/                  Consolidated reference data
+│   ├── wstg/                   WSTG v4.2 (13 categories, 110+ files)
+│   ├── payloads/               64 PAT reference categories
+│   ├── waf/                    144 vendor fingerprints, evasion, bypasses, skills
+│   ├── wordlists/              Wordlists + 20 GF patterns
+│   └── portswigger/            (future)
 ├── docs/
-│   ├── workflow.md             Full pipeline workflow documentation
-│   ├── testflow.md             Test triage and dispatch flow documentation
-│   ├── reports/                Reference reports (see section below)
-│   ├── architecture.md         Server architecture documentation
-│   ├── burp-flow.md            Burp Suite MCP workflow guide
-│   ├── deep-testing.md         Request mutation and fuzzing techniques
-│   ├── agent-reference.md      Agent reference guide
-│   ├── USAGE.md                Usage guide
-│   ├── ENGAGEMENTS.md          Engagement management guide
-│   └── skills.md               Skill documentation
+│   ├── workflow.md             Pipeline workflow documentation
+│   ├── testflow.md             Test triage flow documentation
+│   ├── reports/                H1 reports, disclosed patterns, Facebook, Google VRP
+│   ├── verification/           Verification artifacts
+│   ├── architecture.md         Server architecture
+│   └── ...                     USAGE, ENGAGEMENTS, deep-testing, agent-reference
 ├── scripts/
-│   ├── payloads/               PAT test harnesses (deploy, lib, hunt, nuclei, 12 test.sh)
-│   ├── playwright-mcp.sh       Burp proxy auto-detect + CF stealth
-│   ├── playwright-stealth.js   navigator.webdriver patch, CF bypass
-│   ├── tools/                  57 CLI tool wrapper scripts
-│   └── gen-disclosed-reports.py  H1 report generation
+│   ├── payloads/               PAT test harnesses (deploy, lib, hunt, 12 test.sh)
+│   └── tools/                  57 CLI tool wrapper scripts
 ├── prompts/                    13 per-category prompt templates
-├── templates/
-│   ├── report-template.md      Pentest report template
-│   ├── quality-gates.md        Phase gate definitions
-│   ├── input-validation-guide.md  IV testing guide
-│   ├── cross-domain-auth-guide.md  Cross-domain auth guide
-│   ├── testing-strategies.md   Per-category testing strategies
-│   ├── source-code-analysis.md Source code review guide
-│   ├── agent-roles/            Role-specific agent templates
-│   └── shared/                 Shared prompt fragments
-├── configs/                    Config examples (anthropic, router, schema)
-├── wordlists/                  Wordlists + 20 GF patterns + reference
-├── skills/                     15 WAF skills + 70+ Dristi skills
-├── engagements/                Active engagement directories (17)
-├── findings/                   CVE/bypass/param/takeover findings library
-└── templates/pipelined-testing.md  Pipeline testing documentation
+├── templates/                  Report templates, quality gates, guides
+├── skills/                     70+ Dristi tradecraft skills
+├── runtime/                    Runtime data (gitignored)
+│   ├── engagements/            Active engagement directories
+│   └── findings/               CVE/bypass/param/takeover findings library
+└── configs/                    Config examples (anthropic, router, schema)
 ```
 
 ---
@@ -104,7 +90,7 @@ Layer 4: Validation + Reporting      — how to ship it (7-Question Gate, VRT, r
 |-------|-------|-------------|------|
 | 1  SCOPE   | scope.md     | Register target, scope, credentials, task tree | phase_completed=0 |
 | 1.5 AUTH   | (inline)     | Auth flow test, WAF detection, token capture | — |
-| 1.75 OSINT | osint.sh     | WHOIS, M365/Azure, third-party misconfigs, spoof check, cloud bucket enum | — |
+| 1.75 Intel | phase-intel.sh | WHOIS, M365/Azure, third-party misconfigs, spoof check, cloud bucket enum | — |
 | 2  RECON   | recon.md     | Subdomain enum, DNS, crawl, params, nuclei, secrets | phase_completed=1 |
 | 3  SURFACE | surface.md   | Prioritize endpoints, rank attack surface | phase_completed=2 |
 | 4  HUNT    | hunt.md      | Dispatch 54 hunt-* sub-agents, test all bug classes | phase_completed=3 |
@@ -227,7 +213,7 @@ Autopilot is a thin orchestrator (248 lines) — phases 2-7 are dispatched via `
 ## Agents (82)
 
 ### Pipeline Agents (10)
-autopilot, consult, capture, hunt, osint, recon, report, scope, surface, validate
+autopilot, consult, capture, hunt, pintel, recon, report, scope, surface, validate
 
 ### Bug Class Agents (54 hunt-*)
 api-misconfig, aspnet, ato, auth-bypass, brute-force, business-logic, cache-poison, cicd, clickjacking, cloud-misconfig, cors, csrf, deserialization, dispatch, dom, file-upload, graphql, host-header, http-smuggling, idor, jwt-confusion, k8s, laravel, ldap, lfi, llm-ai, mfa-bypass, misc, nextjs, nodejs, nosqli, ntlm-info, oauth, open-redirect, race-condition, rce, saml, session, sharepoint, source-leak, springboot, sqli, ssrf, ssti, subdomain, tls-network, websocket, xss, xxe
@@ -265,7 +251,7 @@ Every hunt agent includes:
 - obfu.py payload obfuscation script
 - waf_evasion.py loads via JSON at runtime (171 total vendors)
 
-### Disclosed Reports (docs/reports/)
+### Disclosed Reports (~/dristi-reports/)
 - **HackerOne**: 14,682 reports from 28 TOP sources, 24 per-class .md files
   - xss.md: 2,382 · auth-bypass.md: 1,092 · sqli.md: 705 · idor.md: 251 · ssrf.md: 309 · rce.md: 331 · oauth.md: 107 · mfa-bypass.md: 90 · misc.md: 838
   - Plus INDEX.md, 28 TOP bug-type files, 52 TOP program files

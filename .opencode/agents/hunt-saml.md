@@ -28,7 +28,7 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 ## PayloadsAllTheThings Reference
 
-This agent has a corresponding reference library at `payloads-reference/SAML Injection/` (201 lines).
+This agent has a corresponding reference library at `knowledge/payloads/SAML Injection/` (201 lines).
 Read the README before/during testing for enriched methodology and bypass techniques:
 
 - **Methodology**: Detection techniques for different contexts and frameworks
@@ -152,9 +152,9 @@ When hunting **Saml**, use these resources:
 
 ### Before You Start
 
-1. **Browse the master index:** `docs/hackerone-reports/INDEX.md` — find reports relevant to your class
-2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-saml.md` — curated techniques with HTTP request/response examples
-3. **Check Facebook writeups:** `docs/facebook-reports/facebook-writeups.md` if testing Meta/Meta-owned surfaces
+1. **Browse the master index:** `~/dristi-reports/hackerone-reports/INDEX.md` — find reports relevant to your class
+2. **Study the pattern library:** `~/dristi-reports/disclosed-reports/hunt-saml.md` — curated techniques with HTTP request/response examples
+3. **Check Facebook writeups:** `~/dristi-reports/facebook-reports/README.md` if testing Meta/Meta-owned surfaces
 
 ### During Testing
 
@@ -166,7 +166,7 @@ When hunting **Saml**, use these resources:
 
 ### External Repositories
 
-- **HackerOne Reports (Master):** `docs/hackerone-reports/INDEX.md` — 14,682+ structured disclosed reports
-- **HackerOne TOP by Class:** `docs/hackerone-reports/` — per-class report files (24 classes)
-- **Facebook Writeups:** `docs/facebook-reports/facebook-writeups.md` — Meta bug bounty writeups
-- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-saml.md`
+- **HackerOne Reports (Master):** `~/dristi-reports/hackerone-reports/INDEX.md` — 14,682+ structured disclosed reports
+- **HackerOne TOP by Class:** `~/dristi-reports/hackerone-reports/` — per-class report files (24 classes)
+- **Facebook Writeups:** `~/dristi-reports/facebook-reports/README.md` — Meta bug bounty writeups
+- **Pattern Library:** `~/dristi-reports/disclosed-reports/hunt-saml.md`

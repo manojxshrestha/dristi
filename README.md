@@ -15,15 +15,15 @@
   <img src="https://img.shields.io/badge/license-Apache%202.0-green" alt="Apache 2.0">
   <img src="https://img.shields.io/badge/WSTG-v4.2-purple" alt="WSTG v4.2">
   <img src="https://img.shields.io/badge/MCP%20tools-86-orange" alt="86 MCP Tools">
-  <img src="https://img.shields.io/badge/technique%20guides-31-red" alt="31 Technique Guides">
+  <img src="https://img.shields.io/badge/H1%20reports-8.3k+-red" alt="8,300+ H1 Reports">
   <img src="https://img.shields.io/badge/agents-75-blueviolet" alt="75 Agents">
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs Welcome">
 </p>
 
 <p align="center">
   Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for bug hunting,
-  external red-team work, and authorized pentests — <b>75 agents</b> · <b>86 MCP tools</b> ·
-  <b>681 disclosed-report patterns</b> across core vulnerability classes ·
+  external red-team work, and authorized pentests — <b>82 agents</b> · <b>86 MCP tools</b> ·
+  <b>8,376+ disclosed HackerOne reports</b> across 25 vulnerability classes ·
   enterprise identity + infrastructure attack matrices ·
   engagement management · Burp MCP integration ·
   <b>20 GF patterns</b> for parameter discovery.
@@ -33,12 +33,12 @@
 
 ## What is this?
 
-Dristi gives LLM-powered security tools the complete OWASP Web Security Testing Guide methodology as an MCP server — 96 test cases across 12 categories, 31 PortSwigger Academy technique guides, and the full pentest lifecycle. It pairs with Burp Suite's MCP server for request execution, or runs standalone as a reference knowledge base.
+Dristi gives LLM-powered security tools the complete OWASP Web Security Testing Guide methodology as an MCP server — 96 test cases across 12 categories, 8,376+ disclosed HackerOne reports, and the full pentest lifecycle. It pairs with Burp Suite's MCP server for request execution, or runs standalone as a reference knowledge base.
 
 Four layers stack:
 
 - **Methodology + agents** — *how to think.* 5-phase non-linear hunting workflow, critical-thinking framework, developer-psychology heuristics, anomaly detection patterns, and the red-team operator-discipline corrections (when scope is "external red team" not "bug hunting / WAPT"). Available as auto-loading OpenCode agents.
-- **48 `@hunt-*` agents** — *what to look for in webapps.* Per-class detection patterns, payloads, bypass tables, and chain templates — curated from 681 disclosed HackerOne reports across 24 core vulnerability classes, plus 20+ framework/surface skills (Next.js, Spring Boot, Laravel, Kubernetes, CI/CD, WebSocket, deserialization, ...).
+- **48 `@hunt-*` agents** — *what to look for in webapps.* Per-class detection patterns, payloads, bypass tables, and chain templates — curated from 8,376+ disclosed HackerOne reports across 25 vulnerability classes, plus 20+ framework/surface skills (Next.js, Spring Boot, Laravel, Kubernetes, CI/CD, WebSocket, deserialization, ...).
 - **Enterprise platform attack chains** — *what to look for on the perimeter.* M365/Entra ID, Okta, cloud IAM, VMware vCenter, enterprise VPN, SharePoint, ASP.NET, NTLM, APK red-team pipeline, supply-chain recon — current CVE chains, AADSTS error references, version-fingerprint matrices, and post-credential escalation paths.
 - **Validation + reporting** — *how to ship it.* 7-Question Gate, VRT category fallback, severity-request paragraphs, OOS rebuttals, cookie/PII redaction, client-facing red-team deliverable format, and SOC-patch / mid-engagement attacker detection methodology.
 
@@ -301,9 +301,9 @@ dristi/
 │   ├── reconnect-burp.sh            # Burp MCP reconnection
 │   └── refresh-cve-index.py         # CISA KEV refresh
 ├── docs/                            # architecture · credits · CLI reference · verification
-├── web-security-testing-guide/      # OWASP WSTG test cases (110 files)
+├── knowledge/                       # WSTG, payloads, WAF, wordlists, PortSwigger
 ├── prompts/                         # 12 WSTG category prompts
-├── engagements/                   # engagement working directories
+├── runtime/engagements/             # engagement working directories
 ├── gif/                             # assets
 ├── README.md                        # this file
 └── SECURITY.md                      # authorized-use posture
@@ -499,7 +499,7 @@ Dristi provides the methodology ("what to test and how to exploit it"), Burp pro
 
 ### 3-layer stack
 
-1. **Knowledge layer** — WSTG v4.2 (96 tests, 12 categories) + PortSwigger Academy (31 technique guides, payloads, WAF bypass)
+1. **Knowledge layer** — WSTG v4.2 (96 tests, 12 categories) + PortSwigger Academy technique guides (payloads, WAF bypass)
 2. **Engagement layer** — scope registration, findings database, test tracking, phase gates, QA review, reporting
 3. **Agent layer** — 74 OpenCode agents: 8 pipeline agents, 48 `@hunt-*` agents, 18 specialty agents
 
@@ -650,8 +650,8 @@ Each category has a dedicated prompt file (`prompts/<category>.md`) with test li
 - `get_test_payloads` — payloads for a specific test
 - `search_wstg` — keyword search across all WSTG content
 
-### PortSwigger Academy (3)
-- `list_portswigger_categories` — 31 technique guide categories
+### PortSwigger Academy (3, ⚠️ content not yet populated)
+- `list_portswigger_categories` — list available categories
 - `get_technique_guide` — attack technique reference with payloads and WAF bypass
 - `search_techniques` — search across all guides
 
@@ -756,7 +756,7 @@ All runtime data is stored under `server/data/`:
 | `qa-tracking/` | Quality assurance reviews |
 | `code-analysis/` | Source code review results |
 
-**Wordlists** (`wordlists/`):
+**Wordlists** (`knowledge/wordlists/`):
 | Directory | Contents |
 |-----------|----------|
 | `gf-patterns/` | 20 GF parameter discovery patterns (XSS, SSRF, SQLi, IDOR, etc.) |
@@ -817,7 +817,7 @@ This bundle was built and validated through authorized engagements that exposed 
 4. **No client-facing deliverable format** — bug-bounty report templates don't fit enterprise red-team where output is a 50KB+ MD + DOCX with embedded screenshots → `redteam-report-template`
 5. **No post-credential escalation model** — when recon yielded credentials (AWS keys, JWTs, GCP JSON), it was unclear what they granted or how to escalate → `cloud-iam-deep`
 
-The per-class `@hunt-*` agents address gap-zero (*"what should I look for in webapps"*) — 48 agents codifying patterns from 681 disclosed HackerOne reports, covering injection, authorization, server-side, identity, API, business logic, frameworks, and infrastructure. The enterprise-platform and red-team-tradecraft layers address what bug-bounty alone cannot: external red-team engagements against monitored enterprise targets.
+The per-class `@hunt-*` agents address gap-zero (*"what should I look for in webapps"*) — 48 agents codifying patterns from 8,376+ disclosed HackerOne reports, covering injection, authorization, server-side, identity, API, business logic, frameworks, and infrastructure. The enterprise-platform and red-team-tradecraft layers address what bug-bounty alone cannot: external red-team engagements against monitored enterprise targets.
 
 ---
 

@@ -188,7 +188,7 @@ mcp = FastMCP(
     ),
 )
 
-WSTG_DIR = Path(__file__).parent.parent / "web-security-testing-guide"
+WSTG_DIR = Path(__file__).parent.parent / "knowledge" / "wstg"
 DATA_DIR = Path(__file__).parent / "data"
 TRACKING_DIR = DATA_DIR / "tracking"
 TOOL_TRACKING_DIR = DATA_DIR / "tool-tracking"
@@ -263,7 +263,7 @@ def _append_live_log(
     duration_ms: int = 0,
     is_error: bool = False,
 ) -> None:
-    """Append a verbose human-readable entry to engagements/<eid>/logs.txt.
+    """Append a verbose human-readable entry to runtime/engagements/<eid>/logs.txt.
 
     This is the live logging file — designed for `tail -f` monitoring.
     Every MCP tool call is logged with full args and full result.
@@ -326,7 +326,7 @@ def _make_logged_tool(original_tool_decorator):
     Returns a replacement decorator that:
     1. Wraps the tool function with logging
     2. Extracts engagement_id from args (if present)
-    3. Logs full args + result to engagements/<eid>/logs.txt
+    3. Logs full args + result to runtime/engagements/<eid>/logs.txt
     4. Preserves function signature for FastMCP parameter inspection
     """
 
@@ -435,7 +435,7 @@ def _safe_code_fence(text: str) -> tuple[str, str]:
 
 
 def _append_finding_markdown(engagement_id: str, finding: dict) -> None:
-    """Append a finding as human-readable markdown to engagements/<eid>/findings.md.
+    """Append a finding as human-readable markdown to runtime/engagements/<eid>/findings.md.
 
     This is an append-only crash-safe log. Even if the process dies mid-write,
     all previously written findings survive. This file is the user's insurance
@@ -480,7 +480,7 @@ def _append_finding_markdown(engagement_id: str, finding: dict) -> None:
 
 
 def _append_progress_log(engagement_id: str, entry: str) -> None:
-    """Append a one-line progress entry to engagements/<eid>/progress.log.
+    """Append a one-line progress entry to runtime/engagements/<eid>/progress.log.
 
     This is an append-only timestamped log of all test completions, tool runs,
     and findings. Survives crashes. Human-readable at a glance.
@@ -1073,7 +1073,7 @@ def search_wstg(query: str) -> str:
 
 # ── PortSwigger Technique Guide Tools ─────────────────────────────
 
-PORTSWIGGER_DIR = Path(__file__).parent.parent / "knowledge-base" / "portswigger-academy"
+PORTSWIGGER_DIR = Path(__file__).parent.parent / "knowledge" / "portswigger"
 
 # Map category codes to technique guide filenames
 _CODE_TO_FILE = {
@@ -1392,7 +1392,7 @@ def log_finding(
         },
     )
 
-    result = f"Finding logged: {finding_ref} - {title} ({severity})\nAlso saved to: ./engagements/{engagement_id}/findings.md"
+    result = f"Finding logged: {finding_ref} - {title} ({severity})\nAlso saved to: ./runtime/engagements/{engagement_id}/findings.md"
     if duplicate_warnings:
         result += "\n\n**DUPLICATE WARNINGS:**\n"
         for dw in duplicate_warnings:
@@ -3382,7 +3382,7 @@ def generate_report(
     force: bool = False,
 ) -> str:
     """Generate a full markdown penetration test report from all logged findings.
-    The report is saved to engagements/<engagement_id>/report.md.
+    The report is saved to runtime/engagements/<engagement_id>/report.md.
 
     Before generating, validates that all phase gates have passed.
     If validation fails, report is blocked unless force=True.
@@ -3871,7 +3871,7 @@ def save_code_analysis(engagement_id: str, analysis: str) -> str:
         },
     )
 
-    return f"Code analysis saved ({len(analysis.split())} words).\n" f"Available via get_code_analysis('{engagement_id}').\n" f"Also saved to: engagements/{engagement_id}/code-analysis.md"
+    return f"Code analysis saved ({len(analysis.split())} words).\n" f"Available via get_code_analysis('{engagement_id}').\n" f"Also saved to: runtime/engagements/{engagement_id}/code-analysis.md"
 
 
 @mcp.tool()
@@ -4020,7 +4020,7 @@ def save_checkpoint(engagement_id: str, description: str = "") -> str:
         f"- Tests tracked: {summary['tests_tracked']} ({summary['coverage_pct']}% coverage)\n"
         f"- Tools tracked: {summary['tools_tracked']}\n"
         f"- Gates passed: {summary['gates_passed']}\n"
-        f"- Resume prompt updated: engagements/{engagement_id}/resume-prompt.md"
+        f"- Resume prompt updated: runtime/engagements/{engagement_id}/resume-prompt.md"
     )
 
 
@@ -4117,7 +4117,7 @@ def resume_engagement(engagement_id: str) -> str:
                 "",
                 "## Full Resume Prompt",
                 "A detailed resume prompt with auth credentials and rules is at:",
-                f"  `engagements/{engagement_id}/resume-prompt.md`",
+                f"  `runtime/engagements/{engagement_id}/resume-prompt.md`",
                 "Read it for the complete context needed to continue.",
             ]
         )
@@ -4314,7 +4314,7 @@ def _generate_resume_prompt_content(engagement_id: str) -> str:
             [
                 "",
                 "## Session",
-                f"- Cookie jar: `./engagements/{engagement_id}/cookies.txt` (exists — may be expired, re-authenticate if needed)",
+                f"- Cookie jar: `./runtime/engagements/{engagement_id}/cookies.txt` (exists — may be expired, re-authenticate if needed)",
             ]
         )
 
@@ -4375,7 +4375,7 @@ def _generate_resume_prompt_content(engagement_id: str) -> str:
 
 
 def _write_resume_prompt_file(engagement_id: str) -> None:
-    """Write the resume prompt to engagements/<eid>/resume-prompt.md.
+    """Write the resume prompt to runtime/engagements/<eid>/resume-prompt.md.
 
     Called automatically on every checkpoint and phase gate pass.
     The user can paste this file's contents into a new Dristi session
@@ -4399,7 +4399,7 @@ def generate_resume_prompt(engagement_id: str) -> str:
     session needs to continue the pentest: target URL, auth credentials, current
     phase, remaining tests, endpoint map references, and rules.
 
-    Also writes the prompt to engagements/<eid>/resume-prompt.md so it survives
+    Also writes the prompt to runtime/engagements/<eid>/resume-prompt.md so it survives
     session crashes. The user can copy-paste it into a new session.
 
     Call this manually at any time, or it runs automatically on every checkpoint
@@ -4418,7 +4418,7 @@ def generate_resume_prompt(engagement_id: str) -> str:
         {
             "tool": "generate_resume_prompt",
             "args": {},
-            "result": f"Resume prompt generated and saved to engagements/{engagement_id}/resume-prompt.md",
+            "result": f"Resume prompt generated and saved to runtime/engagements/{engagement_id}/resume-prompt.md",
         },
     )
 
@@ -5212,7 +5212,7 @@ def get_browser_profile(engagement_id: str, agent_id: str) -> str:
         engagement_id: The engagement identifier
         agent_id: Unique identifier for the subagent (e.g., 'xss-agent', 'sqli-agent', 'agent-1')
     """
-    profile_path = f"./engagements/{engagement_id}/browser-profiles/{agent_id}"
+    profile_path = f"./runtime/engagements/{engagement_id}/browser-profiles/{agent_id}"
 
     return (
         f"Browser profile path: {profile_path}\n\n"
@@ -5220,13 +5220,13 @@ def get_browser_profile(engagement_id: str, agent_id: str) -> str:
         f"```bash\n"
         f"  --url <login-url> \\\n"
         f"  --username <user> --password <pass> \\\n"
-        f"  --cookie-jar ./engagements/{engagement_id}/cookies-{agent_id}.txt \\\n"
+        f"  --cookie-jar ./runtime/engagements/{engagement_id}/cookies-{agent_id}.txt \\\n"
         f"  --profile {profile_path}\n"
         f"```\n\n"
         f"## Usage with curl\n"
         f"```bash\n"
-        f"  -b ./engagements/{engagement_id}/cookies-{agent_id}.txt \\\n"
-        f"  -c ./engagements/{engagement_id}/cookies-{agent_id}.txt \\\n"
+        f"  -b ./runtime/engagements/{engagement_id}/cookies-{agent_id}.txt \\\n"
+        f"  -c ./runtime/engagements/{engagement_id}/cookies-{agent_id}.txt \\\n"
         f"  <url>\n"
         f"```\n\n"
         f"Each subagent should use its own cookie jar and profile for session isolation."

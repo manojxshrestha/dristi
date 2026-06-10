@@ -130,9 +130,9 @@ When hunting **MFA / 2FA Bypass**, use these resources BEFORE and DURING testing
 
 ### Before You Start
 
-1. **Read the report index:** `docs/hackerone-reports/mfa-bypass.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
-2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-mfa-bypass.md` — curated techniques with HTTP request/response examples and detection methods
-3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+1. **Read the report index:** `~/dristi-reports/hackerone-reports/mfa-bypass.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi-reports/disclosed-reports/hunt-mfa-bypass.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `~/dristi-reports/facebook-reports/README.md` if testing Meta-owned surfaces
 
 ### During Testing
 
@@ -153,7 +153,7 @@ When hunting **MFA / 2FA Bypass**, use these resources BEFORE and DURING testing
 | 4 | [#1247108] | [TikTok 2FA Bypass](https://hackerone.com/reports/1247108) |
 | 5 | [#667739] | [Previously created sessions continue being valid after MFA activation](https://hackerone.com/reports/667739) |
 
-**Full list:** `docs/hackerone-reports/mfa-bypass.md` (90 reports)
+**Full list:** `~/dristi-reports/hackerone-reports/mfa-bypass.md` (90 reports)
 
 ### Quick Fetch Commands
 
@@ -165,6 +165,6 @@ webfetch https://hackerone.com/reports/418767
 
 ### External Repositories
 
-- **HackerOne Reports:** `docs/hackerone-reports/mfa-bypass.md` — per-class disclosed reports
-- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
-- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-mfa-bypass.md` (exists)
+- **HackerOne Reports:** `~/dristi-reports/hackerone-reports/mfa-bypass.md` — per-class disclosed reports
+- **HackerOne Master Index:** `~/dristi-reports/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi-reports/disclosed-reports/hunt-mfa-bypass.md` (exists)

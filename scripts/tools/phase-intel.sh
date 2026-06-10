@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# OSINT — Passive intelligence gathering via reconFTW modules
+# Intel — Passive intelligence gathering
 #
 # Modules (no API keys required):
 #   domain_info           — WHOIS lookup, M365/Azure tenant discovery, Scopify scope analysis
@@ -11,10 +11,10 @@
 # Skipped: ip_info (requires WHOISXML_API key)
 #
 # Usage:
-#   ./tools/osint.sh <domain> [output_dir]
-#   ./tools/osint.sh --install            # Install missing reconftw tools
+#   ./tools/phase-intel.sh <domain> [output_dir]
+#   ./tools/phase-intel.sh --install            # Install missing tools
 #
-# Output (in output_dir/osint/):
+# Output (in output_dir/intel/):
 #   domain_info_general.txt       — WHOIS + msftrecon output
 #   azure_tenant_domains.txt      — Microsoft/Azure-related findings
 #   scopify.txt                   — Scopify scope analysis
@@ -69,7 +69,7 @@ install_repo() {
 }
 
 do_install() {
-    log_step "Installing reconftw OSINT tools"
+    log_step "Installing Intel tools"
 
     if ! command -v git &>/dev/null; then log_err "git required"; return 1; fi
     if ! command -v uv &>/dev/null; then log_err "uv required (curl -LsSf https://astral.sh/uv/install.sh)"; return 1; fi
@@ -95,11 +95,11 @@ fi
 # ── Argument parsing ────────────────────────────────────────────────
 TARGET="${1:?Usage: $0 <domain> [output_dir]  or  $0 --install}"
 OUT_DIR="${2:-$BASE_DIR/recon/$TARGET}"
-OSINT_DIR="$OUT_DIR/osint"
-mkdir -p "$OSINT_DIR"
+INTEL_DIR="$OUT_DIR/intel"
+mkdir -p "$INTEL_DIR"
 
 log_info "Target: $TARGET"
-log_info "Output: $OSINT_DIR"
+log_info "Output: $INTEL_DIR"
 
 # ── Helper: tool check ───────────────────────────────────────────────
 check_tool() {
@@ -117,7 +117,7 @@ check_repo_tool() {
         return 0
     fi
     log_warn "$repo not found at $TOOLS_DIR/$repo — skipping"
-    log_info "  Install: $0 --install  (or cd reconftw && ./install.sh)"
+    log_info "  Install: $0 --install"
     return 1
 }
 
@@ -126,10 +126,10 @@ run_domain_info() {
     log_step "domain_info — WHOIS, M365/Azure tenant, Scopify"
 
     check_tool whois || return 0
-    whois "$TARGET" > "$OSINT_DIR/domain_info_general.txt" 2>/dev/null && \
+    whois "$TARGET" > "$INTEL_DIR/domain_info_general.txt" 2>/dev/null && \
         log_ok "WHOIS data saved" || log_warn "WHOIS lookup failed"
 
-    : > "$OSINT_DIR/azure_tenant_domains.txt"
+    : > "$INTEL_DIR/azure_tenant_domains.txt"
 
     if check_repo_tool "msftrecon" "msftrecon/msftrecon.py"; then
         if command -v python3 &>/dev/null; then
@@ -138,8 +138,8 @@ run_domain_info() {
             msftrecon_out=$(mktemp)
             if python3 "$TOOLS_DIR/msftrecon/msftrecon/msftrecon.py" -d "$TARGET" > "$msftrecon_out" 2>/dev/null; then
                 if [ -s "$msftrecon_out" ]; then
-                    cat "$msftrecon_out" >> "$OSINT_DIR/domain_info_general.txt"
-                    grep -iE 'microsoft|azure|tenant' "$msftrecon_out" > "$OSINT_DIR/azure_tenant_domains.txt" 2>/dev/null || true
+                    cat "$msftrecon_out" >> "$INTEL_DIR/domain_info_general.txt"
+                    grep -iE 'microsoft|azure|tenant' "$msftrecon_out" > "$INTEL_DIR/azure_tenant_domains.txt" 2>/dev/null || true
                     log_ok "M365/Azure tenant info saved"
                 fi
             else
@@ -154,7 +154,7 @@ run_domain_info() {
             log_info "Running Scopify..."
             local company_name
             company_name=$(unfurl format %r <<< "$TARGET" 2>/dev/null || echo "$TARGET" | awk -F. '{print $(NF-1)}')
-            python3 "$TOOLS_DIR/Scopify/scopify.py" -c "$company_name" > "$OSINT_DIR/scopify.txt" 2>/dev/null && \
+            python3 "$TOOLS_DIR/Scopify/scopify.py" -c "$company_name" > "$INTEL_DIR/scopify.txt" 2>/dev/null && \
                 log_ok "Scopify scope analysis saved" || log_warn "Scopify failed"
         else
             log_warn "unfurl or python3 missing — skipping Scopify"
@@ -181,14 +181,14 @@ run_third_party_misconfigs() {
 
     log_info "Scanning by domain: $TARGET"
     timeout 120 misconfig-mapper -target "$TARGET" -as-domain true -permutations false -skip-ssl \
-        -service "*" -verbose 0 2>/dev/null | anew -q "$OSINT_DIR/3rdparts_misconfigurations.txt" || true
+        -service "*" -verbose 0 2>/dev/null | anew -q "$INTEL_DIR/3rdparts_misconfigurations.txt" || true
 
     log_info "Scanning by company: $company_name"
     timeout 120 misconfig-mapper -target "$company_name" -skip-ssl -verbose 0 -service "*" \
-        2>/dev/null | anew -q "$OSINT_DIR/3rdparts_misconfigurations.txt" || true
+        2>/dev/null | anew -q "$INTEL_DIR/3rdparts_misconfigurations.txt" || true
 
-    if [ -s "$OSINT_DIR/3rdparts_misconfigurations.txt" ]; then
-        log_ok "$(wc -l < "$OSINT_DIR/3rdparts_misconfigurations.txt") misconfigurations found"
+    if [ -s "$INTEL_DIR/3rdparts_misconfigurations.txt" ]; then
+        log_ok "$(wc -l < "$INTEL_DIR/3rdparts_misconfigurations.txt") misconfigurations found"
     else
         log_info "No third-party misconfigurations found"
     fi
@@ -205,8 +205,8 @@ run_spoof() {
 
     if [ -x "$spoofy_venv" ] && [ -f "$spoofy_script" ]; then
         log_info "Checking spoofability..."
-        (cd "$TOOLS_DIR/Spoofy" && "$spoofy_venv" "$spoofy_script" -d "$TARGET") > "$OSINT_DIR/spoof.txt" 2>/dev/null
-        if [ -s "$OSINT_DIR/spoof.txt" ]; then
+        (cd "$TOOLS_DIR/Spoofy" && "$spoofy_venv" "$spoofy_script" -d "$TARGET") > "$INTEL_DIR/spoof.txt" 2>/dev/null
+        if [ -s "$INTEL_DIR/spoof.txt" ]; then
             log_ok "Spoof report saved"
         else
             log_warn "Spoofy returned no results"
@@ -244,10 +244,10 @@ run_cloud_enum() {
             -t 20 \
             -m "$mutations" \
             -b "$brute" \
-            -qs 2>/dev/null | anew -q "$OSINT_DIR/cloud_enum.txt"
+            -qs 2>/dev/null | anew -q "$INTEL_DIR/cloud_enum.txt"
 
-        if [ -s "$OSINT_DIR/cloud_enum.txt" ]; then
-            log_ok "$(wc -l < "$OSINT_DIR/cloud_enum.txt") cloud resources found"
+        if [ -s "$INTEL_DIR/cloud_enum.txt" ]; then
+            log_ok "$(wc -l < "$INTEL_DIR/cloud_enum.txt") cloud resources found"
         else
             log_info "No cloud resources found"
         fi
@@ -255,7 +255,7 @@ run_cloud_enum() {
 }
 
 # ── Main ─────────────────────────────────────────────────────────────
-log_info "Starting OSINT for $TARGET"
+log_info "Starting intel for $TARGET"
 log_info "Modules: domain_info, third_party_misconfigs, spoof, cloud_enum_scan"
 log_warn "Skipped: ip_info (requires WHOISXML_API key)"
 
@@ -265,8 +265,8 @@ run_spoof
 run_cloud_enum
 
 echo -e "\n${GREEN}════════════════════════════════════════════${NC}"
-log_ok "OSINT complete — results in $OSINT_DIR"
-for f in "$OSINT_DIR"/*; do
+log_ok "Intel complete — results in $INTEL_DIR"
+for f in "$INTEL_DIR"/*; do
     [ -f "$f" ] && echo "  $(basename "$f"): $(wc -l < "$f") lines"
 done
 echo -e "${GREEN}════════════════════════════════════════════${NC}"

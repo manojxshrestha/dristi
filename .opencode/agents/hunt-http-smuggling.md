@@ -28,7 +28,7 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 ## PayloadsAllTheThings Reference
 
-This agent has a corresponding reference library at `payloads-reference/Request Smuggling/` (182 lines).
+This agent has a corresponding reference library at `knowledge/payloads/Request Smuggling/` (182 lines).
 Read the README before/during testing for enriched methodology and bypass techniques:
 
 - **Methodology**: Detection techniques for different contexts and frameworks
@@ -125,9 +125,9 @@ When hunting **HTTP Request Smuggling**, use these resources BEFORE and DURING t
 
 ### Before You Start
 
-1. **Read the report index:** `docs/hackerone-reports/http-smuggling.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
-2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-http-smuggling.md` — curated techniques with HTTP request/response examples and detection methods
-3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+1. **Read the report index:** `~/dristi-reports/hackerone-reports/http-smuggling.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi-reports/disclosed-reports/hunt-http-smuggling.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `~/dristi-reports/facebook-reports/README.md` if testing Meta-owned surfaces
 
 ### During Testing
 
@@ -148,7 +148,7 @@ When hunting **HTTP Request Smuggling**, use these resources BEFORE and DURING t
 | 4 | [#498052] | [Password theft login.newrelic.com via Request Smuggling](https://hackerone.com/reports/498052) |
 | 5 | [#867952] | [HTTP request Smuggling](https://hackerone.com/reports/867952) |
 
-**Full list:** `docs/hackerone-reports/http-smuggling.md` (50 reports)
+**Full list:** `~/dristi-reports/hackerone-reports/http-smuggling.md` (50 reports)
 
 ### Quick Fetch Commands
 
@@ -160,6 +160,6 @@ webfetch https://hackerone.com/reports/771666
 
 ### External Repositories
 
-- **HackerOne Reports:** `docs/hackerone-reports/http-smuggling.md` — per-class disclosed reports
-- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
-- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-http-smuggling.md` (exists)
+- **HackerOne Reports:** `~/dristi-reports/hackerone-reports/http-smuggling.md` — per-class disclosed reports
+- **HackerOne Master Index:** `~/dristi-reports/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi-reports/disclosed-reports/hunt-http-smuggling.md` (exists)

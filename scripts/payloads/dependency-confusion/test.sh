@@ -6,13 +6,13 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"; BASE_DIR="$(cd "$SCRIPT_DIR/../.." 
 source "$SCRIPT_DIR/../lib.sh"
 CLASS=dependency-confusion
 ENGAGEMENT="${1:?Usage: $0 <engagement-id> [target-dir]}"
-TARGET_DIR="${2:-$BASE_DIR/engagements/$ENGAGEMENT/recon/files}"
-HITS_DIR="$BASE_DIR/engagements/$ENGAGEMENT/recon/hits/$CLASS"
+TARGET_DIR="${2:-$BASE_DIR/runtime/engagements/$ENGAGEMENT/recon/files}"
+HITS_DIR="$BASE_DIR/runtime/engagements/$ENGAGEMENT/recon/hits/$CLASS"
 mkdir -p "$HITS_DIR"
 pat_ref "$CLASS"
 
 info "Scanning for package files in subdomain recon output..."
-RECON_DIR="$BASE_DIR/engagements/$ENGAGEMENT/recon"
+RECON_DIR="$BASE_DIR/runtime/engagements/$ENGAGEMENT/recon"
 FOUND=0; TOTAL=0
 
 # Search for package files in subdomain content directories

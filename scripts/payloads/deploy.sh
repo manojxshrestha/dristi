@@ -4,7 +4,7 @@
 set -euo pipefail
 
 PAYLOAD_DIR="$(cd "$(dirname "$0")" && pwd)"
-PAT_DIR="$PAYLOAD_DIR/../../payloads-reference"
+PAT_DIR="$PAYLOAD_DIR/../../knowledge/payloads"
 
 log()  { echo -e "\033[0;32m[+]\033[0m $1"; }
 warn() { echo -e "\033[1;33m[!]\033[0m $1"; }

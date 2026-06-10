@@ -21,7 +21,7 @@ You are an expert in HTTP parameter pollution for penetration testing.
 
 ## PayloadsAllTheThings Reference
 
-This agent has a corresponding reference library at `payloads-reference/HTTP Parameter Pollution/` (100 lines). Contains per-technology parsing tables (ASP.NET, PHP, Node.js, Python, Ruby, Go), array injection, JSON injection.
+This agent has a corresponding reference library at `knowledge/payloads/HTTP Parameter Pollution/` (100 lines). Contains per-technology parsing tables (ASP.NET, PHP, Node.js, Python, Ruby, Go), array injection, JSON injection.
 
 ## Scope Notice
 

@@ -22,7 +22,7 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 ### Phase P1.5: AUTH
 - Sign-up / credential validation
 - Fingerprint WAF via `identify_waf()` MCP tool
-- Look up vendor fingerprints in `~/dristi/waf-reference/waf-knowledge-base/02-waf-fingerprints/`
+- Look up vendor fingerprints in `knowledge/waf/waf-knowledge-base/02-waf-fingerprints/`
 - Apply stealth proxy (Playwright CF bypass) if Cloudflare detected
 - Save `auth_analysis` deliverable
 
@@ -32,8 +32,8 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - Third-party SaaS misconfiguration scan (`misconfig-mapper`)
 - SPF/DMARC spoofability check (`Spoofy`)
 - Cloud storage bucket enumeration (`cloud_enum` — AWS S3, Azure Blob, GCP, DO Spaces)
-- Runs via `scripts/tools/osint.sh <domain>`
-- Output to `engagements/<eid>/recon/<domain>/osint/`
+- Runs via `scripts/tools/phase-intel.sh <domain>`
+- Output to `engagements/<eid>/recon/<domain>/intel/`
 - Skipped: `ip_info` (requires `WHOISXML_API` key)
 
 ### Phase P2: RECON
@@ -47,7 +47,7 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 
 ### Phase P3: SURFACE
 - Load `endpoint_map_raw` deliverable
-- Check H1 report index for class prioritization (`~/dristi/docs/reports/hackerone-reports/INDEX.md`)
+- Check H1 report index for class prioritization (`~/dristi-reports/hackerone-reports/INDEX.md`)
 - Classify into Tiers (T0: public+input, T1: auth+input, T2: infra)
 - Risk-score each endpoint via `prioritize_endpoints()`
 - Save `endpoint_map_ranked` deliverable
@@ -55,8 +55,8 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 ### Phase P4: HUNT
 - Load `endpoint_map_ranked` + `auth_analysis`
 - **Deep testing** — API fuzzing, method override, content-type switch, GraphQL probing, race conditions, UUID analysis, JWT manipulation
-- **WAF handling** — apply vendor-specific bypass payloads from `get_waf_bypass()` + `~/dristi/waf-reference/`
-- **Read H1 reports** — per-class files in `~/dristi/docs/reports/hackerone-reports/<class>.md`
+- **WAF handling** — apply vendor-specific bypass payloads from `get_waf_bypass()` + `knowledge/waf/`
+- **Read H1 reports** — per-class files in `~/dristi-reports/hackerone-reports/<class>.md`
 - For each endpoint tier, dispatch applicable `@hunt-*` agents:
   - Tier 0 endpoints → full battery (XSS, SSRF, SQLi, SSTI, CMDI, IDOR, CSRF, etc.)
   - Tier 1 endpoints → auth-dependent tests (ATO, IDOR, OAuth, JWT, business logic)
@@ -64,7 +64,7 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - Validate PoC before logging: `validate_poc()`
 - Log findings: `log_finding()`, `track_test()`
 - Check chaining opportunities: `find_chains()`
-- Cross-reference severity against H1/Facebook/Google VRP writeups in `~/dristi/docs/reports/`
+- Cross-reference severity against H1/Facebook/Google VRP writeups in `~/dristi-reports/`
 
 ### Phase P5: CAPTURE
 - Load confirmed findings via `get_findings()`
@@ -114,9 +114,9 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 ### Reference-Based Prioritization
 
 Before testing any class, each hunt agent reads:
-- `~/dristi/docs/reports/hackerone-reports/<class>.md` — disclosed report patterns
-- `~/dristi/docs/reports/facebook-reports/` — Facebook writeups
-- `~/dristi/docs/reports/google-vrp-writeups/` — Google VRP writeups
+- `~/dristi-reports/hackerone-reports/<class>.md` — disclosed report patterns
+- `~/dristi-reports/facebook-reports/` — Facebook writeups
+- `~/dristi-reports/google-vrp-writeups/` — Google VRP writeups
 
 This informs which parameters are worth extra effort, which bypasses worked at scale, and which severity to expect.
 
@@ -129,7 +129,7 @@ graph TD
     A["Phase 1.5: identify_waf() MCP tool"] --> B{WAF detected?}
     B -->|No| C["Phase 4: normal testing"]
     B -->|Yes| D["Look up vendor: get_waf_bypass(vendor, class)"]
-    D --> E["Check waf-reference/ vendor KB"]
+    D --> E["Check knowledge/waf/ vendor KB"]
     E --> F["Apply evasion: encoding, splitting, HPP, case mutation"]
     F --> G["Test with WAF stealth payloads first"]
     G --> H{Blocked?}
@@ -147,7 +147,7 @@ If Cloudflare: redirect 80% of effort to API subdomain (api.*), use Playwright s
 
 ## Disclosed Report Impact on Testing
 
-Every `@hunt-*` agent reads its class file from `~/dristi/docs/reports/hackerone-reports/` before testing. This changes behavior:
+Every `@hunt-*` agent reads its class file from `~/dristi-reports/hackerone-reports/` before testing. This changes behavior:
 
 | If H1 reports show... | Agent does... |
 |------------------------|--------------|
@@ -163,17 +163,17 @@ Every `@hunt-*` agent reads its class file from `~/dristi/docs/reports/hackerone
 
 | Reference | Path | Contents |
 |-----------|------|----------|
-| H1 Reports | `~/dristi/docs/reports/hackerone-reports/<class>.md` | 14,682 disclosed reports per class |
-| Facebook Writeups | `~/dristi/docs/reports/facebook-reports/README.md` | 399 Meta bug bounty writeups |
-| Google VRP | `~/dristi/docs/reports/google-vrp-writeups/writeups.md` | 273 Google bug bounty writeups |
+| H1 Reports | `~/dristi-reports/hackerone-reports/<class>.md` | 14,682 disclosed reports per class |
+| Facebook Writeups | `~/dristi-reports/facebook-reports/README.md` | 399 Meta bug bounty writeups |
+| Google VRP | `~/dristi-reports/google-vrp-writeups/writeups.md` | 273 Google bug bounty writeups |
 | WSTG Tests | MCP Server (`get_wstg_test()`) | 96 test cases across 13 categories |
 | Technique Guides | MCP Server (`get_technique_guide()`) | 26 technique references |
-| PayloadsAllTheThings | `~/dristi/payloads-reference/` | 64 categories, ~25K payloads |
-| WAF Fingerprints | `~/dristi/waf-reference/waf-knowledge-base/02-waf-fingerprints/` | 144 vendor fingerprints |
-| WAF Bypasses | `~/dristi/waf-reference/waf-knowledge-base/04-known-bypasses/` | 24 vendor bypass files |
-| WAF Evasion | `~/dristi/waf-reference/waf-knowledge-base/03-evasion-techniques/` | 21 evasion categories |
-| WAF Skills | `~/dristi/waf-reference/skills/` | 15 loadable WAF skills |
-| PAT Test Harnesses | `~/dristi/scripts/payloads/` | 12 test.sh for automated class testing |
+| PayloadsAllTheThings | `knowledge/payloads/` | 64 categories, ~25K payloads |
+| WAF Fingerprints | `knowledge/waf/waf-knowledge-base/02-waf-fingerprints/` | 144 vendor fingerprints |
+| WAF Bypasses | `knowledge/waf/waf-knowledge-base/04-known-bypasses/` | 24 vendor bypass files |
+| WAF Evasion | `knowledge/waf/waf-knowledge-base/03-evasion-techniques/` | 21 evasion categories |
+| WAF Skills | `knowledge/waf/skills/` | 15 loadable WAF skills |
+| PAT Test Harnesses | `scripts/payloads/` | 12 test.sh for automated class testing |
 
 ---
 

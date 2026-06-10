@@ -21,7 +21,7 @@ You are an expert in mass assignment for penetration testing.
 
 ## PayloadsAllTheThings Reference
 
-This agent has a corresponding reference library at `payloads-reference/Mass Assignment/` (40 lines). Contains tools, methodology, and lab references.
+This agent has a corresponding reference library at `knowledge/payloads/Mass Assignment/` (40 lines). Contains tools, methodology, and lab references.
 
 ## Scope Notice
 

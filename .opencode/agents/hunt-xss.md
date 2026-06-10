@@ -28,7 +28,7 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 ## PayloadsAllTheThings Reference
 
-This agent has a corresponding reference library at `payloads-reference/XSS Injection/` (610 lines).
+This agent has a corresponding reference library at `knowledge/payloads/XSS Injection/` (610 lines).
 Read the README before/during testing for enriched methodology and bypass techniques:
 
 - **Methodology**: Detection techniques for different contexts and frameworks
@@ -445,9 +445,9 @@ When hunting **Cross-Site Scripting (XSS)**, use these resources BEFORE and DURI
 
 ### Before You Start
 
-1. **Read the report index:** `docs/hackerone-reports/xss.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
-2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-xss.md` — curated techniques with HTTP request/response examples and detection methods
-3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+1. **Read the report index:** `~/dristi-reports/hackerone-reports/xss.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi-reports/disclosed-reports/hunt-xss.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `~/dristi-reports/facebook-reports/README.md` if testing Meta-owned surfaces
 
 ### During Testing
 
@@ -468,7 +468,7 @@ When hunting **Cross-Site Scripting (XSS)**, use these resources BEFORE and DURI
 | 4 | [#526325] | [Stored XSS in Wiki pages](https://hackerone.com/reports/526325) |
 | 5 | [#484434] | [Stored XSS on imgur profile](https://hackerone.com/reports/484434) |
 
-**Full list:** `docs/hackerone-reports/xss.md` (2382 reports)
+**Full list:** `~/dristi-reports/hackerone-reports/xss.md` (2382 reports)
 
 ### Quick Fetch Commands
 
@@ -480,6 +480,6 @@ webfetch https://hackerone.com/reports/488147
 
 ### External Repositories
 
-- **HackerOne Reports:** `docs/hackerone-reports/xss.md` — per-class disclosed reports
-- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
-- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-xss.md` (exists)
+- **HackerOne Reports:** `~/dristi-reports/hackerone-reports/xss.md` — per-class disclosed reports
+- **HackerOne Master Index:** `~/dristi-reports/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi-reports/disclosed-reports/hunt-xss.md` (exists)

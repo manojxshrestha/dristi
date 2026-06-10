@@ -44,7 +44,7 @@ run_cloud_enum() {
     local cloud_enum_script="$TOOLS_DIR/cloud_enum/cloud_enum.py"
 
     if [ ! -x "$cloud_enum_venv" ] || [ ! -f "$cloud_enum_script" ]; then
-        log_warn "cloud_enum not installed — run ./tools/osint.sh --install"
+        log_warn "cloud_enum not installed — run ./tools/phase-intel.sh --install"
         log_info "Fallback: trying s3scanner on subdomains only"
         return 1
     fi

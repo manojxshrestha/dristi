@@ -565,6 +565,7 @@ def get_waf_bypass(
 
     if not all_bypasses:
         known_vendors = sorted(all_bypass_data.keys())
+        known_vulns = sorted({k for v in all_bypass_data.values() for k in v})
         return (
             f"No bypass payloads found for WAF='{vendor}', vuln_class='{vuln}'.\n\n"
             f"**Known WAF vendors**: {', '.join(known_vendors)}\n"

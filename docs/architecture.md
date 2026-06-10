@@ -14,8 +14,8 @@ Dristi is a dual-interface security testing platform: an **MCP server** (94 tool
 │  Server (94 tools)│    │  + Commands (14)         │
 │  ──────────────── │    │  ──────────────────────  │
 │  • WSTG v4.2     │    │  • hunt-xss, hunt-sqli   │
-│  • 31 technique  │    │  • bb-methodology        │
-│    guides         │    │  • triage-validation     │
+│  • H1 8,376+ rpts│    │  • bb-methodology        │
+│  • WAF bypass    │    │  • triage-validation     │
 │  • Findings DB    │    │  • offensive-osint       │
 │  • Engagement     │    │  • m365-entra-attack     │
 │    management     │    │  • ... 64 more           │
@@ -114,7 +114,7 @@ Slash commands in `.opencode/commands/` that route to specific agents:
 | `scripts/full_hunt.sh` | Full hunt pipeline |
 | `scripts/tools/` (37 files) | Scanners, testers, helpers |
 
-### 5. Wordlists (`wordlists/`)
+### 5. Wordlists (`knowledge/wordlists/`)
 
 Supplementary wordlists for recon and fuzzing: API endpoints, common paths, parameters, sensitive files.
 

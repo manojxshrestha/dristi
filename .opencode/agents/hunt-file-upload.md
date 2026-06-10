@@ -28,7 +28,7 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 ## PayloadsAllTheThings Reference
 
-This agent has a corresponding reference library at `payloads-reference/Upload Insecure Files/` (414 lines).
+This agent has a corresponding reference library at `knowledge/payloads/Upload Insecure Files/` (414 lines).
 Read the README before/during testing for enriched methodology and bypass techniques:
 
 - **Methodology**: Detection techniques for different contexts and frameworks
@@ -202,9 +202,9 @@ When hunting **File Upload**, use these resources BEFORE and DURING testing:
 
 ### Before You Start
 
-1. **Read the report index:** `docs/hackerone-reports/file-upload.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
-2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-file-upload.md` — curated techniques with HTTP request/response examples and detection methods
-3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+1. **Read the report index:** `~/dristi-reports/hackerone-reports/file-upload.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi-reports/disclosed-reports/hunt-file-upload.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `~/dristi-reports/facebook-reports/README.md` if testing Meta-owned surfaces
 
 ### During Testing
 
@@ -225,7 +225,7 @@ When hunting **File Upload**, use these resources BEFORE and DURING testing:
 | 4 | [#854032] | [Unrestricted file upload on [ambassador.mail.ru]](https://hackerone.com/reports/854032) |
 | 5 | [#683957] | [[ RCE ] Through stopping the redirect in /admin/* the attacker able to...](https://hackerone.com/reports/683957) |
 
-**Full list:** `docs/hackerone-reports/file-upload.md` (152 reports)
+**Full list:** `~/dristi-reports/hackerone-reports/file-upload.md` (152 reports)
 
 ### Quick Fetch Commands
 
@@ -237,6 +237,6 @@ webfetch https://hackerone.com/reports/1010466
 
 ### External Repositories
 
-- **HackerOne Reports:** `docs/hackerone-reports/file-upload.md` — per-class disclosed reports
-- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
-- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-file-upload.md` (exists)
+- **HackerOne Reports:** `~/dristi-reports/hackerone-reports/file-upload.md` — per-class disclosed reports
+- **HackerOne Master Index:** `~/dristi-reports/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi-reports/disclosed-reports/hunt-file-upload.md` (exists)

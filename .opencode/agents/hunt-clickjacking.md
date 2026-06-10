@@ -21,7 +21,7 @@ You are an expert in clickjacking for penetration testing.
 
 ## PayloadsAllTheThings Reference
 
-This agent has a corresponding reference library at `payloads-reference/Clickjacking/` (256 lines). Contains methodology on UI redressing, invisible frames, button/form hijacking, framebusting bypass, and XSS filter evasion.
+This agent has a corresponding reference library at `knowledge/payloads/Clickjacking/` (256 lines). Contains methodology on UI redressing, invisible frames, button/form hijacking, framebusting bypass, and XSS filter evasion.
 
 ## Scope Notice
 

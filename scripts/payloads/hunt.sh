@@ -10,7 +10,7 @@ RUN_NUCLEI=false
 [ "${3:-}" = "--nuclei" ] || [ "${2:-}" = "--nuclei" ] && RUN_NUCLEI=true
 [ "${2:-}" = "--nuclei" ] && MODE=quick
 
-RECON_DIR="$BASE_DIR/engagements/$ENGAGEMENT/recon"
+RECON_DIR="$BASE_DIR/runtime/engagements/$ENGAGEMENT/recon"
 URLS_DIR="$RECON_DIR/urls"
 HITS_DIR="$RECON_DIR/hits"
 LIVE_FILE="$RECON_DIR/live.txt"

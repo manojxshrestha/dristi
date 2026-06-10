@@ -81,11 +81,11 @@ mkdir -p "$FINDINGS_DIR"/{xss,sqli,takeover,misconfig,exposure,ssrf,cves,redirec
 if [ "$(basename "$(dirname "$RECON_DIR")")" = "sessions" ]; then
     SESSION_ID=$(basename "$RECON_DIR")
     TARGET=$(basename "$(dirname "$(dirname "$RECON_DIR")")")
-    DEFAULT_FINDINGS_DIR="$BASE_DIR/findings/$TARGET/sessions/$SESSION_ID"
+    DEFAULT_FINDINGS_DIR="$BASE_DIR/runtime/findings/$TARGET/sessions/$SESSION_ID"
 else
     SESSION_ID=""
     TARGET=$(basename "$RECON_DIR")
-    DEFAULT_FINDINGS_DIR="$BASE_DIR/findings/$TARGET"
+    DEFAULT_FINDINGS_DIR="$BASE_DIR/runtime/findings/$TARGET"
 fi
 
 FINDINGS_DIR="${FINDINGS_OUT_DIR:-$DEFAULT_FINDINGS_DIR}"

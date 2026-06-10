@@ -159,7 +159,7 @@ Runs cloud_enum on subdomains + s3scanner + trufflehog:
 - `[OPEN_UPLOAD]` — public + accepts PUT — HIGHEST priority (write access without auth)
 - `[LEAKED_SECRET]` — trufflehog found credentials in the bucket
 
-If `cloud_enum` is not installed, run first: `bash scripts/tools/osint.sh --install`
+If `cloud_enum` is not installed, run first: `bash scripts/tools/phase-intel.sh --install`
 
 ### Step 8: Compiled Endpoint Triage
 

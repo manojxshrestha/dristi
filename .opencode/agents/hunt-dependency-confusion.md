@@ -21,7 +21,7 @@ You are an expert in dependency confusion for penetration testing.
 
 ## PayloadsAllTheThings Reference
 
-This agent has a corresponding reference library at `payloads-reference/Dependency Confusion/` (39 lines). Contains tools, methodology for NPM/pip/gem/Maven, and real-world references (Apple, Microsoft, PayPal).
+This agent has a corresponding reference library at `knowledge/payloads/Dependency Confusion/` (39 lines). Contains tools, methodology for NPM/pip/gem/Maven, and real-world references (Apple, Microsoft, PayPal).
 
 ## Scope Notice
 

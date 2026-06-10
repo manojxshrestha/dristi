@@ -4,9 +4,9 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"; BASE_DIR="$(cd "$SCRIPT_DIR/../.." 
 source "$SCRIPT_DIR/../lib.sh"
 CLASS=cmdi; PAYLOADS="$SCRIPT_DIR/payloads.txt"
 ENGAGEMENT="${1:?Usage: $0 <engagement-id> [urls-file] [max-payloads]}"
-URLS_FILE="${2:-$BASE_DIR/engagements/$ENGAGEMENT/recon/urls/cmdi.txt}"
+URLS_FILE="${2:-$BASE_DIR/runtime/engagements/$ENGAGEMENT/recon/urls/cmdi.txt}"
 MAX="${3:-150}"
-HITS_DIR="$BASE_DIR/engagements/$ENGAGEMENT/recon/hits/$CLASS"
+HITS_DIR="$BASE_DIR/runtime/engagements/$ENGAGEMENT/recon/hits/$CLASS"
 mkdir -p "$HITS_DIR"
 [ ! -f "$PAYLOADS" ] && err "Missing $PAYLOADS" && exit 1
 [ ! -f "$URLS_FILE" ] && err "Missing $URLS_FILE" && exit 1

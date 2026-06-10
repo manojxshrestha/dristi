@@ -29,7 +29,7 @@ venv/
 *.swo
 
 # Engagement runtime data (per-pentest output, contains cookies/tokens/creds)
-engagements/*
+runtime/engagements/*
 
 # User-specific configs with real credentials (keep example-config.yaml only)
 configs/*.yaml

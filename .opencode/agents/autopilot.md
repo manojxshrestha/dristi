@@ -11,7 +11,7 @@ You are a thin orchestrator. You do NOT run tools directly. You dispatch each ph
 ```
 Phase 1 (SCOPE)     → run directly (register, init, create task tree)
 Phase 1.5 (AUTH)    → run directly (get creds, test, save deliverable)
-Phase 1.75 (OSINT)  → run directly (WHOIS, M365, misconfig-mapper, spoof, cloud_enum)
+Phase 1.75 (Intel)  → run directly (WHOIS, M365, misconfig-mapper, spoof, cloud_enum)
 Phase 2 (RECON)     → task(subagent_type="recon", ...)
 Phase 3 (SURFACE)   → task(subagent_type="surface", ...)
 Phase 4 (HUNT)      → task(subagent_type="hunt", ...)
@@ -67,29 +67,29 @@ Phase 7 (REPORT)    → task(subagent_type="report", ...)
 
 Proceed to Phase 1.75.
 
-## Phase 1.75: OSINT (passive)
+## Phase 1.75: Intel (passive)
 
-1. Run passive OSINT for each target domain:
+1. Run passive intel for each target domain:
    ```bash
-   bash scripts/tools/osint.sh <domain>
+   bash scripts/tools/phase-intel.sh <domain>
    ```
-2. Output lands in `engagements/<eid>/recon/<domain>/osint/`:
+2. Output lands in `runtime/engagements/<eid>/recon/<domain>/intel/`:
    - `domain_info_general.txt` — WHOIS data
    - `azure_tenant_domains.txt` — M365/Azure tenant info
    - `scopify.txt` — Scope analysis
    - `3rdparts_misconfigurations.txt` — Exposed SaaS (Slack, Jira, GitHub, etc.)
    - `spoof.txt` — SPF/DMARC spoofability
    - `cloud_enum.txt` — Cloud storage buckets (AWS S3, Azure Blob, GCP)
-3. Save OSINT deliverable:
+3. Save Intel deliverable:
    ```
    wstg_save_deliverable(
-     deliverable_type='osint_analysis',
+     deliverable_type='intel_analysis',
      content=<summary of findings>,
-     producer_agent='scope'
+     producer_agent='pintel'
    )
    ```
-4. Track tool: `wstg_track_tool(tool_name='osint', status='run', notes='WHOIS + misconfig-mapper + Spoofy + cloud_enum')`
-5. If no OSINT tools are installed, log a warning `[MISSING TOOLS]` and proceed — OSINT is informative, not blocking.
+4. Track tool: `wstg_track_tool(tool_name='pintel', status='run', notes='WHOIS + misconfig-mapper + Spoofy + cloud_enum')`
+5. If no intel tools are installed, log a warning `[MISSING TOOLS]` and proceed — Intel is informative, not blocking.
 
 Proceed to Phase 2.
 
@@ -121,7 +121,7 @@ Return: summary of findings, gate result (PASS/FAIL), number of endpoints discov
 
 ## Phase 3: SURFACE (dispatch)
 
-**Before dispatch:** Review `docs/hackerone-reports/` for bug classes matching this target's tech stack — prioritize classes with the most disclosed reports.
+**Before dispatch:** Review `~/dristi-reports/hackerone-reports/` for bug classes matching this target's tech stack — prioritize classes with the most disclosed reports.
 
 ```
 task(
@@ -145,7 +145,7 @@ Return: Tier 0 count, Tier 1 count, gate result (PASS/FAIL), top 5 priority endp
 
 ## Phase 4: HUNT (dispatch)
 
-**Before dispatch:** Each sub-agent should read its `docs/hackerone-reports/<class>.md` file BEFORE starting tests to learn real-world payloads and bypass techniques. The `webfetch` command can pull full HackerOne disclosures during testing for technique guidance.
+**Before dispatch:** Each sub-agent should read its `~/dristi-reports/hackerone-reports/<class>.md` file BEFORE starting tests to learn real-world payloads and bypass techniques. The `webfetch` command can pull full HackerOne disclosures during testing for technique guidance.
 
 ```
 task(
@@ -270,8 +270,8 @@ Present this exact summary:
 ║ Domains tested: <N> core                                    ║
 ║ Bug classes tested: <N>                                      ║
 ║                                                              ║
-║ Full report: engagements/<eid>/report.md                     ║
-║ Structured data: engagements/<eid>/findings.json             ║
+║ Full report: runtime/engagements/<eid>/report.md                     ║
+║ Structured data: runtime/engagements/<eid>/findings.json             ║
 ║ PoC evidence: scripts/recon/*/evidence/                      ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
