@@ -26,6 +26,16 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
 8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
+## PayloadsAllTheThings Reference
+
+This agent has a corresponding reference library at `payloads-reference/Cross-Site Request Forgery/` (163 lines).
+Read the README before/during testing for enriched methodology and bypass techniques:
+
+- **Methodology**: Detection techniques for different contexts and frameworks
+- **Payloads**: Classified payloads by injection point and filter type
+- **Bypass Patterns**: WAF/filter evasion specific to CSRF
+- **Labs**: PortSwigger and real-world practice labs
+
 ## Scope Notice
 
 - **Advisory mode** (default): You provide methodology, payloads, and analysis. The user executes commands.
@@ -351,3 +361,47 @@ No Duende.BFF-direct CVE exists as of 2026-05. The three classes above are **des
 - **`oauth-hunter`** — OAuth/SAML `state`/`RelayState` is structurally a CSRF token; missing validation here is account-linking CSRF. Chain primitive: attacker initiates OAuth on their account, sends victim the `/callback?code=X&state=` URL → victim's logged-in browser completes the link → attacker's social identity now controls victim's account.
 - **`security-arsenal`** — Reach for the CSRF PoC templates (form POST, `enctype=text/plain` JSON, sandboxed-iframe null-origin, base64 multipart bypass) before writing one from scratch; also the WAF-bypass header variants for Origin/Referer checks.
 - **`triage-validator`** — Run the Pre-Severity Gate before submitting CSRF on a logout endpoint or any action without state-change consequence — those are the canonical N/A traps. Confirm victim LOSES something concrete (account access, money, data), not just "a request executed."
+## Disclosed Reports Reference
+
+When hunting **Cross-Site Request Forgery (CSRF)**, use these resources BEFORE and DURING testing:
+
+### Before You Start
+
+1. **Read the report index:** `docs/hackerone-reports/csrf.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-csrf.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+
+### During Testing
+
+- **Fetch a report when stuck:** If a test shows promise but you need a payload/bypass idea, use `webfetch` to pull the full HackerOne disclosure:
+  ```
+  webfetch https://hackerone.com/reports/807924
+  ```
+- **Study the technique** from the fetched report, then apply it to your current target
+- **Cross-reference impact:** After confirming a bug, check similar HackerOne reports to validate your severity classification
+
+### Top 5 Most-Upvoted Cross-Site Request Forgery (CSRF) Reports
+
+| # | Report ID | Title |
+|---|-----------|-------|
+| 1 | [#807924] | [CSRF on connecting Paypal as Payment Provider](https://hackerone.com/reports/807924) |
+| 2 | [#463330] | [Account Takeover using Linked Accounts due to lack of CSRF protection](https://hackerone.com/reports/463330) |
+| 3 | [#583987] | [Periscope android app deeplink leads to CSRF in follow action](https://hackerone.com/reports/583987) |
+| 4 | [#604120] | [Chaining Bugs: Leakage of CSRF token which leads to Stored XSS and Acc...](https://hackerone.com/reports/604120) |
+| 5 | [#1727221] | [Improper CSRF token validation allows attackers to access victim's acc...](https://hackerone.com/reports/1727221) |
+
+**Full list:** `docs/hackerone-reports/csrf.md` (475 reports)
+
+### Quick Fetch Commands
+
+```bash
+webfetch https://hackerone.com/reports/807924
+webfetch https://hackerone.com/reports/463330
+webfetch https://hackerone.com/reports/583987
+```
+
+### External Repositories
+
+- **HackerOne Reports:** `docs/hackerone-reports/csrf.md` — per-class disclosed reports
+- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-csrf.md` (exists)

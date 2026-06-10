@@ -26,6 +26,16 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
 8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
+## PayloadsAllTheThings Reference
+
+This agent has a corresponding reference library at `payloads-reference/GraphQL Injection/` (496 lines).
+Read the README before/during testing for enriched methodology and bypass techniques:
+
+- **Methodology**: Detection techniques for different contexts and frameworks
+- **Payloads**: Classified payloads by injection point and filter type
+- **Bypass Patterns**: WAF/filter evasion specific to GRAPHQL
+- **Labs**: PortSwigger and real-world practice labs
+
 ## Scope Notice
 
 - **Advisory mode** (default): You provide methodology, payloads, and analysis. The user executes commands.
@@ -375,3 +385,47 @@ The following real, verified bug-bounty / coordinated-disclosure cases extend th
 - **`race-condition-hunter`** — GraphQL batching collapses N mutations into one HTTP packet — perfect single-packet race vehicle. Chain primitive: GraphQL batch + race → atomic-update missing → double-spend balance.
 - **`security-arsenal`** — Load the GraphQL Payload Pack: introspection query, schema-suggestion error probe, alias amplification template, depth-bomb DoS payload, batch-attack template.
 - **`triage-validator`** — Apply the Body-Diff Rule: introspection alone is informational; require a concrete cross-tenant read or mutation-with-impact PoC before submitting.
+## Disclosed Reports Reference
+
+When hunting **GraphQL**, use these resources BEFORE and DURING testing:
+
+### Before You Start
+
+1. **Read the report index:** `docs/hackerone-reports/graphql.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-graphql.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+
+### During Testing
+
+- **Fetch a report when stuck:** If a test shows promise but you need a payload/bypass idea, use `webfetch` to pull the full HackerOne disclosure:
+  ```
+  webfetch https://hackerone.com/reports/489146
+  ```
+- **Study the technique** from the fetched report, then apply it to your current target
+- **Cross-reference impact:** After confirming a bug, check similar HackerOne reports to validate your severity classification
+
+### Top 5 Most-Upvoted GraphQL Reports
+
+| # | Report ID | Title |
+|---|-----------|-------|
+| 1 | [#489146] | [Confidential data of users and limited metadata of programs and report...](https://hackerone.com/reports/489146) |
+| 2 | [#792927] | [Email address of any user can be queried on Report Invitation GraphQL ...](https://hackerone.com/reports/792927) |
+| 3 | [#2122671] | [IDOR - Delete all Licenses and certifications from users account using...](https://hackerone.com/reports/2122671) |
+| 4 | [#885539] | [Private list members disclosure via GraphQL](https://hackerone.com/reports/885539) |
+| 5 | [#1864188] | [SSRF in graphQL query (pwapi.ex2b.com)](https://hackerone.com/reports/1864188) |
+
+**Full list:** `docs/hackerone-reports/graphql.md` (71 reports)
+
+### Quick Fetch Commands
+
+```bash
+webfetch https://hackerone.com/reports/489146
+webfetch https://hackerone.com/reports/792927
+webfetch https://hackerone.com/reports/2122671
+```
+
+### External Repositories
+
+- **HackerOne Reports:** `docs/hackerone-reports/graphql.md` — per-class disclosed reports
+- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-graphql.md` (exists)

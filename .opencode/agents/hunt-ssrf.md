@@ -26,6 +26,16 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
 8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
+## PayloadsAllTheThings Reference
+
+This agent has a corresponding reference library at `payloads-reference/Server Side Request Forgery/` (465 lines).
+Read the README before/during testing for enriched methodology and bypass techniques:
+
+- **Methodology**: Detection techniques for different contexts and frameworks
+- **Payloads**: Classified payloads by injection point and filter type
+- **Bypass Patterns**: WAF/filter evasion specific to SSRF
+- **Labs**: PortSwigger and real-world practice labs
+
 ## Scope Notice
 
 - **Advisory mode** (default): You provide methodology, payloads, and analysis. The user executes commands.
@@ -682,3 +692,47 @@ All cloud metadata SSRF leading to credential theft is **Critical (CVSS 9.8+)**.
 ### Related skills
 
 Cross-reference: `hunt-ssrf` (for general bypass techniques), `hunt-llm-ai` (for SSRF via AI agent tool calls), `hunt-oauth` (if IAM keys include OAuth/OIDC secrets).
+## Disclosed Reports Reference
+
+When hunting **Server-Side Request Forgery (SSRF)**, use these resources BEFORE and DURING testing:
+
+### Before You Start
+
+1. **Read the report index:** `docs/hackerone-reports/ssrf.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-ssrf.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+
+### During Testing
+
+- **Fetch a report when stuck:** If a test shows promise but you need a payload/bypass idea, use `webfetch` to pull the full HackerOne disclosure:
+  ```
+  webfetch https://hackerone.com/reports/885975
+  ```
+- **Study the technique** from the fetched report, then apply it to your current target
+- **Cross-reference impact:** After confirming a bug, check similar HackerOne reports to validate your severity classification
+
+### Top 5 Most-Upvoted Server-Side Request Forgery (SSRF) Reports
+
+| # | Report ID | Title |
+|---|-----------|-------|
+| 1 | [#885975] | [My Expense Report resulted in a Server-Side Request Forgery (SSRF) on ...](https://hackerone.com/reports/885975) |
+| 2 | [#341876] | [SSRF in Exchange leads to ROOT access in all instances](https://hackerone.com/reports/341876) |
+| 3 | [#2262382] | [Server Side Request Forgery (SSRF) via Analytics Reports](https://hackerone.com/reports/2262382) |
+| 4 | [#530974] | [Server-Side Request Forgery using Javascript allows to exfill data fro...](https://hackerone.com/reports/530974) |
+| 5 | [#923132] | [Server Side Request Forgery (SSRF) at app.hellosign.com leads to AWS p...](https://hackerone.com/reports/923132) |
+
+**Full list:** `docs/hackerone-reports/ssrf.md` (309 reports)
+
+### Quick Fetch Commands
+
+```bash
+webfetch https://hackerone.com/reports/885975
+webfetch https://hackerone.com/reports/341876
+webfetch https://hackerone.com/reports/2262382
+```
+
+### External Repositories
+
+- **HackerOne Reports:** `docs/hackerone-reports/ssrf.md` — per-class disclosed reports
+- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-ssrf.md` (exists)

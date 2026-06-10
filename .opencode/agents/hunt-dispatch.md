@@ -223,3 +223,26 @@ never echo back, log, or persist:
 - **`okta-attacker`** / **`m365-attacker`** / **`vpn-attacker`** / **`vcenter-attacker`** / **`cloud-iam-auditor`** / **`supply-chain-hunter`** / **`apk-analyzer`** — When fingerprint signals match. Workflow primitive: step 1's curl fingerprint scan against `recon/<target>/live-hosts.txt` maps banner / domain signals to one or more of these platform skills.
 - **`rce-hunter`** / **`sqli-hunter`** / **`ssrf-hunter`** / **`ato-hunter`** / **all other hunt-* skills`** — When the mode-specific skill set is being printed. Workflow primitive: this skill is the loader; it names the hunt-* skills but does not run probes — actual hunting happens after step 4 returns control to `/hunt`.
 - **`report-writer`** vs **`redteam-reporter`** — When the taxonomy print specifies the report format. Workflow primitive: `mode=wapt` ends with `report-writer` as the deliverable format; `mode=redteam` ends with `redteam-reporter` instead.
+
+## Disclosed Reports Reference
+
+When hunting **Dispatch**, use these resources:
+
+### Before You Start
+
+1. **Browse the master index:** `docs/hackerone-reports/INDEX.md` — find reports relevant to your class
+3. **Check Facebook writeups:** `docs/facebook-reports/facebook-writeups.md` if testing Meta/Meta-owned surfaces
+
+### During Testing
+
+- When you find a potential vulnerability, search the HackerOne disclosed reports index for similar findings to:
+  - Discover payload/bypass techniques from real reports
+  - Validate your impact assessment against paid bounties
+  - Cross-check severity classification
+- Use `webfetch` to read a relevant HackerOne report when you need technique guidance
+
+### External Repositories
+
+- **HackerOne Reports (Master):** `docs/hackerone-reports/INDEX.md` — 14,682+ structured disclosed reports
+- **HackerOne TOP by Class:** `docs/hackerone-reports/` — per-class report files (24 classes)
+- **Facebook Writeups:** `docs/facebook-reports/facebook-writeups.md` — Meta bug bounty writeups

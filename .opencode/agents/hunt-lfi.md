@@ -26,6 +26,16 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
 8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
+## PayloadsAllTheThings Reference
+
+This agent has a corresponding reference library at `payloads-reference/File Inclusion/` (146 lines).
+Read the README before/during testing for enriched methodology and bypass techniques:
+
+- **Methodology**: Detection techniques for different contexts and frameworks
+- **Payloads**: Classified payloads by injection point and filter type
+- **Bypass Patterns**: WAF/filter evasion specific to LFI
+- **Labs**: PortSwigger and real-world practice labs
+
 ## Scope Notice
 
 - **Advisory mode** (default): You provide methodology, payloads, and analysis. The user executes commands.
@@ -225,3 +235,47 @@ dotdotpwn.pl -m http -h $TARGET -o unix
 - File read only (non-secret): Medium
 - File read exposing DB creds / API keys: High
 - RCE via log poisoning / session / phar: Critical
+## Disclosed Reports Reference
+
+When hunting **Local File Inclusion / Path Traversal**, use these resources BEFORE and DURING testing:
+
+### Before You Start
+
+1. **Read the report index:** `docs/hackerone-reports/lfi.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-lfi.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+
+### During Testing
+
+- **Fetch a report when stuck:** If a test shows promise but you need a payload/bypass idea, use `webfetch` to pull the full HackerOne disclosure:
+  ```
+  webfetch https://hackerone.com/reports/809819
+  ```
+- **Study the technique** from the fetched report, then apply it to your current target
+- **Cross-reference impact:** After confirming a bug, check similar HackerOne reports to validate your severity classification
+
+### Top 5 Most-Upvoted Local File Inclusion / Path Traversal Reports
+
+| # | Report ID | Title |
+|---|-----------|-------|
+| 1 | [#809819] | [HTML-injection in PDF-export leads to LFI](https://hackerone.com/reports/809819) |
+| 2 | [#1189367] | [Full read SSRF in www.evernote.com that can leak aws metadata and loca...](https://hackerone.com/reports/1189367) |
+| 3 | [#876295] | [Misuse of an authentication cookie combined with a path traversal on a...](https://hackerone.com/reports/876295) |
+| 4 | [#713006] | [Keybase client (Windows 10): Write files anywhere in userland using re...](https://hackerone.com/reports/713006) |
+| 5 | [#697055] | [Worker container escape lead to arbitrary file reading in host machine...](https://hackerone.com/reports/697055) |
+
+**Full list:** `docs/hackerone-reports/lfi.md` (387 reports)
+
+### Quick Fetch Commands
+
+```bash
+webfetch https://hackerone.com/reports/809819
+webfetch https://hackerone.com/reports/1189367
+webfetch https://hackerone.com/reports/876295
+```
+
+### External Repositories
+
+- **HackerOne Reports:** `docs/hackerone-reports/lfi.md` — per-class disclosed reports
+- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-lfi.md` (exists)

@@ -11,6 +11,7 @@ You are a thin orchestrator. You do NOT run tools directly. You dispatch each ph
 ```
 Phase 1 (SCOPE)     → run directly (register, init, create task tree)
 Phase 1.5 (AUTH)    → run directly (get creds, test, save deliverable)
+Phase 1.75 (OSINT)  → run directly (WHOIS, M365, misconfig-mapper, spoof, cloud_enum)
 Phase 2 (RECON)     → task(subagent_type="recon", ...)
 Phase 3 (SURFACE)   → task(subagent_type="surface", ...)
 Phase 4 (HUNT)      → task(subagent_type="hunt", ...)
@@ -22,7 +23,7 @@ Phase 7 (REPORT)    → task(subagent_type="report", ...)
 ## HARD RULES — DO NOT VIOLATE
 
 1. **NO skipping.** Run every phase in order. Never skip.
-2. **NO jumping.** Complete Phase 1 fully before Phase 1.5. Phase 1.5 before Phase 2. And so on.
+2. **NO jumping.** Complete Phase 1 fully before Phase 1.5. Phase 1.5 before Phase 1.75. Phase 1.75 before Phase 2. And so on.
 3. **NO asking (autopilot mode).** Do not ask the user any questions during the pipeline. Just execute.
 4. **Dispatch, don't inline.** Use `task()` for phases 2-7. Do NOT run tool commands directly.
 5. **Check gates.** After every sub-agent returns, call `wstg_phase_gate_check()` and verify PASS before advancing.
@@ -64,6 +65,32 @@ Phase 7 (REPORT)    → task(subagent_type="report", ...)
    )
    ```
 
+Proceed to Phase 1.75.
+
+## Phase 1.75: OSINT (passive)
+
+1. Run passive OSINT for each target domain:
+   ```bash
+   bash scripts/tools/osint.sh <domain>
+   ```
+2. Output lands in `engagements/<eid>/recon/<domain>/osint/`:
+   - `domain_info_general.txt` — WHOIS data
+   - `azure_tenant_domains.txt` — M365/Azure tenant info
+   - `scopify.txt` — Scope analysis
+   - `3rdparts_misconfigurations.txt` — Exposed SaaS (Slack, Jira, GitHub, etc.)
+   - `spoof.txt` — SPF/DMARC spoofability
+   - `cloud_enum.txt` — Cloud storage buckets (AWS S3, Azure Blob, GCP)
+3. Save OSINT deliverable:
+   ```
+   wstg_save_deliverable(
+     deliverable_type='osint_analysis',
+     content=<summary of findings>,
+     producer_agent='scope'
+   )
+   ```
+4. Track tool: `wstg_track_tool(tool_name='osint', status='run', notes='WHOIS + misconfig-mapper + Spoofy + cloud_enum')`
+5. If no OSINT tools are installed, log a warning `[MISSING TOOLS]` and proceed — OSINT is informative, not blocking.
+
 Proceed to Phase 2.
 
 ## Phase 2: RECON (dispatch)
@@ -76,7 +103,7 @@ task(
   prompt="Target: <domain>. Run the complete Phase 2 recon workflow:
 1. batch_subdomain_enum + dns_bruteforce + web_crawl + param_extract
 2. cariddi + nuclei + dir_bruteforce + bypass_403 + vhost_fuzz
-3. zone_transfer + takeover_scanner + cloud_recon + cve_scan + auto_secrets
+3. zone_transfer + takeover_scanner + cloud_recon + s3_buckets + cve_scan + auto_secrets
 4. Answer the 3 triage questions for every discovered endpoint
 5. Save endpoint_map_raw deliverable via wstg_save_deliverable()
 6. Call wstg_phase_gate_check(phase_completed=1)
@@ -93,6 +120,8 @@ Return: summary of findings, gate result (PASS/FAIL), number of endpoints discov
 - `wstg_phase_gate_check(phase_completed=1)` → PASS → checkpoint → proceed.
 
 ## Phase 3: SURFACE (dispatch)
+
+**Before dispatch:** Review `docs/hackerone-reports/` for bug classes matching this target's tech stack — prioritize classes with the most disclosed reports.
 
 ```
 task(
@@ -115,6 +144,8 @@ Return: Tier 0 count, Tier 1 count, gate result (PASS/FAIL), top 5 priority endp
 - `wstg_phase_gate_check(phase_completed=2)` → PASS → checkpoint → proceed.
 
 ## Phase 4: HUNT (dispatch)
+
+**Before dispatch:** Each sub-agent should read its `docs/hackerone-reports/<class>.md` file BEFORE starting tests to learn real-world payloads and bypass techniques. The `webfetch` command can pull full HackerOne disclosures during testing for technique guidance.
 
 ```
 task(

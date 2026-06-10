@@ -26,6 +26,16 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
 8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
+## PayloadsAllTheThings Reference
+
+This agent has a corresponding reference library at `payloads-reference/Server Side Template Injection/` (229 lines).
+Read the README before/during testing for enriched methodology and bypass techniques:
+
+- **Methodology**: Detection techniques for different contexts and frameworks
+- **Payloads**: Classified payloads by injection point and filter type
+- **Bypass Patterns**: WAF/filter evasion specific to SSTI
+- **Labs**: PortSwigger and real-world practice labs
+
 ## Scope Notice
 
 - **Advisory mode** (default): You provide methodology, payloads, and analysis. The user executes commands.
@@ -81,3 +91,47 @@ URL path parameters, search queries reflected in results, HTTP headers reflected
 - **`file-upload-hunter`** — Office docs, SVGs, and email templates uploaded by the user are common SSTI surfaces (the server re-renders them). Chain primitive: upload a DOCX whose `word/document.xml` contains `${T(java.lang.Runtime).getRuntime().exec("id")}` to a Velocity/Freemarker-driven mail-merge → RCE.
 - **`security-arsenal`** — Reach for the engine-specific escape payload tree: Jinja2 class-walker variants (`__subclasses__()[N]` index hunting), Twig `_self.env` registerUndefinedFilterCallback, Freemarker `?new()` Execute, ERB backticks, Velocity `$class.inspect`, Smarty `{php}...{/php}`, plus the WAF-bypass variants (`{{request|attr('application')|...}}`, Unicode escapes, `{%print(...)%}`).
 - **`triage-validator`** — Apply the Pre-Severity Gate before claiming Critical RCE. A `{{7*7}} → 49` reflection inside a sandboxed engine (e.g., Twig sandbox mode, Jinja2 SandboxedEnvironment with no escape) is Medium SSTI, not Critical RCE. Prove `id`/OOB DNS callback with a unique marker before writing the report.
+## Disclosed Reports Reference
+
+When hunting **Server-Side Template Injection (SSTI)**, use these resources BEFORE and DURING testing:
+
+### Before You Start
+
+1. **Read the report index:** `docs/hackerone-reports/ssti.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-ssti.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+
+### During Testing
+
+- **Fetch a report when stuck:** If a test shows promise but you need a payload/bypass idea, use `webfetch` to pull the full HackerOne disclosure:
+  ```
+  webfetch https://hackerone.com/reports/423541
+  ```
+- **Study the technique** from the fetched report, then apply it to your current target
+- **Cross-reference impact:** After confirming a bug, check similar HackerOne reports to validate your severity classification
+
+### Top 5 Most-Upvoted Server-Side Template Injection (SSTI) Reports
+
+| # | Report ID | Title |
+|---|-----------|-------|
+| 1 | [#423541] | [H1514 Server Side Template Injection in Return Magic email templates?](https://hackerone.com/reports/423541) |
+| 2 | [#536130] | [Path traversal, SSTI and RCE on a MailRu acquisition](https://hackerone.com/reports/536130) |
+| 3 | [#164224] | [Urgent: Server side template injection via Smarty template allows for ...](https://hackerone.com/reports/164224) |
+| 4 | [#399462] | [Reflected XSS and Server Side Template Injection  in all HubSpot CMSes](https://hackerone.com/reports/399462) |
+| 5 | [#944359] | [Python : Add query to detect Server Side Template Injection](https://hackerone.com/reports/944359) |
+
+**Full list:** `docs/hackerone-reports/ssti.md` (12 reports)
+
+### Quick Fetch Commands
+
+```bash
+webfetch https://hackerone.com/reports/423541
+webfetch https://hackerone.com/reports/536130
+webfetch https://hackerone.com/reports/164224
+```
+
+### External Repositories
+
+- **HackerOne Reports:** `docs/hackerone-reports/ssti.md` — per-class disclosed reports
+- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-ssti.md` (exists)

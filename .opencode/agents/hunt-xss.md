@@ -26,6 +26,16 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
 8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
+## PayloadsAllTheThings Reference
+
+This agent has a corresponding reference library at `payloads-reference/XSS Injection/` (610 lines).
+Read the README before/during testing for enriched methodology and bypass techniques:
+
+- **Methodology**: Detection techniques for different contexts and frameworks
+- **Payloads**: Classified payloads by injection point and filter type
+- **Bypass Patterns**: WAF/filter evasion specific to XSS
+- **Labs**: PortSwigger and real-world practice labs
+
 ## Scope Notice
 
 - **Advisory mode** (default): You provide methodology, payloads, and analysis. The user executes commands.
@@ -429,3 +439,47 @@ Cross-references:
 - **`http-smuggler`** — Smuggling delivers an XSS payload into the response queue of the NEXT victim's request, even on endpoints that sanitize their own inputs. Chain primitive: smuggle a request whose response (carrying attacker HTML) is served as the body of the next legitimate user's GET / → reflected XSS at every visitor without any URL parameter visible in their address bar.
 - **`security-arsenal`** — Reach for the XSS payload bank (SVG+style, math+style mXSS, CSP-bypass JSONP gadgets, HTML5 event handlers WAFs miss) before hand-crafting payloads; also the always-rejected list to confirm self-XSS / alert-only PoCs are not submittable.
 - **`triage-validator`** — Run the Pre-Severity Gate before claiming Critical on stored XSS that only fires in the attacker's own session, or before claiming reflected XSS where the canary appears HTML-encoded (`&lt;`) in the response body — those are the two most common downgrade-to-N/A traps.
+## Disclosed Reports Reference
+
+When hunting **Cross-Site Scripting (XSS)**, use these resources BEFORE and DURING testing:
+
+### Before You Start
+
+1. **Read the report index:** `docs/hackerone-reports/xss.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-xss.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+
+### During Testing
+
+- **Fetch a report when stuck:** If a test shows promise but you need a payload/bypass idea, use `webfetch` to pull the full HackerOne disclosure:
+  ```
+  webfetch https://hackerone.com/reports/510152
+  ```
+- **Study the technique** from the fetched report, then apply it to your current target
+- **Cross-reference impact:** After confirming a bug, check similar HackerOne reports to validate your severity classification
+
+### Top 5 Most-Upvoted Cross-Site Scripting (XSS) Reports
+
+| # | Report ID | Title |
+|---|-----------|-------|
+| 1 | [#510152] | [Bypass for #488147 enables stored XSS on https://paypal.com/signin aga...](https://hackerone.com/reports/510152) |
+| 2 | [#846338] | [Reflected XSS on https://www.glassdoor.com/employers/sem-dual-lp/](https://hackerone.com/reports/846338) |
+| 3 | [#488147] | [Stored XSS on https://paypal.com/signin via cache poisoning](https://hackerone.com/reports/488147) |
+| 4 | [#526325] | [Stored XSS in Wiki pages](https://hackerone.com/reports/526325) |
+| 5 | [#484434] | [Stored XSS on imgur profile](https://hackerone.com/reports/484434) |
+
+**Full list:** `docs/hackerone-reports/xss.md` (2382 reports)
+
+### Quick Fetch Commands
+
+```bash
+webfetch https://hackerone.com/reports/510152
+webfetch https://hackerone.com/reports/846338
+webfetch https://hackerone.com/reports/488147
+```
+
+### External Repositories
+
+- **HackerOne Reports:** `docs/hackerone-reports/xss.md` — per-class disclosed reports
+- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-xss.md` (exists)

@@ -26,6 +26,16 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
 8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
+## PayloadsAllTheThings Reference
+
+This agent has a corresponding reference library at `payloads-reference/Race Condition/` (166 lines).
+Read the README before/during testing for enriched methodology and bypass techniques:
+
+- **Methodology**: Detection techniques for different contexts and frameworks
+- **Payloads**: Classified payloads by injection point and filter type
+- **Bypass Patterns**: WAF/filter evasion specific to RACE-CONDITION
+- **Labs**: PortSwigger and real-world practice labs
+
 ## Scope Notice
 
 - **Advisory mode** (default): You provide methodology, payloads, and analysis. The user executes commands.
@@ -490,3 +500,47 @@ Implementation: [flatt.tech/research/posts/beyond-the-limit-...](https://flatt.t
 - **`api-misconfig-hunter`** — Wallet/balance/credit endpoints without atomic UPDATE are double-spend candidates. Chain primitive: race + atomic-update missing → double-spend balance → withdraw N× user balance.
 - **`security-arsenal`** — Load the Turbo Intruder single-packet template, h2.cl smuggling for atomic submit, and `curl --next` parallel multi-request patterns.
 - **`triage-validator`** — Apply the Statistical-Sampling gate: a single anomalous response is noise; require 1 successful + N duplicate / over-quota / stale-state demonstrations with response screenshots before reporting.
+## Disclosed Reports Reference
+
+When hunting **Race Condition**, use these resources BEFORE and DURING testing:
+
+### Before You Start
+
+1. **Read the report index:** `docs/hackerone-reports/race-condition.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-race-condition.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+
+### During Testing
+
+- **Fetch a report when stuck:** If a test shows promise but you need a payload/bypass idea, use `webfetch` to pull the full HackerOne disclosure:
+  ```
+  webfetch https://hackerone.com/reports/759247
+  ```
+- **Study the technique** from the fetched report, then apply it to your current target
+- **Cross-reference impact:** After confirming a bug, check similar HackerOne reports to validate your severity classification
+
+### Top 5 Most-Upvoted Race Condition Reports
+
+| # | Report ID | Title |
+|---|-----------|-------|
+| 1 | [#759247] | [Race Condition allows to redeem multiple times gift cards which leads ...](https://hackerone.com/reports/759247) |
+| 2 | [#429026] | [Race condition in performing retest allows duplicated payments](https://hackerone.com/reports/429026) |
+| 3 | [#381356] | [Client-Side Race Condition using Marketo, allows sending user to data-...](https://hackerone.com/reports/381356) |
+| 4 | [#604534] | [Race Condition leads to undeletable group member](https://hackerone.com/reports/604534) |
+| 5 | [#509629] | [Race condition in activating email resulting in infinite amount of dia...](https://hackerone.com/reports/509629) |
+
+**Full list:** `docs/hackerone-reports/race-condition.md` (79 reports)
+
+### Quick Fetch Commands
+
+```bash
+webfetch https://hackerone.com/reports/759247
+webfetch https://hackerone.com/reports/429026
+webfetch https://hackerone.com/reports/381356
+```
+
+### External Repositories
+
+- **HackerOne Reports:** `docs/hackerone-reports/race-condition.md` — per-class disclosed reports
+- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-race-condition.md` (exists)

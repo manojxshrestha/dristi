@@ -200,3 +200,27 @@ nuclei -u https://$TARGET -t brute-force/ -severity medium,high,critical
 - No rate limit on login + no lockout: Medium
 - Username enumeration alone: Low-Medium
 - ReDoS with meaningful server lag: Medium
+## Disclosed Reports Reference
+
+When hunting **Brute Force**, use these resources:
+
+### Before You Start
+
+1. **Browse the master index:** `docs/hackerone-reports/INDEX.md` — find reports relevant to your class
+2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-brute-force.md` — curated techniques with HTTP request/response examples
+3. **Check Facebook writeups:** `docs/facebook-reports/facebook-writeups.md` if testing Meta/Meta-owned surfaces
+
+### During Testing
+
+- When you find a potential vulnerability, search the HackerOne disclosed reports index for similar findings to:
+  - Discover payload/bypass techniques from real reports
+  - Validate your impact assessment against paid bounties
+  - Cross-check severity classification
+- Use `webfetch` to read a relevant HackerOne report when you need technique guidance
+
+### External Repositories
+
+- **HackerOne Reports (Master):** `docs/hackerone-reports/INDEX.md` — 14,682+ structured disclosed reports
+- **HackerOne TOP by Class:** `docs/hackerone-reports/` — per-class report files (24 classes)
+- **Facebook Writeups:** `docs/facebook-reports/facebook-writeups.md` — Meta bug bounty writeups
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-brute-force.md`

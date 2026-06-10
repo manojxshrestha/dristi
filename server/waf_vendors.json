@@ -1,0 +1,2383 @@
+{
+  "360": {
+    "headers": [
+      "x-powered-by-360wzb"
+    ],
+    "server": [
+      "qianxin-waf"
+    ],
+    "body_patterns": [
+      "Blockpage references wzws-waf-cgi/",
+      "Body contains wangshan.360.cn URL",
+      "WZWS-Ray header"
+    ],
+    "status_codes": [
+      493
+    ],
+    "block_page_markers": [
+      "powered",
+      "qianxin-waf",
+      "blockpage",
+      "references",
+      "wzws-waf-cgi",
+      "body",
+      "contains",
+      "wangshan",
+      "url",
+      "wzws-ray",
+      "header"
+    ]
+  },
+  "aesecure": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "Blocked content contains aesecure_denied.png",
+      "Response headers contain aeSecure-code"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "blocked",
+      "content",
+      "contains",
+      "aesecure_denied",
+      "png",
+      "response",
+      "headers",
+      "contain",
+      "aesecure-code"
+    ]
+  },
+  "airlock": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "Blocked page: 'Server detected a syntax error'"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "blocked",
+      "page",
+      "server",
+      "detected",
+      "syntax",
+      "error"
+    ]
+  },
+  "akamai_kona": {
+    "headers": [
+      "x-akamai-* custom headers (e.g., x-akamai-request-id)",
+      "x-true-cache-key"
+    ],
+    "server": [
+      "akamaighost"
+    ],
+    "body_patterns": [
+      "Reference #\" followed by numeric reference number"
+    ],
+    "status_codes": [
+      403
+    ],
+    "block_page_markers": [
+      "akamai",
+      "true",
+      "akamaighost",
+      "reference",
+      "followed",
+      "numeric",
+      "number"
+    ]
+  },
+  "alertlogic": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "Blocked page: 'We are sorry, but the page you are looking for cannot be found'",
+      "404 Not Found in red letters"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "blocked",
+      "page",
+      "sorry",
+      "but",
+      "found",
+      "red",
+      "letters"
+    ]
+  },
+  "aliyundun": {
+    "headers": [],
+    "server": [
+      "aliyundun"
+    ],
+    "body_patterns": [
+      "Blocked page references errors.aliyun.com"
+    ],
+    "status_codes": [
+      405
+    ],
+    "block_page_markers": [
+      "aliyundun",
+      "blocked",
+      "page",
+      "references",
+      "errors",
+      "aliyun",
+      "com"
+    ]
+  },
+  "anquanbao": {
+    "headers": [
+      "x-powered-by-anquanbao"
+    ],
+    "server": [],
+    "body_patterns": [
+      "/aqb_cc/error/ in block page URL",
+      "Anquanbao\" branding in block page"
+    ],
+    "status_codes": [
+      405
+    ],
+    "block_page_markers": [
+      "powered",
+      "aqb_cc",
+      "error",
+      "block",
+      "page",
+      "url",
+      "anquanbao",
+      "branding"
+    ]
+  },
+  "anyu": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "intercepted by anyu",
+      "anyu- the green channel",
+      "WZWS-RAY header"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "intercepted",
+      "anyu",
+      "anyu-",
+      "green",
+      "channel",
+      "wzws-ray",
+      "header"
+    ]
+  },
+  "approach": {
+    "headers": [],
+    "server": [
+      "approach"
+    ],
+    "body_patterns": [
+      "approach web application firewall framework",
+      "Your IP has been logged warning"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "approach",
+      "web",
+      "application",
+      "firewall",
+      "framework",
+      "been",
+      "logged",
+      "warning"
+    ]
+  },
+  "armor_defense": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "this request has been blocked by armor",
+      "Contact support message"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "request",
+      "been",
+      "blocked",
+      "armor",
+      "contact",
+      "support",
+      "message"
+    ]
+  },
+  "arvancloud": {
+    "headers": [],
+    "server": [
+      "arvancloud"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "arvancloud"
+    ]
+  },
+  "aspa": {
+    "headers": [],
+    "server": [
+      "aspa-waf"
+    ],
+    "body_patterns": [
+      "ASPA-Cache-Status header"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "aspa-waf",
+      "aspa-cache-status",
+      "header"
+    ]
+  },
+  "aspnet_generic": {
+    "headers": [
+      "x-aspnet-version"
+    ],
+    "server": [],
+    "body_patterns": [
+      "Generic 403 error for unauthorized users"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "aspnet",
+      "generic",
+      "error",
+      "unauthorized",
+      "users"
+    ]
+  },
+  "astra": {
+    "headers": [
+      "cz_astra_csrf_cookie"
+    ],
+    "server": [],
+    "body_patterns": [
+      "sorry, this is not allowed.",
+      "getastra.com/assets/images/ reference"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "astra",
+      "sorry",
+      "allowed",
+      "getastra",
+      "com",
+      "assets",
+      "images",
+      "reference"
+    ]
+  },
+  "aws_waf": {
+    "headers": [
+      "awsalb",
+      "x-amz-id",
+      "x-amz-request-id"
+    ],
+    "server": [
+      "awselb/2.0"
+    ],
+    "body_patterns": [
+      "Generated by cloudfront (CloudFront)\" if using CloudFront + WAF"
+    ],
+    "status_codes": [
+      403
+    ],
+    "block_page_markers": [
+      "awsalb",
+      "amz",
+      "awselb/2.0",
+      "generated",
+      "cloudfront",
+      "using",
+      "waf"
+    ]
+  },
+  "baidu_yunjiasu": {
+    "headers": [],
+    "server": [
+      "yunjiasu-nginx"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "yunjiasu-nginx"
+    ]
+  },
+  "barikode": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "barikode",
+      "forbidden access"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "barikode",
+      "forbidden",
+      "access"
+    ]
+  },
+  "barracuda": {
+    "headers": [
+      "barra_counter_session",
+      "barracuda_ prefix cookies"
+    ],
+    "server": [],
+    "body_patterns": [
+      "You have been blocked because of fraudulent activity",
+      "Barracuda Networks\" branding in block page"
+    ],
+    "status_codes": [
+      403
+    ],
+    "block_page_markers": [
+      "barra",
+      "counter",
+      "barracuda",
+      "prefix",
+      "have",
+      "been",
+      "blocked",
+      "because",
+      "fraudulent",
+      "networks",
+      "branding",
+      "block",
+      "page"
+    ]
+  },
+  "bekchy": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "Headers: 'Bekchy - Access Denied'",
+      "Reference to bekchy.com/report"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "headers",
+      "bekchy",
+      "access",
+      "denied",
+      "reference",
+      "com",
+      "report"
+    ]
+  },
+  "binarysec": {
+    "headers": [
+      "x-binarysec-via",
+      "x-binarysec-nocache"
+    ],
+    "server": [],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "binarysec"
+    ]
+  },
+  "bitninja": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "security check by bitninja",
+      "reCAPTCHA challenge"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "security",
+      "check",
+      "bitninja",
+      "recaptcha",
+      "challenge"
+    ]
+  },
+  "blockdos": {
+    "headers": [],
+    "server": [
+      "blockdos.net"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "blockdos.net"
+    ]
+  },
+  "bluedon_ist": {
+    "headers": [],
+    "server": [
+      "bdwaf"
+    ],
+    "body_patterns": [
+      "bluedon web application firewall"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "bdwaf",
+      "bluedon",
+      "web",
+      "application",
+      "firewall"
+    ]
+  },
+  "bulletproof_security": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "bpsmessage div",
+      "WordPress security plugin"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "bpsmessage",
+      "div",
+      "wordpress",
+      "security",
+      "plugin"
+    ]
+  },
+  "cdn_ns_gateway": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "cdnnswaf application gateway"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "cdnnswaf",
+      "application",
+      "gateway"
+    ]
+  },
+  "cerber_wordpress": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "your request looks suspicious",
+      "WordPress plugin"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "request",
+      "looks",
+      "suspicious",
+      "wordpress",
+      "plugin"
+    ]
+  },
+  "chaitin_safeline": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "Body contains event_id in HTML comments"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "body",
+      "contains",
+      "event_id",
+      "html",
+      "comments"
+    ]
+  },
+  "chinacache": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "Headers: Powered-by-ChinaCache"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "headers",
+      "powered-by-chinacache"
+    ]
+  },
+  "cisco_ace_xml": {
+    "headers": [],
+    "server": [
+      "ace xml gateway"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "ace",
+      "xml",
+      "gateway"
+    ]
+  },
+  "cloudbric": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "malicious code detected",
+      "blocked by cloudbric"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "malicious",
+      "code",
+      "detected",
+      "blocked",
+      "cloudbric"
+    ]
+  },
+  "cloudflare": {
+    "headers": [
+      "__cfuid",
+      "cf-ray (e.g., cf-ray"
+    ],
+    "server": [
+      "cloudflare"
+    ],
+    "body_patterns": [
+      "Attention Required!\" or \"Please complete the security check to access",
+      "Cloudflare challenge page (JavaScript challenge or CAPTCHA)"
+    ],
+    "status_codes": [
+      403
+    ],
+    "block_page_markers": [
+      "cfuid",
+      "ray",
+      "cloudflare",
+      "attention",
+      "required",
+      "please",
+      "complete",
+      "security",
+      "challenge",
+      "page",
+      "javascript",
+      "captcha"
+    ]
+  },
+  "cloudfloordns": {
+    "headers": [],
+    "server": [
+      "cloudfloordns waf"
+    ],
+    "body_patterns": [
+      "Title: CloudfloorDNS - Web Application Firewall Error"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "cloudfloordns",
+      "waf",
+      "title",
+      "web",
+      "application",
+      "firewall",
+      "error"
+    ]
+  },
+  "cloudfront": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "generated by cloudfront (cloudfront)"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "generated",
+      "cloudfront"
+    ]
+  },
+  "comodo_cwatch": {
+    "headers": [
+      "comodo_ prefix cookies"
+    ],
+    "server": [
+      "protected by comodo waf"
+    ],
+    "body_patterns": [
+      "Protected by COMODO\" in block page",
+      "cWatch\" branding"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "comodo",
+      "prefix",
+      "protected",
+      "waf",
+      "block",
+      "page",
+      "cwatch",
+      "branding"
+    ]
+  },
+  "crawlprotect": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "Title: CrawlProtect"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "title",
+      "crawlprotect"
+    ]
+  },
+  "deny_all": {
+    "headers": [
+      "sessioncookie (deny-all specific)"
+    ],
+    "server": [],
+    "body_patterns": [
+      "Condition Intercepted",
+      "Deny-All\" branding in block page"
+    ],
+    "status_codes": [
+      403
+    ],
+    "block_page_markers": [
+      "sessioncookie",
+      "(deny",
+      "condition",
+      "intercepted",
+      "deny-all",
+      "branding",
+      "block",
+      "page"
+    ]
+  },
+  "distil": {
+    "headers": [
+      "x-distil-cs"
+    ],
+    "server": [],
+    "body_patterns": [
+      "pardon our interruption..."
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "distil",
+      "pardon",
+      "our",
+      "interruption"
+    ]
+  },
+  "dosarrest": {
+    "headers": [
+      "x-dis-request-id"
+    ],
+    "server": [
+      "dosarrest"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "dis",
+      "dosarrest"
+    ]
+  },
+  "dotdefender": {
+    "headers": [
+      "x-dotdefender-denied"
+    ],
+    "server": [],
+    "body_patterns": [
+      "dotDefender Blocked Your Request",
+      "dotDefender\" branding in block page"
+    ],
+    "status_codes": [
+      403
+    ],
+    "block_page_markers": [
+      "dotdefender",
+      "blocked",
+      "request",
+      "branding",
+      "block",
+      "page"
+    ]
+  },
+  "dynamicweb_injection": {
+    "headers": [
+      "x-403-status-by:"
+    ],
+    "server": [],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "403"
+    ]
+  },
+  "e3learning": {
+    "headers": [],
+    "server": [
+      "e3learning_waf"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "e3learning",
+      "waf"
+    ]
+  },
+  "edgecast_verizon": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "400 Bad Request on malicious input",
+      "Contact site administrator message"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "bad",
+      "request",
+      "malicious",
+      "input",
+      "contact",
+      "site",
+      "administrator",
+      "message"
+    ]
+  },
+  "eisoo_cloud": {
+    "headers": [],
+    "server": [
+      "eisoowaf"
+    ],
+    "body_patterns": [
+      "/eisoo-firewall-block.css reference"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "eisoowaf",
+      "eisoo-firewall-block",
+      "css",
+      "reference"
+    ]
+  },
+  "expression_engine": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "invalid uri",
+      "invalid get request"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "invalid",
+      "uri",
+      "get",
+      "request"
+    ]
+  },
+  "f5_asm": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "the requested url was rejected"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "requested",
+      "url",
+      "rejected"
+    ]
+  },
+  "f5_bigip_asm": {
+    "headers": [
+      "bigip or bigipserver",
+      "x-wa-info"
+    ],
+    "server": [
+      "big-ip or server: f5"
+    ],
+    "body_patterns": [
+      "Please consult with your administrator"
+    ],
+    "status_codes": [
+      403
+    ],
+    "block_page_markers": [
+      "bigip",
+      "big-ip",
+      "server:",
+      "please",
+      "consult",
+      "administrator"
+    ]
+  },
+  "fortinet_fortiweb": {
+    "headers": [
+      "fortiwafsid"
+    ],
+    "server": [
+      "fortiweb or server: fortinet"
+    ],
+    "body_patterns": [
+      ".fgd_icon (FortiGuard icon reference)",
+      "Server Unavailable!"
+    ],
+    "status_codes": [
+      503
+    ],
+    "block_page_markers": [
+      "fortiwafsid",
+      "fortiweb",
+      "server:",
+      "fortinet",
+      "fgd_icon",
+      "fortiguard",
+      "icon",
+      "reference",
+      "server",
+      "unavailable"
+    ]
+  },
+  "godaddy": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "access denied - godaddy website firewall"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "access",
+      "denied",
+      "godaddy",
+      "website",
+      "firewall"
+    ]
+  },
+  "greywizard": {
+    "headers": [],
+    "server": [
+      "greywizard"
+    ],
+    "body_patterns": [
+      "grey wizard' text"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "greywizard",
+      "grey",
+      "wizard",
+      "text"
+    ]
+  },
+  "huawei_cloud": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "Error image from hwclouds.com/static/error/images/"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "error",
+      "image",
+      "from",
+      "hwclouds",
+      "com",
+      "static"
+    ]
+  },
+  "hyperguard": {
+    "headers": [
+      "odsession"
+    ],
+    "server": [],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "odsession"
+    ]
+  },
+  "ibm_datapower": {
+    "headers": [
+      "x-backside-transport:"
+    ],
+    "server": [],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "backside"
+    ]
+  },
+  "imperva_incapsula": {
+    "headers": [
+      "visid_incap_",
+      "incap_ses_",
+      "x-iinfo"
+    ],
+    "server": [],
+    "body_patterns": [
+      "Powered By Incapsula",
+      "Incapsula incident ID"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "visid",
+      "incap",
+      "ses",
+      "iinfo",
+      "powered",
+      "incapsula",
+      "incident"
+    ]
+  },
+  "imunify360": {
+    "headers": [],
+    "server": [
+      "imunify360-webshield"
+    ],
+    "body_patterns": [
+      "powered by imunify360"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "imunify360-webshield",
+      "powered",
+      "imunify360"
+    ]
+  },
+  "indusguard": {
+    "headers": [
+      "x-version"
+    ],
+    "server": [
+      "if_waf"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "version",
+      "waf"
+    ]
+  },
+  "instart_dx": {
+    "headers": [
+      "x-instart-request-id",
+      "x-instart-wl",
+      "x-instart-cache"
+    ],
+    "server": [],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "instart"
+    ]
+  },
+  "isa_server": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "the isa server denied the specified url"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "isa",
+      "server",
+      "denied",
+      "specified"
+    ]
+  },
+  "janusec": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "Body displays JANUSEC name and logo"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "body",
+      "displays",
+      "janusec",
+      "name",
+      "logo"
+    ]
+  },
+  "jiasule": {
+    "headers": [
+      "__jsluid"
+    ],
+    "server": [
+      "jiasule-waf"
+    ],
+    "body_patterns": [
+      "static.jiasule.com JS reference"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "jsluid",
+      "jiasule-waf",
+      "static",
+      "jiasule",
+      "com",
+      "reference"
+    ]
+  },
+  "keycdn": {
+    "headers": [],
+    "server": [
+      "keycdn"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "keycdn"
+    ]
+  },
+  "knownsec": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "ks-waf-error.png image in block page"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "ks-waf-error",
+      "png",
+      "image",
+      "block",
+      "page"
+    ]
+  },
+  "litespeed": {
+    "headers": [],
+    "server": [
+      "litespeed"
+    ],
+    "body_patterns": [
+      "proudly powered by litespeed web server"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "litespeed",
+      "proudly",
+      "powered",
+      "web",
+      "server"
+    ]
+  },
+  "malcare": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "blocked because of malicious activities",
+      "firewall powered by malcare"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "blocked",
+      "because",
+      "malicious",
+      "activities",
+      "firewall",
+      "powered",
+      "malcare"
+    ]
+  },
+  "missioncontrol": {
+    "headers": [],
+    "server": [
+      "mission control application shield"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "mission",
+      "control",
+      "application",
+      "shield"
+    ]
+  },
+  "modsecurity_crs": {
+    "headers": [
+      "x-scanner"
+    ],
+    "server": [],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "scanner"
+    ]
+  },
+  "modsecurity": {
+    "headers": [
+      "x-scanner (when crs ruleset is active)"
+    ],
+    "server": [
+      "mod_security or server: nyob"
+    ],
+    "body_patterns": [
+      "This error was generated by Mod_Security",
+      "mod_security rules triggered"
+    ],
+    "status_codes": [
+      403
+    ],
+    "block_page_markers": [
+      "scanner",
+      "mod",
+      "security",
+      "server:",
+      "nyob",
+      "error",
+      "generated",
+      "mod_security",
+      "rules",
+      "triggered"
+    ]
+  },
+  "naxsi": {
+    "headers": [
+      "x-data-origin"
+    ],
+    "server": [],
+    "body_patterns": [
+      "This Request Has Been Blocked By NAXSI",
+      "NAXSI\" in block page"
+    ],
+    "status_codes": [
+      403
+    ],
+    "block_page_markers": [
+      "data",
+      "request",
+      "been",
+      "blocked",
+      "naxsi",
+      "block",
+      "page"
+    ]
+  },
+  "nemesida": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "suspicious activity detected",
+      "Contact nwaf@{site.tld}"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "suspicious",
+      "activity",
+      "detected",
+      "contact",
+      "nwaf",
+      "site",
+      "tld"
+    ]
+  },
+  "netcontinuum": {
+    "headers": [
+      "nci__sessionid"
+    ],
+    "server": [],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "nci",
+      "sessionid"
+    ]
+  },
+  "netscaler": {
+    "headers": [
+      "nncoection",
+      "ns_af",
+      "citrix_ns_id",
+      "nsc_ prefix cookies"
+    ],
+    "server": [],
+    "body_patterns": [
+      "Access to this resource has been blocked by the NetScaler",
+      "NetScaler\" or \"NS\" in block page"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "nncoection",
+      "citrix",
+      "nsc",
+      "prefix",
+      "access",
+      "resource",
+      "been",
+      "blocked",
+      "netscaler",
+      "block",
+      "page"
+    ]
+  },
+  "nevisproxy": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": []
+  },
+  "newdefend": {
+    "headers": [],
+    "server": [
+      "newdefend"
+    ],
+    "body_patterns": [
+      "newdefend.com/feedback reference",
+      "/nd_block/ directory"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "newdefend",
+      "com",
+      "feedback",
+      "reference",
+      "nd_block",
+      "directory"
+    ]
+  },
+  "nexusguard": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "speresources.nexusguard.com/wafpage reference"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "speresources",
+      "nexusguard",
+      "com",
+      "wafpage",
+      "reference"
+    ]
+  },
+  "ninjafirewall": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "Title: 'NinjaFirewall: 403 Forbidden'",
+      "for security reasons"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "title",
+      "ninjafirewall",
+      "forbidden",
+      "security",
+      "reasons"
+    ]
+  },
+  "nsfocus": {
+    "headers": [],
+    "server": [
+      "nsfocus"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "nsfocus"
+    ]
+  },
+  "nullddos": {
+    "headers": [],
+    "server": [
+      "nullddos system"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "nullddos",
+      "system"
+    ]
+  },
+  "onmessage_shield": {
+    "headers": [
+      "x-engine:"
+    ],
+    "server": [],
+    "body_patterns": [
+      "Blackbaud K-12 reference"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "engine:",
+      "blackbaud",
+      "k-12",
+      "reference"
+    ]
+  },
+  "openresty_lua": {
+    "headers": [],
+    "server": [
+      "openresty/{version}"
+    ],
+    "body_patterns": [],
+    "status_codes": [
+      406
+    ],
+    "block_page_markers": [
+      "openresty/{version}"
+    ]
+  },
+  "palo_alto": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "Virus/Spyware Download Blocked",
+      "Palo Alto Next Generation Security Platform",
+      "Blocked by PAN\" or \"Palo Alto Networks"
+    ],
+    "status_codes": [
+      403
+    ],
+    "block_page_markers": [
+      "virus",
+      "spyware",
+      "download",
+      "blocked",
+      "palo",
+      "alto",
+      "next",
+      "generation",
+      "security",
+      "platform",
+      "pan",
+      "networks"
+    ]
+  },
+  "pentawaf": {
+    "headers": [],
+    "server": [
+      "pentawaf/{version}"
+    ],
+    "body_patterns": [
+      "Body contains PentaWAF text"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "pentawaf/{version}",
+      "body",
+      "contains",
+      "pentawaf",
+      "text"
+    ]
+  },
+  "perimeterx": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "perimeterx.com/whywasiblocked reference"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "perimeterx",
+      "com",
+      "whywasiblocked",
+      "reference"
+    ]
+  },
+  "pksecurity_module": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "pksecuritymodule: security.alert"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "pksecuritymodule",
+      "security",
+      "alert"
+    ]
+  },
+  "positive_technologies": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "forbidden' with request id in yyyy-mm-dd format"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "forbidden",
+      "request",
+      "yyyy-mm-dd",
+      "format"
+    ]
+  },
+  "powercdn": {
+    "headers": [
+      "x-cache:",
+      "x-cdn:"
+    ],
+    "server": [],
+    "body_patterns": [
+      "Via: powercdn.com"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "cache:",
+      "cdn:",
+      "via",
+      "powercdn",
+      "com"
+    ]
+  },
+  "proventia_ibm": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "request does not match proventia rules"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "request",
+      "does",
+      "match",
+      "proventia",
+      "rules"
+    ]
+  },
+  "puhui": {
+    "headers": [],
+    "server": [
+      "puhuiwaf"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "puhuiwaf"
+    ]
+  },
+  "qiniu_cdn": {
+    "headers": [
+      "x-qiniu-cdn"
+    ],
+    "server": [],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "qiniu"
+    ]
+  },
+  "radware_appwall": {
+    "headers": [
+      "x-sl-compstate"
+    ],
+    "server": [],
+    "body_patterns": [
+      "Unauthorized Activity Has Been Detected",
+      "Case Number:\" followed by a reference number",
+      "Radware\" branding in block page"
+    ],
+    "status_codes": [
+      403
+    ],
+    "block_page_markers": [
+      "unauthorized",
+      "activity",
+      "been",
+      "detected",
+      "case",
+      "number",
+      "followed",
+      "reference",
+      "radware",
+      "branding",
+      "block",
+      "page"
+    ]
+  },
+  "reblaze": {
+    "headers": [
+      "rbzid"
+    ],
+    "server": [
+      "reblaze secure web gateway"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "rbzid",
+      "reblaze",
+      "secure",
+      "web",
+      "gateway"
+    ]
+  },
+  "request_validation_mode": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "ASP.NET: 'potentially dangerous request detected'",
+      "Code 500"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "asp",
+      "net",
+      "potentially",
+      "dangerous",
+      "request",
+      "detected",
+      "code"
+    ]
+  },
+  "rsfirewall": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "COM_RSFIREWALL_403_FORBIDDEN",
+      "COM_RSFIREWALL_EVENT"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "com_rsfirewall_403_forbidden",
+      "com_rsfirewall_event"
+    ]
+  },
+  "sabre": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "Code 500 on malicious requests",
+      "Contact dxsupport@sabre.com"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "code",
+      "malicious",
+      "requests",
+      "contact",
+      "dxsupport",
+      "sabre",
+      "com"
+    ]
+  },
+  "safe3": {
+    "headers": [
+      "x-powered-by:"
+    ],
+    "server": [
+      "safe3 web firewall"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "powered",
+      "safe3",
+      "web",
+      "firewall"
+    ]
+  },
+  "safedog": {
+    "headers": [
+      "safedog prefix cookies",
+      "safedog-flow-item"
+    ],
+    "server": [
+      "waf/2.0 or server: safedog"
+    ],
+    "body_patterns": [
+      "SafeDog\" branding in block page"
+    ],
+    "status_codes": [
+      403
+    ],
+    "block_page_markers": [
+      "safedog",
+      "prefix",
+      "flow",
+      "waf/2.0",
+      "server:",
+      "branding",
+      "block",
+      "page"
+    ]
+  },
+  "secking": {
+    "headers": [],
+    "server": [
+      "seckingwaf",
+      "secking/{version}"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "seckingwaf",
+      "secking/{version}"
+    ]
+  },
+  "secupress": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "secupress",
+      "Block ID: Bad URL Contents"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "secupress",
+      "block",
+      "bad",
+      "url",
+      "contents"
+    ]
+  },
+  "secure_entry": {
+    "headers": [],
+    "server": [
+      "secure entry server"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "secure",
+      "entry",
+      "server"
+    ]
+  },
+  "secureiis": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "BeyondTrust logo",
+      "download secureiis personal edition"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "beyondtrust",
+      "logo",
+      "download",
+      "secureiis",
+      "personal",
+      "edition"
+    ]
+  },
+  "securesphere": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "error in h2",
+      "Title: Error"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "error",
+      "title"
+    ]
+  },
+  "senginx": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "senginx-robot-mitigation"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "senginx-robot-mitigation"
+    ]
+  },
+  "serverdefender_vp": {
+    "headers": [
+      "x-pint:"
+    ],
+    "server": [],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "pint:"
+    ]
+  },
+  "shadow_daemon": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "request forbidden by administrative rules"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "request",
+      "forbidden",
+      "administrative",
+      "rules"
+    ]
+  },
+  "shieldsecurity": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "you were blocked by the shield",
+      "Transgression warning"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "were",
+      "blocked",
+      "shield",
+      "transgression",
+      "warning"
+    ]
+  },
+  "siteground": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "the page you are trying to access is restricted"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "page",
+      "trying",
+      "access"
+    ]
+  },
+  "siteguard": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "powered by siteguard",
+      "the server refuse to browse the page"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "powered",
+      "siteguard",
+      "server",
+      "refuse",
+      "browse",
+      "page"
+    ]
+  },
+  "sitelock": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "Reference to sitelock.com",
+      "sitelock-site-verification"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "reference",
+      "sitelock",
+      "com",
+      "sitelock-site-verification"
+    ]
+  },
+  "sonicwall": {
+    "headers": [],
+    "server": [
+      "sonicwall"
+    ],
+    "body_patterns": [
+      "This request is blocked by the SonicWALL",
+      "SonicWall\" branding in block page"
+    ],
+    "status_codes": [
+      403
+    ],
+    "block_page_markers": [
+      "sonicwall",
+      "request",
+      "blocked",
+      "branding",
+      "block",
+      "page"
+    ]
+  },
+  "sophos_utm": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "powered by utm web protection"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "powered",
+      "utm",
+      "web",
+      "protection"
+    ]
+  },
+  "squarespace": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "Code 404 on malicious requests",
+      "brick-50"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "code",
+      "malicious",
+      "requests",
+      "brick-50"
+    ]
+  },
+  "squidproxy_ids": {
+    "headers": [],
+    "server": [
+      "squid/{version}"
+    ],
+    "body_patterns": [
+      "Access control configuration prevents"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "squid/{version}",
+      "access",
+      "control",
+      "configuration",
+      "prevents"
+    ]
+  },
+  "stackpath": {
+    "headers": [],
+    "server": [
+      "stackpath"
+    ],
+    "body_patterns": [
+      "This request has been blocked by the StackPath",
+      "StackPath logo or branding in block page",
+      "triggered the service and blocked your request"
+    ],
+    "status_codes": [
+      403
+    ],
+    "block_page_markers": [
+      "stackpath",
+      "request",
+      "been",
+      "blocked",
+      "logo",
+      "branding",
+      "block",
+      "page",
+      "triggered",
+      "service"
+    ]
+  },
+  "stingray": {
+    "headers": [
+      "x-mapping"
+    ],
+    "server": [],
+    "body_patterns": [
+      "Code 403 or 500"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "mapping",
+      "code"
+    ]
+  },
+  "sucuri": {
+    "headers": [
+      "x-sucuri-id"
+    ],
+    "server": [
+      "sucuri or server: cloudproxy"
+    ],
+    "body_patterns": [
+      "Access Denied - Sucuri Website Firewall",
+      "Sucuri WebSite Firewall - CloudProxy - Access Denied"
+    ],
+    "status_codes": [
+      403
+    ],
+    "block_page_markers": [
+      "sucuri",
+      "server:",
+      "cloudproxy",
+      "access",
+      "denied",
+      "website",
+      "firewall"
+    ]
+  },
+  "synology_cloud": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "Copyright (c) 2019 Synology Inc."
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "copyright",
+      "synology",
+      "inc"
+    ]
+  },
+  "tencent_cloud": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "Code 405",
+      "Reference to waf.tencent-cloud.com"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "code",
+      "reference",
+      "waf",
+      "tencent-cloud",
+      "com"
+    ]
+  },
+  "teros": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": []
+  },
+  "trafficshield": {
+    "headers": [
+      "asinfo"
+    ],
+    "server": [
+      "f5-trafficshield"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "asinfo",
+      "f5-trafficshield"
+    ]
+  },
+  "transip": {
+    "headers": [
+      "x-transip-backend",
+      "x-transip-balancer"
+    ],
+    "server": [],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "transip"
+    ]
+  },
+  "ucloud_uewaf": {
+    "headers": [],
+    "server": [
+      "uewaf/{version}"
+    ],
+    "body_patterns": [
+      "/uewaf_deny_pages/ reference"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "uewaf/{version}",
+      "uewaf_deny_pages",
+      "reference"
+    ]
+  },
+  "urlmaster_security": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "UrlMaster keyword",
+      "UrlRewriteModule keyword",
+      "SecurityCheck keyword"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "urlmaster",
+      "keyword",
+      "urlrewritemodule",
+      "securitycheck"
+    ]
+  },
+  "urlscan": {
+    "headers": [],
+    "server": [
+      "microsoft-iis (urlscan runs as iis extension)"
+    ],
+    "body_patterns": [
+      "Server Error in Application",
+      "UrlScan\" in error page"
+    ],
+    "status_codes": [
+      404,
+      403
+    ],
+    "block_page_markers": [
+      "microsoft-iis",
+      "(urlscan",
+      "runs",
+      "iis",
+      "extension)",
+      "server",
+      "error",
+      "application",
+      "urlscan",
+      "page"
+    ]
+  },
+  "usp_secure_entry": {
+    "headers": [],
+    "server": [
+      "secure entry server"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "secure",
+      "entry",
+      "server"
+    ]
+  },
+  "varnish_cachewall": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "error 403 naughty, not nice!",
+      "Varnish cache Server"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "error",
+      "naughty",
+      "nice",
+      "varnish",
+      "cache",
+      "server"
+    ]
+  },
+  "varnish_owasp": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "Code 404 on malicious requests",
+      "request rejected by xvarnish-waf"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "code",
+      "malicious",
+      "requests",
+      "request",
+      "rejected",
+      "xvarnish-waf"
+    ]
+  },
+  "viettel": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "Title: 'Access denied - Viettel WAF'",
+      "cloudrity.com.vn reference"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "title",
+      "access",
+      "denied",
+      "viettel",
+      "waf",
+      "cloudrity",
+      "com",
+      "reference"
+    ]
+  },
+  "virusdie": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "virusdie.ru firewallstop.png",
+      "FW_BLOCK meta tag"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "virusdie",
+      "firewallstop",
+      "png",
+      "fw_block",
+      "meta",
+      "tag"
+    ]
+  },
+  "wallarm": {
+    "headers": [],
+    "server": [
+      "nginx-wallarm"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "nginx-wallarm"
+    ]
+  },
+  "watchguard": {
+    "headers": [],
+    "server": [
+      "watchguard"
+    ],
+    "body_patterns": [
+      "request denied by watchguard firewall"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "watchguard",
+      "request",
+      "denied",
+      "firewall"
+    ]
+  },
+  "web_land": {
+    "headers": [],
+    "server": [
+      "apache protected by webland waf"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "apache",
+      "protected",
+      "webland",
+      "waf"
+    ]
+  },
+  "webarx": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "blocked by webarx waf",
+      "/wp-content/plugins/webarx/"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "blocked",
+      "webarx",
+      "waf",
+      "wp-content",
+      "plugins"
+    ]
+  },
+  "webknight": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "WebKnight Application Firewall Alert",
+      "This request has been blocked by WebKnight"
+    ],
+    "status_codes": [
+      999,
+      404
+    ],
+    "block_page_markers": [
+      "webknight",
+      "application",
+      "firewall",
+      "alert",
+      "request",
+      "been",
+      "blocked"
+    ]
+  },
+  "webray": {
+    "headers": [],
+    "server": [
+      "webray-waf"
+    ],
+    "body_patterns": [
+      "DrivedBy: RaySrv RayEng/{version}"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "webray-waf",
+      "drivedby",
+      "raysrv",
+      "rayeng",
+      "version"
+    ]
+  },
+  "webseal": {
+    "headers": [],
+    "server": [
+      "webseal"
+    ],
+    "body_patterns": [
+      "this is a webseal error message template file"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "webseal",
+      "error",
+      "message",
+      "template",
+      "file"
+    ]
+  },
+  "webtotem": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "the current request was blocked by webtotem"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "current",
+      "request",
+      "blocked",
+      "webtotem"
+    ]
+  },
+  "west263cdn": {
+    "headers": [
+      "x-cache:"
+    ],
+    "server": [],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "cache:"
+    ]
+  },
+  "wordfence": {
+    "headers": [
+      "wfvt_ (wordfence visitor token)",
+      "wordfence_verifiedhuman"
+    ],
+    "server": [],
+    "body_patterns": [
+      "Generated by Wordfence",
+      "A potentially unsafe operation has been detected"
+    ],
+    "status_codes": [
+      403
+    ],
+    "block_page_markers": [
+      "wfvt",
+      "(wordfence",
+      "wordfence",
+      "verifiedhuman",
+      "generated",
+      "potentially",
+      "unsafe",
+      "operation",
+      "been",
+      "detected"
+    ]
+  },
+  "wts_waf": {
+    "headers": [],
+    "server": [
+      "wts"
+    ],
+    "body_patterns": [
+      "Title: WTS-WAF"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "wts",
+      "title",
+      "wts-waf"
+    ]
+  },
+  "xlabs_security": {
+    "headers": [
+      "x-cdn:"
+    ],
+    "server": [],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "cdn:"
+    ]
+  },
+  "xuanwudun": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "admin.dbappwaf.cn reference"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "admin",
+      "dbappwaf",
+      "reference"
+    ]
+  },
+  "yunaq_chuangyu": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "365cyd.com or 365cyd.net reference",
+      "help.365cyd.com/cyd-error-help"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "cyd",
+      "com",
+      "net",
+      "reference",
+      "help",
+      "cyd-error-help"
+    ]
+  },
+  "yunsuo": {
+    "headers": [],
+    "server": [],
+    "body_patterns": [
+      "yunsuologo image class"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "yunsuologo",
+      "image",
+      "class"
+    ]
+  },
+  "yxlink": {
+    "headers": [],
+    "server": [
+      "yxlink-waf"
+    ],
+    "body_patterns": [],
+    "status_codes": [],
+    "block_page_markers": [
+      "yxlink-waf"
+    ]
+  },
+  "zenedge": {
+    "headers": [
+      "x-zen-fury"
+    ],
+    "server": [
+      "zenedge"
+    ],
+    "body_patterns": [
+      "/__zenedge/assets/ reference"
+    ],
+    "status_codes": [],
+    "block_page_markers": [
+      "zen",
+      "zenedge",
+      "assets",
+      "reference"
+    ]
+  },
+  "zscaler": {
+    "headers": [],
+    "server": [
+      "zscaler"
+    ],
+    "body_patterns": [
+      "Access Denied: Accenture Policy\" or similar policy message",
+      "ZScaler\" branding in block page",
+      "zscloud.net\" references in block page"
+    ],
+    "status_codes": [
+      403
+    ],
+    "block_page_markers": [
+      "zscaler",
+      "access",
+      "denied",
+      "accenture",
+      "policy",
+      "similar",
+      "branding",
+      "block",
+      "page",
+      "zscloud",
+      "net",
+      "references"
+    ]
+  }
+}

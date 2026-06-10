@@ -139,12 +139,29 @@ bash scripts/tools/cloud_recon.sh <target>
 - `[NO_INPUT]` — static page, no user-controlled data
 - `[AUTH_GATE]` — requires authentication
 
-**For cloud buckets (S3, GCP, Azure blobs), also answer:**
+### Step 7: S3 / Cloud Bucket Scan
+
+```bash
+bash scripts/tools/s3_buckets.sh <target>
+```
+
+Runs cloud_enum on subdomains + s3scanner + trufflehog:
+
+| Tool | What it does | Output |
+|------|-------------|--------|
+| cloud_enum | Keyword-based bucket enumeration (AWS, Azure, GCP, DO) | `clouds/cloud_enum_results.jsonl`, `clouds/cloud_assets.txt` |
+| s3scanner | Scans all discovered subdomains for valid S3 buckets | `clouds/s3buckets.txt` |
+| trufflehog | Scans public buckets for leaked secrets | `clouds/s3_trufflehog.txt`, `clouds/cloud_enum_trufflehog.txt` |
+
+**For each cloud bucket, answer:**
 - `[PUBLIC_BUCKET]` — accessible without auth, accepts GET/PUT/DELETE
 - `[AUTH_BUCKET]` — requires cloud credentials (AWS keys, GCP SA, Azure SAS)
 - `[OPEN_UPLOAD]` — public + accepts PUT — HIGHEST priority (write access without auth)
+- `[LEAKED_SECRET]` — trufflehog found credentials in the bucket
 
-### Step 7: Compiled Endpoint Triage
+If `cloud_enum` is not installed, run first: `bash scripts/tools/osint.sh --install`
+
+### Step 8: Compiled Endpoint Triage
 
 After all tools have run, compile the answers to the 3 questions:
 

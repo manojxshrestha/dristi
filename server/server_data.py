@@ -370,6 +370,7 @@ DELIVERABLE_TYPES = {
     "cmdi_analysis": {"description": "Command Injection vulnerability analysis results", "consumed_by": "CMDi Exploitation Agent"},
     "ssrf_ssti_analysis": {"description": "SSRF and SSTI vulnerability analysis results", "consumed_by": "SSRF/SSTI Exploitation Agent"},
     "auth_analysis": {"description": "Authentication and session analysis results", "consumed_by": "Phase 4 agents for auth context"},
+    "osint_analysis": {"description": "OSINT results: WHOIS, M365/Azure tenant, third-party misconfigs, spoof check, cloud bucket enumeration", "consumed_by": "Phase 4 agents for target intelligence"},
     "code_review_findings": {"description": "Source code analysis security findings", "consumed_by": "All testing agents"},
     "tool_results": {"description": "Aggregated CLI tool output and findings", "consumed_by": "Phase 4-5 agents"},
     "waf_intelligence": {"description": "WAF/defense detection results: vendor, blocked patterns, known bypasses, encoding behavior", "consumed_by": "All Phase 4 exploitation agents"},

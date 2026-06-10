@@ -26,6 +26,16 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
 8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
+## PayloadsAllTheThings Reference
+
+This agent has a corresponding reference library at `payloads-reference/Account Takeover/` (188 lines).
+Read the README before/during testing for enriched methodology and bypass techniques:
+
+- **Methodology**: Detection techniques for different contexts and frameworks
+- **Payloads**: Classified payloads by injection point and filter type
+- **Bypass Patterns**: WAF/filter evasion specific to ATO
+- **Labs**: PortSwigger and real-world practice labs
+
 ## Scope Notice
 
 - **Advisory mode** (default): You provide methodology, payloads, and analysis. The user executes commands.
@@ -87,3 +97,47 @@ PUT /api/user/email
 - **`misc-hunter`** — Host-header injection on password reset is the canonical Path 1 primitive. Chain primitive: `POST /forgot-password` with `Host: attacker.com` (or `X-Forwarded-Host`) → reset email constructs link from request Host header → link points to `attacker.com/reset?token=XXXX` → victim clicks → token leaked to attacker → ATO.
 - **`security-arsenal`** — Pull the Password-Reset Bypass Tables for host-header variants (`X-Forwarded-Host`, `X-Host`, `X-HTTP-Host-Override`, dual-Host smuggling), token-entropy payloads (sequential numeric, time-based predictable), and the always-rejected list for "rate-limit on /forgot-password" reports.
 - **`triage-validator`** — Run the Pre-Severity Gate before claiming Critical on an ATO that requires the victim to click a link AND enter credentials AND complete CAPTCHA. The reproducibility step (10-minute fresh-browser walkthrough on test account B from attacker A's session) is what separates Critical-paid from Self-XSS-tier rejected.
+## Disclosed Reports Reference
+
+When hunting **Account Takeover (ATO)**, use these resources BEFORE and DURING testing:
+
+### Before You Start
+
+1. **Read the report index:** `docs/hackerone-reports/ato.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-ato.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+
+### During Testing
+
+- **Fetch a report when stuck:** If a test shows promise but you need a payload/bypass idea, use `webfetch` to pull the full HackerOne disclosure:
+  ```
+  webfetch https://hackerone.com/reports/745324
+  ```
+- **Study the technique** from the fetched report, then apply it to your current target
+- **Cross-reference impact:** After confirming a bug, check similar HackerOne reports to validate your severity classification
+
+### Top 5 Most-Upvoted Account Takeover (ATO) Reports
+
+| # | Report ID | Title |
+|---|-----------|-------|
+| 1 | [#745324] | [Account takeover via leaked session cookie](https://hackerone.com/reports/745324) |
+| 2 | [#2293343] | [Account Takeover via Password Reset without user interactions](https://hackerone.com/reports/2293343) |
+| 3 | [#737140] | [Mass account takeovers using HTTP Request Smuggling on https://slackb....](https://hackerone.com/reports/737140) |
+| 4 | [#129873] | [Bypassing Digits origin validation which leads to account takeover](https://hackerone.com/reports/129873) |
+| 5 | [#740037] | [Request smuggling on admin-official.line.me could lead to account take...](https://hackerone.com/reports/740037) |
+
+**Full list:** `docs/hackerone-reports/ato.md` (232 reports)
+
+### Quick Fetch Commands
+
+```bash
+webfetch https://hackerone.com/reports/745324
+webfetch https://hackerone.com/reports/2293343
+webfetch https://hackerone.com/reports/737140
+```
+
+### External Repositories
+
+- **HackerOne Reports:** `docs/hackerone-reports/ato.md` — per-class disclosed reports
+- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-ato.md` (exists)

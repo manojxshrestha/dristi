@@ -1,0 +1,71 @@
+# Awesome-WAF Training Dataset Configuration
+# Mirrors Dristi's config format for compatibility
+
+target:
+  description: "Awesome-WAF Training Dataset"
+  source_repo: "https://github.com/0xInfection/Awesome-WAF"
+  version: "1.0"
+  license: "Apache 2.0"
+
+knowledge_base:
+  categories:
+    - id: "detection-methodology"
+      code: "DETECT"
+      prefix: "WAF-DETECT"
+      title: "Detection Methodology"
+      tests: 4
+    - id: "waf-fingerprints"
+      code: "FP"
+      prefix: "WAF-FP"
+      title: "WAF Fingerprints"
+      vendors: 24
+    - id: "evasion-techniques"
+      code: "EVASION"
+      prefix: "WAF-EVASION"
+      title: "Evasion Techniques"
+      tests: 21
+    - id: "known-bypasses"
+      code: "BYPASS"
+      prefix: "WAF-BYPASS"
+      title: "Known Bypasses"
+      vendors: 15
+    - id: "tools-and-research"
+      code: "TOOLS"
+      prefix: "WAF-TOOLS"
+      title: "Tools and Research"
+      files: 4
+
+skills:
+  total: 15
+  categories:
+    - "waf-fingerprinting"
+    - "waf-evasion-xss"
+    - "waf-evasion-sqli"
+    - "waf-evasion-rce"
+    - "waf-bypass-cloudflare"
+    - "waf-bypass-imperva"
+    - "waf-bypass-modsecurity"
+    - "waf-bypass-aws"
+    - "waf-bypass-f5"
+    - "waf-bypass-sucuri"
+    - "waf-encoding-obfuscation"
+    - "waf-hpp-hpf"
+    - "waf-regex-reversing"
+    - "waf-header-spoofing"
+    - "waf-protocol-evasion"
+
+assets:
+  papers: 12
+  presentations: 11
+  images: 3
+  scripts: 1
+
+rules:
+  avoid:
+    - "No proprietary WAF vendor information"
+    - "No credential harvesting techniques"
+  focus:
+    - "WAF detection and fingerprinting"
+    - "Evasion techniques and bypass payloads"
+    - "Offensive security perspective only"
+    - "Research and academic references"

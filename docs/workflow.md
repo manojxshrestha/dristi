@@ -4,8 +4,8 @@
 
 Dristi is a security testing platform with two interfaces that work together:
 
-1. **MCP Server** (86 tools) — provides the OWASP WSTG methodology, engagement management, findings database, phase gates, and reporting as callable tools
-2. **OpenCode Agents** (75 agents) — provides per-class bug hunting tradecraft. All agents are accessed via `@agent-name` (no `/commands`).
+1. **MCP Server** (86 tools) — provides the OWASP WSTG methodology, engagement management, findings database, phase gates, WAF identification/evasion, and reporting as callable tools
+2. **OpenCode Agents** (82 agents) — provides per-class bug hunting tradecraft, enterprise platform attack chains, and engagement lifecycle management via `@agent-name`
 
 Together they turn an LLM into a methodical bug hunter: the agents tell it *what to look for and how*, the MCP server gives it the *structured methodology and tracking*, and Burp Suite provides *HTTP request execution*.
 
@@ -20,45 +20,61 @@ graph TB
     scans agent descriptions
     loads matching agents`"]
     MCP["`**MCP Server - 86 tools**
-    • register scope
-    • log finding
-    • track coverage
+    • register scope / log finding
+    • track coverage / identify WAF
+    • get bypass payloads
     • generate report`"]
     Agent["`**Agent SKILL content**
     guides LLM on what to test,
     what payloads to use,
-    how to chain & bypass`"]
+    how to chain & bypass,
+    which references to fetch`"]
     Burp["`**Burp Suite MCP Server**
     executes HTTP requests
     sends payloads, parses responses`"]
+    Refs["`**Reference Libraries**
+    • hackerone-reports (14,682)
+    • facebook writeups (399)
+    • google vrp writeups (273)
+    • waf-reference (144 vendors)
+    • payloads-reference (64 cats)`"]
 
     User --> Matcher
     Matcher --> MCP
     Matcher --> Agent
+    Matcher --> Refs
     MCP --> Burp
     Agent --> Burp
 ```
 
-The loop: **describe → agent loads → MCP tracks → Burp executes → analyze → log finding → validate → report**
+The loop: **describe → agent loads → MCP tracks → references guide → Burp executes → analyze → log finding → validate → report**
 
-All agents are invoked via `@agent-name`. 9 pipeline agents on Tab: `@autopilot` → `@consult` → `@scope` → `@recon` → `@surface` → `@hunt` → `@capture` → `@validate` → `@report`. 48 specialized `@hunt-*` agents + 18 non-hunt agents (75 total) available via `@`.
+All agents are invoked via `@agent-name`. 10 pipeline agents: `@autopilot` → `@consult` → `@scope` → `@osint` → `@recon` → `@surface` → `@hunt` → `@capture` → `@validate` → `@report`. 54 specialized `@hunt-*` agents + 18 non-hunt specialty agents (82 total).
 
 **Two modes:**
-- **`@autopilot`** — runs P1–P7 fully autonomous, ends with report + PoC for submission
-- **`@consult`** — same P1–P7, interactive — asks at every phase transition
-- **Manual `@scope` → `@recon` → ...** — step-by-step with prompts at each phase
+- **`@autopilot`** — runs fully autonomous, dispatches phases 2-7 via `task()` to sub-agents, ends with report
+- **`@consult`** — same pipeline, interactive at every phase transition with suggestions
+- **Manual** — `@scope` → `@recon` → ... step-by-step
 
 ---
 
-## The 6-Phase Engagement Workflow
+## The Pipeline (7 Phases + Auth)
 
-Every engagement follows the same 6-phase loop. At each phase, different agents auto-load and different MCP tools become relevant.
+```
+Phase 1:   SCOPE     → register domains, load config, create task tree
+Phase 1.5: AUTH      → test credentials, detect WAF, save auth deliverable
+Phase 2:   RECON     → subdomain enum, crawl, params, nuclei, secrets
+Phase 3:   SURFACE   → load recon, classify tiers, prioritize endpoints
+Phase 4:   HUNT      → test all bug classes via 54 hunt-* sub-agents
+Phase 5:   CAPTURE   → evidence collection, screenshots, redaction
+Phase 6:   VALIDATE  → re-validate PoCs, 7-Question Gate
+Phase 7:   REPORT    → coverage check, generate final report
+```
 
 ```mermaid
 flowchart LR
-    SCOPE --> AUTH --> RECON --> SURFACE --> HUNT --> VALIDATE --> CAPTURE --> REPORT
-
-    VALIDATE -->|PASS| CAPTURE
+    SCOPE --> AUTH --> OSINT --> RECON --> SURFACE --> HUNT --> CAPTURE --> VALIDATE --> REPORT
+    VALIDATE -->|PASS| REPORT
     VALIDATE -->|KILL| DISCARD["Discard"]
     VALIDATE -->|DOWNGRADE| REPORT
     VALIDATE -->|CHAIN| HUNT
@@ -86,237 +102,251 @@ flowchart LR
 
 **Goal:** Understand the target, define what's in/out, scaffold the engagement.
 
-| What happens | Which agents load | Which MCP tools to use |
-|-------------|-------------------|----------------------|
-| Parse program rules, identify in-scope assets, OOS items, bounty bands | `@scope`, `@bug-bounty`, `@osint-methodology` | `load_engagement_config()`, `register_scope()`, `get_scope()` |
+| Step | Action | MCP Tools |
+|------|--------|-----------|
+| 1 | Ask user for target domain(s) and credentials | — |
+| 2 | Parse scope table if provided | `parse_scope_table()` |
+| 3 | Load engagement config | `load_engagement_config()` |
+| 4 | Register all domains with types | `register_scope()` / `register_scope_batch()` |
+| 5 | Create engagement in database | `findings_init()` |
+| 6 | Create phase tracking tree | `create_task_tree()` |
+| 7 | Gate check | `phase_gate_check(phase_completed=0)` |
 
-**How it works:**
-1. Invoke `@scope` and answer the prompts
-2. `@bug-bounty` agent provides program rules methodology
-3. Use MCP to register domains: `register_scope('meta.com', 'app')`
-4. Define engagement config via YAML or manually
-5. Output: populated `scope.md` with in-scope assets, OOS items, focus areas
-
-**MCP tools used:** `load_engagement_config`, `register_scope`, `get_scope`, `get_engagement_config`
-
----
-
-### Phase 2: AUTHENTICATE — Get Credentials First
-
-**Goal:** Obtain and persist authentication credentials. 90% of high-impact bugs require a session.
-
-| What happens | Which agents load | Which MCP tools to use |
-|-------------|-------------------|----------------------|
-| Check for existing credentials, sign up, document auth method, save auth_analysis deliverable | `@consult`, `@bug-bounty` | `wstg_get_engagement_config()`, `wstg_save_deliverable('auth_analysis', ...)` |
-
-**How it works:**
-1. Check `wstg_get_engagement_config()` for existing credentials
-2. Sign up for a free account / get API key if none exist
-3. Document: `AUTH_METHOD`, `AUTH_VALUE`, `AUTH_USER`, `AUTH_STATUS`
-4. Test auth works: `curl -sv <target>/api/me -H "Authorization: Bearer <token>"`
-5. If Cloudflare detected (`cf-mitigated`), redirect 80% effort to API subdomain
-6. Save auth_analysis deliverable with real token/cookie values (not placeholders)
-
-**MCP tools used:** `wstg_get_engagement_config`, `wstg_save_deliverable`, `wstg_get_deliverable`
+**Output:** Registered engagement with scope boundaries, task tree created.
 
 ---
 
-### Phase 3: RECON
+### Phase 1.5: AUTH
 
-**Goal:** Discover attack surface — subdomains, endpoints, technologies, secrets, identity fabric.
+**Goal:** Obtain authentication credentials and detect WAF before testing.
 
-| What happens | Which agents load | Which MCP tools to use |
-|-------------|-------------------|----------------------|
-| Subdomain enumeration, endpoint mapping, JS analysis, technology fingerprinting | `@recon`, `@web2-recon`, `@offensive-osint`, `@osint-methodology` | `track_tool()`, `prioritize_endpoints()`, `parse_tool_output()` |
+| Step | Action | MCP Tools |
+|------|--------|-----------|
+| 1 | Check for existing credentials | `get_engagement_config()` |
+| 2 | Sign up or provide API key | — |
+| 3 | Test auth works | `curl -sv <target>/api/me` |
+| 4 | **WAF fingerprint check** | `identify_waf()` with response headers + body |
+| 5 | If Cloudflare detected | Redirect 80% effort to API subdomain; use Playwright stealth for CF pages |
+| 6 | Look up vendor fingerprints | `~/dristi/waf-reference/waf-knowledge-base/02-waf-fingerprints/<vendor>.md` |
+| 7 | Save auth context with real tokens | `save_deliverable('auth_analysis', ...)` |
 
-**How it works:**
-1. Tell the LLM: *"Run recon on *.meta.com — subdomains, endpoints, S3 buckets."*
-2. Agent suggests commands: `subfinder -d meta.com`, `httpx -l subdomains.txt`, `katana -u https://meta.com`
-3. You run commands in another terminal, paste results back
-4. LLM analyzes results, identifies technologies, ranks attack surface
-5. Use MCP to track: `track_tool('subfinder', 'run', 'found 47 hosts')`
-6. Use MCP to parse output: `parse_tool_output('nuclei', raw_text)`
-7. Output: ranked attack surface with tech stack, priority endpoints
+**WAF Detection:**
+```bash
+curl -sI https://<domain>/ 2>&1 | grep -i "server:\|cf-ray\|x-sucuri\|x-iinfo\|x-mod-security\|x-waf"
+```
+Pass headers + body through `identify_waf()` MCP tool. If identified, check vendor-specific fingerprints and known bypasses at `~/dristi/waf-reference/`.
 
-**MCP tools used:** `track_tool`, `parse_tool_output`, `ingest_tool_file`, `prioritize_endpoints`, `get_priority_queue`, `verify_tool_result`
-
----
-
-### Phase 4: SURFACE — Rank the Attack Surface
-
-**Goal:** Convert raw recon output into a prioritized "test these N first" list.
-
-| What happens | Which agents load | Which MCP tools to use |
-|-------------|-------------------|----------------------|
-| Load endpoint_map_raw, classify into Tier 0/1/2, save endpoint_map_ranked deliverable | `@surface` | `wstg_get_deliverable('endpoint_map_raw')`, `wstg_prioritize_endpoints()`, `wstg_save_deliverable('endpoint_map_ranked', ...)` |
-
-**How it works:**
-1. Load the endpoint_map_raw deliverable from Phase 3, or fall back to raw recon files
-2. For every endpoint that accepts input, answer 3 questions:
-   - Q1: Input type? (params, body, headers, cookies, file upload, GraphQL)
-   - Q2: Auth status? (public, auth-gated, unknown)
-   - Q3: Impact if exploitable? (data read, data write, code exec, auth bypass)
-3. Classify into Tiers:
-   - **Tier 0** — public + accepts input (no barrier, test first)
-   - **Tier 1** — auth-gated + accepts input (needs credentials)
-   - **Tier 2** — infrastructure findings (passive, not directly exploitable)
-4. Prioritize via `wstg_prioritize_endpoints()` for risk scoring
-5. Save endpoint_map_ranked deliverable for Phase 5 consumption
-
-**MCP tools used:** `wstg_get_deliverable`, `wstg_prioritize_endpoints`, `wstg_save_deliverable`, `get_priority_queue`
+**Output:** `auth_analysis` deliverable with tokens, WAF vendor info.
 
 ---
 
-### Phase 5: HUNT
+#---
 
-**Goal:** Test for specific vulnerability classes using per-class tradecraft.
+### Phase 1.75: OSINT
 
-| What happens | Which agents load | Which MCP tools to use |
-|-------------|-------------------|----------------------|
-| Active testing with payloads, bypass techniques, chain templates | Invoke `@hunt` or directly use `@hunt-*` agent for the target class | `log_finding()`, `get_wstg_test()`, `get_technique_guide()`, `get_test_payloads()`, `get_witness_payloads()`, `get_waf_bypass()`, `create_exploitation_queue()` |
-| **Structured walkthrough** — `@hunt` dispatches to relevant subagents | `@hunt` asks which classes to test, then dispatches to `@hunt-*` subagents | `track_test()` per WSTG-ID, `log_finding()`, `get_coverage()`, `phase_gate_check()` |
+**Goal:** Passive intelligence gathering — WHOIS, cloud footprint, third-party exposure, email spoofability.
 
-**How it works:**
-1. Describe what you're testing: *"I see /api/users/{id} with a numeric ID — testing IDOR"*
-2. `hunt-idor` agent loads automatically
-3. Agent provides:
-   - Detection patterns (method swap, array wrap, parameter pollution)
-   - Payloads to try
-   - Bypass techniques
-   - Chain opportunities (IDOR + CSRF = account takeover)
-4. Use Burp MCP or curl to send requests
-5. If blocked by WAF: `get_waf_bypass('cloudflare', 'idor')`
-6. If evidence needed: `get_witness_payloads('url_param')`
-7. If finding found: `log_finding('hunt-idor', 'IDOR in /api/users/{id}', severity)`
-8. For systematic testing: `create_exploitation_queue('idor', vulnerabilities_list)`
-9. Output: confirmed or eliminated leads, logged findings
+| Step | Action | Tool |
+|------|--------|------|
+| 1 | WHOIS lookup, M365/Azure tenant discovery | `whois`, `msftrecon` |
+| 2 | Scope analysis from registered domain | `Scopify` |
+| 3 | Third-party SaaS misconfiguration scan (Slack, Jira, GitHub, etc.) | `misconfig-mapper` |
+| 4 | SPF/DMARC spoofability check | `Spoofy` |
+| 5 | Cloud storage bucket enumeration (AWS S3, Azure Blob, GCP, DO Spaces) | `cloud_enum` |
 
-**How agent auto-loading works at this phase:**
+**MCP tools used:** `track_tool()`
+
+**Note:** `ip_info` module (reverse IP, IP WHOIS, geolocation) is skipped — requires `WHOISXML_API` key.
+
+**Output:** OSINT data to `engagements/<id>/recon/<domain>/osint/` — consumed by RECON for target context and by HUNT agents for WAF/cloud/third-party awareness.
+
+---
+
+## Phase 2: RECON
+
+**Goal:** Discover attack surface — subdomains, endpoints, technologies, secrets.
+
+| Step | Action | MCP Tools |
+|------|--------|-----------|
+| 1 | Subdomain enumeration + DNS bruteforce | `track_tool()` |
+| 2 | Web crawling, parameter extraction | `track_tool()` |
+| 3 | Cariddi, nuclei, directory bruteforce | `track_tool()` |
+| 4 | 403 bypass, vhost fuzzing | `track_tool()` |
+| 5 | Zone transfer, takeover scanner | `track_tool()` |
+| 6 | Cloud recon, CVE scan, secrets discovery | `track_tool()` |
+| 7 | Answer 3 triage questions per endpoint | — |
+| 8 | Save endpoint map deliverable | `save_deliverable('endpoint_map_raw', ...)` |
+| 9 | Gate check | `phase_gate_check(phase_completed=1)` |
+
+**MCP tools used:** `track_tool`, `parse_tool_output`, `ingest_tool_file`, `verify_tool_result`
+
+**Output:** `endpoint_map_raw` deliverable with all discovered endpoints and triage answers.
+
+---
+
+### Phase 3: SURFACE
+
+**Goal:** Convert raw recon output into a prioritized "test these first" list.
+
+| Step | Action | MCP Tools |
+|------|--------|-----------|
+| 1 | Load endpoint_map_raw deliverable | `get_deliverable('endpoint_map_raw')` |
+| 2 | Check H1 report index for class prioritization | `~/dristi/docs/reports/hackerone-reports/INDEX.md` |
+| 3 | Classify into Tiers | Tier 0 (public+input) / Tier 1 (auth+input) / Tier 2 (infra) |
+| 4 | Risk-score each endpoint | `prioritize_endpoints()` |
+| 5 | Save ranked deliverable | `save_deliverable('endpoint_map_ranked', ...)` |
+| 6 | Gate check | `phase_gate_check(phase_completed=2)` |
+
+**Output:** `endpoint_map_ranked` deliverable consumed by Phase 4.
+
+---
+
+### Phase 4: HUNT
+
+**Goal:** Test for specific vulnerability classes using per-class tradecraft and reference libraries.
+
+| Step | Action | MCP Tools |
+|------|--------|-----------|
+| 1 | Load endpoint_map_ranked + auth_analysis | `get_deliverable()` |
+| 2 | Run deep testing (API fuzzing, method override, content-type switch, GraphQL probing, race conditions, UUID analysis, JWT manipulation) | — |
+| 3 | **WAF handling:** If WAF detected in Phase 1.5, apply vendor-specific bypasses | `identify_waf()`, `get_waf_bypass()`, `~/dristi/waf-reference/` |
+| 4 | **Read H1 reports:** Each hunt agent reads its class file from `~/dristi/docs/reports/hackerone-reports/<class>.md` before testing | `webfetch` for full disclosures |
+| 5 | **Test all applicable bug classes** via 54 hunt-* sub-agents | `get_wstg_test()`, `get_technique_guide()`, `get_test_payloads()`, `get_witness_payloads()` |
+| 6 | For each confirmed finding: validate PoC, log, track test, check chaining | `validate_poc()`, `log_finding()`, `track_test()`, `find_chains()` |
+| 7 | Cross-reference severity against similar H1/Facebook/Google reports | `~/dristi/docs/reports/` |
+| 8 | Gate check | `phase_gate_check(phase_completed=3)` |
+
+**Agent auto-loading examples:**
 
 | You say… | Agent loads |
 |----------|-------------|
-| "XSS on the search field — reflected, stored, DOM contexts" | `hunt-xss` |
-| "URL param accepts http:// URLs — testing SSRF" | `hunt-ssrf` |
-| "SQLi on the login — testing error, blind, time-based" | `hunt-sqli` |
-| "SSTI on template param — Jinja2/Twig/Freemarker" | `hunt-ssti` |
-| "CMDI on ping param — testing blind and OOB" | `hunt-rce` |
-| "IDOR in /api/users/{id} — cross-tenant access" | `hunt-idor` |
-| "Auth bypass on admin panel — path traversal" | `hunt-auth-bypass` |
-| "ATO on session — JWT manipulation, 2FA bypass" | `hunt-ato` |
-| "GraphQL at /graphql — introspection, mutations" | `hunt-graphql` |
-| "File upload on /profile/avatar — RCE via upload" | `hunt-file-upload` |
-| "Race condition on coupon — concurrent redemption" | `hunt-race-condition` |
-| "OAuth login — CSRF, redirect_uri, state bypass" | `hunt-oauth` |
-| "CORS misconfiguration — credentialed cross-origin" | `hunt-cors` |
-| "XXE in XML upload — OOB entity exfiltration" | `hunt-xxe` |
-| "CSRF on email-change endpoint" | `hunt-csrf` |
-| "Prototype pollution in JSON parser" | `hunt-dom` / `hunt-nodejs` |
-| "NoSQLi on JSON login endpoint" | `hunt-nosqli` |
-| "LDAP injection on search endpoint" | `hunt-ldap` |
-| "Open redirect in ?next= parameter" | `hunt-open-redirect` |
-| "H2C smuggling on HTTP/2 endpoint" | `hunt-http-smuggling` |
-| "Deserialization in session cookie" | `hunt-deserialization` |
-| "Subdomain takeover — CNAME unclaimed" | `hunt-subdomain` |
-| "Email security — SPF/DMARC spoof feasibility" | `offensive-osint` |
-| "Cloud IAM — AWS/Azure/GCP privilege escalation" | `cloud-iam-deep` |
-| "M365 tenant — Entra ID, federation, SharePoint" | `m365-entra-attack` |
-| "Android APK — decompile, secrets, endpoints" | `apk-redteam-pipeline` |
-| "iOS IPA — binary analysis, URL schemes" | `apk-redteam-pipeline` |
-| "Smart contract audit — Solidity reentrancy" | `web3-audit` |
-| "Token audit — honeypot, liquidity, rug-pull" | `meme-coin-audit` |
+| "XSS on the search field — reflected, stored, DOM contexts" | `@hunt-xss` |
+| "URL param accepts http:// URLs — testing SSRF" | `@hunt-ssrf` |
+| "SQLi on the login — testing error, blind, time-based" | `@hunt-sqli` |
+| "SSTI on template param — Jinja2/Twig/Freemarker" | `@hunt-ssti` |
+| "CMDI on ping param — testing blind and OOB" | `@hunt-rce` |
+| "IDOR in /api/users/{id} — cross-tenant access" | `@hunt-idor` |
+| "Auth bypass on admin panel — path traversal" | `@hunt-auth-bypass` |
+| "ATO on session — JWT manipulation, 2FA bypass" | `@hunt-ato` |
+| "GraphQL at /graphql — introspection, mutations" | `@hunt-graphql` |
+| "File upload on /profile/avatar — RCE via upload" | `@hunt-file-upload` |
+| "Race condition on coupon — concurrent redemption" | `@hunt-race-condition` |
+| "OAuth login — CSRF, redirect_uri, state bypass" | `@hunt-oauth` |
+| "CORS misconfiguration — credentialed cross-origin" | `@hunt-cors` |
+| "XXE in XML upload — OOB entity exfiltration" | `@hunt-xxe` |
+| "CSRF on email-change endpoint" | `@hunt-csrf` |
+| "NoSQLi on JSON login endpoint" | `@hunt-nosqli` |
+| "LDAP injection on search endpoint" | `@hunt-ldap` |
+| "Open redirect in ?next= parameter" | `@hunt-open-redirect` |
+| "H2C smuggling on HTTP/2 endpoint" | `@hunt-http-smuggling` |
+| "Deserialization in session cookie" | `@hunt-deserialization` |
+| "Subdomain takeover — CNAME unclaimed" | `@hunt-subdomain` |
+| "Cloud IAM — AWS/Azure/GCP privilege escalation" | `@cloud-iam-deep` |
+| "M365 tenant — Entra ID, federation, SharePoint" | `@m365-entra-attack` |
+| "Android APK — decompile, secrets, endpoints" | `@apk-redteam-pipeline` |
+| "Smart contract audit — Solidity reentrancy" | `@web3-audit` |
+| "Token audit — honeypot, liquidity, rug-pull" | `@meme-coin-audit` |
+| "K8s pod escape" | `@hunt-k8s` |
+| "Next.js API route without auth" | `@hunt-nextjs` |
 
-**MCP tools used:** `get_wstg_test`, `get_test_payloads`, `get_technique_guide`, `get_witness_payloads`, `get_evidence_checklist`, `get_slot_types`, `log_finding`, `create_exploitation_queue`, `validate_exploitation_queue`, `get_exploitation_queue`, `get_waf_bypass`, `identify_waf`, `track_test`, `add_graph_node`, `add_graph_edge`
+**Reference Libraries** (available to every hunt agent during testing):
+
+| Resource | Path | Contents |
+|----------|------|----------|
+| H1 Reports | `~/dristi/docs/reports/hackerone-reports/<class>.md` | 14,682 disclosed reports per class |
+| Facebook Writeups | `~/dristi/docs/reports/facebook-reports/README.md` | 399 Meta bug bounty writeups |
+| Google VRP | `~/dristi/docs/reports/google-vrp-writeups/writeups.md` | 273 Google bug bounty writeups |
+| WAF Fingerprints | `~/dristi/waf-reference/waf-knowledge-base/02-waf-fingerprints/` | 144 vendor fingerprints |
+| WAF Bypasses | `~/dristi/waf-reference/waf-knowledge-base/04-known-bypasses/` | 24 vendor bypass files |
+| WAF Evasion | `~/dristi/waf-reference/waf-knowledge-base/03-evasion-techniques/` | 21 evasion categories |
+| WAF Skills | `~/dristi/waf-reference/skills/` | 15 WAF skills (loadable via `skill()`) |
+| Payloads | `~/dristi/payloads-reference/` | 64 PAT categories, 12 with test.sh |
+
+**MCP tools used:** `get_wstg_test`, `get_test_payloads`, `get_technique_guide`, `get_witness_payloads`, `get_evidence_checklist`, `get_slot_types`, `log_finding`, `create_exploitation_queue`, `validate_exploitation_queue`, `get_exploitation_queue`, `get_waf_bypass`, `identify_waf`, `track_test`, `add_graph_node`, `add_graph_edge`, `find_chains`, `validate_poc`
+
+**Output:** Confirmed findings logged to engagement database, exploitation queues created.
+
+---
+
+### Phase 5: CAPTURE
+
+**Goal:** Capture evidence with proper hygiene — redact cookies, PII, sanitize.
+
+| Step | Action | MCP Tools |
+|------|--------|-----------|
+| 1 | Load confirmed findings | `get_findings()` |
+| 2 | Load evidence-hygiene for redaction protocol | `@evidence-hygiene` |
+| 3 | For each finding: capture raw HTTP, screenshot (if DOM/visual), check collaborator (if OOB) | `validate_poc()` |
+| 4 | **WAF evidence:** Capture blocked vs. bypassed request pairs, note evasion technique used | — |
+| 5 | Apply redaction (cookies, PII, tokens) | — |
+| 6 | Save sanitized evidence | `scripts/recon/<domain>/evidence/<finding-id>/` |
+| 7 | Gate check | `phase_gate_check(phase_completed=4)` |
+
+**Browser rules:** Use Playwright for screenshots. Call `playwright_browser_close()` after every operation. Never call `browser.newContext()` — default context already routes through Burp via `--proxy-server`.
+
+**Output:** Sanitized evidence pack for each finding.
 
 ---
 
 ### Phase 6: VALIDATE
 
-**Goal:** Decide whether a lead is a real, reportable bug before writing anything.
+**Goal:** Decide whether a finding is reportable before writing anything.
 
-| What happens | Which agents load | Which MCP tools to use |
-|-------------|-------------------|----------------------|
-| Run the 7-Question Gate on every candidate finding | `@validate`, `@triage-validation` | `track_test()`, `validate_poc()` |
+| Step | Action | MCP Tools |
+|------|--------|-----------|
+| 1 | Load findings | `get_findings()` |
+| 2 | Re-validate each PoC | `validate_poc()` |
+| 3 | Cross-reference severity against similar H1/Facebook/Google reports | `~/dristi/docs/reports/` |
+| 4 | Run the 7-Question Gate | `@triage-validation` |
+| 5 | Assign verdict | `update_finding()` |
 
-**How it works:**
-1. Before drafting any report, invoke `@triage-validation`
-2. The `triage-validation` agent runs the 7-Question Gate:
-
+**The 7-Question Gate:**
 ```
 Q1: Can an attacker use this RIGHT NOW with a real HTTP request?
 Q2: Is the impact on the program's accepted-impact list?
-Q3: Is the asset in scope?
+Q3: Is the vulnerable asset in scope?
 Q4: Does it work without privileged access an attacker can't get?
 Q5: Is this not already known or documented behavior?
 Q6: Can impact be proved beyond "technically possible"?
-Q7: Is this not on the never-submit list?
+Q7: Is this NOT on the never-submit list?
 ```
 
-3. **Outcomes:**
-   - **PASS** — all 7 ✓ → proceed to Capture and Report
-   - **DOWNGRADE** — Q2 or Q5 fails → lower severity, still report
-   - **CHAIN REQUIRED** — needs another primitive → go back to Hunt
-   - **KILL** — any other failure → discard, do not draft
+**Outcomes:**
+- **PASS** — all 7 ✓ → proceed to Report
+- **DOWNGRADE** — Q2 or Q5 fails → lower severity, still report
+- **CHAIN REQUIRED** — needs another primitive → go back to Hunt
+- **KILL** — any other failure → discard, do not draft
 
-4. Only PASS or DOWNGRADE should result in a report
-5. Output: verdict for each candidate finding
+**Never-submit list:** Missing headers, introspection alone, clickjacking alone, self-XSS, open redirect alone, SSRF DNS-only, logout CSRF, rate limits on non-critical forms, cookie flags alone.
 
----
-
-### Phase 7: CAPTURE
-
-**Goal:** Capture evidence with proper hygiene — redact cookies, PII, sanitize HAR files.
-
-| What happens | Which agents load | Which MCP tools to use |
-|-------------|-------------------|----------------------|
-| Screenshot hygiene, HAR sanitization, evidence organization | `@capture`, `@evidence-hygiene` | `update_finding()` |
-
-**How it works:**
-1. Before screenshots: *"I'm about to capture PoC screenshots. What do I redact?"*
-2. `evidence-hygiene` agent loads and provides:
-   - Cookie redaction protocol (which fields to hide)
-   - PII black-bar rules (other users' data, faces, emails)
-   - HAR sanitization (jq filters)
-   - Screenshot capture order (request → response → full chain)
-3. Capture evidence, sanitize, organize
-4. Use MCP to update findings with evidence references
-5. Output: sanitized evidence pack ready for report
-
-**MCP tools used:** `update_finding`
+**Output:** Verdict for each finding (PASS / KILL / DOWNGRADE / CHAIN REQUIRED).
 
 ---
 
-### Phase 8: REPORT
+### Phase 7: REPORT
 
-**Goal:** Draft a submission-ready report using platform-specific templates.
+**Goal:** Generate a submission-ready report with coverage validation.
 
-| What happens | Which agents load | Which MCP tools to use |
-|-------------|-------------------|----------------------|
-| Draft report body, map to VRT, include severity request | `@report`, `@report-writing`, `@bugcrowd-reporting`, `@redteam-report-template`, `@redteam-mindset` | `get_coverage()`, `get_tool_coverage()`, `generate_report()` |
+| Step | Action | MCP Tools |
+|------|--------|-----------|
+| 1 | Check WSTG coverage | `get_coverage()` |
+| 2 | Check tool coverage | `get_tool_coverage()` |
+| 3 | Final gate check | `phase_gate_check(phase_completed=6)` |
+| 4 | Generate full report | `generate_report()` |
+| 5 | Present report summary | — |
+| 6 | Ask which platform (H1/Bugcrowd/Client) | — |
 
-**How it works:**
-1. Invoke `@report` or describe the finding
-2. Agent loads the appropriate template based on platform:
-   - **HackerOne** — standard body format
-   - **Bugcrowd** — VRT mapping, severity request paragraph, OOS rebuttals
-   - **Immunefi** — smart-contract vulnerability format
-   - **Red Team** — client-facing deliverable with DOCX packaging
-3. Agent fills in the template with:
-   - Vulnerability description
-   - HTTP request/response evidence
-   - Impact analysis
-   - Remediation recommendation
-   - CVSS 3.1/4.0 score
-4. Use MCP to check coverage: `get_coverage()` → `get_tool_coverage()`
-5. Generate final report: `generate_report()`
-6. Output: copy-paste-ready report or markdown deliverable
+**Platform-specific reporters:**
+- `@report-writing` — HackerOne/generic format
+- `@bugcrowd-reporting` — Bugcrowd VRT mapping
+- `@redteam-report-template` — Client-facing DOCX
+- `@redteam-mindset` — Red-team ops posture
 
-**MCP tools used:** `get_coverage`, `get_tool_coverage`, `generate_report`, `get_findings`, `get_engagement_status`
+**Output:** `engagements/<eid>/report.md` — full pentest report.
 
 ---
 
 ## How MCP Server and Agents Interact
-
-The two interfaces complement each other throughout the workflow:
 
 ```mermaid
 graph TB
@@ -328,15 +358,22 @@ graph TB
     2. Provides detection patterns,
        payloads, bypass table,
        chain opportunities
-    3. Guides LLM on what to say`"]
+    3. Reads H1 IDOR reports for
+       real-world technique guidance
+    4. Guides LLM on what to say`"]
 
     MCP["`**MCP Server**
     1. get_wstg_test(WSTG-ATHZ-01)
     2. get_technique_guide(IDOR)
-    3. log_finding(...)
-    4. track_test(...)
-    5. track_tool(...)
+    3. identify_waf() if blocked
+    4. log_finding(...)
+    5. track_test(...)
     6. get_coverage()`"]
+
+    Refs["`**Reference Libraries**
+    1. ~/dristi/docs/reports/hackerone-reports/idor.md (251 reports)
+    2. ~/dristi/waf-reference/ (144 vendor fingerprints)
+    3. ~/dristi/payloads-reference/Insecure Direct Object References/`"]
 
     Burp["`**Burp MCP Server**
     Sends HTTP requests
@@ -344,6 +381,7 @@ graph TB
 
     User --> Agent
     User --> MCP
+    Agent --> Refs
     Agent --> Burp
     MCP --> Burp
 ```
@@ -351,90 +389,24 @@ graph TB
 **At every phase, the pattern is the same:**
 
 1. You describe what you're doing → agent loads with relevant tradecraft
-2. Agent guides the LLM on what to test, what payloads to use, how to interpret responses
+2. Agent reads its reference library (H1 reports, WAF KB, PAT) for technique guidance
 3. MCP server provides structured methodology (WSTG tests, technique guides) and tracking
-4. Burp MCP executes the actual HTTP requests
+4. Burp MCP (or curl) executes the actual HTTP requests
 5. Findings are logged via MCP, tracked via MCP, reported via MCP
 
 ---
 
-## Complete Example Walkthrough
+## Mode Comparison
 
-### Target: meta.com (bug bounty program)
-
-```
-Step 1 — SCOPE
-  You: "Testing meta.com for their HackerOne program. Here's the scope."
-  → Agent: bb-methodology loads
-  → MCP: load_engagement_config('meta'), register_scope('meta.com')
-  → Result: scope populated, rules understood
-
-Step 2 — RECON
-  You: "Find all subdomains and live hosts for *.meta.com"
-  → Agent: offensive-osint loads, suggests subfinder + httpx + katana
-  → You run commands, paste results
-  → LLM identifies: api.meta.com (GraphQL), auth.meta.com (OAuth),
-    admin.meta.com (403), cdn.meta.com
-  → MCP: prioritize_endpoints() → {api: 9, auth: 7, admin: 8, cdn: 3}
-  → MCP: track_tool('subfinder', 'run', '47 hosts found')
-
-Step 3 — HUNT
-  You: "api.meta.com has a /api/users/{id} endpoint. Testing IDOR."
-  → Agent: hunt-idor loads with 26 H1 report patterns
-  → Tries: PUT /api/users/123 (method swap → 200), 
-           /api/v2/users/123 (path traversal → 200),
-           {"id":123} (JSON wrap → shows other user's data)
-  → MCP: log_finding('IDOR', 'high', '/api/users/{id} allows cross-tenant access')
-  → MCP: track_test('WSTG-ATHZ-01', 'completed', 'IDOR confirmed')
-
-Step 4 — VALIDATE
-  You: @triage-validation
-  → Agent: triage-validation runs 7Q gate
-  → Q1: Real HTTP request? ✓ (curl with cookie)
-  → Q2: Accepted impact? ✓ (data exposure)
-  → Q3: In scope? ✓ (api.meta.com in scope)
-  → Q4: No admin-only? ✓ (works with user accounts)
-  → Q5: Not known? ✓ (no public disclosure)
-  → Q6: Concrete impact? ✓ (victim data returned)
-  → Q7: Never-submit? ✓ (not on list)
-  → Result: PASS
-
-Step 5 — CAPTURE
-  You: "About to screenshot the IDOR PoC"
-  → Agent: evidence-hygiene loads
-  → Redacts cookies, masks victim email in response
-  → Captures: request in Burp Repeater → response with data → curl terminal
-
-Step 6 — REPORT
-  You: @report
-  → Agent: report-writing loads with H1 template
-  → MCP: get_coverage() → 40% (Phase 3 only), get_findings() → 1 finding
-  → Template filled: IDOR in /api/users/{id}
-  → Output: copy-paste-ready HackerOne report
-```
-
----
-
-## Phase Gate System
-
-After each phase, run `phase_gate_check()` to verify quality before proceeding:
-
-```mermaid
-flowchart LR
-    P0["Phase 0 INFO"] -->|Gate PASS| P1["Phase 1 CONF"]
-    P1 -->|Gate PASS| P2["Phase 2"]
-    P2 -->|Gate PASS| P3["Phase 3"]
-    P3 -->|Gate PASS| P4["Phase 4"]
-    P4 -->|Gate PASS| P5["Phase 5"]
-    P5 -->|Gate PASS| REPORT["Generate Report"]
-```
-
-Each gate checks:
-- Required tests completed
-- Required tools run
-- Findings properly logged
-- Evidence collected
-- No critical gaps
+| Feature | `@autopilot` | `@consult` | Manual |
+|---------|-------------|------------|--------|
+| Phases | 1–7 autonomous | 1–7 with prompts | Step-by-step |
+| Sub-agent dispatch | `task()` for phases 2-7 | `task()` for phases 2-7 | Direct agent invocation |
+| Phase gates | Automatic check + checkpoint | Ask before each gate | Manual |
+| WAF handling | Automatic detection in Phase 1.5 | Detected + suggested bypasses | Manual |
+| Reference fetching | Automatic pre-hunt reading | Suggested before testing | On-demand |
+| Recovery | Auto-retry on gate failure | Suggests recovery options | Manual |
+| Best for | Full engagement, no interruptions | Learning, guided testing | Targeted single-class testing |
 
 ---
 
@@ -446,3 +418,5 @@ Each gate checks:
 4. **Evidence hygiene by default** — redact before capture, not after
 5. **Phase gates ensure quality** — don't skip to reporting without coverage validation
 6. **Burp is optional** — curl + browser works fine for most testing
+7. **References guide technique** — real H1 reports, WAF KBs, and payload libs inform every test
+8. **Browser close after every op** — `playwright_browser_close()` mandate to prevent context leaks

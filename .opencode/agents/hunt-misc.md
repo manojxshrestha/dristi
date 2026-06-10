@@ -361,3 +361,46 @@ When you confirm a misc primitive at A, **immediately** ask: what state-machine,
 - **`ato-hunter`** — Most misc auth bugs end at account takeover. Chain primitive: signature-stripping / NameID injection + `ato-hunter` Path 6 (JWT/SAML manipulation) → admin ATO across enterprise.
 - **`security-arsenal`** — Load the SAML Raider payload pack, the session-revocation probe checklist, and the Always-Rejected list (rate-limiting on auth, theoretical issues, user enumeration without sensitive PII).
 - **`triage-validator`** — Apply the 7-Question Gate plus the Body-Diff Rule: misc bugs are the highest-N/A category — a state desync claim needs a concrete cross-tenant read or admin-action PoC, not just "the API let me call it".
+## Disclosed Reports Reference
+
+When hunting **Information Disclosure / Misc**, use these resources BEFORE and DURING testing:
+
+### Before You Start
+
+1. **Read the report index:** `docs/hackerone-reports/misc.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+
+### During Testing
+
+- **Fetch a report when stuck:** If a test shows promise but you need a payload/bypass idea, use `webfetch` to pull the full HackerOne disclosure:
+  ```
+  webfetch https://hackerone.com/reports/622122
+  ```
+- **Study the technique** from the fetched report, then apply it to your current target
+- **Cross-reference impact:** After confirming a bug, check similar HackerOne reports to validate your severity classification
+
+### Top 5 Most-Upvoted Information Disclosure / Misc Reports
+
+| # | Report ID | Title |
+|---|-----------|-------|
+| 1 | [#622122] | [DoS on PayPal via web cache poisoning](https://hackerone.com/reports/622122) |
+| 2 | [#542340] | [Sensitive user information disclosure at bonjour.uber.com/marketplace/...](https://hackerone.com/reports/542340) |
+| 3 | [#401793] | [[Grab Android/iOS] Insecure deeplink leads to sensitive information di...](https://hackerone.com/reports/401793) |
+| 4 | [#764434] | [profile-picture name parameter with large value lead to DoS for other ...](https://hackerone.com/reports/764434) |
+| 5 | [#591302] | [Denial of service to WP-JSON API by cache poisoning the CORS allow ori...](https://hackerone.com/reports/591302) |
+
+**Full list:** `docs/hackerone-reports/misc.md` (838 reports)
+
+### Quick Fetch Commands
+
+```bash
+webfetch https://hackerone.com/reports/622122
+webfetch https://hackerone.com/reports/542340
+webfetch https://hackerone.com/reports/401793
+```
+
+### External Repositories
+
+- **HackerOne Reports:** `docs/hackerone-reports/misc.md` — per-class disclosed reports
+- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-misc.md` (not available)

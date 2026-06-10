@@ -26,6 +26,16 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
 8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
+## PayloadsAllTheThings Reference
+
+This agent has a corresponding reference library at `payloads-reference/Insecure Direct Object References/` (130 lines).
+Read the README before/during testing for enriched methodology and bypass techniques:
+
+- **Methodology**: Detection techniques for different contexts and frameworks
+- **Payloads**: Classified payloads by injection point and filter type
+- **Bypass Patterns**: WAF/filter evasion specific to IDOR
+- **Labs**: PortSwigger and real-world practice labs
+
 ## Scope Notice
 
 - **Advisory mode** (default): You provide methodology, payloads, and analysis. The user executes commands.
@@ -417,3 +427,47 @@ Cross-references:
 - **`graphql-hunter`** — GraphQL resolvers without field-level authorization are IDOR-by-default; introspection hands you the schema. Chain primitive: `__schema` introspection → enumerate every mutation accepting `id:` argument → substitute victim IDs across `updateUser`, `deleteOrg`, `transferBilling` mutations → mass IDOR fan-out from one introspection query.
 - **`security-arsenal`** — Pull the IDOR Bypass Tables section for HTTP-parameter-pollution payloads (`?id=own&id=victim`), nested-JSON wrappers (`{"data":{"id":"VICTIM"}}`), and parameter-name variations (`uid`/`userId`/`user_id`/`account`) when the first direct substitution returns 403.
 - **`triage-validator`** — Run the Pre-Severity Gate before claiming Critical on an IDOR that returns 200 but doesn't actually leak data (empty array, redacted fields, "access denied" in body with 200 status). The 200-but-no-data IDOR is the #1 N/A driver on H1/Bugcrowd.
+## Disclosed Reports Reference
+
+When hunting **Insecure Direct Object Reference (IDOR)**, use these resources BEFORE and DURING testing:
+
+### Before You Start
+
+1. **Read the report index:** `docs/hackerone-reports/idor.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-idor.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+
+### During Testing
+
+- **Fetch a report when stuck:** If a test shows promise but you need a payload/bypass idea, use `webfetch` to pull the full HackerOne disclosure:
+  ```
+  webfetch https://hackerone.com/reports/415081
+  ```
+- **Study the technique** from the fetched report, then apply it to your current target
+- **Cross-reference impact:** After confirming a bug, check similar HackerOne reports to validate your severity classification
+
+### Top 5 Most-Upvoted Insecure Direct Object Reference (IDOR) Reports
+
+| # | Report ID | Title |
+|---|-----------|-------|
+| 1 | [#415081] | [IDOR to add secondary users in www.paypal.com/businessmanage/users/api...](https://hackerone.com/reports/415081) |
+| 2 | [#751577] | [IDOR allow access to payments data of any user](https://hackerone.com/reports/751577) |
+| 3 | [#2122671] | [IDOR - Delete all Licenses and certifications from users account using...](https://hackerone.com/reports/2122671) |
+| 4 | [#1969141] | [Insecure Direct Object Reference (IDOR) - Delete Campaigns](https://hackerone.com/reports/1969141) |
+| 5 | [#380410] | [idor allows you to delete photos and album from a gallery](https://hackerone.com/reports/380410) |
+
+**Full list:** `docs/hackerone-reports/idor.md` (251 reports)
+
+### Quick Fetch Commands
+
+```bash
+webfetch https://hackerone.com/reports/415081
+webfetch https://hackerone.com/reports/751577
+webfetch https://hackerone.com/reports/2122671
+```
+
+### External Repositories
+
+- **HackerOne Reports:** `docs/hackerone-reports/idor.md` — per-class disclosed reports
+- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-idor.md` (exists)

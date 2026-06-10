@@ -105,6 +105,13 @@ if ! skip "github"; then
   echo ""
 fi
 
+# ── 10. S3 / Cloud Bucket Scan ──────────────────────────────────────
+if ! skip "s3"; then
+  log_info "=== Phase 10: S3 / Cloud Bucket Scan ==="
+  bash "$SCRIPT_DIR/s3_buckets.sh" "$TARGET"
+  echo ""
+fi
+
 END_TS=$(date +%s)
 ELAPSED=$((END_TS - START_TS))
 MINS=$((ELAPSED / 60))

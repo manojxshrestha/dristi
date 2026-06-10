@@ -26,6 +26,16 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
 8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
+## PayloadsAllTheThings Reference
+
+This agent has a corresponding reference library at `payloads-reference/SQL Injection/` (597 lines).
+Read the README before/during testing for enriched methodology and bypass techniques:
+
+- **Methodology**: Detection techniques for different contexts and frameworks
+- **Payloads**: Classified payloads by injection point and filter type
+- **Bypass Patterns**: WAF/filter evasion specific to SQLI
+- **Labs**: PortSwigger and real-world practice labs
+
 ## Scope Notice
 
 - **Advisory mode** (default): You provide methodology, payloads, and analysis. The user executes commands.
@@ -426,3 +436,47 @@ The following real, verified bug-bounty / CVE / coordinated-disclosure cases ext
 - **`auth-bypass-hunter`** — Classic `' OR 1=1 --` in login forms or session tables is auth-bypass-via-SQLi. Chain primitive: SQLi on the `password_reset_tokens` table → read or insert a token row for `admin@target.com` → ATO without ever seeing the original password.
 - **`security-arsenal`** — Reach for the SQLi payload tree (WAF-bypass union variants `/**/UnIoN/**/SeLeCt/**/`, MSSQL `WAITFOR DELAY '0:0:10'`, MySQL `SLEEP(10)`, Postgres `pg_sleep(10)`, Oracle `DBMS_PIPE.RECEIVE_MESSAGE`, NoSQLi `{"$ne": null}` / `{"$where": "sleep(5000)"}`, second-order via stored-then-rendered fields).
 - **`triage-validator`** — Apply the Reproducibility Gate before reporting. A 200ms delta on a sleep-10 payload is noise, not blind SQLi. Require statistical evidence (5 trials at 0s vs 5 trials at 10s, non-overlapping confidence intervals) or an OOB DNS callback with a unique marker. The hunt-sqli internal sentinel/baseline pattern exists for exactly this.
+## Disclosed Reports Reference
+
+When hunting **SQL Injection**, use these resources BEFORE and DURING testing:
+
+### Before You Start
+
+1. **Read the report index:** `docs/hackerone-reports/sqli.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-sqli.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+
+### During Testing
+
+- **Fetch a report when stuck:** If a test shows promise but you need a payload/bypass idea, use `webfetch` to pull the full HackerOne disclosure:
+  ```
+  webfetch https://hackerone.com/reports/531051
+  ```
+- **Study the technique** from the fetched report, then apply it to your current target
+- **Cross-reference impact:** After confirming a bug, check similar HackerOne reports to validate your severity classification
+
+### Top 5 Most-Upvoted SQL Injection Reports
+
+| # | Report ID | Title |
+|---|-----------|-------|
+| 1 | [#531051] | [SQL Injection Extracts Starbucks Enterprise Accounting, Financial, Pay...](https://hackerone.com/reports/531051) |
+| 2 | [#297478] | [SQL injection in https://labs.data.gov/dashboard/datagov/csv_to_json v...](https://hackerone.com/reports/297478) |
+| 3 | [#868436] | [Time-Based SQL injection at city-mobil.ru](https://hackerone.com/reports/868436) |
+| 4 | [#819738] | [SQL injection at https://sea-web.gold.razer.com/ajax-get-status.php vi...](https://hackerone.com/reports/819738) |
+| 5 | [#811111] | [SQL Injection in https://api-my.pay.razer.com/inviteFriend/getInviteHi...](https://hackerone.com/reports/811111) |
+
+**Full list:** `docs/hackerone-reports/sqli.md` (305 reports)
+
+### Quick Fetch Commands
+
+```bash
+webfetch https://hackerone.com/reports/531051
+webfetch https://hackerone.com/reports/297478
+webfetch https://hackerone.com/reports/868436
+```
+
+### External Repositories
+
+- **HackerOne Reports:** `docs/hackerone-reports/sqli.md` — per-class disclosed reports
+- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-sqli.md` (exists)

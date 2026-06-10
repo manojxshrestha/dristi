@@ -7,6 +7,7 @@ across agents via the deliverable system.
 Roadmap Tier 2.3.
 """
 
+import json
 import re
 from pathlib import Path
 
@@ -14,6 +15,10 @@ from pathlib import Path
 DATA_DIR: Path = Path(".")
 _atomic_write_json = None
 _append_event = None
+
+# Path to external WAF vendor fingerprints loaded from the Awesome-WAF KB
+WAF_VENDORS_JSON = Path(__file__).parent / "waf_vendors.json"
+WAF_BYPASSES_JSON = Path(__file__).parent / "waf_bypasses.json"
 
 
 def configure(data_dir: Path, atomic_write_fn, append_event_fn):
@@ -25,6 +30,43 @@ def configure(data_dir: Path, atomic_write_fn, append_event_fn):
 
 
 # ── WAF Fingerprint Database ─────────────────────────────────────
+
+
+def _load_external_vendors():
+    """Load additional WAF vendor fingerprints from JSON file."""
+    try:
+        if WAF_VENDORS_JSON.exists():
+            with open(WAF_VENDORS_JSON) as f:
+                return json.load(f)
+    except Exception:
+        pass
+    return {}
+
+
+def _get_all_signatures():
+    """Return WAF_SIGNATURES merged with external vendors."""
+    sigs = dict(WAF_SIGNATURES)
+    sigs.update(_load_external_vendors())
+    return sigs
+
+
+def _load_external_bypasses():
+    """Load additional WAF bypass payloads from JSON file."""
+    try:
+        if WAF_BYPASSES_JSON.exists():
+            with open(WAF_BYPASSES_JSON) as f:
+                return json.load(f)
+    except Exception:
+        pass
+    return {}
+
+
+def _get_all_bypasses():
+    """Return WAF_BYPASSES merged with external bypasses."""
+    bypasses = dict(WAF_BYPASSES)
+    bypasses.update(_load_external_bypasses())
+    return bypasses
+
 
 WAF_SIGNATURES = {
     "cloudflare": {
@@ -378,7 +420,8 @@ def _match_waf(headers: dict, body: str, status_code: int) -> list[dict]:
     headers_lower = {k.lower(): v.lower() for k, v in headers.items()}
     body_lower = body.lower() if body else ""
 
-    for waf_name, sig in WAF_SIGNATURES.items():
+    all_sigs = _get_all_signatures()
+    for waf_name, sig in all_sigs.items():
         score = 0
         evidence = []
 
@@ -507,10 +550,13 @@ def get_waf_bypass(
     vendor = waf_vendor.lower().strip()
     vuln = vuln_class.lower().strip()
 
+    # Merge external bypasses
+    all_bypass_data = _get_all_bypasses()
+
     # Get vendor-specific bypasses
-    vendor_bypasses = WAF_BYPASSES.get(vendor, {}).get(vuln, [])
+    vendor_bypasses = all_bypass_data.get(vendor, {}).get(vuln, [])
     # Always include generic bypasses
-    generic_bypasses = WAF_BYPASSES.get("_generic", {}).get(vuln, [])
+    generic_bypasses = all_bypass_data.get("_generic", {}).get(vuln, [])
 
     all_bypasses = vendor_bypasses + [{**b, "technique": f"[generic] {b['technique']}"} for b in generic_bypasses if b["payload"] not in {vb["payload"] for vb in vendor_bypasses}]
 
@@ -518,10 +564,7 @@ def get_waf_bypass(
         all_bypasses = [b for b in all_bypasses if b.get("level") == bypass_level]
 
     if not all_bypasses:
-        known_vendors = sorted(WAF_BYPASSES.keys())
-        known_vulns = set()
-        for v in WAF_BYPASSES.values():
-            known_vulns.update(v.keys())
+        known_vendors = sorted(all_bypass_data.keys())
         return (
             f"No bypass payloads found for WAF='{vendor}', vuln_class='{vuln}'.\n\n"
             f"**Known WAF vendors**: {', '.join(known_vendors)}\n"
@@ -532,7 +575,7 @@ def get_waf_bypass(
     # Build output
     lines = [f"# WAF Bypass Payloads: {vendor} / {vuln}\n"]
 
-    if vendor in WAF_BYPASSES:
+    if vendor in all_bypass_data:
         lines.append(f"**WAF**: {vendor.replace('_', ' ').title()}")
     else:
         lines.append("**WAF**: Generic (unknown vendor)")
@@ -588,8 +631,10 @@ def list_waf_vendors() -> str:
     lines.append("| Vendor | Headers | Body Patterns | Block Markers | Bypass Classes |")
     lines.append("|--------|---------|---------------|---------------|----------------|")
 
-    for vendor, sig in sorted(WAF_SIGNATURES.items()):
-        bypass_classes = sorted(WAF_BYPASSES.get(vendor, {}).keys())
+    all_sigs = _get_all_signatures()
+    all_bypasses = _get_all_bypasses()
+    for vendor, sig in sorted(all_sigs.items()):
+        bypass_classes = sorted(all_bypasses.get(vendor, {}).keys())
         bypass_str = ", ".join(bypass_classes) if bypass_classes else "generic only"
         hdrs: list = sig.get("headers", [])
         bps: list = sig.get("body_patterns", [])
@@ -599,7 +644,7 @@ def list_waf_vendors() -> str:
     lines.extend(
         [
             "",
-            f"**Total vendors**: {len(WAF_SIGNATURES)}",
+            f"**Total vendors**: {len(all_sigs)}",
             "",
             "Use `identify_waf(headers, body, status_code)` to detect which WAF is in use.",
             "Use `get_waf_bypass(vendor, vuln_class)` to get tailored bypass payloads.",

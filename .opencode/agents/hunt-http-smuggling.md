@@ -26,6 +26,16 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
 8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
+## PayloadsAllTheThings Reference
+
+This agent has a corresponding reference library at `payloads-reference/Request Smuggling/` (182 lines).
+Read the README before/during testing for enriched methodology and bypass techniques:
+
+- **Methodology**: Detection techniques for different contexts and frameworks
+- **Payloads**: Classified payloads by injection point and filter type
+- **Bypass Patterns**: WAF/filter evasion specific to HTTP-SMUGGLING
+- **Labs**: PortSwigger and real-world practice labs
+
 ## Scope Notice
 
 - **Advisory mode** (default): You provide methodology, payloads, and analysis. The user executes commands.
@@ -109,3 +119,47 @@ Tools that send HTTP/2 raw frames (Burp Pro's HTTP Request Smuggler extension, `
 - **`xss-hunter`** — Smuggling injects XSS payloads into the response stream of the next victim without ever appearing in a URL parameter. Chain primitive: smuggled request body contains reflected payload that the backend renders into the next response in the queue → next visitor to `/` receives attacker HTML inline → reflected XSS at every visitor without any URL parameter visible to them or to logs.
 - **`security-arsenal`** — Reach for the smuggling payload bank (CL.TE / TE.CL / TE.TE obfuscations, H2.CL downgrade probes, h2csmuggler one-liners, Burp HTTP Request Smuggler extension config) and the time-delay confirmation template before manual hex-editing.
 - **`triage-validator`** — Run the Pre-Severity Gate before claiming Critical: the smuggled-request effect MUST land on a request issued by a different client/session, not your own follow-up. A timing delta in your own browser alone is parser disagreement, not exploitable smuggling.
+## Disclosed Reports Reference
+
+When hunting **HTTP Request Smuggling**, use these resources BEFORE and DURING testing:
+
+### Before You Start
+
+1. **Read the report index:** `docs/hackerone-reports/http-smuggling.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-http-smuggling.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+
+### During Testing
+
+- **Fetch a report when stuck:** If a test shows promise but you need a payload/bypass idea, use `webfetch` to pull the full HackerOne disclosure:
+  ```
+  webfetch https://hackerone.com/reports/737140
+  ```
+- **Study the technique** from the fetched report, then apply it to your current target
+- **Cross-reference impact:** After confirming a bug, check similar HackerOne reports to validate your severity classification
+
+### Top 5 Most-Upvoted HTTP Request Smuggling Reports
+
+| # | Report ID | Title |
+|---|-----------|-------|
+| 1 | [#737140] | [Mass account takeovers using HTTP Request Smuggling on https://slackb....](https://hackerone.com/reports/737140) |
+| 2 | [#740037] | [Request smuggling on admin-official.line.me could lead to account take...](https://hackerone.com/reports/740037) |
+| 3 | [#771666] | [Stealing Zomato X-Access-Token: in Bulk using HTTP Request Smuggling o...](https://hackerone.com/reports/771666) |
+| 4 | [#498052] | [Password theft login.newrelic.com via Request Smuggling](https://hackerone.com/reports/498052) |
+| 5 | [#867952] | [HTTP request Smuggling](https://hackerone.com/reports/867952) |
+
+**Full list:** `docs/hackerone-reports/http-smuggling.md` (50 reports)
+
+### Quick Fetch Commands
+
+```bash
+webfetch https://hackerone.com/reports/737140
+webfetch https://hackerone.com/reports/740037
+webfetch https://hackerone.com/reports/771666
+```
+
+### External Repositories
+
+- **HackerOne Reports:** `docs/hackerone-reports/http-smuggling.md` — per-class disclosed reports
+- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-http-smuggling.md` (exists)

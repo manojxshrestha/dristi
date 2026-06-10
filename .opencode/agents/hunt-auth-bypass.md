@@ -474,3 +474,47 @@ app.post('/api/admin/delete', deleteUser);         // no server-side check
 - **`sharepoint-hunter`** — The SP equivalent of the WordPress XMLRPC pattern lives here. Chain primitive: `/_vti_bin/Authentication.asmx` anonymous reachable + native Forms-auth credential accepted + zero rate limit = unlimited credential brute-force endpoint bypassing custom-branded `customlogin.aspx` protections → FedAuth cookie → full SharePoint farm access.
 - **`security-arsenal`** — Pull the JWT-attack payloads section (alg=none, kid path-traversal, JWK injection, RS256→HS256 key confusion) when JWT validation is the auth wall; pull the SAML signature-stripping section when the SP accepts unsigned assertions.
 - **`triage-validator`** — Run the Pre-Severity Gate before claiming Critical on an "auth bypass" that only enumerates usernames or only reveals a 401-vs-403 differential. Username enumeration alone without lockout-amplification is consistently N/A or Informational on H1.
+## Disclosed Reports Reference
+
+When hunting **Authentication / Authorization Bypass**, use these resources BEFORE and DURING testing:
+
+### Before You Start
+
+1. **Read the report index:** `docs/hackerone-reports/auth-bypass.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-auth-bypass.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+
+### During Testing
+
+- **Fetch a report when stuck:** If a test shows promise but you need a payload/bypass idea, use `webfetch` to pull the full HackerOne disclosure:
+  ```
+  webfetch https://hackerone.com/reports/791775
+  ```
+- **Study the technique** from the fetched report, then apply it to your current target
+- **Cross-reference impact:** After confirming a bug, check similar HackerOne reports to validate your severity classification
+
+### Top 5 Most-Upvoted Authentication / Authorization Bypass Reports
+
+| # | Report ID | Title |
+|---|-----------|-------|
+| 1 | [#791775] | [Email Confirmation Bypass in myshop.myshopify.com that Leads to Full P...](https://hackerone.com/reports/791775) |
+| 2 | [#591295] | [Potential pre-auth RCE on Twitter VPN](https://hackerone.com/reports/591295) |
+| 3 | [#921780] | [Improper Authentication - any user can login as other user with otp/lo...](https://hackerone.com/reports/921780) |
+| 4 | [#796808] | [[Part II] Email Confirmation Bypass in myshop.myshopify.com that Leads...](https://hackerone.com/reports/796808) |
+| 5 | [#335330] | [Subdomain Takeover to Authentication bypass](https://hackerone.com/reports/335330) |
+
+**Full list:** `docs/hackerone-reports/auth-bypass.md` (1092 reports)
+
+### Quick Fetch Commands
+
+```bash
+webfetch https://hackerone.com/reports/791775
+webfetch https://hackerone.com/reports/591295
+webfetch https://hackerone.com/reports/921780
+```
+
+### External Repositories
+
+- **HackerOne Reports:** `docs/hackerone-reports/auth-bypass.md` — per-class disclosed reports
+- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-auth-bypass.md` (exists)

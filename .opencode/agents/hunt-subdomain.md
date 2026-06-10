@@ -364,3 +364,47 @@ Cross-references:
 - **`xss-hunter`** — A claimed subdomain is same-origin to session-cookie-domain siblings. Chain primitive: Subdomain takeover at `feedback.target.com` + cookie scope `.target.com` → JS hosted on takeover host reads main-app cookies → session hijack.
 - **`security-arsenal`** — Load the 27+ Subdomain Takeover Fingerprint Table (NoSuchBucket, "no such app", GitHub Pages 404 strings, Heroku, Shopify, Fastly) and the `subzy`/`subjack` automation patterns.
 - **`triage-validator`** — Apply the Unique-Marker gate: takeover claim is informational on its own; submit only after publishing a unique HTML marker on the claimed host AND demonstrating a downstream impact (cookie read, OAuth chain, CSP bypass).
+## Disclosed Reports Reference
+
+When hunting **Subdomain Takeover**, use these resources BEFORE and DURING testing:
+
+### Before You Start
+
+1. **Read the report index:** `docs/hackerone-reports/subdomain.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-subdomain.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+
+### During Testing
+
+- **Fetch a report when stuck:** If a test shows promise but you need a payload/bypass idea, use `webfetch` to pull the full HackerOne disclosure:
+  ```
+  webfetch https://hackerone.com/reports/335330
+  ```
+- **Study the technique** from the fetched report, then apply it to your current target
+- **Cross-reference impact:** After confirming a bug, check similar HackerOne reports to validate your severity classification
+
+### Top 5 Most-Upvoted Subdomain Takeover Reports
+
+| # | Report ID | Title |
+|---|-----------|-------|
+| 1 | [#335330] | [Subdomain Takeover to Authentication bypass](https://hackerone.com/reports/335330) |
+| 2 | [#665398] | [Subdomain takeover of datacafe-cert.starbucks.com](https://hackerone.com/reports/665398) |
+| 3 | [#219205] | [Authentication bypass on auth.uber.com via subdomain takeover of saost...](https://hackerone.com/reports/219205) |
+| 4 | [#779442] | [Subdomain takeover of storybook.lystit.com](https://hackerone.com/reports/779442) |
+| 5 | [#159156] | [Hacker.One Subdomain Takeover](https://hackerone.com/reports/159156) |
+
+**Full list:** `docs/hackerone-reports/subdomain.md` (216 reports)
+
+### Quick Fetch Commands
+
+```bash
+webfetch https://hackerone.com/reports/335330
+webfetch https://hackerone.com/reports/665398
+webfetch https://hackerone.com/reports/219205
+```
+
+### External Repositories
+
+- **HackerOne Reports:** `docs/hackerone-reports/subdomain.md` — per-class disclosed reports
+- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-subdomain.md` (exists)

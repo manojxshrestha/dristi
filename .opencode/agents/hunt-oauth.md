@@ -26,6 +26,16 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
 8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
+## PayloadsAllTheThings Reference
+
+This agent has a corresponding reference library at `payloads-reference/OAuth Misconfiguration/` (82 lines).
+Read the README before/during testing for enriched methodology and bypass techniques:
+
+- **Methodology**: Detection techniques for different contexts and frameworks
+- **Payloads**: Classified payloads by injection point and filter type
+- **Bypass Patterns**: WAF/filter evasion specific to OAUTH
+- **Labs**: PortSwigger and real-world practice labs
+
 ## Scope Notice
 
 - **Advisory mode** (default): You provide methodology, payloads, and analysis. The user executes commands.
@@ -484,3 +494,47 @@ A server-side prefix-match flaw on `redirect_uri` is **necessary but not suffici
 - **`saml-hunter`** — When OAuth is layered atop a SAML IdP, the IdP-level XSW becomes the OAuth ATO path. Chain primitive: SAML SP that issues OAuth tokens after assertion-validation + XSW attack on the assertion alters `NameID` to admin user → SP issues OAuth token bearing admin identity → OAuth-scoped APIs grant admin access.
 - **`security-arsenal`** — Pull the OAuth `redirect_uri` Bypass Table (host-confusion `legit.com@evil.com`, `legit.com.evil.com`, path-traversal, parameter pollution, encoded-slash `%2F`, fragment-injection `#legit.com`) and the open-redirect chain catalog when exact-match validation forces you to find an open-redirect on the whitelisted domain first.
 - **`triage-validator`** — Run the Pre-Severity Gate before claiming Critical on an OAuth "open redirect" that doesn't actually leak a token (only the `state` param, or the callback page doesn't include credentials in URL). State-only leakage is Low; token/code leakage with successful exchange demonstration is Critical. The exchange-the-code step is non-negotiable.
+## Disclosed Reports Reference
+
+When hunting **OAuth / OpenID Connect**, use these resources BEFORE and DURING testing:
+
+### Before You Start
+
+1. **Read the report index:** `docs/hackerone-reports/oauth.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-oauth.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+
+### During Testing
+
+- **Fetch a report when stuck:** If a test shows promise but you need a payload/bypass idea, use `webfetch` to pull the full HackerOne disclosure:
+  ```
+  webfetch https://hackerone.com/reports/791775
+  ```
+- **Study the technique** from the fetched report, then apply it to your current target
+- **Cross-reference impact:** After confirming a bug, check similar HackerOne reports to validate your severity classification
+
+### Top 5 Most-Upvoted OAuth / OpenID Connect Reports
+
+| # | Report ID | Title |
+|---|-----------|-------|
+| 1 | [#791775] | [Email Confirmation Bypass in myshop.myshopify.com that Leads to Full P...](https://hackerone.com/reports/791775) |
+| 2 | [#740989] | [Shopify Stocky App OAuth Misconfiguration](https://hackerone.com/reports/740989) |
+| 3 | [#202781] | [Chained Bugs to Leak Victim's Uber's FB Oauth Token](https://hackerone.com/reports/202781) |
+| 4 | [#796956] | [Able to Takeover Merchants Accounts Even They Have Already Setup SSO, ...](https://hackerone.com/reports/796956) |
+| 5 | [#110293] | [Insufficient OAuth callback validation which leads to Periscope accoun...](https://hackerone.com/reports/110293) |
+
+**Full list:** `docs/hackerone-reports/oauth.md` (107 reports)
+
+### Quick Fetch Commands
+
+```bash
+webfetch https://hackerone.com/reports/791775
+webfetch https://hackerone.com/reports/740989
+webfetch https://hackerone.com/reports/202781
+```
+
+### External Repositories
+
+- **HackerOne Reports:** `docs/hackerone-reports/oauth.md` — per-class disclosed reports
+- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-oauth.md` (exists)

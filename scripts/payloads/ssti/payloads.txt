@@ -1,0 +1,13 @@
+{{7*7}}
+{{7*'7'}}
+<%= 7*7 %>
+{{config}}
+{{self}}
+{{''.__class__.__mro__[1].__subclasses__()}}
+{{''.__class__.__mro__[2].__subclasses__()}}
+{{''.__class__.__mro__}}
+{{''.__class__.__bases__[0].__subclasses__()}}
+{$smarty.version}
+{{app.request}}
+{{dump(app)}}
+{{app.user}}

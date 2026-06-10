@@ -26,6 +26,16 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
 8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
+## PayloadsAllTheThings Reference
+
+This agent has a corresponding reference library at `payloads-reference/SAML Injection/` (201 lines).
+Read the README before/during testing for enriched methodology and bypass techniques:
+
+- **Methodology**: Detection techniques for different contexts and frameworks
+- **Payloads**: Classified payloads by injection point and filter type
+- **Bypass Patterns**: WAF/filter evasion specific to SAML
+- **Labs**: PortSwigger and real-world practice labs
+
 ## Scope Notice
 
 - **Advisory mode** (default): You provide methodology, payloads, and analysis. The user executes commands.
@@ -136,3 +146,27 @@ NameID manip     = Medium/High (depends on what NameID maps to)
 - **`xxe-hunter`** — SAML assertions ARE XML; XXE in the assertion parser is a separate chain on top of XSW. Chain primitive: SAML parser without `disallow-doctype-decl` + `<!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/passwd">]>` in assertion + `<NameID>&xxe;</NameID>` → SP renders/logs NameID → /etc/passwd contents leak in error response or audit log → file-read primitive on SAML SP infrastructure.
 - **`security-arsenal`** — Pull the SAML/XSW Payload Catalog (XSW1-XSW8 templates, comment-injection variants for libxml/Xerces/MSXML parser differences, signature-wrapping with multiple Reference elements, key-confusion payloads where attacker-IdP-signed assertions are accepted by trust-naive SPs) and the always-rejected list for "SAMLResponse accepted on the wrong endpoint" claims that don't actually validate.
 - **`triage-validator`** — Run the Pre-Severity Gate before claiming Critical on a SAML "vulnerability" that only modifies non-security-relevant attributes (display name, locale) without altering NameID, AuthnContext, or role-bearing AttributeStatements. Theoretical XML manipulation that doesn't cross an authorization boundary is Informational, not Critical — the auth-decision-changing step is the gate.
+## Disclosed Reports Reference
+
+When hunting **Saml**, use these resources:
+
+### Before You Start
+
+1. **Browse the master index:** `docs/hackerone-reports/INDEX.md` — find reports relevant to your class
+2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-saml.md` — curated techniques with HTTP request/response examples
+3. **Check Facebook writeups:** `docs/facebook-reports/facebook-writeups.md` if testing Meta/Meta-owned surfaces
+
+### During Testing
+
+- When you find a potential vulnerability, search the HackerOne disclosed reports index for similar findings to:
+  - Discover payload/bypass techniques from real reports
+  - Validate your impact assessment against paid bounties
+  - Cross-check severity classification
+- Use `webfetch` to read a relevant HackerOne report when you need technique guidance
+
+### External Repositories
+
+- **HackerOne Reports (Master):** `docs/hackerone-reports/INDEX.md` — 14,682+ structured disclosed reports
+- **HackerOne TOP by Class:** `docs/hackerone-reports/` — per-class report files (24 classes)
+- **Facebook Writeups:** `docs/facebook-reports/facebook-writeups.md` — Meta bug bounty writeups
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-saml.md`

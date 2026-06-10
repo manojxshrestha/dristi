@@ -26,6 +26,16 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
 8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
+## PayloadsAllTheThings Reference
+
+This agent has a corresponding reference library at `payloads-reference/Web Cache Deception/` (152 lines).
+Read the README before/during testing for enriched methodology and bypass techniques:
+
+- **Methodology**: Detection techniques for different contexts and frameworks
+- **Payloads**: Classified payloads by injection point and filter type
+- **Bypass Patterns**: WAF/filter evasion specific to CACHE-POISON
+- **Labs**: PortSwigger and real-world practice labs
+
 ## Scope Notice
 
 - **Advisory mode** (default): You provide methodology, payloads, and analysis. The user executes commands.
@@ -323,3 +333,47 @@ The following real, verified bug-bounty / coordinated-disclosure cases extend th
 - **`auth-bypass-hunter`** — Web Cache Deception turns authenticated pages into publicly-cached responses, leaking session-bound content to unauthenticated attackers. Chain primitive: `/account/profile.css` served as authenticated HTML, cached as static asset → attacker fetches same URL without auth and reads victim's email/tokens → session cookies in body → full ATO.
 - **`security-arsenal`** — Reach for the unkeyed-header wordlist (`X-Forwarded-Host`, `X-Host`, `X-Forwarded-Server`, `X-HTTP-Host-Override`, `Forwarded`, `X-Original-URL`) and the WCD path-extension list (`.css`, `.js`, `.jpg`, `.ico`, `;.css`, `%2e%2ecss`) before hand-fuzzing.
 - **`triage-validator`** — Run the Pre-Severity Gate before claiming Critical: the poisoned response MUST be reproducible from a separate IP/incognito without your poison headers. If only your own browser sees the effect, it's a self-cache and N/A.
+## Disclosed Reports Reference
+
+When hunting **Web Cache Poisoning**, use these resources BEFORE and DURING testing:
+
+### Before You Start
+
+1. **Read the report index:** `docs/hackerone-reports/cache-poison.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-cache-poison.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+
+### During Testing
+
+- **Fetch a report when stuck:** If a test shows promise but you need a payload/bypass idea, use `webfetch` to pull the full HackerOne disclosure:
+  ```
+  webfetch https://hackerone.com/reports/622122
+  ```
+- **Study the technique** from the fetched report, then apply it to your current target
+- **Cross-reference impact:** After confirming a bug, check similar HackerOne reports to validate your severity classification
+
+### Top 5 Most-Upvoted Web Cache Poisoning Reports
+
+| # | Report ID | Title |
+|---|-----------|-------|
+| 1 | [#622122] | [DoS on PayPal via web cache poisoning](https://hackerone.com/reports/622122) |
+| 2 | [#492841] | [Web cache poisoning attack leads to user information and more](https://hackerone.com/reports/492841) |
+| 3 | [#1424094] | [Web Cache Poisoning leads to Stored XSS](https://hackerone.com/reports/1424094) |
+| 4 | [#303730] | [Defacement of catalog.data.gov via web cache poisoning to stored DOMXS...](https://hackerone.com/reports/303730) |
+| 5 | [#1096609] | [https://themes.shopify.com::: Host header web cache poisoning lead to ...](https://hackerone.com/reports/1096609) |
+
+**Full list:** `docs/hackerone-reports/cache-poison.md` (30 reports)
+
+### Quick Fetch Commands
+
+```bash
+webfetch https://hackerone.com/reports/622122
+webfetch https://hackerone.com/reports/492841
+webfetch https://hackerone.com/reports/1424094
+```
+
+### External Repositories
+
+- **HackerOne Reports:** `docs/hackerone-reports/cache-poison.md` — per-class disclosed reports
+- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-cache-poison.md` (exists)

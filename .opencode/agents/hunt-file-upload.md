@@ -26,6 +26,16 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
 8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
+## PayloadsAllTheThings Reference
+
+This agent has a corresponding reference library at `payloads-reference/Upload Insecure Files/` (414 lines).
+Read the README before/during testing for enriched methodology and bypass techniques:
+
+- **Methodology**: Detection techniques for different contexts and frameworks
+- **Payloads**: Classified payloads by injection point and filter type
+- **Bypass Patterns**: WAF/filter evasion specific to FILE-UPLOAD
+- **Labs**: PortSwigger and real-world practice labs
+
 ## Scope Notice
 
 - **Advisory mode** (default): You provide methodology, payloads, and analysis. The user executes commands.
@@ -186,3 +196,47 @@ curl -s -X POST "https://$TARGET/api/import" \
 - **`ssrf-hunter`** — Image-processing libraries (ImageMagick, ffmpeg) fetch remote URLs from inside the uploaded file. Chain primitive: upload an SVG/MVG with `<image xlink:href="http://169.254.169.254/latest/meta-data/iam/security-credentials/">` or ffmpeg `concat:http://internal/...` → SSRF to AWS IMDS → cloud creds; the ImageTragick CVE-2016-3714 family is still alive on legacy farms.
 - **`security-arsenal`** — Reach for the file-upload bypass tree: 10-row extension/MIME/magic-byte bypass table (double-ext, null-byte, case variants, `.phtml`/`.phar`/`.php5`/`.pht`, `.htaccess` upload to re-enable handlers, `web.config` upload on IIS), SVG/MVG/SVGZ payloads, DOCX-XXE templates, ZIP-slip path traversal in archives, polyglot generators.
 - **`triage-validator`** — Apply the Reproducibility Gate. A file successfully uploaded but never served, never executed, never parsed by anything is not a finding — it's a write-only blob. Critical RCE requires the actual `whoami` round-trip from the uploaded shell; stored XSS requires the popup firing in a victim browser, not just the file existing on disk.
+## Disclosed Reports Reference
+
+When hunting **File Upload**, use these resources BEFORE and DURING testing:
+
+### Before You Start
+
+1. **Read the report index:** `docs/hackerone-reports/file-upload.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-file-upload.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+
+### During Testing
+
+- **Fetch a report when stuck:** If a test shows promise but you need a payload/bypass idea, use `webfetch` to pull the full HackerOne disclosure:
+  ```
+  webfetch https://hackerone.com/reports/403417
+  ```
+- **Study the technique** from the fetched report, then apply it to your current target
+- **Cross-reference impact:** After confirming a bug, check similar HackerOne reports to validate your severity classification
+
+### Top 5 Most-Upvoted File Upload Reports
+
+| # | Report ID | Title |
+|---|-----------|-------|
+| 1 | [#403417] | [Remote Code Execution on www.semrush.com/my_reports on Logo upload](https://hackerone.com/reports/403417) |
+| 2 | [#506646] | [Webshell via File Upload on ecjobs.starbucks.com.cn](https://hackerone.com/reports/506646) |
+| 3 | [#1010466] | [Blind XSS on image upload](https://hackerone.com/reports/1010466) |
+| 4 | [#854032] | [Unrestricted file upload on [ambassador.mail.ru]](https://hackerone.com/reports/854032) |
+| 5 | [#683957] | [[ RCE ] Through stopping the redirect in /admin/* the attacker able to...](https://hackerone.com/reports/683957) |
+
+**Full list:** `docs/hackerone-reports/file-upload.md` (152 reports)
+
+### Quick Fetch Commands
+
+```bash
+webfetch https://hackerone.com/reports/403417
+webfetch https://hackerone.com/reports/506646
+webfetch https://hackerone.com/reports/1010466
+```
+
+### External Repositories
+
+- **HackerOne Reports:** `docs/hackerone-reports/file-upload.md` — per-class disclosed reports
+- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-file-upload.md` (exists)

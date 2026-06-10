@@ -211,3 +211,47 @@ Tools: `kiterunner` natively eats OpenAPI; `sj` (Swagger Jacker), `apidetector`,
 - **`subdomain-hunter`** — CORS regex with wildcard subdomain trusts a takeoverable host. Chain primitive: CORS allowlist `*.target.com` + subdomain takeover → attacker-controlled origin reads credentialed API responses.
 - **`security-arsenal`** — Load the JWT Attack Payloads section (alg=none, kid path traversal, JWK injection, embedded JWK) and the Mass-Assignment Field Wordlist (`is_admin`, `role`, `verified`, `permissions`, `org_id`, `tenant_id`).
 - **`triage-validator`** — Apply the Server-Policy-vs-State gate: a permissive CORS header alone is informational; demonstrate actual cross-origin credentialed read of sensitive data before reporting.
+## Disclosed Reports Reference
+
+When hunting **API Misconfiguration**, use these resources BEFORE and DURING testing:
+
+### Before You Start
+
+1. **Read the report index:** `docs/hackerone-reports/api-misconfig.md` — scan top-upvoted reports for real-world payloads, bypass techniques, and bounty benchmarks
+2. **Study the pattern library:** `~/dristi/docs/disclosed-reports/hunt-api-misconfig.md` — curated techniques with HTTP request/response examples and detection methods
+3. **Check writeups (Meta/Facebook):** `docs/facebook-reports/facebook-writeups.md` if testing Meta-owned surfaces
+
+### During Testing
+
+- **Fetch a report when stuck:** If a test shows promise but you need a payload/bypass idea, use `webfetch` to pull the full HackerOne disclosure:
+  ```
+  webfetch https://hackerone.com/reports/455645
+  ```
+- **Study the technique** from the fetched report, then apply it to your current target
+- **Cross-reference impact:** After confirming a bug, check similar HackerOne reports to validate your severity classification
+
+### Top 5 Most-Upvoted API Misconfiguration Reports
+
+| # | Report ID | Title |
+|---|-----------|-------|
+| 1 | [#455645] | [Exposed Kubernetes API - RCE/Exposed Creds](https://hackerone.com/reports/455645) |
+| 2 | [#716292] | [JumpCloud API Key leaked via Open Github Repository.](https://hackerone.com/reports/716292) |
+| 3 | [#1342088] | [Flickr Account Takeover using AWS Cognito API](https://hackerone.com/reports/1342088) |
+| 4 | [#591813] | [[Pre-Submission][H1-4420-2019] API access to Phabricator on code.uberi...](https://hackerone.com/reports/591813) |
+| 5 | [#591302] | [Denial of service to WP-JSON API by cache poisoning the CORS allow ori...](https://hackerone.com/reports/591302) |
+
+**Full list:** `docs/hackerone-reports/api-misconfig.md` (305 reports)
+
+### Quick Fetch Commands
+
+```bash
+webfetch https://hackerone.com/reports/455645
+webfetch https://hackerone.com/reports/716292
+webfetch https://hackerone.com/reports/1342088
+```
+
+### External Repositories
+
+- **HackerOne Reports:** `docs/hackerone-reports/api-misconfig.md` — per-class disclosed reports
+- **HackerOne Master Index:** `docs/hackerone-reports/INDEX.md` — all classes
+- **Pattern Library:** `~/dristi/docs/disclosed-reports/hunt-api-misconfig.md` (exists)

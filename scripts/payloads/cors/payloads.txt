@@ -1,0 +1,10 @@
+https://evil.com
+null
+https://evil.com.evil.com
+https://evil.com:8080
+https://target.com@evil.com
+https://evil.com/
+http://evil.com
+file://
+data://
+https:///
