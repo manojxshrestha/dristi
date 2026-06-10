@@ -369,4 +369,4 @@ Cache keys on `callback=setCountryCookie` only (before `;`), but the JS parser r
 - **Reconnection.** If Burp closes: `bash scripts/reconnect-burp.sh` or restart the MCP extension in Burp.
 - **Use min/max timing for slow send.** Drag the send slider to 10-12s for byte-by-byte transmission to evade WAFs that only check complete requests.
 - **Reference the BSCP corpus.** See [DingyShark/BurpSuiteCertifiedPractitioner](https://github.com/DingyShark/BurpSuiteCertifiedPractitioner) for per-lab Burp payloads and adaptation patterns.
-- **Timing attack patterns.** See [`docs/timing-attacks/`](timing-attacks/) for Burp-specific timing amplification, discovery overload, cache key detection, parameter repetition, and SQLi WAF bypass workflows (mirrored from manojxshrestha/playbook/web-timing-attacks).
+- **Timing attack patterns.** See [manojxshrestha/playbook/web-timing-attacks](https://github.com/manojxshrestha/playbook/blob/main/web-timing-attacks) for Burp-specific timing amplification, discovery overload, cache key detection, parameter repetition, and SQLi WAF bypass workflows.
