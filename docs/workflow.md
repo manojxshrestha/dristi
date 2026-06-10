@@ -191,7 +191,7 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 | Step | Action | MCP Tools |
 |------|--------|-----------|
 | 1 | Load endpoint_map_raw deliverable | `get_deliverable('endpoint_map_raw')` |
-| 2 | Check H1 report index for class prioritization | `~/dristi-reports/hackerone-reports/INDEX.md` |
+| 2 | Check skills for relevant hunt-class tradecraft | skills/ |
 | 3 | Classify into Tiers | Tier 0 (public+input) / Tier 1 (auth+input) / Tier 2 (infra) |
 | 4 | Risk-score each endpoint | `prioritize_endpoints()` |
 | 5 | Save ranked deliverable | `save_deliverable('endpoint_map_ranked', ...)` |
@@ -210,11 +210,9 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 | 1 | Load endpoint_map_ranked + auth_analysis | `get_deliverable()` |
 | 2 | Run deep testing (API fuzzing, method override, content-type switch, GraphQL probing, race conditions, UUID analysis, JWT manipulation) | — |
 | 3 | **WAF handling:** If WAF detected in Phase 1.5, apply vendor-specific bypasses | `identify_waf()`, `get_waf_bypass()`, `knowledge/waf/` |
-| 4 | **Read H1 reports:** Each hunt agent reads its class file from `~/dristi-reports/hackerone-reports/<class>.md` before testing | `webfetch` for full disclosures |
-| 5 | **Test all applicable bug classes** via 54 hunt-* sub-agents | `get_wstg_test()`, `get_technique_guide()`, `get_test_payloads()`, `get_witness_payloads()` |
+| 4 | **Test all applicable bug classes** via 54 hunt-* sub-agents | `get_wstg_test()`, `get_technique_guide()`, `get_test_payloads()`, `get_witness_payloads()` |
 | 6 | For each confirmed finding: validate PoC, log, track test, check chaining | `validate_poc()`, `log_finding()`, `track_test()`, `find_chains()` |
-| 7 | Cross-reference severity against similar H1/Facebook/Google reports | `~/dristi-reports/` |
-| 8 | Gate check | `phase_gate_check(phase_completed=3)` |
+| 7 | Gate check | `phase_gate_check(phase_completed=3)` |
 
 **Agent auto-loading examples:**
 
@@ -253,9 +251,6 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 
 | Resource | Path | Contents |
 |----------|------|----------|
-| H1 Reports | `~/dristi-reports/hackerone-reports/<class>.md` | 14,682 disclosed reports per class |
-| Facebook Writeups | `~/dristi-reports/facebook-reports/README.md` | 399 Meta bug bounty writeups |
-| Google VRP | `~/dristi-reports/google-vrp-writeups/writeups.md` | 273 Google bug bounty writeups |
 | WAF Fingerprints | `knowledge/waf/waf-knowledge-base/02-waf-fingerprints/` | 144 vendor fingerprints |
 | WAF Bypasses | `knowledge/waf/waf-knowledge-base/04-known-bypasses/` | 24 vendor bypass files |
 | WAF Evasion | `knowledge/waf/waf-knowledge-base/03-evasion-techniques/` | 21 evasion categories |
@@ -296,7 +291,7 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 |------|--------|-----------|
 | 1 | Load findings | `get_findings()` |
 | 2 | Re-validate each PoC | `validate_poc()` |
-| 3 | Cross-reference severity against similar H1/Facebook/Google reports | `~/dristi-reports/` |
+| 3 | Cross-reference severity against MCP technique guides | `get_technique_guide()` |
 | 4 | Run the 7-Question Gate | `@triage-validation` |
 | 5 | Assign verdict | `update_finding()` |
 
@@ -371,7 +366,7 @@ graph TB
     6. get_coverage()`"]
 
     Refs["`**Reference Libraries**
-    1. ~/dristi-reports/hackerone-reports/idor.md (251 reports)
+    1. skills/hunt-idor/ (technique guidance)
     2. knowledge/waf/ (144 vendor fingerprints)
     3. knowledge/payloads/Insecure Direct Object References/`"]
 

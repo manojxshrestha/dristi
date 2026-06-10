@@ -47,7 +47,6 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 
 ### Phase P3: SURFACE
 - Load `endpoint_map_raw` deliverable
-- Check H1 report index for class prioritization (`~/dristi-reports/hackerone-reports/INDEX.md`)
 - Classify into Tiers (T0: public+input, T1: auth+input, T2: infra)
 - Risk-score each endpoint via `prioritize_endpoints()`
 - Save `endpoint_map_ranked` deliverable
@@ -56,7 +55,6 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - Load `endpoint_map_ranked` + `auth_analysis`
 - **Deep testing** — API fuzzing, method override, content-type switch, GraphQL probing, race conditions, UUID analysis, JWT manipulation
 - **WAF handling** — apply vendor-specific bypass payloads from `get_waf_bypass()` + `knowledge/waf/`
-- **Read H1 reports** — per-class files in `~/dristi-reports/hackerone-reports/<class>.md`
 - For each endpoint tier, dispatch applicable `@hunt-*` agents:
   - Tier 0 endpoints → full battery (XSS, SSRF, SQLi, SSTI, CMDI, IDOR, CSRF, etc.)
   - Tier 1 endpoints → auth-dependent tests (ATO, IDOR, OAuth, JWT, business logic)
@@ -64,8 +62,6 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - Validate PoC before logging: `validate_poc()`
 - Log findings: `log_finding()`, `track_test()`
 - Check chaining opportunities: `find_chains()`
-- Cross-reference severity against H1/Facebook/Google VRP writeups in `~/dristi-reports/`
-
 ### Phase P5: CAPTURE
 - Load confirmed findings via `get_findings()`
 - Load evidence-hygiene for redaction protocol
@@ -76,7 +72,7 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 
 ### Phase P6: VALIDATE
 - Re-validate each PoC via `validate_poc()` or `validate_finding_poc()`
-- Cross-reference severity against similar H1/Facebook/Google reports
+- Cross-reference severity against MCP technique guides
 - Run the 7-Question Gate (real request? accepted impact? in scope? no privileged access? not known? provable? not never-submit?)
 - Assign verdict: PASS / KILL / DOWNGRADE / CHAIN-REQUIRED
 - Update finding via `update_finding()`
@@ -111,15 +107,6 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - HTTP method (POST/PUT/DELETE > GET)
 - Injectable parameter names (id, file, url, redirect, template, cmd, etc.)
 
-### Reference-Based Prioritization
-
-Before testing any class, each hunt agent reads:
-- `~/dristi-reports/hackerone-reports/<class>.md` — disclosed report patterns
-- `~/dristi-reports/facebook-reports/` — Facebook writeups
-- `~/dristi-reports/google-vrp-writeups/` — Google VRP writeups
-
-This informs which parameters are worth extra effort, which bypasses worked at scale, and which severity to expect.
-
 ---
 
 ## WAF Handling Flow
@@ -145,27 +132,10 @@ If Cloudflare: redirect 80% of effort to API subdomain (api.*), use Playwright s
 
 ---
 
-## Disclosed Report Impact on Testing
-
-Every `@hunt-*` agent reads its class file from `~/dristi-reports/hackerone-reports/` before testing. This changes behavior:
-
-| If H1 reports show... | Agent does... |
-|------------------------|--------------|
-| Pattern repeated across 100+ reports | Prioritzes that parameter/endpoint type |
-| WAF bypass technique in 5+ reports | Includes that bypass variation early |
-| Common severity is Critical/High | Skips low-effort payloads, goes straight to complex chains |
-| No reports for this class on similar tech | Considers medium priority, tests but doesn't deep-dive |
-| Facebook/Google VRP shows specific bypass | Incorporates that technique |
-
----
-
 ## Reference Libraries Available at Test Time
 
 | Reference | Path | Contents |
 |-----------|------|----------|
-| H1 Reports | `~/dristi-reports/hackerone-reports/<class>.md` | 14,682 disclosed reports per class |
-| Facebook Writeups | `~/dristi-reports/facebook-reports/README.md` | 399 Meta bug bounty writeups |
-| Google VRP | `~/dristi-reports/google-vrp-writeups/writeups.md` | 273 Google bug bounty writeups |
 | WSTG Tests | MCP Server (`get_wstg_test()`) | 96 test cases across 13 categories |
 | Technique Guides | MCP Server (`get_technique_guide()`) | 26 technique references |
 | PayloadsAllTheThings | `knowledge/payloads/` | 64 categories, ~25K payloads |

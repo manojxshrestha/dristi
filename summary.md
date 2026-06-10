@@ -251,14 +251,6 @@ Every hunt agent includes:
 - obfu.py payload obfuscation script
 - waf_evasion.py loads via JSON at runtime (171 total vendors)
 
-### Disclosed Reports (~/dristi-reports/)
-- **HackerOne**: 14,682 reports from 28 TOP sources, 24 per-class .md files
-  - xss.md: 2,382 · auth-bypass.md: 1,092 · sqli.md: 705 · idor.md: 251 · ssrf.md: 309 · rce.md: 331 · oauth.md: 107 · mfa-bypass.md: 90 · misc.md: 838
-  - Plus INDEX.md, 28 TOP bug-type files, 52 TOP program files
-- **Facebook**: 399 writeups (2017-2025)
-- **Google VRP**: 273 writeups (2017-2026)
-- **Pattern Libraries**: 31 files with technique walkthroughs
-
 ### Wordlists
 - raft-medium-dirs.txt, api-endpoints.txt, params.txt, sensitive-files.txt, common.txt
 - 20 GF patterns for parameter discovery

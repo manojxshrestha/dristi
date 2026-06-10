@@ -121,7 +121,7 @@ Return: summary of findings, gate result (PASS/FAIL), number of endpoints discov
 
 ## Phase 3: SURFACE (dispatch)
 
-**Before dispatch:** Review `~/dristi-reports/hackerone-reports/` for bug classes matching this target's tech stack — prioritize classes with the most disclosed reports.
+**Before dispatch:** Review the skills/ directory for relevant hunt skills matching this target's tech stack — each skill contains payloads, detection patterns, and bypass techniques.
 
 ```
 task(
@@ -145,7 +145,7 @@ Return: Tier 0 count, Tier 1 count, gate result (PASS/FAIL), top 5 priority endp
 
 ## Phase 4: HUNT (dispatch)
 
-**Before dispatch:** Each sub-agent should read its `~/dristi-reports/hackerone-reports/<class>.md` file BEFORE starting tests to learn real-world payloads and bypass techniques. The `webfetch` command can pull full HackerOne disclosures during testing for technique guidance.
+**Before dispatch:** Each sub-agent's skill (`skills/hunt-<class>/SKILL.md`) contains payloads, detection patterns, and bypass techniques. The `webfetch` command can pull HackerOne disclosures during testing for additional technique guidance.
 
 ```
 task(
