@@ -368,5 +368,5 @@ Cache keys on `callback=setCountryCookie` only (before `;`), but the JS parser r
 - **Poll Collaborator after 5-10 seconds.** OOB callbacks can take a few seconds; don't poll immediately.
 - **Reconnection.** If Burp closes: `bash scripts/reconnect-burp.sh` or restart the MCP extension in Burp.
 - **Use min/max timing for slow send.** Drag the send slider to 10-12s for byte-by-byte transmission to evade WAFs that only check complete requests.
-- **Reference the BSCP corpus.** See [`docs/bscp/README.md`](bscp/README.md) for per-lab Burp payloads and adaptation patterns (mirrored from DingyShark/BurpSuiteCertifiedPractitioner).
+- **Reference the BSCP corpus.** See [DingyShark/BurpSuiteCertifiedPractitioner](https://github.com/DingyShark/BurpSuiteCertifiedPractitioner) for per-lab Burp payloads and adaptation patterns.
 - **Timing attack patterns.** See [`docs/timing-attacks/`](timing-attacks/) for Burp-specific timing amplification, discovery overload, cache key detection, parameter repetition, and SQLi WAF bypass workflows (mirrored from manojxshrestha/playbook/web-timing-attacks).
