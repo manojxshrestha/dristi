@@ -739,7 +739,7 @@ All runtime data is stored under `server/data/`:
 
 | Directory | Contents |
 |-----------|----------|
-| `findings/` | Vulnerability records with evidence |
+| `runtime/findings/` | Vulnerability records with evidence |
 | `tracking/` | WSTG test execution status |
 | `tool-tracking/` | CLI tool execution records |
 | `scope/` | Target scope registration |

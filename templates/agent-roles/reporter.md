@@ -96,7 +96,7 @@ The orchestrator provides ONLY:
 
 ### Final Judge Mode
 1. **Load all data**: Call `get_judge_data('{eid}')` for the full engagement analysis packet
-2. **Read report**: Read `engagements/{eid}/report.md`
+2. **Read report**: Read `runtime/engagements/{eid}/report.md`
 3. **Read anti-patterns**: Read `templates/quality-gates.md`
 4. **Apply five analytical lenses** (see Workflow)
 5. **Produce verdict**: PASS / FAIL / CONDITIONAL_PASS with specific actions
@@ -124,7 +124,7 @@ The orchestrator provides ONLY:
 
 ### Final Judge Workflow
 1. Call `get_judge_data('{eid}')` for the complete engagement analysis packet with statistical anomaly flags
-2. Read `engagements/{eid}/report.md`
+2. Read `runtime/engagements/{eid}/report.md`
 3. Read `templates/quality-gates.md` for the anti-pattern checklist
 4. Apply the **Five Analytical Lenses**:
 

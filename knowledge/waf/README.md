@@ -6,7 +6,7 @@ Extracted from [0xInfection/Awesome-WAF](https://github.com/0xInfection/Awesome-
 
 This dataset contains comprehensive knowledge about Web Application Firewalls (WAFs) from an offensive security perspective. It is organized into:
 
-- **waf-knowledge-base/** - Categorized WAF knowledge (like Dristi's web-security-testing-guide/)
+- **waf-knowledge-base/** - Categorized WAF knowledge (like Dristi's knowledge/wstg/)
   - `01-detection-methodology/` - How to detect and fingerprint WAFs
   - `02-waf-fingerprints/` - Detection signatures for 110+ WAF vendors
   - `03-evasion-techniques/` - 21 categories of WAF evasion techniques

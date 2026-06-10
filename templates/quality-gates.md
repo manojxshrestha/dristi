@@ -291,7 +291,7 @@ These are common mistakes that reduce pentest quality. Flag any you see:
 - [ ] Final Judge agent spawned with ZERO session context
 - [ ] Final Judge prompt contained NO information about testing difficulties or decisions
 - [ ] `get_judge_data()` called by the Judge to retrieve full analysis packet
-- [ ] Report file (`engagements/{eid}/report.md`) read by the Judge
+- [ ] Report file (`runtime/engagements/{eid}/report.md`) read by the Judge
 - [ ] Anti-patterns from this file (quality-gates.md) checked by the Judge
 - [ ] Raw tracking data (`server/data/tracking/{eid}.json`) inspected for quality indicators
 - [ ] Verdict received (PASS, FAIL, or CONDITIONAL_PASS)

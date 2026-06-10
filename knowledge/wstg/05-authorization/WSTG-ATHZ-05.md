@@ -50,8 +50,8 @@ OAuth 2.0 is widely used for delegated authorization, but implementation flaws c
    ```
 2. Follow the complete redirect chain with verbose output to map every hop:
    ```
-     -b ./engagements/<eid>/cookies.txt \
-     -c ./engagements/<eid>/cookies.txt \
+     -b ./runtime/engagements/<eid>/cookies.txt \
+     -c ./runtime/engagements/<eid>/cookies.txt \
      https://app.example.com/login 2>&1 | grep -E '(> GET|> POST|< HTTP|< Location|< Set-Cookie)'
    ```
 3. Document each redirect hop:
@@ -167,15 +167,15 @@ OAuth 2.0 is widely used for delegated authorization, but implementation flaws c
 2. Check if the application domain receives cookies originally set by the auth provider (cookie scope misconfiguration — e.g., cookies scoped to `.example.com` when they should be scoped to `auth.example.com`)
 3. Check if tokens are passed in URL parameters during cross-domain redirects (leakable via Referer header):
    ```
-     -b ./engagements/<eid>/cookies.txt \
-     -c ./engagements/<eid>/cookies.txt \
+     -b ./runtime/engagements/<eid>/cookies.txt \
+     -c ./runtime/engagements/<eid>/cookies.txt \
      https://app.example.com/callback?code=AUTH_CODE
    ```
    Look for `Referer` headers in subsequent requests that contain the auth code.
 4. Test if the callback endpoint validates the `state` parameter when the request originates from a different domain than expected
 5. Check if the app's session token is valid on the auth provider domain (and vice versa) — session confusion vulnerability:
    ```
-     -b ./engagements/<eid>/cookies.txt \
+     -b ./runtime/engagements/<eid>/cookies.txt \
      https://auth.example.com/admin/
    ```
 6. Test JWT audience (`aud`) claim: if the token's `aud` is for `app.example.com`, can it be used against `api.example.com` or another service?

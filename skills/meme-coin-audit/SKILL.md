@@ -148,7 +148,7 @@ python3 tools/token_scanner.py contracts/Token.sol
 python3 tools/token_scanner.py programs/token/ --chain solana --recursive
 
 # Full directory scan with report
-python3 tools/token_scanner.py src/ --recursive --output findings/token-report.md
+python3 tools/token_scanner.py src/ --recursive --output runtime/findings/token-report.md
 ```
 
 The scanner checks all 8 bug classes via regex patterns. It catches:

@@ -64,7 +64,7 @@ Layer 4: Validation + Reporting      — how to ship it (7-Question Gate, VRT, r
 ├── docs/
 │   ├── workflow.md             Pipeline workflow documentation
 │   ├── testflow.md             Test triage flow documentation
-│   ├── reports/                H1 reports, disclosed patterns, Facebook, Google VRP
+│   ├── (reports moved to ~/dristi-reports/)
 │   ├── verification/           Verification artifacts
 │   ├── architecture.md         Server architecture
 │   └── ...                     USAGE, ENGAGEMENTS, deep-testing, agent-reference
@@ -235,14 +235,14 @@ Every hunt agent includes:
 
 ## Reference Libraries
 
-### PayloadsAllTheThings (payloads-reference/)
+### PayloadsAllTheThings (knowledge/payloads/)
 - 64 categories (unlinked from GitHub)
 - 12 extracted with test.sh wrappers in scripts/payloads/
 - ~25K total payloads
 - pat_ref() maps 30 agent class names to PAT README paths
 - 17 test.sh + 12 payloads.txt + lib.sh + hunt.sh + nuclei.sh + deploy.sh
 
-### WAF Reference (waf-reference/)
+### WAF Reference (knowledge/waf/)
 - 144 vendor fingerprints with detection methodology
 - 21 evasion technique files (WAF-EVASION-01 through 21)
 - 24 known bypass vendor files
@@ -302,7 +302,7 @@ Constants: CATEGORIES (WSTG categories), TOOL_REGISTRY (CLI tool metadata), WITN
 
 Located in `scripts/tools/`: wrappers for subdomain enum, DNS bruteforce, web crawling, parameter extraction, directory bruteforce, vhost fuzzing, zone transfer, takeover scanning, cloud recon, CVE scanning, secret discovery, nuclei scanning, cariddi scanning, bypass 403, OSINT (whois, misconfig-mapper, Spoofy, cloud_enum), S3/cloud bucket scanning (cloud_enum + s3scanner + trufflehog), and more.
 
-All domain-mode: accept domain as $1, auto-discover recon output, output to engagements/<id>/recon/.
+All domain-mode: accept domain as $1, auto-discover recon output, output to runtime/engagements/<id>/recon/.
 
 ---
 
@@ -347,7 +347,7 @@ All domain-mode: accept domain as $1, auto-discover recon output, output to enga
 
 - **Autopilot as orchestrator, not monolith**: 248-line dispatcher; phases 2-7 via task()
 - **Nuclei as optional tier-2**: PAT curl test.sh is tier-1 (fast)
-- **Output to engagements/<id>/**: Consistent directory structure
+- **Output to runtime/engagements/<id>/**: Consistent directory structure
 - **WAF as JSON at runtime**: 144 vendors loaded from JSON, avoids Python syntax issues
 - **HackerOne reports as per-agent reference**: Each hunt agent reads its class file before testing
 - **Browser close after every op**: playwright_browser_close() mandate

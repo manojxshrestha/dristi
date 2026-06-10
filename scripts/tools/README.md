@@ -9,7 +9,7 @@ Agents must follow this pipeline; each phase depends on outputs from the previou
 
 ```mermaid
 graph TD
-    subgraph WSTG["web-security-testing-guide/"]
+    subgraph WSTG["knowledge/wstg/"]
         W["OWASP WSTG test cases<br/>110 files across 12 categories"]
     end
     subgraph P["prompts/"]
@@ -50,11 +50,11 @@ graph TD
 1. **`prompts/`** — Agent reads the WSTG checklist for the current phase (e.g., `input-validation.md` lists WSTG-INPV-01 for reflected XSS).
 2. **`skills/`** — Agent loads the relevant hunt skill (e.g., `hunt-xss/SKILL.md` for payloads, detection patterns, bypass techniques).
 3. **`scripts/tools/`** — Agent runs the automation scripts (e.g., `param_extract.sh` → `gf_xss.txt` → fire payloads from `xss_payloads.txt`).
-4. **`web-security-testing-guide/`** — Agent references the full OWASP WSTG guide for in-depth technique validation.
+4. **`knowledge/wstg/`** — Agent references the full OWASP WSTG guide for in-depth technique validation.
 
 | Layer | Directory | Role | Content |
 |-------|-----------|------|---------|
-| Reference | `web-security-testing-guide/` | Full OWASP WSTG methodology | 96 test cases across 12 categories |
+| Reference | `knowledge/wstg/` | Full OWASP WSTG methodology | 96 test cases across 12 categories |
 | Checklist | `prompts/` | Which WSTG tests to run | 13 brief test lists (WSTG-INFO-01, WSTG-INPV-01, etc.) |
 | Tactical | `skills/` | How to execute each hunt | 69+ agent workflows with commands, payloads, bypass chains |
 | Automation | `scripts/tools/` | Run the recon pipeline | 9 scripts + payloads file + orchestrator |

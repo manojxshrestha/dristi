@@ -747,7 +747,7 @@ gf rfi          # Remote file inclusion
 gf xxe          # XXE parameters
 ```
 
-Also see: `wordlists/gf-patterns/` for local copies of all pattern files.
+Also see: `knowledge/wordlists/gf-patterns/` for local copies of all pattern files.
 
 ---
 

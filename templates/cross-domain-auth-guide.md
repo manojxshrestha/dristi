@@ -11,7 +11,7 @@ Before starting authenticated testing, determine if cross-domain auth is in use:
 - [ ] OIDC well-known configuration retrieved (if OIDC)
 - [ ] SAML metadata retrieved (if SAML)
 - [ ] All domains registered with `register_scope()`
-- [ ] Cookie jar created (`touch ./engagements/<eid>/cookies.txt`)
+- [ ] Cookie jar created (`touch ./runtime/engagements/<eid>/cookies.txt`)
 - [ ] Login flow documented step-by-step
 - [ ] Cookie jar verified with valid session
 
@@ -23,8 +23,8 @@ Before starting authenticated testing, determine if cross-domain auth is in use:
 # Create cookie jar
 
 # Standard cross-domain request pattern
-  -b ./engagements/<eid>/cookies.txt \
-  -c ./engagements/<eid>/cookies.txt \
+  -b ./runtime/engagements/<eid>/cookies.txt \
+  -c ./runtime/engagements/<eid>/cookies.txt \
   -D- <url>
 
 # Inspect cookie jar contents
@@ -45,8 +45,8 @@ auth.example.com	FALSE	/	TRUE	1707400000	KEYCLOAK_SESSION	xyz789
 
 To trace each redirect hop individually (without following):
 ```bash
-  -b ./engagements/<eid>/cookies.txt \
-  -c ./engagements/<eid>/cookies.txt \
+  -b ./runtime/engagements/<eid>/cookies.txt \
+  -c ./runtime/engagements/<eid>/cookies.txt \
   <url>
 ```
 Look for `Location:` headers and `Set-Cookie:` headers at each hop.
@@ -71,8 +71,8 @@ Key fields to note:
 ### Step 2: Initiate the Auth Flow
 
 ```bash
-  -b ./engagements/<eid>/cookies.txt \
-  -c ./engagements/<eid>/cookies.txt \
+  -b ./runtime/engagements/<eid>/cookies.txt \
+  -c ./runtime/engagements/<eid>/cookies.txt \
   https://app.example.com/login
 ```
 
@@ -87,8 +87,8 @@ The redirect chain typically looks like:
 Extract the login form action URL from the HTML response, then POST credentials:
 
 ```bash
-  -b ./engagements/<eid>/cookies.txt \
-  -c ./engagements/<eid>/cookies.txt \
+  -b ./runtime/engagements/<eid>/cookies.txt \
+  -c ./runtime/engagements/<eid>/cookies.txt \
   -X POST -d "username=USER&password=PASS" \
   "https://auth.example.com/auth/realms/REALM/login-actions/authenticate?session_code=...&client_id=..."
 ```
@@ -96,7 +96,7 @@ Extract the login form action URL from the HTML response, then POST credentials:
 ### Step 4: Verify Session
 
 ```bash
-  -b ./engagements/<eid>/cookies.txt \
+  -b ./runtime/engagements/<eid>/cookies.txt \
   https://app.example.com/dashboard
 ```
 
@@ -129,8 +129,8 @@ If the standard flow fails, try these directly against the token endpoint:
 
 **Step 1: Initiate from the Service Provider**
 ```bash
-  -b ./engagements/<eid>/cookies.txt \
-  -c ./engagements/<eid>/cookies.txt \
+  -b ./runtime/engagements/<eid>/cookies.txt \
+  -c ./runtime/engagements/<eid>/cookies.txt \
   https://app.example.com/login
 ```
 
@@ -144,8 +144,8 @@ The IdP responds with an HTML form containing a SAMLResponse (auto-submitted via
 Extract the SAMLResponse and RelayState values, then POST them:
 
 ```bash
-  -b ./engagements/<eid>/cookies.txt \
-  -c ./engagements/<eid>/cookies.txt \
+  -b ./runtime/engagements/<eid>/cookies.txt \
+  -c ./runtime/engagements/<eid>/cookies.txt \
   -X POST -d "SAMLResponse=BASE64_VALUE&RelayState=RELAY_VALUE" \
   https://app.example.com/saml/acs
 ```
@@ -275,15 +275,15 @@ This is normal for SAML flows — the IdP returns an HTML form that auto-submits
 3. POST both to the SP's ACS endpoint
 
 ### "Cookie jar has expired tokens"
-1. Clear the cookie jar: `sh -c '> ./engagements/<eid>/cookies.txt'`
+1. Clear the cookie jar: `sh -c '> ./runtime/engagements/<eid>/cookies.txt'`
 2. Re-run the full authentication flow
 3. Verify with an authenticated request
 
 ### "Redirect loop"
 Follow redirects one at a time (without `-L`) to identify the loop point:
 ```bash
-  -b ./engagements/<eid>/cookies.txt \
-  -c ./engagements/<eid>/cookies.txt \
+  -b ./runtime/engagements/<eid>/cookies.txt \
+  -c ./runtime/engagements/<eid>/cookies.txt \
   <url>
 ```
 Check if a missing cookie or expired session is causing the loop.
@@ -325,7 +325,7 @@ If the login page is JavaScript-rendered (Auth0 Universal Login, custom Keycloak
 ```bash
   --url https://app.example.com/login \
   --username USER --password PASS \
-  --cookie-jar ./engagements/<eid>/cookies.txt
+  --cookie-jar ./runtime/engagements/<eid>/cookies.txt
 ```
 
 **Level 4: Token Extraction from JavaScript**

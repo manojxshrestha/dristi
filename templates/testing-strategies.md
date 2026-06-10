@@ -222,4 +222,4 @@ When using parallel subagents for cross-domain engagements:
 - **Agent 2**: Auth provider domain — OAuth/OIDC-specific tests (WSTG-ATHZ-05)
 - **Agent 3**: Cross-domain interactions — cookie scope, CORS, session handling
 
-Each agent uses the shared cookie jar path: `-b ./engagements/<eid>/cookies.txt -c ./engagements/<eid>/cookies.txt`
+Each agent uses the shared cookie jar path: `-b ./runtime/engagements/<eid>/cookies.txt -c ./runtime/engagements/<eid>/cookies.txt`
