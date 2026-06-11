@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ═══════════════════════════════════════════════════════════════════════════════
-# dristi.sh — Dristi: Offensive Security MCP platform auto-setup
+# setup.sh — Dristi: Offensive Security MCP platform auto-setup
 #
 # What this script does:
 #   - Installs Go/Python/cargo security tools if missing
@@ -14,7 +14,7 @@
 #   - Install OpenCode (if not present, script handles it)
 #
 # Idempotent — safe to re-run. Backs up existing configs.
-# Usage:  bash scripts/dristi.sh
+# Usage:  bash scripts/setup.sh
 # ═══════════════════════════════════════════════════════════════════════════════
 set -euo pipefail
 
@@ -48,11 +48,17 @@ command -v brew &>/dev/null && HAS_BREW=true
 command -v cargo &>/dev/null && HAS_CARGO=true
 
 # ── Pre-flight checks ─────────────────────────────────────────────────────────
-echo -e "${BOLD}
-  ╔══════════════════════════════════════════════════════╗
-  ║              Dristi — Auto Setup                      ║
-  ║  Offensive Security MCP  +  72 OpenCode Agents        ║
-  ╚══════════════════════════════════════════════════════╝${N}"
+print_banner() {
+    echo -e "${BOLD}${C}
+    .___      .__          __  .__ 
+  __| _/______|__| _______/  |_|__|
+ / __ |\_  __ \  |/  ___/\   __\  |
+/ /_/ | |  | \/  |\___ \  |  | |  |
+\____ | |__|  |__/____  > |__| |__|
+     \/               \/           
+        by ~/.manojxshrestha${N}"
+}
+print_banner
 echo "  Target:    $DST"
 echo "  Platform:  $OS / $ARCH"
 echo "  Log:       $LOG_FILE"
@@ -367,7 +373,7 @@ if [ -d "$DST/.opencode/rules" ]; then
   for rule_file in "$DST/.opencode/rules"/*.md; do
     [ -f "$rule_file" ] || continue
     rule_name="$(basename "$rule_file")"
-    target="$OC_DIR/rules/$rule_name"
+    target="$HOME/.config/opencode/rules/$rule_name"
     ln -sf "$rule_file" "$target"
     ok "Rule $rule_name — linked"
   done

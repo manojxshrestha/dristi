@@ -20,6 +20,12 @@
 | `@hunt-source-leak` | When you find `.git`, `.env`, backup files, or debug endpoints. Source map analysis, s3 bucket leaks. | URL or domain |
 | `@hunt-subdomain` | When recon finds stale CNAMEs, dangling DNS. Subdomain takeover validation. | CNAME records |
 
+## Exploitation
+
+| Agent | When to use | Input |
+|-------|-------------|-------|
+| `@exploit` | After Phase 4 HUNT completes. Reads all findings, classifies by vuln class, loads technique guides + payload libraries, attempts PoC exploitation with WAF bypass, and records evidence. | `findings_list_vulns()` |
+
 ## Web Application Vulnerabilities
 
 | Agent | When to use | GF input |

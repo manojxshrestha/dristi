@@ -2,7 +2,7 @@
 
 ## Overview
 
-Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive security: bug hunting, external red-team engagements, and authorized penetration tests. It provides the complete OWASP Web Security Testing Guide methodology as an MCP server with 86 tools, paired with 81 autonomous agents covering vulnerability hunting, enterprise platform attacks, and full engagement lifecycle management.
+Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive security: bug hunting, external red-team engagements, and authorized penetration tests. It provides the complete OWASP Web Security Testing Guide methodology as an MCP server with 86 tools, paired with 75 autonomous agents covering vulnerability hunting, enterprise platform attacks, and full engagement lifecycle management.
 
 **Goal:** Turn an LLM into an autonomous, methodical, reference-informed bug hunter that can run a full penetration test from scope to report — discovering subdomains, crawling endpoints, fingerprinting WAFs, dispatching per-class exploit agents, validating PoCs, capturing redacted evidence, and generating a submission-ready report — without human intervention between phases. The pipeline is modeled on real bug bounty workflows: triage by attack surface, read disclosed reports for technique guidance, bypass WAFs before exploiting, and run every finding through a 7-Question Gate before drafting.
 
@@ -11,7 +11,7 @@ Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive
 - **`@consult`** — interactive: same pipeline but pauses at every phase transition to present findings, suggest next steps, and ask for confirmation before proceeding. Best for learning or guided testing.
 
 **Stats:**
-- 86 MCP tools · 82 agents (54 hunt-* + 28 pipeline/specialty)
+- 86 MCP tools · 75 agents (48 hunt-* + 27 pipeline/specialty)
 - 13 WSTG categories · 96 test cases
 - 57 CLI tool wrapper scripts · 20 GF patterns for parameter discovery
 - 7-phase autonomous pipeline (autopilot)
@@ -25,7 +25,7 @@ Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive
 
 ```
 Layer 1: Methodology + Agents        — how to think (5-phase workflow, critical thinking)
-Layer 2: 54 hunt-* agents            — what to look for (per-class detection + bypass)
+Layer 2: 48 hunt-* agents            — what to look for (per-class detection + bypass)
 Layer 3: Enterprise attack chains    — what to hit on the perimeter (M365, Okta, K8s, VPN, IAM)
 Layer 4: Validation + Reporting      — how to ship it (7-Question Gate, VRT, redaction)
 ```
@@ -83,19 +83,20 @@ Layer 4: Validation + Reporting      — how to ship it (7-Question Gate, VRT, r
 
 ## Pipeline (Autopilot)
 
-7-phase autonomous pipeline orchestrated by `autopilot.md`. Each phase has gate checks via `wstg_phase_gate_check()`.
+8-phase autonomous pipeline orchestrated by `autopilot.md`. Each phase has gate checks via `wstg_phase_gate_check()`.
 
 | Phase | Agent | Description | Gate |
 |-------|-------|-------------|------|
-| 1  SCOPE   | scope.md     | Register target, scope, credentials, task tree | phase_completed=0 |
-| 1.5 AUTH   | (inline)     | Auth flow test, WAF detection, token capture | — |
-| 1.75 Intel | phase-intel.sh | WHOIS, M365/Azure, third-party misconfigs, spoof check, cloud bucket enum | — |
-| 2  RECON   | recon.md     | Subdomain enum, DNS, crawl, params, nuclei, secrets | phase_completed=1 |
-| 3  SURFACE | surface.md   | Prioritize endpoints, rank attack surface | phase_completed=2 |
-| 4  HUNT    | hunt.md      | Dispatch 54 hunt-* sub-agents, test all bug classes | phase_completed=3 |
-| 5  CAPTURE | capture.md   | Evidence collection, screenshots, redaction | phase_completed=4 |
-| 6  VALIDATE| validate.md  | Re-validate PoCs, 7-Question Gate, severity | phase_completed=5 |
-| 7  REPORT  | report.md    | Coverage check, generate report | phase_completed=6 |
+| 1  SCOPE     | scope.md      | Register target, scope, credentials, task tree | phase_completed=0 |
+| 1.5 AUTH     | (inline)      | Auth flow test, WAF detection, token capture | — |
+| 1.75 Intel   | phase-intel.sh | WHOIS, M365/Azure, third-party misconfigs, spoof check, cloud bucket enum | — |
+| 2  RECON     | recon.md      | Subdomain enum, DNS, crawl, params, nuclei, secrets | phase_completed=1 |
+| 3  SURFACE   | surface.md    | Prioritize endpoints, rank attack surface | phase_completed=2 |
+| 4  HUNT      | hunt.md       | Dispatch 54 hunt-* sub-agents, test all bug classes | phase_completed=3 |
+| 4.5 EXPLOIT  | exploit.md    | Second-wave exploitation: PoC all findings, WAF bypass, chaining | — |
+| 5  CAPTURE   | capture.md    | Evidence collection, screenshots, redaction | phase_completed=4 |
+| 6  VALIDATE  | validate.md   | Re-validate PoCs, 7-Question Gate, severity | phase_completed=5 |
+| 7  REPORT    | report.md     | Coverage check, generate report | phase_completed=6 |
 
 Autopilot is a thin orchestrator (248 lines) — phases 2-7 are dispatched via `task()` to specialized sub-agents to avoid context exhaustion.
 
@@ -209,10 +210,10 @@ Autopilot is a thin orchestrator (248 lines) — phases 2-7 are dispatched via `
 
 ---
 
-## Agents (82)
+## Agents (83)
 
-### Pipeline Agents (10)
-autopilot, consult, capture, hunt, pintel, recon, report, scope, surface, validate
+### Pipeline Agents (11)
+autopilot, consult, capture, exploit, hunt, pintel, recon, report, scope, surface, validate
 
 ### Bug Class Agents (54 hunt-*)
 api-misconfig, aspnet, ato, auth-bypass, brute-force, business-logic, cache-poison, cicd, clickjacking, cloud-misconfig, cors, csrf, deserialization, dispatch, dom, file-upload, graphql, host-header, http-smuggling, idor, jwt-confusion, k8s, laravel, ldap, lfi, llm-ai, mfa-bypass, misc, nextjs, nodejs, nosqli, ntlm-info, oauth, open-redirect, race-condition, rce, saml, session, sharepoint, source-leak, springboot, sqli, ssrf, ssti, subdomain, tls-network, websocket, xss, xxe

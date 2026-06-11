@@ -22,10 +22,17 @@ warn(){ echo -e "${Y}[!]${N} $*"; }
 err(){  echo -e "${R}[✗]${N} $*"; }
 info(){ echo -e "${C}[*]${N} $*"; }
 
-echo -e "${BOLD}
-╔══════════════════════════════════════╗
-║     Burp MCP Reconnect Script        ║
-╚══════════════════════════════════════╝${N}"
+print_banner() {
+    echo -e "${BOLD}${C}
+    .___      .__          __  .__ 
+  __| _/______|__| _______/  |_|__|
+ / __ |\_  __ \  |/  ___/\   __\  |
+/ /_/ | |  | \/  |\___ \  |  | |  |
+\____ | |__|  |__/____  > |__| |__|
+     \/               \/           
+        by ~/.manojxshrestha${N}"
+}
+print_banner
 
 # ── Step 1: Kill stale WSL-side proxy ─────────────────────────────────────────
 info "Checking for stale MCP proxy processes..."
@@ -114,7 +121,7 @@ fi
 info "Toggling Burp MCP entry in opencode config..."
 if [ ! -f "$CONFIG" ]; then
   err "OpenCode config not found at $CONFIG"
-  echo "  Run 'bash scripts/dristi.sh' first to set up the config."
+  echo "  Run 'bash scripts/setup.sh' first to set up the config."
   exit 1
 fi
 
@@ -134,7 +141,7 @@ except (FileNotFoundError, json.JSONDecodeError) as e:
 burp = cfg.get("mcp", {}).get("burp")
 if not burp:
     print("[-] No 'burp' entry in opencode MCP config")
-    print("    Run 'bash scripts/dristi.sh' to configure it.")
+    print("    Run 'bash scripts/setup.sh' to configure it.")
     sys.exit(1)
 
 # Back up

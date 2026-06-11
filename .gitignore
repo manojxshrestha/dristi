@@ -64,3 +64,4 @@ node_modules/
 # Browser test artifacts
 claude-*
 *.playwright-mcp/
+engagements/

@@ -1,6 +1,6 @@
 # Architecture
 
-Dristi is a dual-interface security testing platform: an **MCP server** (94 tools for methodology, tracking, findings management) and an **OpenCode agent bundle** (72 auto-loading agents + 14 commands for bug hunting tradecraft).
+Dristi is a dual-interface security testing platform: an **MCP server** (86 tools for methodology, tracking, findings management) and an **OpenCode agent bundle** (83 auto-loading agents for bug hunting tradecraft).
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -10,8 +10,8 @@ Dristi is a dual-interface security testing platform: an **MCP server** (94 tool
           ┌────────────┴────────────┐
           ▼                         ▼
 ┌──────────────────┐    ┌──────────────────────────┐
-│  Dristi MCP      │    │  OpenCode Agents (72)    │
-│  Server (94 tools)│    │  + Commands (14)         │
+│  Dristi MCP      │    │  OpenCode Agents (83)    │
+│  Server (86 tools)│    │                         │
 │  ──────────────── │    │  ──────────────────────  │
 │  • WSTG v4.2     │    │  • hunt-xss, hunt-sqli   │
  │  • WSTG v4.2     │    │  • bb-methodology        │
@@ -43,7 +43,7 @@ Dristi is a dual-interface security testing platform: an **MCP server** (94 tool
 
 ### 1. MCP Server (`server/server.py`)
 
-The core methodology engine. 94 tools organized into:
+The core methodology engine. 86 tools organized into:
 
 | Category | Tools | Purpose |
 |----------|-------|---------|

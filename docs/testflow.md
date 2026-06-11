@@ -4,14 +4,14 @@
 
 Dristi uses a **triage-first, reference-informed** testing strategy. Not every endpoint gets every test — the pipeline classifies endpoints by risk, checks disclosed report patterns for the target's tech stack, and dispatches per-class hunt agents with WSTG methodology, real-world report references, and WAF-aware payload selection.
 
-82 agents total: 54 specialized `@hunt-*` agents + 28 pipeline/specialty agents.
+83 agents total: 54 specialized `@hunt-*` agents + 29 pipeline/specialty agents.
 
 ---
 
-## 7-Phase Pipeline
+## 8-Phase Pipeline
 
 ```
-SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) → CAPTURE(5) → VALIDATE(6) → REPORT(7)
+SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) → EXPLOIT(4.5) → CAPTURE(5) → VALIDATE(6) → REPORT(7)
 ```
 
 ### Phase P1: SCOPE
@@ -62,6 +62,22 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - Validate PoC before logging: `validate_poc()`
 - Log findings: `log_finding()`, `track_test()`
 - Check chaining opportunities: `find_chains()`
+
+### Phase P4.5: EXPLOIT
+- Load all findings via `findings_list_vulns()`
+- Classify each finding by vulnerability class (XSS, SQLi, SSRF, SSTI, CMDi, IDOR, etc.)
+- Load technique guide per class: `get_technique_guide()`
+- Load payload library from `knowledge/payloads/<Class>/`
+- Load bypass techniques from hunt agent files
+- Attempt exploitation in escalating tiers:
+  - Tier 1: Confirm reflection/execution
+  - Tier 2: Demonstrate impact (data extraction, command execution, access)
+  - Tier 3: OOB/collaborator exfiltration (if blind)
+  - Tier 4: WAF bypass (basic → intermediate → advanced)
+- Record results via `update_finding()` with evidence + poc_output
+- Check cross-class chains: `find_chains()` → `findings_add_chain()`
+- Upgrade severities for chained findings
+
 ### Phase P5: CAPTURE
 - Load confirmed findings via `get_findings()`
 - Load evidence-hygiene for redaction protocol

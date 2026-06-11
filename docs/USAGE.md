@@ -1,6 +1,6 @@
 # Dristi — Usage Guide
 
-A practical guide to using the 72-agent Dristi bundle + WSTG MCP server for bug hunting (bounty programs, authorized pentesting, CTFs, vuln research) **and external red-team engagements** against enterprise targets. This document covers how the agents compose, and how to use them on a real engagement from intake through paid bounty (or final client deliverable).
+A practical guide to using the 83-agent Dristi bundle + WSTG MCP server for bug hunting (bounty programs, authorized pentesting, CTFs, vuln research) **and external red-team engagements** against enterprise targets. This document covers how the agents compose, and how to use them on a real engagement from intake through paid bounty (or final client deliverable).
 
 > Built and validated through authorized red-team and bug-bounty engagements — exposed four bug-bounty capability gaps and five additional gaps around platform attack chains, mid-engagement IR detection, and client-facing reporting. The final stack documented here addresses both modes.
 
@@ -12,7 +12,7 @@ This section is for people who have **never used the bundle before, never used O
 
 ### What is this bundle, in plain English?
 
-It's a collection of 72 OpenCode agents + 94 MCP tools that turn OpenCode into a methodical bug-hunting assistant.
+It's a collection of 83 OpenCode agents + 86 MCP tools that turn OpenCode into a methodical bug-hunting assistant.
 
 Without the bundle, asking the LLM *"is this XSS?"* gets you a generic answer. With the bundle installed, the same question loads the `hunt-xss` agent — which contains specific detection patterns from disclosed reports, the exact payloads that have worked, and a validation gate that prevents you from filing a false-positive bug report.
 
@@ -34,7 +34,7 @@ You don't "learn" the bundle. You install it once, then describe what you're tes
 - ❌ You don't need to know how to write exploits. The agents include working payloads.
 - ❌ You don't need to know Burp Suite. It's optional. Agents work with curl + browser.
 - ❌ You don't need a bug bounty account yet. You can practice on OWASP Juice Shop first.
-- ❌ You don't need to read all 72 agent files. They auto-load when relevant.
+- ❌ You don't need to read all 83 agent files. They auto-load when relevant.
 
 ### Pick a practice target
 
@@ -200,7 +200,7 @@ Once submitted, use the MCP server to log the finding via `log_finding()` and ap
 
 ## 4. MCP Server Integration
 
-Dristi's WSTG MCP server provides 94 tools for methodology, tracking, and engagement management alongside the OpenCode agents.
+Dristi's WSTG MCP server provides 86 tools for methodology, tracking, and engagement management alongside the OpenCode agents.
 
 ### Typical workflow with MCP + agents
 

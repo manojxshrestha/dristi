@@ -5,7 +5,7 @@
 Dristi is a security testing platform with two interfaces that work together:
 
 1. **MCP Server** (86 tools) — provides the OWASP WSTG methodology, engagement management, findings database, phase gates, WAF identification/evasion, and reporting as callable tools
-2. **OpenCode Agents** (82 agents) — provides per-class bug hunting tradecraft, enterprise platform attack chains, and engagement lifecycle management via `@agent-name`
+2. **OpenCode Agents** (83 agents) — provides per-class bug hunting tradecraft, enterprise platform attack chains, and engagement lifecycle management via `@agent-name`
 
 Together they turn an LLM into a methodical bug hunter: the agents tell it *what to look for and how*, the MCP server gives it the *structured methodology and tracking*, and Burp Suite provides *HTTP request execution*.
 
