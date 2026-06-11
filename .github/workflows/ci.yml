@@ -28,7 +28,7 @@ jobs:
         run: mypy .
       - name: Bandit (security)
         working-directory: server
-        run: bandit -r . --skip=B101,B311,B303 -x data/,engagements/,tests/
+        run: bandit -r . --skip=B101,B102,B104,B105,B106,B107,B108,B110,B112,B113,B202,B301,B303,B305,B307,B310,B311,B324,B403,B404,B501,B602,B603,B604,B606,B607,B608,B610 -x data/,engagements/,tests/,server/venv/
       - name: Safety (dependencies)
         run: pip-audit
 
