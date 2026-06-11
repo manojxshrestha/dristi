@@ -31,7 +31,7 @@ Dristi is a dual-interface security testing platform: an **MCP server** (94 tool
          ▼
 ┌─────────────────────────────────────────────────────┐
 │              Storage (server/data/)                   │
-│  findings/ tracking/ scope/ checkpoints/ events/     │
+│  runtime/findings/ tracking/ scope/ checkpoints/ events/     │
 │  exploitation-queues/ deliverables/ configs/         │
 │  task-trees/ priority-queues/ waf-data/              │
 │  knowledge-graphs/ gate-tracking/ qa-tracking/       │

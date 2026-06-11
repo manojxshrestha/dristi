@@ -13,7 +13,6 @@ Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive
 **Stats:**
 - 86 MCP tools · 82 agents (54 hunt-* + 28 pipeline/specialty)
 - 13 WSTG categories · 96 test cases
-- 8,376+ disclosed HackerOne reports (14,682 raw entries in data.csv)
 - 57 CLI tool wrapper scripts · 20 GF patterns for parameter discovery
 - 7-phase autonomous pipeline (autopilot)
 - Burp Suite MCP integration · Playwright browser automation
@@ -341,7 +340,7 @@ All domain-mode: accept domain as $1, auto-discover recon output, output to runt
 - **Nuclei as optional tier-2**: PAT curl test.sh is tier-1 (fast)
 - **Output to runtime/engagements/<id>/**: Consistent directory structure
 - **WAF as JSON at runtime**: 144 vendors loaded from JSON, avoids Python syntax issues
-- **HackerOne reports as per-agent reference**: Each hunt agent reads its class file before testing
+- **Skills drive per-agent methodology**: Load relevant skill via `skill()` MCP tool for each vulnerability class
 - **Browser close after every op**: playwright_browser_close() mandate
 - **No context.newContext()**: Default context routes through Burp
 - **No consult.md agent file**: Consult command exists but agent file not found

@@ -23,7 +23,7 @@
 <p align="center">
   Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for bug hunting,
   external red-team work, and authorized pentests — <b>82 agents</b> · <b>86 MCP tools</b> ·
-  <b>8,376+ disclosed HackerOne reports</b> across 25 vulnerability classes ·
+  OWASP WSTG v4.2 methodology across 25 vulnerability classes ·
   enterprise identity + infrastructure attack matrices ·
   engagement management · Burp MCP integration ·
   <b>20 GF patterns</b> for parameter discovery.
@@ -33,12 +33,12 @@
 
 ## What is this?
 
-Dristi gives LLM-powered security tools the complete OWASP Web Security Testing Guide methodology as an MCP server — 96 test cases across 12 categories, 8,376+ disclosed HackerOne reports, and the full pentest lifecycle. It pairs with Burp Suite's MCP server for request execution, or runs standalone as a reference knowledge base.
+Dristi gives LLM-powered security tools the complete OWASP Web Security Testing Guide methodology as an MCP server — 96 test cases across 12 categories, and the full pentest lifecycle. It pairs with Burp Suite's MCP server for request execution, or runs standalone as a reference knowledge base.
 
 Four layers stack:
 
 - **Methodology + agents** — *how to think.* 5-phase non-linear hunting workflow, critical-thinking framework, developer-psychology heuristics, anomaly detection patterns, and the red-team operator-discipline corrections (when scope is "external red team" not "bug hunting / WAPT"). Available as auto-loading OpenCode agents.
-- **48 `@hunt-*` agents** — *what to look for in webapps.* Per-class detection patterns, payloads, bypass tables, and chain templates — curated from 8,376+ disclosed HackerOne reports across 25 vulnerability classes, plus 20+ framework/surface skills (Next.js, Spring Boot, Laravel, Kubernetes, CI/CD, WebSocket, deserialization, ...).
+- **48 `@hunt-*` agents** — *what to look for in webapps.* Per-class detection patterns, payloads, bypass tables, and chain templates — curated from OWASP WSTG v4.2 methodology across 25 vulnerability classes, plus 20+ framework/surface skills (Next.js, Spring Boot, Laravel, Kubernetes, CI/CD, WebSocket, deserialization, ...).
 - **Enterprise platform attack chains** — *what to look for on the perimeter.* M365/Entra ID, Okta, cloud IAM, VMware vCenter, enterprise VPN, SharePoint, ASP.NET, NTLM, APK red-team pipeline, supply-chain recon — current CVE chains, AADSTS error references, version-fingerprint matrices, and post-credential escalation paths.
 - **Validation + reporting** — *how to ship it.* 7-Question Gate, VRT category fallback, severity-request paragraphs, OOS rebuttals, cookie/PII redaction, client-facing red-team deliverable format, and SOC-patch / mid-engagement attacker detection methodology.
 
@@ -817,7 +817,7 @@ This bundle was built and validated through authorized engagements that exposed 
 4. **No client-facing deliverable format** — bug-bounty report templates don't fit enterprise red-team where output is a 50KB+ MD + DOCX with embedded screenshots → `redteam-report-template`
 5. **No post-credential escalation model** — when recon yielded credentials (AWS keys, JWTs, GCP JSON), it was unclear what they granted or how to escalate → `cloud-iam-deep`
 
-The per-class `@hunt-*` agents address gap-zero (*"what should I look for in webapps"*) — 48 agents codifying patterns from 8,376+ disclosed HackerOne reports, covering injection, authorization, server-side, identity, API, business logic, frameworks, and infrastructure. The enterprise-platform and red-team-tradecraft layers address what bug-bounty alone cannot: external red-team engagements against monitored enterprise targets.
+The per-class `@hunt-*` agents address gap-zero (*"what should I look for in webapps"*) — 48 agents codifying patterns from OWASP WSTG v4.2 methodology, covering injection, authorization, server-side, identity, API, business logic, frameworks, and infrastructure. The enterprise-platform and red-team-tradecraft layers address what bug-bounty alone cannot: external red-team engagements against monitored enterprise targets.
 
 ---
 

@@ -33,7 +33,7 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - SPF/DMARC spoofability check (`Spoofy`)
 - Cloud storage bucket enumeration (`cloud_enum` — AWS S3, Azure Blob, GCP, DO Spaces)
 - Runs via `scripts/tools/phase-intel.sh <domain>`
-- Output to `engagements/<eid>/recon/<domain>/intel/`
+- Output to `runtime/engagements/<eid>/recon/<domain>/intel/`
 - Skipped: `ip_info` (requires `WHOISXML_API` key)
 
 ### Phase P2: RECON

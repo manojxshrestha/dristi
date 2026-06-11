@@ -158,7 +158,7 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 
 **Note:** `ip_info` module (reverse IP, IP WHOIS, geolocation) is skipped — requires `WHOISXML_API` key.
 
-**Output:** Intel data to `engagements/<id>/recon/<domain>/intel/` — consumed by RECON for target context and by HUNT agents for WAF/cloud/third-party awareness.
+**Output:** Intel data to `runtime/engagements/<id>/recon/<domain>/intel/` — consumed by RECON for target context and by HUNT agents for WAF/cloud/third-party awareness.
 
 ---
 
@@ -337,7 +337,7 @@ Q7: Is this NOT on the never-submit list?
 - `@redteam-report-template` — Client-facing DOCX
 - `@redteam-mindset` — Red-team ops posture
 
-**Output:** `engagements/<eid>/report.md` — full pentest report.
+**Output:** `runtime/engagements/<eid>/report.md` — full pentest report.
 
 ---
 
