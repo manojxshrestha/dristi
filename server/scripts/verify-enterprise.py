@@ -133,7 +133,7 @@ def main() -> int:
         updated = db.update_vuln(vuln["id"], severity="Medium")
         db_ok &= check("update_vuln() works", updated["severity"] == "Medium")
 
-        cred = db.add_credential("verify-eng", "admin", "s3cret", secret_type="password")
+        cred = db.add_credential("verify-eng", "admin", "s3cret", secret_type="password")  # nosec B106
         db_ok &= check("add_credential() works", cred["username"] == "admin")
 
         db.close()

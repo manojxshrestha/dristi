@@ -99,7 +99,7 @@ class TestFindingsDB:
         cred = db.add_credential(
             engagement_id="test-006",
             username="admin",
-            secret="s3cret!",
+            secret="s3cret!",  # nosec B106
             secret_type="password",
             domain="test.com",
             access_level="admin",

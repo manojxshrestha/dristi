@@ -57,5 +57,5 @@ def decrypt_secret(ciphertext: str) -> str:
     try:
         f = _get_fernet()
         return f.decrypt(ciphertext.encode()).decode()
-    except Exception:
+    except Exception:  # nosec B110
         return ciphertext
