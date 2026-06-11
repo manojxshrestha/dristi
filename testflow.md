@@ -1,6 +1,6 @@
 # Test Flow — Mastering Dristi
 
-All interactions use `@agent-name` — no `/commands`. 9 pipeline agents on Tab: `@autopilot` → `@consult` → `@scope` → `@recon` → `@surface` → `@hunt` → `@capture` → `@validate` → `@report`. 48 specialized `@hunt-*` agents + 18 non-hunt agents (75 total) via `@`.
+All interactions use `@agent-name` — no `/commands`. 11 pipeline agents on Tab: `@autopilot` → `@consult` → `@scope` → `@pintel` → `@recon` → `@surface` → `@hunt` → `@exploit` → `@capture` → `@validate` → `@report`. 48 specialized `@hunt-*` agents + 24 specialty agents (83 total) via `@`.
 
 ## Guided Flow
 
@@ -8,7 +8,8 @@ All interactions use `@agent-name` — no `/commands`. 9 pipeline agents on Tab:
 SCOPE complete?    ──→  "Ready to recon? → @recon target.com"
 RECON complete?    ──→  "Ready to rank surface? → @surface target.com"
 SURFACE ranked?    ──→  "Ready to hunt? → @hunt target.com"
-HUNT complete?     ──→  "Found something? → @validate"
+HUNT complete?     ──→  "Ready to exploit? → @exploit"
+EXPLOIT done?      ──→  "Ready to validate? → @validate"
 VALIDATE pass?     ──→  "Ready to report? → @report"
 REPORT done?       ──→  "Loop back to hunt for more findings"
 ```
@@ -17,10 +18,10 @@ If stuck: just say *"What should I do next?"*
 
 ---
 
-## The 7-Phase Pipeline
+## The 8-Phase Pipeline
 
 ```
-SCOPE → AUTH → RECON → SURFACE → HUNT → CAPTURE → VALIDATE → REPORT
+SCOPE → AUTH → RECON → SURFACE → HUNT → EXPLOIT → CAPTURE → VALIDATE → REPORT
 ```
 
 ### P1: SCOPE — Define the Target
@@ -149,11 +150,26 @@ Invoke `@hunt` or jump directly to a specific `@hunt-*` agent:
 4. `create_exploitation_queue()` if further exploitation planned
 5. Check `@hunt-dispatch` for chaining opportunities
 
-**→ Transition:** *"Found something? → @validate to check reportability, then @report"*
+**→ Transition:** *"Found something? → @exploit to deep-research and bypass, then @validate"*
 
 ---
 
-### P5: CAPTURE — Evidence Hygiene
+### P4.5: EXPLOIT — Deep-Research Exploitation
+
+Invoke `@exploit` to systematically validate and escalate findings:
+
+| Step | Action | What Happens |
+|------|--------|--------------|
+| 1 | Invoke `@exploit` | Exploitation pipeline loads technique guides + payloads |
+| 2 | Deep-research per vuln class | Load relevant WSTG tests, technique guides, witness payloads |
+| 3 | Apply WAF bypass | `wstg_get_waf_bypass()` tailored to detected WAF vendor |
+| 4 | 5-tier exploitation | From minimal proof to full chain exploitation |
+| 5 | Chain findings | `wstg_find_chains()` for attack path discovery |
+| 6 | Mark exploitation results | `mark_exploited()` per finding — exploited / potential / failed |
+
+**→ Transition:** *"Exploitation complete. Ready to validate findings?"*
+
+---
 
 | Step | Action | What Happens |
 |------|--------|--------------|
@@ -208,7 +224,7 @@ Q7: Is this NOT on the never-submit list?
 @autopilot
 ```
 
-Runs the entire P1–P7 pipeline **autonomously** — no prompts at each step. Only stops at the end to show you the report + PoC evidence for submission.
+Runs the entire P1–P8 pipeline **autonomously** — no prompts at each step. Only stops at the end to show you the report + PoC evidence for submission.
 
 **What it does:**
 1. Asks for target + platform + scope (once at the start)
@@ -216,9 +232,9 @@ Runs the entire P1–P7 pipeline **autonomously** — no prompts at each step. O
 3. Runs full recon via scripts (batch_subdomain_enum, web_crawl, cariddi, nuclei, etc.)
 4. Ranks attack surface (endpoint_map_raw → endpoint_map_ranked)
 5. Loads auth context, tests every bug class with candidates using `@hunt-*` tradecraft
-6. Logs findings, validates PoCs, tracks coverage
-7. Generates final report
-8. Presents report + evidence — you review and submit
+6. Exploits validated findings with deep-research techniques and WAF bypass (Phase 4.5)
+7. Logs findings, validates PoCs, tracks coverage
+8. Generates final report and presents evidence — you review and submit
 
 **Checkpoint modes:** `@autopilot` runs fully autonomous. `@consult` runs the same pipeline but asks at every phase. If you want individual control, use the pipeline agents (`@scope` → `@recon` → `@surface` → `@hunt` → ...).
 
@@ -229,6 +245,7 @@ Runs the entire P1–P7 pipeline **autonomously** — no prompts at each step. O
 ```
 @recon target.com --fast
 @hunt-xss               (or whichever class)
+@exploit                (validate + bypass findings)
 @validate
 @report
 ```
@@ -272,7 +289,7 @@ Dristi covers the full red-team kill chain — from perimeter recon through expl
 | `@apk-redteam-pipeline` | APK acquisition (Play Store), jadx/apktool decompile, secret/JWT/Firebase grep, Frida instrumentation, cert pinning bypass, intent analysis |
 | `@supply-chain-attack-recon` | Dependency confusion, package squatting, typosquatting, GH Actions injection, SBOM mining, registry poisoning |
 
-### Web App Exploitation (48 `@hunt-*` agents)
+### Web App Exploitation (48 `@hunt-*` agents + 11 pipeline + 24 specialty)
 Every OWASP-classified bug class: XSS (174 H1 reports), SQLi, SSRF (11 IP bypass techniques), IDOR, RCE (67 reports), SSTI (Jinja2/Twig/Freemarker/ERB/Spring), GraphQL, race conditions, deserialization (Java/PHP/.NET/pickle), HTTP smuggling (CL.TE/TE.CL/H2.CL), cache poisoning, JWT confusion, prototype pollution, XXE, WebSocket abuse, CORS, CSRF, file upload (10 bypass techniques), SAML (XSW1–XSW8), OAuth/OIDC, NoSQLi, ATO (9 paths), MFA bypass (7 patterns), business logic, source leak, Laravel/Spring Boot/Next.js/ASP.NET/Node.js framework abuse, and more.
 
 ### Post-Exploitation & Reporting
@@ -296,6 +313,7 @@ Every OWASP-classified bug class: XSS (174 H1 reports), SQLi, SSRF (11 IP bypass
 [ ] P4: Hunt — relevant @hunt-* agents against findings
 [ ] P4: Findings logged via log_finding()
 [ ] P4: WSTG tests tracked via track_test()
+[ ] P4.5: Exploit — deep-research, WAF bypass, chain findings
 [ ] P5: Evidence captured with hygiene
 [ ] P6: Every finding validated via @validate
 [ ] P7: Report drafted via @report
