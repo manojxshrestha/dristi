@@ -4158,6 +4158,8 @@ def resume_engagement(engagement_id: str) -> str:
         _write_resume_prompt_file(engagement_id)
     except Exception:
         pass  # nosec B110
+
+    _append_event(
         engagement_id,
         {
             "tool": "resume_engagement",

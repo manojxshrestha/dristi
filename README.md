@@ -33,7 +33,7 @@
 
 ## What is this?
 
-Dristi gives LLM-powered security tools the complete OWASP Web Security Testing Guide methodology as an MCP server — 96 test cases across 12 categories, and the full pentest lifecycle. It pairs with Burp Suite's MCP server for request execution, or runs standalone as a reference knowledge base.
+Dristi is an LLM-powered security toolkit that provides the complete OWASP Web Security Testing Guide methodology as an MCP server — 96 test cases across 12 categories, and the full pentest lifecycle. It pairs with Burp Suite's MCP server for request execution, or runs standalone as a reference knowledge base.
 
 Four layers stack:
 
