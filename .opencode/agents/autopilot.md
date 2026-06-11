@@ -15,6 +15,7 @@ Phase 1.75 (Intel)  → run directly (WHOIS, M365, misconfig-mapper, spoof, clou
 Phase 2 (RECON)     → task(subagent_type="recon", ...)
 Phase 3 (SURFACE)   → task(subagent_type="surface", ...)
 Phase 4 (HUNT)      → task(subagent_type="hunt", ...)
+Phase 4.5 (EXPLOIT) → task(subagent_type="exploit", ...) — second-wave exploitation of all findings
 Phase 5 (CAPTURE)   → task(subagent_type="capture", ...)
 Phase 6 (VALIDATE)  → task(subagent_type="validate", ...)
 Phase 7 (REPORT)    → task(subagent_type="report", ...)
@@ -167,6 +168,36 @@ Return: findings summary by severity (Critical/High/Medium/Low/Info), number of 
 
 **After dispatch returns:**
 - `wstg_phase_gate_check(phase_completed=3)` → PASS → checkpoint → proceed.
+
+## Phase 4.5: EXPLOIT (dispatch — second-wave exploitation)
+
+After HUNT finds vulnerabilities, EXPLOIT attempts PoC-level exploitation for each one. This is a dedicated pass so exploitation doesn't compete with detection for the HUNT agent's turn budget.
+
+```
+task(
+  description="Phase 4.5 Exploit for <domain>",
+  prompt="Target: <domain>. Run Phase 4.5 second-wave exploitation:
+1. Load all findings via         wstg_findings_list_vulns(engagement_id=<eid>)
+2. Classify each finding to a vulnerability class (XSS, SQLi, SSRF, SSTI, CMDi, etc.)
+3. For each unique class, load technique guide: wstg_get_technique_guide(<CATEGORY>)
+4. For EACH finding, attempt exploitation:
+   a. wstg_validate_poc() with class-specific payloads
+   b. If blocked → wstg_get_waf_bypass() → retry with bypass
+   c. If success → wstg_update_finding() with evidence + poc_output
+   d. If blocked after exhaustive bypass → document as potential
+5. After individual exploitation: wstg_findings_find_chains()
+6. Upgrade severities for chained findings
+7. Track all tests via wstg_track_test()
+8. Call wstg_save_checkpoint()
+
+Return: number of findings exploited, number blocked (potential), number of chains found, checkpoint status.",
+  subagent_type="exploit"
+)
+```
+
+**After dispatch returns:**
+- Findings now have PoC evidence attached (or documentation of why exploitation was blocked)
+- `wstg_save_checkpoint()` → proceed to Phase 5.
 
 ## Phase 5: CAPTURE (dispatch)
 

@@ -54,5 +54,6 @@ class TestStateManager:
         create_checkpoint("wal-eng", "tester", "WAL entry 1")
         create_checkpoint("wal-eng", "tester", "WAL entry 2")
         from state_manager import get_wal
+
         wal = get_wal("wal-eng")
         assert len(wal) >= 2

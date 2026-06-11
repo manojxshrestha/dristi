@@ -97,9 +97,7 @@ def validate_role(role: str) -> str:
     """Validate and normalize a role string."""
     role = role.lower().strip()
     if role not in RBAC_ROLES:
-        raise ValueError(
-            f"Invalid role {role!r}. Must be one of: {', '.join(RBAC_ROLES)}"
-        )
+        raise ValueError(f"Invalid role {role!r}. Must be one of: {', '.join(RBAC_ROLES)}")
     return role
 
 
@@ -107,9 +105,7 @@ def validate_access_level(level: str) -> str:
     """Validate and normalize an access level string."""
     level = level.lower().strip()
     if level not in ACCESS_LEVELS:
-        raise ValueError(
-            f"Invalid access level {level!r}. Must be one of: {', '.join(ACCESS_LEVELS)}"
-        )
+        raise ValueError(f"Invalid access level {level!r}. Must be one of: {', '.join(ACCESS_LEVELS)}")
     return level
 
 
@@ -411,9 +407,7 @@ def end_session(engagement_id: str, session_id: str) -> dict:
         session["ended_at"] = datetime.now(timezone.utc).isoformat()
         session_file.write_text(json.dumps(session, indent=2), encoding="utf-8")
 
-        _log_access_event(
-            engagement_id, session.get("operator", ""), "session_ended", session_id
-        )
+        _log_access_event(engagement_id, session.get("operator", ""), "session_ended", session_id)
         return {"success": True, "session_id": session_id}
     except (json.JSONDecodeError, OSError) as e:
         return {"success": False, "error": str(e)}
@@ -521,10 +515,7 @@ def check_access(
     if actual < required:
         return {
             "granted": False,
-            "reason": (
-                f"Access level '{grant.get('access_level')}' insufficient "
-                f"(need '{required_level}')"
-            ),
+            "reason": (f"Access level '{grant.get('access_level')}' insufficient " f"(need '{required_level}')"),
             "operator": operator,
             "role": grant.get("role"),
             "access_level": grant.get("access_level"),

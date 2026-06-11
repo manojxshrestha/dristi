@@ -1427,6 +1427,8 @@ def update_finding(
     severity: str = "",
     description: str = "",
     remediation: str = "",
+    evidence: str = "",
+    poc_output: str = "",
     notes: str = "",
 ) -> str:
     """Update an existing finding's severity, description, or remediation.
@@ -1438,6 +1440,8 @@ def update_finding(
         severity: New severity (if changing). One of: Critical, High, Medium, Low, Informational
         description: Updated description (if changing)
         remediation: Updated remediation (if changing)
+        evidence: Updated evidence with PoC request/response (if changing)
+        poc_output: The validated PoC command + response (if changing, output from validate_poc())
         notes: Reason for the update (e.g., "Upgraded per Final Judge - chaining with FINDING-003")
     """
     vuln = _fdb.get_vuln_by_ref(engagement_id, finding_id.upper())
@@ -1456,6 +1460,10 @@ def update_finding(
         kwargs["description"] = description
     if remediation:
         kwargs["remediation"] = remediation
+    if evidence:
+        kwargs["evidence"] = evidence
+    if poc_output:
+        kwargs["poc_output"] = poc_output
 
     if kwargs:
         _fdb.update_vuln(vuln["id"], **kwargs)
@@ -1476,6 +1484,10 @@ def update_finding(
         updated_fields.append("description")
     if remediation:
         updated_fields.append("remediation")
+    if evidence:
+        updated_fields.append("evidence")
+    if poc_output:
+        updated_fields.append("poc_output")
 
     return f"Finding {finding_id} updated: {', '.join(updated_fields)}. Note: {notes}"
 
@@ -6207,9 +6219,7 @@ def execute_nuclei(
         f"**Target**: {target}\n"
         f"**Findings**: {finding_count}\n"
         f"**Exit Code**: {result.returncode}\n\n"
-        f"{parsed}\n"
-        + (f"\n### Stderr\n```\n{stderr[:1000]}\n```\n" if stderr else "")
-        + (f"\n**JSONL saved to**: `{output_jsonl}`" if output_jsonl else "")
+        f"{parsed}\n" + (f"\n### Stderr\n```\n{stderr[:1000]}\n```\n" if stderr else "") + (f"\n**JSONL saved to**: `{output_jsonl}`" if output_jsonl else "")
     )
 
 
@@ -6221,7 +6231,6 @@ def _validate_shell_arg(value: str, name: str) -> None:
     """Reject values containing shell metacharacters or path traversal."""
     if _SHELL_UNSAFE.search(value):
         raise ValueError(f"Invalid {name!r}: contains shell metacharacters")
-
 
 
 # ── Tool Verification & Context Compression Tools ─────────────────
@@ -6308,10 +6317,9 @@ def call_graphql_introspect(
 
     try:
         import subprocess as _sp
+
         payload = _json.dumps({"query": introspection_query})
-        cmd = ["curl", "-s", "-X", "POST", endpoint,
-               "-H", "Content-Type: application/json",
-               "--data-raw", payload]
+        cmd = ["curl", "-s", "-X", "POST", endpoint, "-H", "Content-Type: application/json", "--data-raw", payload]
         if headers:
             try:
                 hdrs = _json.loads(headers)
@@ -6410,6 +6418,7 @@ def burp_send_request(
 
     try:
         import subprocess as _sp
+
         result = _sp.run(cmd, capture_output=True, text=True, timeout=timeout + 5)
         stdout = result.stdout or ""
         stderr = result.stderr or ""
@@ -6421,12 +6430,7 @@ def burp_send_request(
     if len(stdout) > 5000:
         response += f"\n... (truncated, {len(stdout)} total chars)"
 
-    return (
-        f"## burp_send_request: {status}\n\n"
-        f"**{method} {url}**\n\n"
-        f"### Response\n```\n{response}\n```\n"
-        + (f"\n### Stderr\n```\n{stderr[:500]}\n```" if stderr else "")
-    )
+    return f"## burp_send_request: {status}\n\n" f"**{method} {url}**\n\n" f"### Response\n```\n{response}\n```\n" + (f"\n### Stderr\n```\n{stderr[:500]}\n```" if stderr else "")
 
 
 # ── Entry Point ────────────────────────────────────────────────────

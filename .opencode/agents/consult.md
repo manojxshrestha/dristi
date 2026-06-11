@@ -51,7 +51,14 @@ Same P1–P7 pipeline as `/autopilot`, but **you ask the user for approval at ev
    - <class-3> — <reason>
    Want me to run all applicable classes or focus on specific ones?"
 **After dispatch returns, show:** "Findings: <N> Critical, <M> High, <P> Medium"
-**You ask:** "Full hunt complete. Want to capture evidence next, or review specific findings?"
+**You ask:** "Full hunt complete. Want to run the exploitation pass (Phase 4.5) to attempt PoC on all findings, or skip to evidence capture?"
+
+### Phase 4.5: EXPLOIT (dispatch via task)
+**You do:** Launch via `task(subagent_type="exploit", ...)` to attempt second-wave exploitation on all findings.
+**Before dispatch, suggest:**
+- "Exploitation phase will attempt PoC for each finding using class-specific payloads and technique guides. This may produce screenshots, collaborator callbacks, or data extraction."
+**After dispatch returns, show:** "Exploited: <N> findings | Blocked (potential): <M> | Chains found: <P>"
+**You ask:** "Exploitation complete. Proceed to evidence capture?"
 
 ### Phase 5: CAPTURE (inline)
 **You do:** For each finding, capture raw HTTP, screenshot, redact PII.

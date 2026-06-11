@@ -25,6 +25,7 @@ _locks_lock = threading.Lock()
 _cp_counter = 0
 _cp_counter_lock = threading.Lock()
 
+
 def configure(staging_dir: Path, append_event_fn: Callable | None = None):
     global STAGING_DIR, _append_event
     STAGING_DIR = staging_dir
@@ -125,19 +126,25 @@ def create_checkpoint(
 
         cp_file.write_text(json.dumps(checkpoint, indent=2), encoding="utf-8")
 
-        _append_wal_entry(safe_id, {
-            "action": "checkpoint",
-            "checkpoint_id": cp_id,
-            "operator": operator,
-            "timestamp": ts,
-        })
-
-        if _append_event:
-            _append_event(engagement_id, {
-                "event": "checkpoint_created",
+        _append_wal_entry(
+            safe_id,
+            {
+                "action": "checkpoint",
                 "checkpoint_id": cp_id,
                 "operator": operator,
-            })
+                "timestamp": ts,
+            },
+        )
+
+        if _append_event:
+            _append_event(
+                engagement_id,
+                {
+                    "event": "checkpoint_created",
+                    "checkpoint_id": cp_id,
+                    "operator": operator,
+                },
+            )
 
         return {
             "checkpoint_id": cp_id,
@@ -157,12 +164,14 @@ def list_checkpoints(engagement_id: str) -> list[dict]:
     for f in sorted(cp_dir.glob("cp-*.json")):
         try:
             data = json.loads(f.read_text(encoding="utf-8"))
-            checkpoints.append({
-                "checkpoint_id": data.get("checkpoint_id", f.stem),
-                "created_at": data.get("created_at", ""),
-                "description": data.get("description", ""),
-                "operator": data.get("operator", ""),
-            })
+            checkpoints.append(
+                {
+                    "checkpoint_id": data.get("checkpoint_id", f.stem),
+                    "created_at": data.get("created_at", ""),
+                    "description": data.get("description", ""),
+                    "operator": data.get("operator", ""),
+                }
+            )
         except (json.JSONDecodeError, OSError):
             continue
 
@@ -205,27 +214,34 @@ def rollback_to_checkpoint(
         ts = _now()
         # Save current state as pre-rollback snapshot
         pre_rollback_cp = create_checkpoint(
-            engagement_id, operator,
+            engagement_id,
+            operator,
             description=f"Auto-snapshot before rollback to {checkpoint_id}",
         )
 
         restored_state = checkpoint.get("state", {})
         save_state(engagement_id, restored_state)
 
-        _append_wal_entry(safe_id, {
-            "action": "rollback",
-            "from_checkpoint": pre_rollback_cp["checkpoint_id"],
-            "to_checkpoint": checkpoint_id,
-            "operator": operator,
-            "timestamp": ts,
-        })
-
-        if _append_event:
-            _append_event(engagement_id, {
-                "event": "state_rolled_back",
+        _append_wal_entry(
+            safe_id,
+            {
+                "action": "rollback",
+                "from_checkpoint": pre_rollback_cp["checkpoint_id"],
                 "to_checkpoint": checkpoint_id,
                 "operator": operator,
-            })
+                "timestamp": ts,
+            },
+        )
+
+        if _append_event:
+            _append_event(
+                engagement_id,
+                {
+                    "event": "state_rolled_back",
+                    "to_checkpoint": checkpoint_id,
+                    "operator": operator,
+                },
+            )
 
         return {
             "success": True,
