@@ -811,7 +811,7 @@ def findings_add_credential(
     engagement_id: str,
     username: str,
     secret: str,
-    secret_type: str = "password",
+    secret_type: str = "password",  # nosec B107
     domain: str = "",
     access_level: str = "unknown",
     source: str = "",
