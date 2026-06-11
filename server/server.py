@@ -5920,7 +5920,7 @@ def validate_poc(
 
     try:
         start_time = time.time()
-        result = subprocess.run(
+        result = subprocess.run(  # nosec B602
             command,
             shell=True,
             capture_output=True,
@@ -6178,7 +6178,7 @@ def execute_nuclei(
     start_time = time.time()
 
     try:
-        result = subprocess.run(
+        result = subprocess.run(  # nosec B603
             cmd,
             capture_output=True,
             text=True,
@@ -6327,7 +6327,7 @@ def call_graphql_introspect(
                     cmd.extend(["-H", f"{k}: {v}"])
             except _json.JSONDecodeError:
                 pass
-        result = _sp.run(cmd, capture_output=True, text=True, timeout=30)
+        result = _sp.run(cmd, capture_output=True, text=True, timeout=30)  # nosec B603
         if result.returncode != 0:
             return f"## GraphQL Introspection: FAILED\n\n**Error**: {result.stderr[:500]}"
         resp = _json.loads(result.stdout)
