@@ -38,7 +38,7 @@ def _load_external_vendors():
         if WAF_VENDORS_JSON.exists():
             with open(WAF_VENDORS_JSON) as f:
                 return json.load(f)
-    except Exception:
+    except (FileNotFoundError, json.JSONDecodeError):
         pass
     return {}
 
@@ -56,7 +56,7 @@ def _load_external_bypasses():
         if WAF_BYPASSES_JSON.exists():
             with open(WAF_BYPASSES_JSON) as f:
                 return json.load(f)
-    except Exception:
+    except (FileNotFoundError, json.JSONDecodeError):
         pass
     return {}
 

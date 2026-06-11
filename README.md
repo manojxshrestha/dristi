@@ -327,7 +327,7 @@ dristi/
 The fastest way to land on the right agent. If you see the pattern in the left column, the right column is the agent that loads.
 
 | When you see this on the target… | Agent that loads |
-|---|---|---|
+|---|---|
 | Reflected user input echoed back in HTML / JS context | `@hunt-xss` |
 | User-controlled value in a database query response | `@hunt-sqli` |
 | Numeric ID in URL or body (`/users/42`, `?invoice_id=12345`) | `@hunt-idor` |
