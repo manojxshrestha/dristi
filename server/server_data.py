@@ -25,7 +25,7 @@ CATEGORIES: dict[str, dict[str, str]] = {
 _CODE_TO_NUM = {cat["code"]: num for num, cat in CATEGORIES.items()}
 
 # ── CLI Tool Registry ───────────────────────────────────────────────
-TOOL_REGISTRY = {
+TOOL_REGISTRY: dict[str, dict[str, Any]] = {
     "nmap": {"phase": 0, "tier": "mandatory", "condition": None},
     "katana": {"phase": 0, "tier": "mandatory", "condition": None},
     "ffuf": {"phase": 0, "tier": "mandatory", "condition": None},

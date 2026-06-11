@@ -14,7 +14,7 @@ try:
 
     HAS_CRYPTO = True
 except ImportError:
-    Fernet = None
+    Fernet = None  # type: ignore[assignment]
     HAS_CRYPTO = False
     logger.warning("cryptography not installed — credentials stored in plaintext. " "Install with: pip install dristi-server[encrypt]")
 

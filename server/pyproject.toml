@@ -16,6 +16,8 @@ dev = [
     "mypy>=1.10",
     "ruff>=0.5",
     "black>=24.0",
+    "bandit>=1.7",
+    "pip-audit>=2.7",
 ]
 encrypt = []
 
@@ -30,24 +32,23 @@ build-backend = "hatchling.build"
 python_version = "3.10"
 strict = false
 disable_error_code = [
+    "import-untyped",
     "no-untyped-call",
     "no-untyped-def",
-    "import-untyped",
     "attr-defined",
     "operator",
-    "var-annotated",
     "type-var",
-    "index",
-    "return-value",
     "misc",
-    "arg-type",
-    "call-overload",
-    "assignment",
+    "var-annotated",
 ]
 ignore_missing_imports = true
 warn_unused_ignores = true
 warn_redundant_casts = true
 warn_return_any = false
+no_implicit_optional = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+warn_unused_configs = true
 exclude = [
     "data/",
     "engagements/",

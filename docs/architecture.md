@@ -14,7 +14,7 @@ Dristi is a dual-interface security testing platform: an **MCP server** (94 tool
 │  Server (94 tools)│    │  + Commands (14)         │
 │  ──────────────── │    │  ──────────────────────  │
 │  • WSTG v4.2     │    │  • hunt-xss, hunt-sqli   │
-│  • H1 8,376+ rpts│    │  • bb-methodology        │
+ │  • WSTG v4.2     │    │  • bb-methodology        │
 │  • WAF bypass    │    │  • triage-validation     │
 │  • Findings DB    │    │  • offensive-osint       │
 │  • Engagement     │    │  • m365-entra-attack     │

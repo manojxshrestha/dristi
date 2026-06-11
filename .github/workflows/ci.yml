@@ -26,6 +26,11 @@ jobs:
       - name: Mypy
         working-directory: server
         run: mypy .
+      - name: Bandit (security)
+        working-directory: server
+        run: bandit -r . --skip=B101,B311,B303 -x data/,engagements/,tests/
+      - name: Safety (dependencies)
+        run: pip-audit
 
   test:
     runs-on: ubuntu-latest

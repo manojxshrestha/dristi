@@ -239,6 +239,25 @@ def _find_test_file(test_id: str) -> Path | None:
 _write_lock = threading.Lock()
 
 
+def _sanitize_id(raw: str, max_len: int = 100) -> str:
+    """Sanitize an identifier (engagement_id, config name, etc.) for safe filesystem use.
+    Allows alphanumeric, dots, hyphens, underscores. Rejects path traversal chars.
+    """
+    if not raw or not isinstance(raw, str):
+        raise ValueError(f"Invalid identifier (empty or wrong type): {raw!r}")
+    safe = re.sub(r"[^a-zA-Z0-9._-]", "", raw[:max_len])
+    safe = safe.lstrip(".")
+    safe = safe[:max_len]
+    if not safe:
+        raise ValueError(f"Invalid identifier (empty after sanitization): {raw!r}")
+    return safe
+
+
+def _engagement_path(engagement_id: str) -> Path:
+    """Get the engagement directory path, sanitizing the ID."""
+    return ENGAGEMENTS_DIR / _sanitize_id(engagement_id)
+
+
 def _atomic_write_json(filepath: Path, data: Any) -> None:
     """Crash-safe JSON write: write to temp file, then atomic rename."""
     filepath.parent.mkdir(parents=True, exist_ok=True)
@@ -268,7 +287,7 @@ def _append_live_log(
     This is the live logging file — designed for `tail -f` monitoring.
     Every MCP tool call is logged with full args and full result.
     """
-    eng_dir = ENGAGEMENTS_DIR / engagement_id
+    eng_dir = _engagement_path(engagement_id)
     eng_dir.mkdir(parents=True, exist_ok=True)
     log_file = eng_dir / "logs.txt"
 
@@ -392,7 +411,7 @@ def _make_logged_tool(original_tool_decorator):
 # calls will auto-log to logs.txt. This gives 100% coverage without
 # touching individual tool functions.
 _original_mcp_tool = mcp.tool
-mcp.tool = _make_logged_tool(_original_mcp_tool)
+mcp.tool = _make_logged_tool(_original_mcp_tool)  # type: ignore[method-assign]
 
 
 def _append_event(engagement_id: str, event: dict) -> None:
@@ -441,7 +460,7 @@ def _append_finding_markdown(engagement_id: str, finding: dict) -> None:
     all previously written findings survive. This file is the user's insurance
     policy against lost progress.
     """
-    eng_dir = ENGAGEMENTS_DIR / engagement_id
+    eng_dir = _engagement_path(engagement_id)
     eng_dir.mkdir(parents=True, exist_ok=True)
     findings_md = eng_dir / "findings.md"
 
@@ -485,7 +504,7 @@ def _append_progress_log(engagement_id: str, entry: str) -> None:
     This is an append-only timestamped log of all test completions, tool runs,
     and findings. Survives crashes. Human-readable at a glance.
     """
-    eng_dir = ENGAGEMENTS_DIR / engagement_id
+    eng_dir = _engagement_path(engagement_id)
     eng_dir.mkdir(parents=True, exist_ok=True)
     log_file = eng_dir / "progress.log"
 
@@ -2291,7 +2310,7 @@ def get_tool_coverage(engagement_id: str) -> str:
     # Group tools by phase
     phases: dict[int, list[str]] = {}
     for tool_name, info in TOOL_REGISTRY.items():
-        phase = info["phase"]
+        phase: int = info["phase"]
         if phase not in phases:
             phases[phase] = []
         phases[phase].append(tool_name)
@@ -3764,7 +3783,7 @@ def generate_report(
     report_content = "\n".join(lines)
 
     # Save the report
-    engagement_dir = ENGAGEMENTS_DIR / engagement_id
+    engagement_dir = _engagement_path(engagement_id)
     engagement_dir.mkdir(parents=True, exist_ok=True)
     report_file = engagement_dir / "report.md"
     report_file.write_text(report_content, encoding="utf-8")
@@ -3858,7 +3877,7 @@ def save_code_analysis(engagement_id: str, analysis: str) -> str:
     _atomic_write_json(analysis_file, existing)
 
     # Also save as markdown in the engagement directory
-    engagement_dir = ENGAGEMENTS_DIR / engagement_id
+    engagement_dir = _engagement_path(engagement_id)
     engagement_dir.mkdir(parents=True, exist_ok=True)
     (engagement_dir / "code-analysis.md").write_text(analysis, encoding="utf-8")
 
@@ -4110,7 +4129,7 @@ def resume_engagement(engagement_id: str) -> str:
         lines.append(f"\n**{in_prog} test(s) were in-progress** when interrupted — check and complete them.")
 
     # Reference resume-prompt.md
-    resume_file = ENGAGEMENTS_DIR / engagement_id / "resume-prompt.md"
+    resume_file = _engagement_path(engagement_id) / "resume-prompt.md"
     if resume_file.exists():
         lines.extend(
             [
@@ -4250,7 +4269,7 @@ def _generate_resume_prompt_content(engagement_id: str) -> str:
         scope_lines.append(f"- {domain} ({dtype})")
 
     # ── Cookie jar status ──
-    cookie_jar_path = ENGAGEMENTS_DIR / engagement_id / "cookies.txt"
+    cookie_jar_path = _engagement_path(engagement_id) / "cookies.txt"
     cookie_jar_exists = cookie_jar_path.exists()
 
     # ── Endpoint map deliverable ──
@@ -4382,7 +4401,7 @@ def _write_resume_prompt_file(engagement_id: str) -> None:
     to continue the pentest automatically.
     """
     try:
-        eng_dir = ENGAGEMENTS_DIR / engagement_id
+        eng_dir = _engagement_path(engagement_id)
         eng_dir.mkdir(parents=True, exist_ok=True)
         prompt_content = _generate_resume_prompt_content(engagement_id)
         resume_file = eng_dir / "resume-prompt.md"
@@ -4422,7 +4441,7 @@ def generate_resume_prompt(engagement_id: str) -> str:
         },
     )
 
-    eng_dir = ENGAGEMENTS_DIR / engagement_id
+    eng_dir = _engagement_path(engagement_id)
     return f"Resume prompt generated and saved to:\n" f"  `{eng_dir / 'resume-prompt.md'}`\n\n" f"To continue this pentest in a new session, paste the following:\n\n" f"---\n\n{prompt}\n\n---"
 
 
@@ -5034,7 +5053,7 @@ def get_witness_payloads(
         available = ", ".join(sorted(WITNESS_PAYLOADS.keys()))
         return f"Unknown sink context '{sink_context}'. Available: {available}"
 
-    ctx = WITNESS_PAYLOADS[sink_context]
+    ctx: dict[str, Any] = WITNESS_PAYLOADS[sink_context]
     bypass_level = bypass_level.lower().strip()
     valid_levels = {"basic", "intermediate", "advanced", "all"}
     if bypass_level not in valid_levels:
@@ -5245,7 +5264,7 @@ def git_checkpoint(engagement_id: str, description: str) -> str:
         engagement_id: The engagement identifier
         description: Checkpoint description (used as commit message)
     """
-    engagement_dir = ENGAGEMENTS_DIR / engagement_id
+    engagement_dir = _engagement_path(engagement_id)
     if not engagement_dir.exists():
         engagement_dir.mkdir(parents=True, exist_ok=True)
 
@@ -5306,7 +5325,7 @@ def git_rollback(engagement_id: str, reason: str) -> str:
         engagement_id: The engagement identifier
         reason: Reason for rollback (logged in audit trail)
     """
-    engagement_dir = ENGAGEMENTS_DIR / engagement_id
+    engagement_dir = _engagement_path(engagement_id)
     git_dir = engagement_dir / ".git"
     if not git_dir.exists():
         return f"No git repository found in engagement '{engagement_id}'. Use git_checkpoint() first."
@@ -6094,6 +6113,117 @@ def validate_finding_poc(
     )
 
 
+@mcp.tool()
+def execute_nuclei(
+    target: str,
+    templates: str = "",
+    severity: str = "",
+    rate_limit: int = 150,
+    timeout: int = 10,
+    output_jsonl: str = "",
+    extra_args: str = "",
+) -> str:
+    """Run nuclei against a target and return parsed results.
+    Use Burp MCP for interactive testing; use this for automated batch scanning.
+
+    Args:
+        target: URL, IP, or domain to scan (e.g. 'https://example.com' or '10.0.0.1')
+        templates: Template filter (e.g. 'cves,exposures,misconfiguration' or specific template path)
+        severity: Filter by severity (e.g. 'critical,high,medium')
+        rate_limit: Max requests per second (default 150)
+        timeout: Template timeout in seconds (default 10)
+        output_jsonl: Path to save JSONL output for later ingestion via ingest_tool_file()
+        extra_args: Additional nuclei CLI flags (e.g. '-headless -stats')
+    """
+    import shutil
+
+    if not shutil.which("nuclei"):
+        return "## execute_nuclei: FAIL\n\n**Error**: `nuclei` is not installed or not in PATH.\nInstall it from https://github.com/projectdiscovery/nuclei"
+
+    # Basic input validation — reject shell metacharacters
+    _validate_shell_arg(target, "target")
+    if templates:
+        _validate_shell_arg(templates, "templates")
+    if output_jsonl:
+        _validate_shell_arg(output_jsonl, "output_jsonl")
+
+    # Build command
+    cmd = ["nuclei", "-target", target, "-json", "-silent"]
+
+    if templates:
+        cmd.extend(["-t", templates])
+    if severity:
+        cmd.extend(["-s", severity])
+    if rate_limit:
+        cmd.extend(["-rl", str(rate_limit)])
+    if timeout:
+        cmd.extend(["-timeout", str(timeout)])
+    if output_jsonl:
+        cmd.extend(["-o", output_jsonl])
+    if extra_args:
+        cmd.extend(extra_args.split())
+
+    start_time = time.time()
+
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
+        elapsed = time.time() - start_time
+    except subprocess.TimeoutExpired:
+        return (
+            f"## execute_nuclei: TIMEOUT\n\n"
+            f"**Command**: `{' '.join(cmd)}`\n\n"
+            f"Nuclei did not complete within 300 seconds. "
+            f"Try narrowing the scope (specific target, fewer templates, higher rate-limit)."
+        )
+    except Exception as e:
+        return f"## execute_nuclei: ERROR\n\n**Command**: `{' '.join(cmd)}`\n\n**Error**: {e}"
+
+    stdout = result.stdout or ""
+    stderr = result.stderr or ""
+
+    # Save to file if requested
+    if output_jsonl and stdout:
+        Path(output_jsonl).write_text(stdout, encoding="utf-8")
+
+    # Parse with the existing parser
+    from tool_parsers import parse_tool_output
+
+    severity_arg = "detailed" if severity else "summary"
+    parsed = parse_tool_output("nuclei", stdout, severity_arg)
+
+    # Count findings
+    finding_count = 0
+    for line in stdout.strip().split("\n"):
+        if line.strip():
+            finding_count += 1
+
+    return (
+        f"## execute_nuclei: COMPLETE ({elapsed:.1f}s)\n\n"
+        f"**Target**: {target}\n"
+        f"**Findings**: {finding_count}\n"
+        f"**Exit Code**: {result.returncode}\n\n"
+        f"{parsed}\n"
+        + (f"\n### Stderr\n```\n{stderr[:1000]}\n```\n" if stderr else "")
+        + (f"\n**JSONL saved to**: `{output_jsonl}`" if output_jsonl else "")
+    )
+
+
+_SHELL_UNSAFE = re.compile(r"[\"';$`|&><(){}!\\]")
+_SHELL_UNSAFE_PATHS = re.compile(r"\.\.")
+
+
+def _validate_shell_arg(value: str, name: str) -> None:
+    """Reject values containing shell metacharacters or path traversal."""
+    if _SHELL_UNSAFE.search(value):
+        raise ValueError(f"Invalid {name!r}: contains shell metacharacters")
+
+
+
 # ── Tool Verification & Context Compression Tools ─────────────────
 
 
@@ -6134,6 +6264,169 @@ def get_engagement_summary(engagement_id: str) -> str:
         engagement_id: The engagement identifier
     """
     return _cc_summary(engagement_id)
+
+
+# ── GraphQL Tools ──────────────────────────────────────────────────
+
+
+@mcp.tool()
+def call_graphql_introspect(
+    endpoint: str,
+    query: str = "",
+    headers: str = "",
+) -> str:
+    """Execute a GraphQL introspection query against an endpoint.
+    Use this when Burp MCP is unavailable for quick schema discovery.
+
+    Args:
+        endpoint: Full GraphQL endpoint URL (e.g. 'https://example.com/graphql')
+        query: Optional custom query. Defaults to standard introspection query.
+        headers: Optional HTTP headers (JSON object string, e.g. '{"Authorization": "Bearer x"}')
+    """
+    import json as _json
+
+    _validate_shell_arg(endpoint, "endpoint")
+
+    introspection_query = query or """
+    query IntrospectionQuery {
+      __schema {
+        queryType { name }
+        mutationType { name }
+        subscriptionType { name }
+        types {
+          name
+          kind
+          description
+          fields {
+            name
+            type { name kind ofType { name kind } }
+          }
+        }
+      }
+    }
+    """.strip()
+
+    try:
+        import subprocess as _sp
+        payload = _json.dumps({"query": introspection_query})
+        cmd = ["curl", "-s", "-X", "POST", endpoint,
+               "-H", "Content-Type: application/json",
+               "--data-raw", payload]
+        if headers:
+            try:
+                hdrs = _json.loads(headers)
+                for k, v in hdrs.items():
+                    cmd.extend(["-H", f"{k}: {v}"])
+            except _json.JSONDecodeError:
+                pass
+        result = _sp.run(cmd, capture_output=True, text=True, timeout=30)
+        if result.returncode != 0:
+            return f"## GraphQL Introspection: FAILED\n\n**Error**: {result.stderr[:500]}"
+        resp = _json.loads(result.stdout)
+    except Exception as e:
+        return f"## GraphQL Introspection: ERROR\n\n**Error**: {e}"
+
+    if "errors" in resp:
+        msgs = [e.get("message", "") for e in resp["errors"]]
+        return (
+            f"## GraphQL Introspection: BLOCKED\n\n"
+            f"Introspection returned errors — likely disabled.\n"
+            f"**Errors**: {'; '.join(msgs[:5])}\n\n"
+            f"Try alternative discovery:\n"
+            f"- GET /graphql?query={{__typename}}\n"
+            f"- Common field bruteforcing\n"
+            f"- Schema stitching / batch queries"
+        )
+
+    schema = resp.get("data", {}).get("__schema", {})
+    if not schema:
+        return "## GraphQL Introspection: No schema returned"
+
+    qtype = schema.get("queryType", {}).get("name", "?")
+    mtype = schema.get("mutationType", {}).get("name", "None")
+    stype = schema.get("subscriptionType", {}).get("name", "None")
+
+    lines = [
+        f"# GraphQL Schema: {endpoint}\n",
+        f"**Query Type**: `{qtype}`",
+        f"**Mutation Type**: `{mtype}`",
+        f"**Subscription Type**: `{stype}`\n",
+        "## Types",
+    ]
+
+    for t in schema.get("types", []):
+        tname = t.get("name", "")
+        if tname.startswith("__") or tname in {"String", "Int", "Float", "Boolean", "ID"}:
+            continue
+        kind = t.get("kind", "")
+        desc = t.get("description", "") or ""
+        lines.append(f"\n### {tname} ({kind})")
+        if desc:
+            lines.append(f"> {desc[:200]}")
+        for f in t.get("fields") or []:
+            fname = f.get("name", "?")
+            ftype = f.get("type", {}).get("name", f.get("type", {}).get("kind", "?"))
+            lines.append(f"- `{fname}`: {ftype}")
+
+    return "\n".join(lines)
+
+
+# ── Burp Suite Stubs ───────────────────────────────────────────────
+
+
+@mcp.tool()
+def burp_send_request(
+    url: str,
+    method: str = "GET",
+    headers: str = "",
+    body: str = "",
+    timeout: int = 15,
+) -> str:
+    """Send an HTTP request (standalone, no Burp required).
+    Use this when Burp Suite MCP is not available. For full Burp features
+    (repeater, intruder, scanner), connect to a running Burp MCP server.
+
+    Args:
+        url: Full URL to send request to
+        method: HTTP method (GET, POST, PUT, DELETE, etc.)
+        headers: Raw HTTP headers (one per line, colon-separated)
+        body: Request body for POST/PUT requests
+        timeout: Request timeout in seconds (default 15)
+    """
+    import shutil as _shutil
+
+    _validate_shell_arg(url, "url")
+    if not _shutil.which("curl"):
+        return "## burp_send_request: FAIL\n\n**Error**: `curl` is not installed."
+
+    cmd = ["curl", "-s", "-X", method, url, "-i", "--max-time", str(timeout)]
+    if headers:
+        for line in headers.strip().split("\n"):
+            line = line.strip()
+            if ":" in line:
+                cmd.extend(["-H", line])
+    if body:
+        cmd.extend(["--data-raw", body])
+
+    try:
+        import subprocess as _sp
+        result = _sp.run(cmd, capture_output=True, text=True, timeout=timeout + 5)
+        stdout = result.stdout or ""
+        stderr = result.stderr or ""
+        status = "OK" if result.returncode == 0 else f"EXIT {result.returncode}"
+    except Exception as e:
+        return f"## burp_send_request: ERROR\n\n**Error**: {e}"
+
+    response = stdout[:5000]
+    if len(stdout) > 5000:
+        response += f"\n... (truncated, {len(stdout)} total chars)"
+
+    return (
+        f"## burp_send_request: {status}\n\n"
+        f"**{method} {url}**\n\n"
+        f"### Response\n```\n{response}\n```\n"
+        + (f"\n### Stderr\n```\n{stderr[:500]}\n```" if stderr else "")
+    )
 
 
 # ── Entry Point ────────────────────────────────────────────────────

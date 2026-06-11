@@ -11,6 +11,7 @@ import json
 import re
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 # These get set by server.py after import
 TASK_TREE_DIR: Path = Path(".")
@@ -193,7 +194,7 @@ def create_task_tree(engagement_id: str) -> str:
         return f"Task tree already exists for {engagement_id} " f"({node_count} nodes). Use get_task_tree() to view it."
 
     root_id = "pentest-root"
-    tree = {
+    tree: dict[str, Any] = {
         "root": root_id,
         "nodes": {},
     }
