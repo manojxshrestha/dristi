@@ -11,7 +11,7 @@ import json
 import logging
 import os
 import re
-import subprocess
+import subprocess  # nosec B404
 import tempfile
 import threading
 import time
@@ -5282,7 +5282,7 @@ def git_checkpoint(engagement_id: str, description: str) -> str:
 
     git_dir = engagement_dir / ".git"
     if not git_dir.exists():
-        result = subprocess.run(
+        result = subprocess.run(  # nosec B603, B607
             ["git", "init"],
             cwd=str(engagement_dir),
             capture_output=True,
@@ -5292,7 +5292,7 @@ def git_checkpoint(engagement_id: str, description: str) -> str:
             return f"Failed to initialize git repo: {result.stderr}"
 
     # Stage all files
-    subprocess.run(
+    subprocess.run(  # nosec B603, B607
         ["git", "add", "-A"],
         cwd=str(engagement_dir),
         capture_output=True,
@@ -5300,7 +5300,7 @@ def git_checkpoint(engagement_id: str, description: str) -> str:
     )
 
     # Commit
-    result = subprocess.run(
+    result = subprocess.run(  # nosec B603, B607
         ["git", "commit", "-m", f"Checkpoint: {description}", "--allow-empty"],
         cwd=str(engagement_dir),
         capture_output=True,
@@ -5308,7 +5308,7 @@ def git_checkpoint(engagement_id: str, description: str) -> str:
     )
 
     # Get commit hash
-    hash_result = subprocess.run(
+    hash_result = subprocess.run(  # nosec B603, B607
         ["git", "rev-parse", "--short", "HEAD"],
         cwd=str(engagement_dir),
         capture_output=True,
@@ -5343,7 +5343,7 @@ def git_rollback(engagement_id: str, reason: str) -> str:
         return f"No git repository found in engagement '{engagement_id}'. Use git_checkpoint() first."
 
     # Show current state
-    log_result = subprocess.run(
+    log_result = subprocess.run(  # nosec B603, B607
         ["git", "log", "--oneline", "-5"],
         cwd=str(engagement_dir),
         capture_output=True,
@@ -5351,7 +5351,7 @@ def git_rollback(engagement_id: str, reason: str) -> str:
     )
 
     # Rollback
-    result = subprocess.run(
+    result = subprocess.run(  # nosec B603, B607
         ["git", "reset", "--hard", "HEAD~1"],
         cwd=str(engagement_dir),
         capture_output=True,
@@ -5362,7 +5362,7 @@ def git_rollback(engagement_id: str, reason: str) -> str:
         return f"Rollback failed: {result.stderr}"
 
     # Get restored commit hash
-    hash_result = subprocess.run(
+    hash_result = subprocess.run(  # nosec B603, B607
         ["git", "rev-parse", "--short", "HEAD"],
         cwd=str(engagement_dir),
         capture_output=True,
@@ -5906,7 +5906,7 @@ def validate_poc(
         expected_no_match: String that MUST NOT appear in the response body
         label: Optional human-readable label for this PoC (e.g. 'Config leak', 'Admin takeover')
     """
-    import subprocess
+    import subprocess  # nosec B404
 
     label_str = f" [{label}]" if label else ""
     _append_event(
