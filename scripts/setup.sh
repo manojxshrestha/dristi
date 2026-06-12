@@ -337,10 +337,9 @@ print("[!] Burp MCP not configured — install Burp Suite + MCP Server extension
 PYEOF
 
 # Symlink Dristi agents into OpenCode directories
-header "Phase 6b: OpenCode agents, commands, rules"
+header "Phase 6b: OpenCode agents, rules"
 OC_AGENTS_DIR="$HOME/.config/opencode/agents"
-OC_COMMANDS_DIR="$HOME/.config/opencode/commands"
-mkdir -p "$OC_AGENTS_DIR" "$OC_COMMANDS_DIR" "$HOME/.config/opencode/rules"
+mkdir -p "$OC_AGENTS_DIR" "$HOME/.config/opencode/rules"
 
 # Agents (flat .md files)
 if [ -d "$DST/.opencode/agents" ]; then
@@ -377,17 +376,6 @@ if [ -d "$DST/.opencode/rules" ]; then
     target="$HOME/.config/opencode/rules/$rule_name"
     ln -sf "$rule_file" "$target"
     ok "Rule $rule_name — linked"
-  done
-fi
-
-# Commands
-if [ -d "$DST/.opencode/commands-bughunt" ]; then
-  for cmd_file in "$DST/.opencode/commands-bughunt"/*.md; do
-    [ -f "$cmd_file" ] || continue
-    cmd_name="$(basename "$cmd_file")"
-    target="$OC_COMMANDS_DIR/$cmd_name"
-    ln -sf "$cmd_file" "$target"
-    ok "Command $cmd_name — linked"
   done
 fi
 
