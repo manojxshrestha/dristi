@@ -486,7 +486,7 @@ export DRISTI_HOME=\"$REPO_DIR\"
 alias dristi='cd \$DRISTI_HOME'
 alias dristi-server='cd \$DRISTI_HOME/server && UV_PROJECT_ENVIRONMENT=venv uv run server.py'
 alias dristi-update='cd \$DRISTI_HOME && git pull'
-alias dristi-recon='cd \$DRISTI_HOME && bash scripts/recon.sh'
+alias dristi-recon='bash \$DRISTI_HOME/scripts/tools/auto_recon.sh'
 alias reconnect-burp='bash \$DRISTI_HOME/scripts/reconnect-burp.sh'
 alias full-hunt='bash \$DRISTI_HOME/scripts/full_hunt.sh'
 "
@@ -554,7 +554,7 @@ echo -e "${BOLD}${G}
 echo ""
 echo "  Commands:   dristi, dristi-server, dristi-update, dristi-recon"
 echo "  OpenCode:   opencode  (launches with Dristi pre-configured)"
-echo "  Agents:     83 OpenCode agents"
+echo "  Agents:     85 OpenCode agents"
 echo "  Tools:      $($QUICK && echo 'skipped (re-run without --quick)' || echo '50+ security tools')"
 echo ""
 echo "  Quick start:"
