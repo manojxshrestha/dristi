@@ -434,10 +434,11 @@ config_path = os.path.join(home, ".config", "opencode", "opencode.json")
 
 mcp = {}
 
-# Burp Suite MCP (SSE — requires Burp + MCP Server extension running)
+# Burp Suite MCP (remote — requires Burp + MCP Server extension running)
 mcp["burp"] = {
-    "type": "sse",
-    "url": "http://127.0.0.1:9876/sse"
+    "type": "remote",
+    "url": "http://127.0.0.1:9876/",
+    "enabled": True
 }
 
 # WSTG server
