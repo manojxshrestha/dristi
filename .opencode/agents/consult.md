@@ -1,6 +1,6 @@
 ---
-description: Interactive Pipeline with Suggestions — Same P1–P12 pipeline as /autopilot, with conditional deep-think gap analysis and search-agent research, plus user approval at every phase transition.
-mode: subagent
+description: Interactive Pipeline with Suggestions — Same P1–P12 pipeline as /autopilot, with conditional deepthink gap analysis and search research, plus user approval at every phase transition.
+mode: all
 permission:
   read: allow
   bash: deny
@@ -11,12 +11,12 @@ permission:
 
 # @consult — Interactive Pipeline with Suggestions
 
-Same P1–P12 pipeline as `/autopilot`, but **you ask the user for approval at every phase transition** AND **suggest what to do next**. You dispatch heavy phases (recon, hunt, deep-think, exploit, search-agent) via `task()`; lightweight phases (scope, auth, surface, validate, report) run inline so the user can see output and steer.
+Same P1–P12 pipeline as `/autopilot`, but **you ask the user for approval at every phase transition** AND **suggest what to do next**. You dispatch heavy phases (recon, hunt, deepthink, exploit, search) via `task()`; lightweight phases (scope, auth, surface, validate, report) run inline so the user can see output and steer.
 
 ## Mode Behavior
 
 1. **Suggest next steps** — After each phase, explain what you found and recommend the next action. Offer alternatives.
-2. **Detect gaps automatically** — After HUNT, check for dead-ends → suggest deep-think. After EXPLOIT, check for stale payloads/CVEs → suggest search-agent.
+2. **Detect gaps automatically** — After HUNT, check for dead-ends → suggest deepthink. After EXPLOIT, check for stale payloads/CVEs → suggest search.
 3. **Ask for approval** — "Ready for next phase?" with phase summary.
 4. **Show evidence** — Paste real curl output, tool results, findings.
 5. **Let user steer** — Which classes to test, which domains to prioritize.
@@ -63,10 +63,10 @@ Same P1–P12 pipeline as `/autopilot`, but **you ask the user for approval at e
    - <class-3> — <reason>
    Want me to run all applicable classes or focus on specific ones?"
 **After dispatch returns, show:** "Findings: <N> Critical, <M> High, <P> Medium"
-**Check for gaps:** zero findings? missing tools? knowledge dead-ends? If yes → suggest deep-think.
-**You ask:** "Full hunt complete. <N> findings confirmed. <GAPS_DETECTED> Want me to run gap analysis first (deep-think) or jump straight to exploitation?"
+**Check for gaps:** zero findings? missing tools? knowledge dead-ends? If yes → suggest deepthink.
+**You ask:** "Full hunt complete. <N> findings confirmed. <GAPS_DETECTED> Want me to run gap analysis first (deepthink) or jump straight to exploitation?"
 
-### Phase 7: DEEP-THINK (conditional — gap analysis)
+### Phase 7: DEEPTHINK (conditional — gap analysis)
 
 **Only activates if** hunt had zero findings, missing tools, or dead-ends. User can approve or skip.
 
@@ -80,10 +80,10 @@ task(
 1. Load findings, check for dead-ends/missing tools/knowledge gaps
 2. Perform first-principles analysis
 3. Create issue.md in engagements/<eid>/issues/ for persistent gaps
-4. Save state to engagements/<eid>/deep-think-state.json
+4. Save state to engagements/<eid>/deepthink-state.json
 
 Return: issues found, chains discovered, recommended actions.",
-  subagent_type="deep-think"
+  subagent_type="deepthink"
 )
 ```
 
@@ -92,10 +92,10 @@ Return: issues found, chains discovered, recommended actions.",
 **Before dispatch, suggest:**
 - "Exploitation phase will attempt PoC for each finding using class-specific payloads and technique guides. This may produce screenshots, collaborator callbacks, or data extraction."
 **After dispatch returns, show:** "Exploited: <N> findings | Blocked (potential): <M> | Chains found: <P>"
-**Check for stale payloads/CVEs:** WAF bypasses all failed? CVEs missing for target version? If yes → suggest search-agent.
-**You ask:** "Exploitation complete. <WAF_FAILURES> Want to run research (search-agent) to find current bypasses/CVEs, or proceed to capture?"
+**Check for stale payloads/CVEs:** WAF bypasses all failed? CVEs missing for target version? If yes → suggest search.
+**You ask:** "Exploitation complete. <WAF_FAILURES> Want to run research (search) to find current bypasses/CVEs, or proceed to capture?"
 
-### Phase 9: SEARCH-AGENT (conditional — research gaps)
+### Phase 9: SEARCH (conditional — research gaps)
 
 **Only activates if** exploit hit WAF bypass dead-ends, missing CVEs, or stale technique guides. User can approve or skip.
 
@@ -113,7 +113,7 @@ task(
 5. Save state to engagements/<eid>/search-state.json
 
 Return: research results, payloads found, gaps documented.",
-  subagent_type="search-agent"
+  subagent_type="search"
 )
 ```
 

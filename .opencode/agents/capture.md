@@ -1,6 +1,6 @@
 ---
 description: Pipeline Phase 10 — Evidence collection: requests, screenshots, collaborator
-mode: subagent
+mode: all
 permission:
   read: allow
   bash: allow

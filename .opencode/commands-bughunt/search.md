@@ -1,9 +1,9 @@
 ---
-name: search-agent
+name: search
 description: RAG-powered re-dispatch for uncovered vulnerability classes
 ---
 
-# /search-agent
+# /search
 
 Search past reports, CVEs, and technique references for vulnerability classes that weren't covered.
 
@@ -17,9 +17,9 @@ Search past reports, CVEs, and technique references for vulnerability classes th
 ## Usage
 
 ```
-/search-agent
+/search
 ```
 
 ## When To Run
 
-After `/deep-think` identifies coverage gaps. Optional skip if all classes were covered.
+After `/deepthink` identifies coverage gaps. Optional skip if all classes were covered.

@@ -11,7 +11,7 @@ Dristi uses a **triage-first, reference-informed** testing strategy. Not every e
 ## 8-Phase Pipeline
 
 ```
-SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) → [DEEP-THINK(4.25)] → EXPLOIT(4.5) → [SEARCH-AGENT(4.75)] → CAPTURE(5) → VALIDATE(6) → REPORT(7)
+SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) → [DEEPTHINK(4.25)] → EXPLOIT(4.5) → [SEARCH(4.75)] → CAPTURE(5) → VALIDATE(6) → REPORT(7)
 ```
 
 ### Phase P1: SCOPE
@@ -63,7 +63,7 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - Log findings: `log_finding()`, `track_test()`
 - Check chaining opportunities: `find_chains()`
 
-### Phase P4.25: DEEP-THINK (conditional)
+### Phase P4.25: DEEPTHINK (conditional)
 
 **Activates when:** HUNT returns zero findings, missing tools, or knowledge gaps.
 
@@ -87,7 +87,7 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - Check cross-class chains: `find_chains()` → `findings_add_chain()`
 - Upgrade severities for chained findings
 
-### Phase P4.75: SEARCH-AGENT (conditional)
+### Phase P4.75: SEARCH (conditional)
 
 **Activates when:** EXPLOIT hits stale CVEs, WAF bypass failures, or missing technique knowledge.
 

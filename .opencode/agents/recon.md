@@ -1,6 +1,6 @@
 ---
 description: Pipeline Phase 4 — Full recon: subdomains, live hosts, crawl, params, nuclei, secrets
-mode: subagent
+mode: all
 permission:
   read: allow
   bash: allow

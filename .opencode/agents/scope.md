@@ -1,6 +1,6 @@
 ---
 description: Pipeline Phase 1 — Register target domain, scope boundaries, credentials, init engagement
-mode: subagent
+mode: all
 permission:
   read: allow
   bash: allow

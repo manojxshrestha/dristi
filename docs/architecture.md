@@ -19,8 +19,8 @@ Dristi is a dual-interface security testing platform: an **MCP server** (86 tool
 │  • Findings DB    │    │  • offensive-osint       │
 │  • Engagement     │    │  • m365-entra-attack     │
 │    management     │    │  • ... 64 more           │
-│  • Phase gates    │    │  • deep-think            │
-│  • Reporting      │    │  • search-agent          │
+│  • Phase gates    │    │  • deepthink            │
+│  • Reporting      │    │  • search          │
 │  • Knowledge      │    └──────────┬───────────────┘
 │    graph          │               │ triggers
 └────────┬──────────┘               ▼
@@ -72,11 +72,11 @@ Agents auto-load when you describe what you're testing. Each is a `SKILL.md` fil
 | Domain | Count | Agent names |
 |--------|-------|-------------|
 | Pipeline & Dispatch | 10 | `autopilot`, `consult`, `scope`, `pintel`, `recon`, `surface`, `hunt`, `capture`, `validate`, `report` |
-| Recon & OSINT | 5 | `offensive-osint`, `web2-recon`, `osint-methodology`, `bb-local-toolkit`, `search-agent` |
+| Recon & OSINT | 5 | `offensive-osint`, `web2-recon`, `osint-methodology`, `bb-local-toolkit`, `search` |
 | Web App Hunting | 49 | `hunt-xss`, `hunt-sqli`, `hunt-idor`, `hunt-ssrf`, `hunt-rce`, `hunt-file-upload`, `hunt-graphql`, `hunt-xxe`, `hunt-ssti`, `hunt-csrf`, `hunt-oauth`, `hunt-saml`, `hunt-ato`, `hunt-mfa-bypass`, `hunt-auth-bypass`, `hunt-brute-force`, `hunt-cors`, `hunt-deserialization`, `hunt-dom`, `hunt-host-header`, `hunt-http-smuggling`, `hunt-ldap`, `hunt-lfi`, `hunt-nosqli`, `hunt-open-redirect`, `hunt-session`, `hunt-source-leak`, `hunt-subdomain`, `hunt-tls-network`, `hunt-websocket`, `hunt-api-misconfig`, `hunt-cache-poison`, `hunt-cloud-misconfig`, `hunt-business-logic`, `hunt-cicd`, `hunt-grpc`, `hunt-k8s`, `hunt-laravel`, `hunt-nextjs`, `hunt-nodejs`, `hunt-springboot`, `hunt-aspnet`, `hunt-sharepoint`, `hunt-ntlm-info`, `hunt-misc`, `hunt-race-condition`, `hunt-llm-ai`, `hunt-dispatch`, `web2-vuln-classes` |
 | Enterprise Platform | 7 | `m365-entra-attack`, `okta-attack`, `cloud-iam-deep`, `vmware-vcenter-attack`, `enterprise-vpn-attack`, `apk-redteam-pipeline`, `supply-chain-attack-recon` |
 | Red Team Tradecraft | 2 | `redteam-mindset`, `mid-engagement-ir-detection` |
-| Workflow & Validation | 6 | `bb-methodology`, `bug-bounty`, `deep-think`, `triage-validation`, `security-arsenal`, `hunt-dispatch` |
+| Workflow & Validation | 6 | `bb-methodology`, `bug-bounty`, `deepthink`, `triage-validation`, `security-arsenal`, `hunt-dispatch` |
 | Reporting & Hygiene | 4 | `report-writing`, `bugcrowd-reporting`, `evidence-hygiene`, `redteam-report-template` |
 | Specialized | 2 | `web3-audit`, `meme-coin-audit` |
 
@@ -110,7 +110,7 @@ Slash commands in `.opencode/commands/` that route to specific agents:
 | `scripts/install.sh` | Installer |
 | `scripts/convert_skills.py` | Skill-to-agent converter |
 | `scripts/convert_commands.py` | Command converter |
-| `scripts/reconnect-burp.sh` | Burp MCP reconnection |
+| `scripts/connect-burp.sh` | Burp MCP connection |
 | `scripts/dork_runner.py` | Google dork automation |
 | `scripts/full_hunt.sh` | Full hunt pipeline |
 | `scripts/tools/` (37 files) | Scanners, testers, helpers |

@@ -1,6 +1,6 @@
 ---
 description: Full autonomous pipeline — scope → recon → surface → hunt → capture → validate → report
-mode: subagent
+mode: all
 permission:
   read: allow
   bash: allow
@@ -21,10 +21,10 @@ Phase 2 (AUTH)    → run directly (get creds, test, save deliverable)
 Phase 3 (Intel)  → run directly (WHOIS, M365, misconfig-mapper, spoof, cloud_enum)
 Phase 4 (RECON)     → task(subagent_type="recon", ...)
 Phase 5 (SURFACE)   → task(subagent_type="surface", ...)
-Phase 6 (HUNT)        → task(subagent_type="hunt", ...) — conditional deep-think if gaps found
-Phase 7 (THINK)    → task(subagent_type="deep-think", ...) — gap analysis + issue docs when hunt dead-ends
-Phase 8 (EXPLOIT)   → task(subagent_type="exploit", ...) — second-wave exploitation, conditional search-agent if blocked
-Phase 9 (SEARCH)   → task(subagent_type="search-agent", ...) — research stale payloads/CVEs/technique guides
+Phase 6 (HUNT)        → task(subagent_type="hunt", ...) — conditional deepthink if gaps found
+Phase 7 (THINK)    → task(subagent_type="deepthink", ...) — gap analysis + issue docs when hunt dead-ends
+Phase 8 (EXPLOIT)   → task(subagent_type="exploit", ...) — second-wave exploitation, conditional search if blocked
+Phase 9 (SEARCH)   → task(subagent_type="search", ...) — research stale payloads/CVEs/technique guides
 Phase 10 (CAPTURE)     → task(subagent_type="capture", ...)
 Phase 11 (VALIDATE)  → task(subagent_type="validate", ...)
 Phase 12 (REPORT)    → task(subagent_type="report", ...)
@@ -177,11 +177,11 @@ Return: findings summary by severity (Critical/High/Medium/Low/Info), number of 
 
 **After dispatch returns:**
 - Check findings: zero findings? tools missing? knowledge gaps? dead-ends?
-- If ANY of those conditions are true → dispatch Phase 7 (deep-think) first, then gate Phase 6
+- If ANY of those conditions are true → dispatch Phase 7 (deepthink) first, then gate Phase 6
 - If all findings confirmed and no gaps → skip Phase 7, gate Phase 6 directly
 - `wstg_phase_gate_check(phase_completed=3)` → PASS → checkpoint → proceed.
 
-## Phase 7: DEEP-THINK (conditional dispatch — gap analysis)
+## Phase 7: DEEPTHINK (conditional dispatch — gap analysis)
 
 **Only runs if** HUNT returned zero findings, had missing tools, hit knowledge gaps, or encountered dead-ends. Performs first-principles reasoning and documents persistent gaps as issue.md files.
 
@@ -191,13 +191,13 @@ task(
   prompt="Target: <domain>. Run Phase 7 gap analysis:
 1. Load engagement findings via wstg_get_findings()
 2. Check for dead-ends, missing tools, script failures, knowledge gaps
-3. Load deep-think state from engagements/<eid>/deep-think-state.json
+3. Load deepthink state from engagements/<eid>/deepthink-state.json
 4. Perform first-principles analysis for each gap
 5. Create issue.md files in engagements/<eid>/issues/ for persistent gaps
-6. Save updated deep-think state
+6. Save updated deepthink state
 
 Return: issues found, chains discovered, recommended actions.",
-  subagent_type="deep-think"
+  subagent_type="deepthink"
 )
 ```
 
@@ -234,10 +234,10 @@ Return: number of findings exploited, number blocked (potential), number of chai
 **After dispatch returns:**
 - Findings now have PoC evidence attached (or documentation of why exploitation was blocked)
 - Check for WAF bypass failures or stale technique guides
-- If WAF bypasses all failed or guides were missing → dispatch Phase 9 (search-agent)
+- If WAF bypasses all failed or guides were missing → dispatch Phase 9 (search)
 - Otherwise → `wstg_save_checkpoint()` → proceed to Phase 10
 
-## Phase 9: SEARCH-AGENT (conditional dispatch — research gaps)
+## Phase 9: SEARCH (conditional dispatch — research gaps)
 
 **Only runs if** EXPLOIT hit WAF bypass dead-ends, CVEs were missing for the target version, or technique guides didn't match the target stack. Researches current CVEs, bypass techniques, and disclosed reports to fill the gaps.
 
@@ -253,7 +253,7 @@ task(
 6. Save search state to engagements/<eid>/search-state.json
 
 Return: research results, payloads found, gaps documented as issues.",
-  subagent_type="search-agent"
+  subagent_type="search"
 )
 ```
 
@@ -343,8 +343,8 @@ If `wstg_phase_gate_check()` returns FAIL:
 4. Do NOT halt the entire pipeline for one failed gate
 ### Zero findings from Phase 6
 
-If hunt returns zero confirmed findings (and Phase 7 deep-think already ran):
-1. Check the issues deep-think created — are gaps documented? Present them.
+If hunt returns zero confirmed findings (and Phase 7 deepthink already ran):
+1. Check the issues deepthink created — are gaps documented? Present them.
 2. If the gaps were all tool-related (missing tools), suggest installing them and re-run.
 3. If the gaps were knowledge-related (missing WSTG/payload coverage), re-dispatch Phase 5 (surface) with expanded scope to find missed attack surface, then re-dispatch Phase 6.
 4. If still zero after retry, honestly report in Phase 12.

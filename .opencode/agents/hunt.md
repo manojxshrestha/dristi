@@ -1,6 +1,6 @@
 ---
 description: Pipeline Phase 6 — Run hunt-* subagents based on surface analysis
-mode: subagent
+mode: all
 permission:
   read: allow
   bash: allow

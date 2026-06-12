@@ -49,7 +49,7 @@ graph TB
 
 The loop: **describe → agent loads → MCP tracks → references guide → Burp executes → analyze → log finding → validate → report**
 
-All agents are invoked via `@agent-name`. 12 pipeline agents: `@autopilot` → `@consult` → `@scope` → `@pintel` → `@recon` → `@surface` → `@hunt` → `@deep-think` → `@exploit` → `@search-agent` → `@capture` → `@validate` → `@report`. 48 specialized `@hunt-*` agents + 25 non-hunt specialty agents (85 total).
+All agents are invoked via `@agent-name`. 12 pipeline agents: `@autopilot` → `@consult` → `@scope` → `@pintel` → `@recon` → `@surface` → `@hunt` → `@deepthink` → `@exploit` → `@search` → `@capture` → `@validate` → `@report`. 48 specialized `@hunt-*` agents + 25 non-hunt specialty agents (85 total).
 
 **Two modes:**
 - **`@autopilot`** — runs fully autonomous, dispatches phases 2-7 via `task()` to sub-agents, ends with report
@@ -67,9 +67,9 @@ Phase 3:   INTEL       → passive OSINT: WHOIS, M365, cloud, spoof check
 Phase 4:   RECON       → subdomain enum, crawl, params, nuclei, secrets
 Phase 5:   SURFACE     → load recon, classify tiers, prioritize endpoints
 Phase 6:   HUNT        → test all bug classes via 48 hunt-* sub-agents
-Phase 7:   DEEP-THINK  → (conditional) first-principles gap analysis when HUNT yields zero
+Phase 7:   DEEPTHINK  → (conditional) first-principles gap analysis when HUNT yields zero
 Phase 8:   EXPLOIT     → deepen confirmed findings, escalate impact
-Phase 9:   SEARCH-AGENT → (conditional) 13-resource retrieval when EXPLOIT stalls
+Phase 9:   SEARCH → (conditional) 13-resource retrieval when EXPLOIT stalls
 Phase 10:  CAPTURE     → evidence collection, screenshots, redaction
 Phase 11:  VALIDATE    → re-validate PoCs, 7-Question Gate
 Phase 12:  REPORT      → coverage check, generate final report
@@ -404,7 +404,7 @@ graph TB
 | Phase gates | Automatic check + checkpoint | Ask before each gate | Manual |
 | WAF handling | Automatic detection in Phase 2 | Detected + suggested bypasses | Manual |
 | Reference fetching | Automatic pre-hunt reading | Suggested before testing | On-demand |
-| Intelligence fallback | Auto-activates deep-think/search-agent | Asks user before activating | Manual |
+| Intelligence fallback | Auto-activates deepthink/search | Asks user before activating | Manual |
 | Recovery | Auto-retry on gate failure | Suggests recovery options | Manual |
 | Best for | Full engagement, no interruptions | Learning, guided testing | Targeted single-class testing |
 

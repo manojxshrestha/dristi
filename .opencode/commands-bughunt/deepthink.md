@@ -1,9 +1,9 @@
 ---
-name: deep-think
+name: deepthink
 description: First-principles gap analysis — find what automation misses
 ---
 
-# /deep-think
+# /deepthink
 
 Step back and think. After automated hunting, identify attack paths the tools missed.
 
@@ -17,7 +17,7 @@ Step back and think. After automated hunting, identify attack paths the tools mi
 ## Usage
 
 ```
-/deep-think
+/deepthink
 ```
 
 ## When To Run

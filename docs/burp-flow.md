@@ -21,7 +21,7 @@ Dristi pairs with [Burp Suite's MCP Server](https://github.com/PortSwigger/burp-
 }
 ```
 
-4. If the connection drops: `bash scripts/reconnect-burp.sh`
+4. If the connection drops: `bash scripts/connect-burp.sh`
 
 ---
 
@@ -366,7 +366,7 @@ Cache keys on `callback=setCountryCookie` only (before `;`), but the JS parser r
 - **Name your Repeater tabs.** When saving test cases, use descriptive names like `idor-users-api` — they become evidence in the report.
 - **Check Scanner issues.** Run passive scanning while browsing; `burp_get_scanner_issues()` pulls findings for quick triage.
 - **Poll Collaborator after 5-10 seconds.** OOB callbacks can take a few seconds; don't poll immediately.
-- **Reconnection.** If Burp closes: `bash scripts/reconnect-burp.sh` or restart the MCP extension in Burp.
+- **Reconnection.** If Burp closes: `bash scripts/connect-burp.sh` or restart the MCP extension in Burp.
 - **Use min/max timing for slow send.** Drag the send slider to 10-12s for byte-by-byte transmission to evade WAFs that only check complete requests.
 - **Reference the BSCP corpus.** See [DingyShark/BurpSuiteCertifiedPractitioner](https://github.com/DingyShark/BurpSuiteCertifiedPractitioner) for per-lab Burp payloads and adaptation patterns.
 - **Timing attack patterns.** See [manojxshrestha/playbook/web-timing-attacks](https://github.com/manojxshrestha/playbook/blob/main/web-timing-attacks) for Burp-specific timing amplification, discovery overload, cache key detection, parameter repetition, and SQLi WAF bypass workflows.

@@ -93,9 +93,9 @@ Layer 4: Validation + Reporting      — how to ship it (7-Question Gate, VRT, r
 | 2  RECON     | recon.md      | Subdomain enum, DNS, crawl, params, nuclei, secrets | phase_completed=1 |
 | 3  SURFACE   | surface.md    | Prioritize endpoints, rank attack surface | phase_completed=2 |
 | 4  HUNT      | hunt.md       | Dispatch 48 hunt-* sub-agents, test all bug classes | phase_completed=3 |
-| 4.25 DEEP-THINK | deep-think.md | (conditional) First-principles gap analysis when HUNT yields zero | — |
+| 4.25 DEEPTHINK | deepthink.md | (conditional) First-principles gap analysis when HUNT yields zero | — |
 | 4.5 EXPLOIT  | exploit.md    | Second-wave exploitation: PoC all findings, WAF bypass, chaining | — |
-| 4.75 SEARCH-AGENT | search-agent.md | (conditional) 13-resource retrieval when EXPLOIT stalls | — |
+| 4.75 SEARCH | search.md | (conditional) 13-resource retrieval when EXPLOIT stalls | — |
 | 5  CAPTURE   | capture.md    | Evidence collection, screenshots, redaction | phase_completed=4 |
 | 6  VALIDATE  | validate.md   | Re-validate PoCs, 7-Question Gate, severity | phase_completed=5 |
 | 7  REPORT    | report.md     | Coverage check, generate report | phase_completed=6 |
@@ -215,7 +215,7 @@ Autopilot is a thin orchestrator (248 lines) — phases 2-7 are dispatched via `
 ## Agents (85)
 
 ### Pipeline Agents (13)
-autopilot, consult, capture, deep-think, exploit, hunt, pintel, recon, report, scope, search-agent, surface, validate
+autopilot, consult, capture, deepthink, exploit, hunt, pintel, recon, report, scope, search, surface, validate
 
 ### Bug Class Agents (48 hunt-*)
 api-misconfig, aspnet, ato, auth-bypass, brute-force, business-logic, cache-poison, cicd, clickjacking, cloud-misconfig, cors, csrf, deserialization, dispatch, dom, file-upload, graphql, host-header, http-smuggling, idor, jwt-confusion, k8s, laravel, ldap, lfi, llm-ai, mfa-bypass, misc, nextjs, nodejs, nosqli, ntlm-info, oauth, open-redirect, race-condition, rce, saml, session, sharepoint, source-leak, springboot, sqli, ssrf, ssti, subdomain, tls-network, websocket, xss, xxe
@@ -224,8 +224,8 @@ api-misconfig, aspnet, ato, auth-bypass, brute-force, business-logic, cache-pois
 apk-redteam-pipeline, bb-local-toolkit, bb-methodology, bug-bounty, bugcrowd-reporting, cloud-iam-deep, enterprise-vpn-attack, evidence-hygiene, m365-entra-attack, meme-coin-audit, mid-engagement-ir-detection, offensive-osint, okta-attack, osint-methodology, redteam-mindset, redteam-report-template, report-writing, supply-chain-attack-recon, triage-validation, web2-recon, web2-vuln-classes, web3-audit
 
 ### Intelligence-Fallback Agents (2)
-deep-think — Strategic reasoning, first-principles analysis, persistent issue tracking
-search-agent — Real-time research, CVE/bypass/report retrieval, gap documentation
+deepthink — Strategic reasoning, first-principles analysis, persistent issue tracking
+search — Real-time research, CVE/bypass/report retrieval, gap documentation
 
 ### Agent Reference Sections
 Every hunt agent includes:
@@ -352,8 +352,8 @@ All domain-mode: accept domain as $1, auto-discover recon output, output to runt
 - **No context.newContext()**: Default context routes through Burp
 - **consult.md frontmatter added**: Was missing entirely, now loads correctly
 - **12 pipeline agents frontmatter fixed**: Added mode + permission blocks
-- **deep-think + search-agent added**: Conditional intelligence fallback phases (4.25, 4.75)
-- **pipeline updated**: Re-exploitation loop after search-agent finds new payloads
+- **deepthink + search added**: Conditional intelligence fallback phases (4.25, 4.75)
+- **pipeline updated**: Re-exploitation loop after search finds new payloads
 - **Deliverable-based data flow**: auth_analysis → Phase 6, endpoint_map_raw → Phase 5 → endpoint_map_ranked → Phase 6
 
 ---

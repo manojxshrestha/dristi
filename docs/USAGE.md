@@ -86,11 +86,11 @@ The stack maps to a 6-phase engagement workflow. Agents compose left-to-right th
 | Phase | What you're doing | Primary agents |
 |---|---|---|
 | **1. Scope** | Reading program rules, deciding what's in/out, scaffolding the engagement folder | `bug-bounty`, `bb-methodology`, `osint-methodology` |
-| **2. Recon** | Asset discovery, subdomain enum, endpoint mapping, secret hunting | `offensive-osint`, `web2-recon`, `bb-local-toolkit`, `search-agent` |
+| **2. Recon** | Asset discovery, subdomain enum, endpoint mapping, secret hunting | `offensive-osint`, `web2-recon`, `bb-local-toolkit`, `search` |
 | **3. Hunt** | Active testing for bugs in specific vuln classes | 48 `hunt-*` agents + 7 enterprise-platform agents + `security-arsenal` |
-| **3.5. Deep-think** | (conditional) First-principles gap analysis when hunt yields zero | `deep-think` |
+| **3.5. Deep-think** | (conditional) First-principles gap analysis when hunt yields zero | `deepthink` |
 | **4. Exploit** | Deepen confirmed findings, attempt WAF bypass | 48 `hunt-*` agents + `web2-vuln-classes` |
-| **4.5. Search-agent** | (conditional) 13-resource retrieval when exploit stalls | `search-agent` |
+| **4.5. Search-agent** | (conditional) 13-resource retrieval when exploit stalls | `search` |
 | **5. Validate** | Decide whether a lead is actually a reportable bug | `triage-validation` (7-Question Gate) via `/triage` or `/validate` |
 | **6. Capture** | PoC screenshots, HAR files, evidence redaction | `evidence-hygiene` |
 | **7. Report** | Draft and submit | `report-writing`, `bugcrowd-reporting` |

@@ -422,7 +422,7 @@ ALIASES="
 $DRISTI_CONFIG_MARKER
 export DRISTI_HOME=\"$DST\"
 alias dristi='cd \$DRISTI_HOME'
-alias reconnect-burp='bash \$DRISTI_HOME/scripts/reconnect-burp.sh'
+alias connect-burp='bash \$DRISTI_HOME/scripts/connect-burp.sh'
 alias full-hunt='bash \$DRISTI_HOME/scripts/full_hunt.sh'
 alias dristi-server='cd \$DRISTI_HOME/server && UV_PROJECT_ENVIRONMENT=venv uv run server.py'
 alias dristi-update='cd \$DRISTI_HOME && git pull'
@@ -492,7 +492,7 @@ echo ""
 echo "  Commands available:"
 echo "    dristi              — cd to Dristi project root"
 echo "    dristi-server       — Start the WSTG MCP server"
-echo "    reconnect-burp      — Reconnect Burp MCP bridge"
+echo "    connect-burp       — Connect/reconnect Burp MCP bridge"
 echo "    full-hunt <target>  — Run automated recon pipeline"
 echo ""
 echo "  OpenCode:"

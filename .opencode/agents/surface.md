@@ -1,6 +1,6 @@
 ---
 description: Pipeline Phase 5 — Analyze recon output, rank P1/P2/P3 attack surface
-mode: subagent
+mode: all
 permission:
   read: allow
   bash: allow

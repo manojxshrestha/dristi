@@ -1,6 +1,6 @@
 ---
 description: Pipeline Phase 12 — Coverage check, phase gates, final report
-mode: subagent
+mode: all
 permission:
   read: allow
   bash: allow

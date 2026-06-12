@@ -511,7 +511,7 @@ alias dristi='cd \$DRISTI_HOME'
 alias dristi-server='cd \$DRISTI_HOME/server && UV_PROJECT_ENVIRONMENT=venv uv run server.py'
 alias dristi-update='cd \$DRISTI_HOME && git pull'
 alias dristi-recon='bash \$DRISTI_HOME/scripts/tools/auto_recon.sh'
-alias reconnect-burp='bash \$DRISTI_HOME/scripts/reconnect-burp.sh'
+alias connect-burp='bash \$DRISTI_HOME/scripts/connect-burp.sh'
 alias full-hunt='bash \$DRISTI_HOME/scripts/full_hunt.sh'
 "
 

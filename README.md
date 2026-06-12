@@ -74,7 +74,7 @@ If you're running an internal red team that includes domain-takeover chains via 
 
 ## Capability Map
 
-85 agents group into 10 pipeline agents + 48 `@hunt-*` + 27 specialty agents (including deep-think, search-agent, and Phase 8 exploitation). Agents auto-load when their description keywords match what you're describing to OpenCode.
+85 agents group into 10 pipeline agents + 48 `@hunt-*` + 27 specialty agents (including deepthink, search, and Phase 8 exploitation). Agents auto-load when their description keywords match what you're describing to OpenCode.
 
 > **OpenCode vs Dristi:** `/plan` and `/build` are OpenCode's built-in modes. Dristi adds 12 pipeline phases below — invoke via `@agent-name` or let `@autopilot`/`@consult` run them sequentially.
 
@@ -86,9 +86,9 @@ If you're running an internal red team that includes domain-takeover chains via 
 | 4 | **RECON** | `@recon` | Subdomains, crawl, params, nuclei, secrets |
 | 5 | **SURFACE** | `@surface` | Classify endpoints, prioritize attack surface |
 | 6 | **HUNT** | `@hunt` | Test all 25 bug classes via 48 `@hunt-*` |
-| 7 | **DEEP-THINK** | `@deep-think` | *(conditional)* First-principles gap analysis |
+| 7 | **DEEPTHINK** | `@deepthink` | *(conditional)* First-principles gap analysis |
 | 8 | **EXPLOIT** | `@exploit` | Deep-research exploitation + WAF bypass |
-| 9 | **SEARCH-AGENT** | `@search-agent` | *(conditional)* Re-dispatch for uncovered classes |
+| 9 | **SEARCH** | `@search` | *(conditional)* Re-dispatch for uncovered classes |
 | 10 | **CAPTURE** | `@capture` | Evidence collection, screenshots, redaction |
 | 11 | **VALIDATE** | `@validate` | Re-validate PoCs, 7-Question Gate |
 | 12 | **REPORT** | `@report` | Coverage check, generate report |
@@ -215,7 +215,7 @@ flowchart TD
     Think -->|"yes"| DeepThink
     Think -->|"no"| Exploit
 
-    DeepThink["4.25 DEEP-THINK<br/>Gap analysis<br/>First-principles reasoning<br/>Issue documentation<br/>agent: @deep-think"]:::phase
+    DeepThink["4.25 DEEPTHINK<br/>Gap analysis<br/>First-principles reasoning<br/>Issue documentation<br/>agent: @deepthink"]:::phase
     DeepThink --> Exploit
 
     Exploit["4.5 EXPLOIT<br/>Deep-research per vuln class<br/>Load technique guides + payloads<br/>5-tier exploitation + WAF bypass<br/>agent: @exploit"]:::phase
@@ -227,7 +227,7 @@ flowchart TD
     StaleCheck -->|"yes"| SearchAgent
     StaleCheck -->|"no"| Validate
 
-    SearchAgent["4.75 SEARCH-AGENT<br/>Research CVEs<br/>Find bypass techniques<br/>Document persistent gaps<br/>agent: @search-agent"]:::phase
+    SearchAgent["4.75 SEARCH<br/>Research CVEs<br/>Find bypass techniques<br/>Document persistent gaps<br/>agent: @search"]:::phase
     SearchAgent --> Validate
 
     Validate["4. VALIDATE<br/>Run the 7-Question Gate<br/>Q1: real HTTP request?<br/>Q2: accepted-impact list?<br/>Q3: in scope?<br/>Q4: no admin-only assumption?<br/>Q5: not already known?<br/>Q6: concrete impact, not 'technically possible'?<br/>Q7: not on never-submit list?<br/>agent: @triage-validation"]:::phase
@@ -336,7 +336,7 @@ dristi/
 │   ├── setup.sh                     # Dristi + OpenCode config
 │   ├── convert_skills.py            # agent-conversion utility
 │   ├── convert_commands.py          # command-conversion utility
-│   ├── reconnect-burp.sh            # Burp MCP reconnection
+│   ├── connect-burp.sh             # Burp MCP connection
 │   └── refresh-cve-index.py         # CISA KEV refresh
 ├── docs/                            # architecture · credits · CLI reference · verification
 ├── knowledge/                       # WSTG, payloads, WAF, wordlists, PortSwigger
@@ -574,7 +574,7 @@ bash scripts/install.sh
 bash scripts/setup.sh
 
 # Step 3 (optional) — Configure Burp Suite MCP and run reconnect helper
-bash scripts/reconnect-burp.sh
+bash scripts/connect-burp.sh
 ```
 
 Or for a quick config-only install (skip tools):
@@ -591,7 +591,7 @@ Dristi works best paired with Burp Suite's MCP server:
 1. Install the [Burp MCP Server](https://github.com/PortSwigger/burp-mcp) extension
 2. Enable it from Extensions → MCP → Server
 3. Add the burp MCP server to your client config (default port 9876)
-4. If the connection drops: `bash scripts/reconnect-burp.sh`
+4. If the connection drops: `bash scripts/connect-burp.sh`
 
 See [`docs/burp-flow.md`](docs/burp-flow.md) for the complete per-phase Burp testing workflow and MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer).
 
@@ -791,7 +791,7 @@ All runtime data is stored under `server/data/`:
 If Burp Suite closes, the `burp` MCP server disconnects. Run the reconnect helper:
 
 ```bash
-bash scripts/reconnect-burp.sh
+bash scripts/connect-burp.sh
 ```
 
 This kills stale proxy processes, checks port 9876, toggles the Burp MCP entry in `opencode.json`, and restarts the WSTG MCP server.

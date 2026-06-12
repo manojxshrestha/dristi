@@ -1,6 +1,6 @@
 ---
 description: Pipeline Phase 11 — Re-run PoCs, classify findings, 7-Question Gate
-mode: subagent
+mode: all
 permission:
   read: allow
   bash: allow
