@@ -10,13 +10,17 @@ from pathlib import Path
 logger = logging.getLogger("dristi-crypto")
 
 try:
-    from cryptography.fernet import Fernet
+    from cryptography.fernet import Fernet, InvalidToken
 
     HAS_CRYPTO = True
 except ImportError:
     Fernet = None  # type: ignore[assignment]
+    InvalidToken = Exception
     HAS_CRYPTO = False
-    logger.warning("cryptography not installed — credentials stored in plaintext. " "Install with: pip install dristi-server[encrypt]")
+    raise ImportError(
+        "cryptography package is required. "
+        "Install with: pip install dristi-server[encrypt] or pip install cryptography"
+    ) from None
 
 
 def _get_key_path() -> Path:
@@ -41,21 +45,22 @@ def _get_fernet():
 
 
 def encrypt_secret(plaintext: str) -> str:
-    if not HAS_CRYPTO or not plaintext:
+    if not plaintext:
         return plaintext
     try:
         f = _get_fernet()
         return f.encrypt(plaintext.encode()).decode()
     except Exception as e:
         logger.error("Encryption failed: %s", e)
-        return plaintext
+        raise
 
 
 def decrypt_secret(ciphertext: str) -> str:
-    if not HAS_CRYPTO or not ciphertext:
+    if not ciphertext:
         return ciphertext
     try:
         f = _get_fernet()
         return f.decrypt(ciphertext.encode()).decode()
-    except Exception:  # nosec B110
-        return ciphertext
+    except InvalidToken:
+        logger.error("Decryption failed: invalid token or key mismatch")
+        raise

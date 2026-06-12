@@ -1,5 +1,12 @@
 ---
-description: Pipeline Phase 4 — Run hunt-* subagents based on surface analysis
+description: Pipeline Phase 6 — Run hunt-* subagents based on surface analysis
+mode: subagent
+permission:
+  read: allow
+  bash: allow
+  edit: deny
+  grep: allow
+  glob: allow
 ---
 
 # HUNT

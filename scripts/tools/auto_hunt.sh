@@ -1,13 +1,5 @@
 #!/bin/bash
-# =============================================================================
-# Auto Hunt Pipeline — full recon + hunt automation
-#
-# Runs the entire pipeline: recon (Phase 0-3) → hunt (Phase 4-7)
-#
-# Usage:
-#   ./tools/auto_hunt.sh <domain>
-#   ./tools/auto_hunt.sh <domain> --skip xss,sqli,nuclei
-# =============================================================================
+# auto_hunt.sh - full recon + hunt pipeline
 
 set -uo pipefail
 
@@ -20,57 +12,63 @@ log_err()  { echo -e "${RED}[-]${NC} $1" >&2; }
 log_info() { echo -e "${CYAN}[*]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 
-TARGET="${1:?Usage: $0 <domain> [--skip xss,sqli,nuclei,secrets]}"
-SKIP=""
-if [ "${2:-}" = "--skip" ] && [ -n "${3:-}" ]; then
-  IFS=',' read -ra SKIP_LIST <<< "$3"
-  for s in "${SKIP_LIST[@]}"; do SKIP="$SKIP,$s"; done
-fi
+[ $# -eq 0 ] && { echo "Usage: $0 <domain> [--skip xss,sqli,nuclei,secrets]" >&2; exit 1; }
+TARGET="$1"
+SKIP_ARRAY=()
+shift
 
-skip() { [[ "$SKIP" == *",$1"* ]]; }
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --skip)
+            IFS=',' read -ra SKIP_ARRAY <<< "$2"
+            shift 2
+            ;;
+        *)
+            log_err "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+done
+
+skip() {
+    for s in "${SKIP_ARRAY[@]}"; do
+        [ "$s" = "$1" ] && return 0
+    done
+    return 1
+}
+
+trap 'log_warn "Interrupted by user"; exit 130' INT
+
+# source auth helper if present
+AUTH_HELPER="$SCRIPT_DIR/_auth_helper.sh"
+if [ -f "$AUTH_HELPER" ]; then
+    # shellcheck source=./_auth_helper.sh
+    source "$AUTH_HELPER"
+    bb_auth_banner
+fi
 
 START_TS=$(date +%s)
-log_info "=== Auto Hunt for: $TARGET ==="
+log_info "Auto Hunt for: $TARGET"
 echo ""
 
-# ── Phase 0-3: Recon ───────────────────────────────────────────────
-log_info "=== Phase 0-3: Recon ==="
-bash "$SCRIPT_DIR/auto_recon.sh" "$TARGET"
-echo ""
+run_phase() {
+    local name="$1"
+    local script="$2"
+    [ ! -x "$script" ] && { log_warn "$script not found or not executable, skipping $name"; return 1; }
+    log_info "=== $name ==="
+    bash "$script" "$TARGET"
+    echo ""
+}
 
-# ── Phase 4: XSS ───────────────────────────────────────────────────
-if ! skip "xss"; then
-  log_info "=== Phase 4: XSS Hunting ==="
-  bash "$SCRIPT_DIR/auto_xss.sh" "$TARGET"
-  echo ""
-fi
+run_phase "Phase 0-3: Recon" "$SCRIPT_DIR/auto_recon.sh"
 
-# ── Phase 5: SQLi ──────────────────────────────────────────────────
-if ! skip "sqli"; then
-  log_info "=== Phase 5: SQLi Hunting ==="
-  bash "$SCRIPT_DIR/auto_sqli.sh" "$TARGET"
-  echo ""
-fi
-
-# ── Phase 6: Nuclei ────────────────────────────────────────────────
-if ! skip "nuclei"; then
-  log_info "=== Phase 6: Nuclei Scanning ==="
-  bash "$SCRIPT_DIR/auto_nuclei.sh" "$TARGET"
-  echo ""
-fi
-
-# ── Phase 7: Secrets Validation ────────────────────────────────────
-if ! skip "secrets"; then
-  log_info "=== Phase 7: Secrets Validation ==="
-  bash "$SCRIPT_DIR/auto_secrets.sh" "$TARGET"
-  echo ""
-fi
+skip xss || run_phase "Phase 4: XSS" "$SCRIPT_DIR/auto_xss.sh"
+skip sqli || run_phase "Phase 5: SQLi" "$SCRIPT_DIR/auto_sqli.sh"
+skip nuclei || run_phase "Phase 6: Nuclei" "$SCRIPT_DIR/auto_nuclei.sh"
+skip secrets || run_phase "Phase 7: Secrets" "$SCRIPT_DIR/auto_secrets.sh"
 
 END_TS=$(date +%s)
 ELAPSED=$((END_TS - START_TS))
-MINS=$((ELAPSED / 60))
-SECS=$((ELAPSED % 60))
-
-log_ok "=== Auto Hunt Complete ==="
-log_ok "Results in: $BASE_DIR/recon/$TARGET/"
-log_ok "Elapsed: ${MINS}m ${SECS}s"
+log_ok "Auto Hunt Complete"
+log_ok "Results: $BASE_DIR/recon/$TARGET/"
+log_ok "Time: $((ELAPSED / 60))m $((ELAPSED % 60))s"

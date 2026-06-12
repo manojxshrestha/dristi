@@ -471,7 +471,7 @@ fi
 echo ""
 log_info "Phase 6: Directory Fuzzing"
 
-WORDLIST_DIR="$BASE_DIR/tools/wordlists"
+WORDLIST_DIR="$BASE_DIR/wordlists"
 
 if command -v ffuf &>/dev/null && [ -s "$RECON_DIR/live/urls.txt" ]; then
     # Select wordlist
@@ -512,10 +512,10 @@ else
 fi
 
 # ============================================================
-# Phase 6.5: Config File Exposure Check
+# Phase 6a: Config File Exposure Check
 # ============================================================
 echo ""
-log_info "Phase 6.5: Config File Exposure Check"
+log_info "Phase 6a: Config File Exposure Check"
 
 if [ -s "$RECON_DIR/live/urls.txt" ]; then
     log_step "Checking for exposed config files (env.js, app_env.js, .env, etc.)..."

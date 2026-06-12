@@ -1,6 +1,6 @@
 # Dristi — Usage Guide
 
-A practical guide to using the 83-agent Dristi bundle + WSTG MCP server for bug hunting (bounty programs, authorized pentesting, CTFs, vuln research) **and external red-team engagements** against enterprise targets. This document covers how the agents compose, and how to use them on a real engagement from intake through paid bounty (or final client deliverable).
+A practical guide to using the 85-agent Dristi bundle + WSTG MCP server for bug hunting (bounty programs, authorized pentesting, CTFs, vuln research) **and external red-team engagements** against enterprise targets. This document covers how the agents compose, and how to use them on a real engagement from intake through paid bounty (or final client deliverable).
 
 > Built and validated through authorized red-team and bug-bounty engagements — exposed four bug-bounty capability gaps and five additional gaps around platform attack chains, mid-engagement IR detection, and client-facing reporting. The final stack documented here addresses both modes.
 
@@ -12,7 +12,7 @@ This section is for people who have **never used the bundle before, never used O
 
 ### What is this bundle, in plain English?
 
-It's a collection of 83 OpenCode agents + 86 MCP tools that turn OpenCode into a methodical bug-hunting assistant.
+It's a collection of 85 OpenCode agents + 86 MCP tools that turn OpenCode into a methodical bug-hunting assistant.
 
 Without the bundle, asking the LLM *"is this XSS?"* gets you a generic answer. With the bundle installed, the same question loads the `hunt-xss` agent — which contains specific detection patterns from disclosed reports, the exact payloads that have worked, and a validation gate that prevents you from filing a false-positive bug report.
 
@@ -34,7 +34,7 @@ You don't "learn" the bundle. You install it once, then describe what you're tes
 - ❌ You don't need to know how to write exploits. The agents include working payloads.
 - ❌ You don't need to know Burp Suite. It's optional. Agents work with curl + browser.
 - ❌ You don't need a bug bounty account yet. You can practice on OWASP Juice Shop first.
-- ❌ You don't need to read all 83 agent files. They auto-load when relevant.
+- ❌ You don't need to read all 85 agent files. They auto-load when relevant.
 
 ### Pick a practice target
 
@@ -86,11 +86,14 @@ The stack maps to a 6-phase engagement workflow. Agents compose left-to-right th
 | Phase | What you're doing | Primary agents |
 |---|---|---|
 | **1. Scope** | Reading program rules, deciding what's in/out, scaffolding the engagement folder | `bug-bounty`, `bb-methodology`, `osint-methodology` |
-| **2. Recon** | Asset discovery, subdomain enum, endpoint mapping, secret hunting | `offensive-osint`, `web2-recon`, `bb-local-toolkit` |
+| **2. Recon** | Asset discovery, subdomain enum, endpoint mapping, secret hunting | `offensive-osint`, `web2-recon`, `bb-local-toolkit`, `search-agent` |
 | **3. Hunt** | Active testing for bugs in specific vuln classes | 48 `hunt-*` agents + 7 enterprise-platform agents + `security-arsenal` |
-| **4. Validate** | Decide whether a lead is actually a reportable bug | `triage-validation` (7-Question Gate) via `/triage` or `/validate` |
-| **5. Capture** | PoC screenshots, HAR files, evidence redaction | `evidence-hygiene` |
-| **6. Report** | Draft and submit | `report-writing`, `bugcrowd-reporting` |
+| **3.5. Deep-think** | (conditional) First-principles gap analysis when hunt yields zero | `deep-think` |
+| **4. Exploit** | Deepen confirmed findings, attempt WAF bypass | 48 `hunt-*` agents + `web2-vuln-classes` |
+| **4.5. Search-agent** | (conditional) 13-resource retrieval when exploit stalls | `search-agent` |
+| **5. Validate** | Decide whether a lead is actually a reportable bug | `triage-validation` (7-Question Gate) via `/triage` or `/validate` |
+| **6. Capture** | PoC screenshots, HAR files, evidence redaction | `evidence-hygiene` |
+| **7. Report** | Draft and submit | `report-writing`, `bugcrowd-reporting` |
 
 ---
 

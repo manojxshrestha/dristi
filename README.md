@@ -16,13 +16,13 @@
   <img src="https://img.shields.io/badge/WSTG-v4.2-purple" alt="WSTG v4.2">
   <img src="https://img.shields.io/badge/MCP%20tools-86-orange" alt="86 MCP Tools">
   <img src="https://img.shields.io/badge/H1%20reports-8.3k+-red" alt="8,300+ H1 Reports">
-  <img src="https://img.shields.io/badge/agents-83-blueviolet" alt="83 Agents">
+  <img src="https://img.shields.io/badge/agents-85-blueviolet" alt="85 Agents">
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs Welcome">
 </p>
 
 <p align="center">
   Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for bug hunting,
-  external red-team work, and authorized pentests — <b>83 agents</b> · <b>86 MCP tools</b> ·
+  external red-team work, and authorized pentests — <b>85 agents</b> · <b>86 MCP tools</b> ·
   OWASP WSTG v4.2 methodology across 25 vulnerability classes ·
   enterprise identity + infrastructure attack matrices ·
   engagement management · Burp MCP integration ·
@@ -74,7 +74,7 @@ If you're running an internal red team that includes domain-takeover chains via 
 
 ## Capability Map
 
-83 agents group into 10 pipeline agents + 48 `@hunt-*` + 25 specialty agents (including Phase 4.5 exploitation). Agents auto-load when their description keywords match what you're describing to OpenCode.
+85 agents group into 10 pipeline agents + 48 `@hunt-*` + 27 specialty agents (including deep-think, search-agent, and Phase 8 exploitation). Agents auto-load when their description keywords match what you're describing to OpenCode.
 
 ```mermaid
 graph TB
@@ -95,7 +95,7 @@ graph TB
         P3["@recon"]:::pipeline
         P4["@surface"]:::pipeline
         P5["@hunt"]:::pipeline
-        P5a["@exploit<br/>Phase 4.5"]:::pipeline
+        P5a["@exploit<br/>Phase 8"]:::pipeline
         P6["@capture"]:::pipeline
         P7["@validate"]:::pipeline
         P8["@report"]:::pipeline
@@ -192,12 +192,26 @@ flowchart TD
     Surface --> Hunt
 
     Hunt["4. HUNT<br/>Test bug-class hypotheses<br/>Apply payloads from Pattern Libraries<br/>48 @hunt-* agents auto-load by keyword"]:::phase
-    Hunt --> Exploit
+    Hunt --> Think
+
+    Think{"Gaps found?"}:::decision
+    Think -->|"yes"| DeepThink
+    Think -->|"no"| Exploit
+
+    DeepThink["4.25 DEEP-THINK<br/>Gap analysis<br/>First-principles reasoning<br/>Issue documentation<br/>agent: @deep-think"]:::phase
+    DeepThink --> Exploit
 
     Exploit["4.5 EXPLOIT<br/>Deep-research per vuln class<br/>Load technique guides + payloads<br/>5-tier exploitation + WAF bypass<br/>agent: @exploit"]:::phase
     Exploit --> Found{"Lead<br/>found?"}:::decision
     Found -->|"no"| Hunt
-    Found -->|"yes"| Validate
+    Found -->|"yes"| StaleCheck
+
+    StaleCheck{"Stale payloads<br/>or CVEs?"}:::decision
+    StaleCheck -->|"yes"| SearchAgent
+    StaleCheck -->|"no"| Validate
+
+    SearchAgent["4.75 SEARCH-AGENT<br/>Research CVEs<br/>Find bypass techniques<br/>Document persistent gaps<br/>agent: @search-agent"]:::phase
+    SearchAgent --> Validate
 
     Validate["4. VALIDATE<br/>Run the 7-Question Gate<br/>Q1: real HTTP request?<br/>Q2: accepted-impact list?<br/>Q3: in scope?<br/>Q4: no admin-only assumption?<br/>Q5: not already known?<br/>Q6: concrete impact, not 'technically possible'?<br/>Q7: not on never-submit list?<br/>agent: @triage-validation"]:::phase
     Validate --> Verdict{"Gate verdict"}:::gate
@@ -236,7 +250,7 @@ Dristi agents are flat `.md` files invoked via `@agent-name`. **10 pipeline agen
 | `@autopilot` | Full P1–P8 autonomous — just provide target + scope |
 | `@consult` | Same P1–P8, interactive — asks at every phase transition |
 | `@scope` → `@recon` → `@surface` → `@hunt` → ... | Step-by-step guided pipeline, prompts at each transition |
-| `@exploit` | Phase 4.5 — deep-research exploitation of all findings with WAF bypass |
+| `@exploit` | Phase 8 — deep-research exploitation of all findings with WAF bypass |
 | `@hunt-xss` (or any `@hunt-*`) | Directly jump to a specific bug class |
 | `@m365-entra-attack` (or any specialty) | Enterprise platform / red-team / OSINT agent |
 
@@ -254,13 +268,13 @@ Dristi agents are flat `.md` files invoked via `@agent-name`. **10 pipeline agen
 ```
 dristi/
 ├── .opencode/
-│   ├── agents/                    # 83 flat .md OpenCode agents
+│   ├── agents/                    # 85 flat .md OpenCode agents
 │   │   ├── autopilot.md               # fully autonomous P1–P8 pipeline
 │   │   ├── scope.md                   # engagement scaffold/program rules
 │   │   ├── recon.md                   # recon orchestration
 │   │   ├── surface.md                 # attack surface ranking
 │   │   ├── hunt.md                    # hunt orchestration
-│   │   ├── exploit.md                 # Phase 4.5 deep-research exploitation
+│   │   ├── exploit.md                 # Phase 8 deep-research exploitation
 │   │   ├── capture.md                 # evidence capture + hygiene
 │   │   ├── validate.md                # validate + triage gates
 │   │   ├── report.md                  # report generation
@@ -320,7 +334,7 @@ dristi/
 
 ## Agent Index
 
-83 agents across 10 pipeline + 48 `@hunt-*` + 25 specialty agents. **Agents auto-load by `@name`** — invoke the pipeline agents directly (`@scope` → `@recon` → ...) or describe what you're testing and the matching `@hunt-*` agent loads.
+85 agents across 10 pipeline + 48 `@hunt-*` + 27 specialty agents. **Agents auto-load by `@name`** — invoke the pipeline agents directly (`@scope` → `@recon` → ...) or describe what you're testing and the matching `@hunt-*` agent loads.
 
 ### Quick lookup — find an agent by what you're seeing
 
@@ -508,7 +522,7 @@ Dristi provides the methodology ("what to test and how to exploit it"), Burp pro
 
 1. **Knowledge layer** — WSTG v4.2 (96 tests, 12 categories) + PortSwigger Academy technique guides (payloads, WAF bypass)
 2. **Engagement layer** — scope registration, findings database, test tracking, phase gates, QA review, reporting
-3. **Agent layer** — 83 OpenCode agents: 10 pipeline agents, 48 `@hunt-*` agents, 25 specialty agents
+3. **Agent layer** — 85 OpenCode agents: 10 pipeline agents, 48 `@hunt-*` agents, 27 specialty agents
 
 ### Integration points
 
@@ -567,7 +581,7 @@ See [`docs/burp-flow.md`](docs/burp-flow.md) for the complete per-phase Burp tes
 ### Verify
 
 ```bash
-# Count the installed agents (should be 83)
+# Count the installed agents (should be 85)
 ls ~/.config/opencode/agents/*.md 2>/dev/null | wc -l
 
 # Spot-check a few agents loaded
@@ -709,7 +723,7 @@ Each category has a dedicated prompt file (`prompts/<category>.md`) with test li
 
 ## Exploitation Workflow
 
-Dristi supports inline exploitation via the **Phase 4.5 `@exploit` agent** or an ad-hoc pipeline:
+Dristi supports inline exploitation via the **Phase 8 `@exploit` agent** or an ad-hoc pipeline:
 
 1. **Detect** — Run WSTG test via Burp, log finding
 2. **Queue** — `create_exploitation_queue()` by vulnerability class

@@ -448,7 +448,7 @@ RECON_PHASES = [
     ("takeover",       "Takeover check"),
 ]
 
-# Map "Phase N" → phase key. Phase 6.5 collapses into config_expose.
+# Map "Phase N" → phase key. Phase 6a collapses into config_expose.
 RECON_PHASE_BY_NUM = {
     "1":   "subdomain_enum",
     "2":   "live_probe",
@@ -456,7 +456,7 @@ RECON_PHASE_BY_NUM = {
     "4":   "url_collect",
     "5":   "js_analysis",
     "6":   "dir_fuzz",
-    "6.5": "config_expose",
+    "6a":  "config_expose",
     "7":   "param_discover",
     "8":   "cicd_scan",
     "9":   "nuclei",

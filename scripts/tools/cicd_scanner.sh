@@ -75,15 +75,16 @@ TARGET=$(echo "$TARGET" | sed -E 's|^https?://github\.com/||' | sed 's|/$||' | s
 # Check sisakulint
 if ! command -v sisakulint &>/dev/null; then
     log_err "sisakulint not found."
-    log_err "Install: bash install_tools.sh"
+    log_err "Install: bash scripts/install.sh"
     log_err "Or manually: https://github.com/sisaku-security/sisakulint/releases"
     exit 1
 fi
 
-# Determine output directory (default: ./findings/<target>/cicd/ relative to cwd)
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# Determine output directory (default: <repo-root>/runtime/findings/<target>/cicd/)
 if [ -z "$OUTPUT_DIR" ]; then
     TARGET_SLUG=$(echo "$TARGET" | sed 's|[:/]|_|g')
-    OUTPUT_DIR="$(pwd)/runtime/findings/$TARGET_SLUG/cicd"
+    OUTPUT_DIR="$SCRIPT_DIR/../../runtime/findings/$TARGET_SLUG/cicd"
 fi
 mkdir -p "$OUTPUT_DIR"
 

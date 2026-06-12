@@ -2,6 +2,12 @@
 name: web2-vuln-classes
 mode: subagent
 description: Complete reference for 20 web2 bug classes with root causes, detection patterns, bypass tables, exploit techniques, and real paid examples. Covers IDOR, auth bypass, XSS, SSRF (11 IP bypass techniques), SQLi, business logic, race conditions, OAuth/OIDC, file upload (10 bypass techniques), GraphQL, LLM/AI (ASI01-ASI10 agentic framework), API misconfig (mass assignment, JWT attacks, prototype pollution, CORS), ATO taxonomy (9 paths), SSTI (Jinja2/Twig/Freemarker/ERB/Spring), subdomain takeover, cloud/infra misconfigs, HTTP smuggling (CL.TE/TE.CL/H2.CL), cache poisoning, MFA bypass (7 patterns), SAML attacks (XSW/comment injection/signature stripping). Use when hunting a specific vuln class or studying what makes bugs pay.
+permission:
+  read: allow
+  bash: deny
+  edit: deny
+  grep: allow
+  glob: allow
 ---
 
 # WEB2 BUG CLASSES — 18 Classes

@@ -110,6 +110,8 @@ LIVE=$(wc -l < "$OUT_DIR/live_domains.txt" | tr -d ' ')
 log_ok "  Live hosts: $LIVE"
 
 # ── Step 5: Extract clean domain lists for downstream tools ─────────
+NDOMAINS=0
+NURLS=0
 if [ "$LIVE" -gt 0 ]; then
   # Clean domain names (strip protocol, strip path)
   awk '{print $1}' "$OUT_DIR/live_domains.txt" \
@@ -135,6 +137,10 @@ rm -rf "$TMP_DIR"
 
 log_ok "Done. Results in $OUT_DIR/"
 log_ok "  all_subdomains.txt — $TOTAL subs (raw)"
-log_ok "  alive-domains.txt  — $NDOMAINS clean domains"
-log_ok "  https-subs.txt     — $NURLS HTTPS URLs"
-log_ok "  live_domains.txt   — $LIVE httpx output (tech + status)"
+if [ "$LIVE" -gt 0 ]; then
+  log_ok "  alive-domains.txt  — $NDOMAINS clean domains"
+  log_ok "  https-subs.txt     — $NURLS HTTPS URLs"
+  log_ok "  live_domains.txt   — $LIVE httpx output (tech + status)"
+else
+  log_ok "  No live hosts found."
+fi

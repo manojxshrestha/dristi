@@ -1,5 +1,12 @@
 ---
-description: Pipeline Phase 1.75 — Passive Intel: WHOIS, M365/Azure, third-party misconfigs, spoof check, cloud bucket enumeration
+description: Pipeline Phase 3 — Passive Intel: WHOIS, M365/Azure, third-party misconfigs, spoof check, cloud bucket enumeration
+mode: subagent
+permission:
+  read: allow
+  bash: allow
+  edit: deny
+  grep: allow
+  glob: allow
 ---
 
 # Intel (Passive)
@@ -8,7 +15,7 @@ Run passive intel to build target intelligence before active recon. This phase r
 
 ## Input
 
-Target domain(s) from Phase 1 (SCOPE) and any credentials/tokens from Phase 1.5 (AUTH).
+Target domain(s) from Phase 1 (SCOPE) and any credentials/tokens from Phase 2 (AUTH).
 
 ## Intel Workflow
 
@@ -61,10 +68,10 @@ wstg_track_tool(tool_name='pintel', status='run', notes='WHOIS + misconfig-mappe
 ## Output
 
 - Files in `runtime/engagements/<eid>/recon/<domain>/intel/`
-- `intel_analysis` deliverable consumed by Phase 4 (HUNT) agents for target intelligence
+- `intel_analysis` deliverable consumed by Phase 6 (HUNT) agents for target intelligence
 
 ## Notes
 
 - If `whois` is unavailable, domain_info is skipped (system package: `apt install whois`)
 - The optional tools (msftrecon, Scopify, Spoofy, cloud_enum) can be installed via `./tools/phase-intel.sh --install`
-- Intel results are informational context, not blocking — proceed to Phase 2 (RECON) regardless
+- Intel results are informational context, not blocking — proceed to Phase 4 (RECON) regardless

@@ -1,14 +1,5 @@
 #!/bin/bash
-# =============================================================================
-# Automated Nuclei Scanning — templates on live hosts
-#
-# Runs nuclei against live URLs with tech-matched severity filtering.
-#
-# Usage:
-#   ./tools/auto_nuclei.sh <domain>                  # auto paths under recon/<domain>/crawl/
-#   ./tools/auto_nuclei.sh <domain> <live-file>      # custom live URL file
-#   ./tools/auto_nuclei.sh <live-file>               # direct file path, domain from path
-# =============================================================================
+# auto_nuclei.sh - run nuclei on live hosts
 
 set -uo pipefail
 
@@ -21,88 +12,76 @@ log_err()  { echo -e "${RED}[-]${NC} $1" >&2; }
 log_info() { echo -e "${CYAN}[*]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 
-TARGET_RAW="${1:?Usage: $0 <domain> [<live-file>]}"
+[ $# -lt 1 ] && { echo "Usage: $0 <domain> [<live-file>]" >&2; exit 1; }
 
-if [[ "$TARGET_RAW" == -* ]]; then
-  TARGET_RAW="${2:?Usage: $0 <domain> [<live-file>]}"
-  LIVE_FILE="${3:-}"
-else
-  LIVE_FILE="${2:-}"
-  [[ "$LIVE_FILE" == -* ]] && LIVE_FILE="${3:-}"
-fi
+TARGET=""
+LIVE_FILE=""
 
-if [[ "$TARGET_RAW" == */* ]]; then
-  LIVE_FILE="$TARGET_RAW"
-  TARGET=$(echo "$TARGET_RAW" | sed -n 's|.*/recon/\([^/]*\)/.*|\1|p')
-  [ -z "$TARGET" ] && TARGET="target"
+if [[ "$1" == */* ]]; then
+    # first arg looks like a path
+    LIVE_FILE="$1"
+    # try to extract domain from recon path
+    TARGET=$(echo "$LIVE_FILE" | sed -n 's|.*/recon/\([^/]*\)/.*|\1|p')
+    [ -z "$TARGET" ] && TARGET="unknown"
 else
-  TARGET="$TARGET_RAW"
-  [ -z "$LIVE_FILE" ] && LIVE_FILE="$BASE_DIR/recon/$TARGET/subdomains/https-subs.txt"
+    TARGET="$1"
+    LIVE_FILE="${2:-$BASE_DIR/recon/$TARGET/subdomains/https-subs.txt}"
 fi
 
 OUT_DIR="$BASE_DIR/recon/$TARGET/nuclei"
 mkdir -p "$OUT_DIR"
+LOG_FILE="$OUT_DIR/nuclei.log"
 
-export PATH="$HOME/go/bin:/usr/local/bin:$PATH"
+trap 'log_warn "Interrupted"; exit 130' INT
 
-# ── Ensure nuclei is installed ──────────────────────────────────────
+# ensure nuclei
 if ! command -v nuclei &>/dev/null; then
-  log_info "Installing nuclei ..."
-  go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest 2>/dev/null
-  log_ok "nuclei installed"
+    log_info "Installing nuclei..."
+    if ! go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest 2>&1; then
+        log_err "nuclei install failed"
+        exit 1
+    fi
+    log_ok "nuclei installed"
 fi
 
-# ── Update templates ────────────────────────────────────────────────
-log_info "Updating nuclei templates ..."
-nuclei -update-templates 2>/dev/null
+log_info "Updating templates..."
+nuclei -update-templates 2>>"$LOG_FILE" || log_warn "template update failed"
 
-# ── Check input ─────────────────────────────────────────────────────
 if [ ! -f "$LIVE_FILE" ] || [ ! -s "$LIVE_FILE" ]; then
-  log_warn "No live URLs found: $LIVE_FILE"
-  log_info "Run subdomain_enum.sh and web_crawl.sh first"
-  exit 0
+    log_warn "No live URLs: $LIVE_FILE"
+    log_info "Run subdomain_enum.sh and web_crawl.sh first"
+    exit 0
 fi
 
 NHOSTS=$(wc -l < "$LIVE_FILE" | tr -d ' ')
 
-# ── Scan critical + high ────────────────────────────────────────────
-log_info "Running nuclei on $NHOSTS live hosts (critical + high severity) ..."
-nuclei -l "$LIVE_FILE" \
-  -severity critical,high \
-  -o "$OUT_DIR/nuclei_critical_high.txt" \
-  -silent \
-  2>/dev/null
+run_nuclei() {
+    local severity="$1"
+    local outfile="$2"
+    local extra="$3"
+    log_info "Scanning $NHOSTS hosts ($severity) ..."
+    nuclei -l "$LIVE_FILE" -severity "$severity" $extra \
+        -o "$outfile" -silent 2>>"$LOG_FILE"
+    local cnt=$(wc -l < "$outfile" 2>/dev/null | tr -d ' ')
+    echo "$cnt"
+}
 
-CH=$(wc -l < "$OUT_DIR/nuclei_critical_high.txt" 2>/dev/null | tr -d ' ')
-log_ok "critical/high: $CH findings"
+# critical+high
+CH=$(run_nuclei "critical,high" "$OUT_DIR/nuclei_critical_high.txt" "")
+log_ok "critical/high: $CH"
 
-# ── Scan medium ─────────────────────────────────────────────────────
-log_info "Running nuclei on $NHOSTS live hosts (medium severity) ..."
-nuclei -l "$LIVE_FILE" \
-  -severity medium \
-  -o "$OUT_DIR/nuclei_medium.txt" \
-  -silent \
-  2>/dev/null
+# medium
+M=$(run_nuclei "medium" "$OUT_DIR/nuclei_medium.txt" "")
+log_ok "medium: $M"
 
-M=$(wc -l < "$OUT_DIR/nuclei_medium.txt" 2>/dev/null | tr -d ' ')
-log_ok "medium: $M findings"
+# tech detection
+T=$(run_nuclei "info,low,medium,high,critical" "$OUT_DIR/nuclei_tech.txt" "-tags tech")
+log_ok "tech-detect: $T"
 
-# ── Tech detection ──────────────────────────────────────────────────
-log_info "Running tech-detect ..."
-nuclei -l "$LIVE_FILE" \
-  -tags tech \
-  -o "$OUT_DIR/nuclei_tech.txt" \
-  -silent \
-  2>/dev/null
-
-T=$(wc -l < "$OUT_DIR/nuclei_tech.txt" 2>/dev/null | tr -d ' ')
-log_ok "tech-detect: $T findings"
-
-# ── Summary ─────────────────────────────────────────────────────────
 TOTAL=$((CH + M))
-log_ok "=== Nuclei Results ==="
-log_ok "  critical+high: $CH → $OUT_DIR/nuclei_critical_high.txt"
-log_ok "  medium:        $M → $OUT_DIR/nuclei_medium.txt"
-log_ok "  tech-detect:   $T → $OUT_DIR/nuclei_tech.txt"
-log_ok "  total:         $TOTAL"
-log_ok "Done. Results in $OUT_DIR/"
+log_ok "=== Results ==="
+log_ok "critical+high: $CH → $OUT_DIR/nuclei_critical_high.txt"
+log_ok "medium:        $M → $OUT_DIR/nuclei_medium.txt"
+log_ok "tech:          $T → $OUT_DIR/nuclei_tech.txt"
+log_ok "total:         $TOTAL (critical+high+medium)"
+log_ok "Log: $LOG_FILE"

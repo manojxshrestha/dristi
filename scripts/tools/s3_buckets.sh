@@ -105,7 +105,7 @@ run_cloud_enum() {
 run_s3scanner() {
     log_step "s3scanner — S3 bucket check on subdomains"
 
-    check_tool s3scanner || return 0
+    _have s3scanner || return 0
 
     local subdomain_file="$SUBDOMAIN_DIR/all_subdomains.txt"
     if [ ! -f "$subdomain_file" ]; then
@@ -132,7 +132,7 @@ run_s3scanner() {
 run_trufflehog() {
     log_step "trufflehog — secret scanning on discovered buckets"
 
-    check_tool trufflehog || return 0
+    _have trufflehog || return 0
 
     # Scan from s3scanner results
     if [ -f "$CLOUD_DIR/s3buckets.txt" ] && [ -s "$CLOUD_DIR/s3buckets.txt" ]; then

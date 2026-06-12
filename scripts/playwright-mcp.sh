@@ -63,7 +63,7 @@ if [ -f "$INIT_SCRIPT" ]; then
 fi
 
 # Realistic User-Agent (override headless default)
-PROXY_ARGS+=( "--user-agent" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" )
+PROXY_ARGS+=( "--user-agent" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36" )
 
 # ── Launch ──────────────────────────────────────────────────────────────────
 

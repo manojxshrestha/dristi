@@ -1,5 +1,12 @@
 ---
-description: Pipeline Phase 5 — Evidence collection: requests, screenshots, collaborator
+description: Pipeline Phase 10 — Evidence collection: requests, screenshots, collaborator
+mode: subagent
+permission:
+  read: allow
+  bash: allow
+  edit: deny
+  grep: allow
+  glob: allow
 ---
 
 # CAPTURE
@@ -16,7 +23,7 @@ Never leave open pages. They accumulate memory and break subsequent phases.
 
 ## Input
 
-Get confirmed findings from Phase 4:
+Get confirmed findings from Phase 6:
 ```
 wstg_get_findings(engagement_id=<eid>)
 wstg_get_deliverable(deliverable_type='endpoint_map_ranked')
@@ -74,6 +81,6 @@ wstg_save_deliverable(deliverable_type='evidence', content=<clean-request+respon
 - [ ] Collaborator interactions checked for OOB findings
 - [ ] Redaction applied to all evidence (cookies, PII, tokens stripped)
 - [ ] Evidence files exist at `scripts/recon/<domain>/evidence/<finding-id>/`
-- [ ] Deliverable saved for Phase 6 consumption
+- [ ] Deliverable saved for Phase 11 consumption
 
-Proceed to Phase 6 (`@validate`) when all findings have clean evidence.
+Proceed to Phase 11 (`@validate`) when all findings have clean evidence.

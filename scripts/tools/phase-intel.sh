@@ -61,7 +61,7 @@ install_repo() {
         (
             cd "$target_dir" || return 1
             uv venv venv &>/dev/null
-            uv pip install --upgrade -r requirements.txt --python venv/bin/python3 &>/dev/null
+            "$target_dir/venv/bin/pip" install -r requirements.txt &>/dev/null
         ) && log_ok "$repo venv ready" || log_warn "$repo venv setup failed"
     fi
 

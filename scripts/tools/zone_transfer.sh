@@ -44,7 +44,7 @@ while IFS= read -r ns; do
   ns="${ns%.}"
   log_info "Attempting zone transfer against $ns ..."
 
-  RESULT=$(dig axfr "$ns" "$TARGET" 2>/dev/null)
+  RESULT=$(dig axfr @"$ns" "$TARGET" 2>/dev/null)
 
   if echo "$RESULT" | grep -qi "Transfer failed\|timed out\|connection refused\|SERVFAIL\|REFUSED\|NXDOMAIN"; then
     log_warn "  $ns - Transfer failed (secured)"

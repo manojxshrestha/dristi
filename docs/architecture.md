@@ -1,6 +1,6 @@
 # Architecture
 
-Dristi is a dual-interface security testing platform: an **MCP server** (86 tools for methodology, tracking, findings management) and an **OpenCode agent bundle** (83 auto-loading agents for bug hunting tradecraft).
+Dristi is a dual-interface security testing platform: an **MCP server** (86 tools for methodology, tracking, findings management) and an **OpenCode agent bundle** (85 auto-loading agents for bug hunting tradecraft).
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -10,7 +10,7 @@ Dristi is a dual-interface security testing platform: an **MCP server** (86 tool
           ┌────────────┴────────────┐
           ▼                         ▼
 ┌──────────────────┐    ┌──────────────────────────┐
-│  Dristi MCP      │    │  OpenCode Agents (83)    │
+│  Dristi MCP      │    │  OpenCode Agents (85)    │
 │  Server (86 tools)│    │                         │
 │  ──────────────── │    │  ──────────────────────  │
 │  • WSTG v4.2     │    │  • hunt-xss, hunt-sqli   │
@@ -19,9 +19,9 @@ Dristi is a dual-interface security testing platform: an **MCP server** (86 tool
 │  • Findings DB    │    │  • offensive-osint       │
 │  • Engagement     │    │  • m365-entra-attack     │
 │    management     │    │  • ... 64 more           │
-│  • Phase gates    │    │                          │
-│  • Reporting      │    └──────────┬───────────────┘
-│  • Knowledge      │               │
+│  • Phase gates    │    │  • deep-think            │
+│  • Reporting      │    │  • search-agent          │
+│  • Knowledge      │    └──────────┬───────────────┘
 │    graph          │               │ triggers
 └────────┬──────────┘               ▼
          │              ┌──────────────────────────┐
@@ -65,17 +65,18 @@ The core methodology engine. 86 tools organized into:
 | Findings Database | 13 | SQLite-backed CRUD + graph |
 | Utility | 9 | Status, audit, prioritize, verify |
 
-### 2. OpenCode Agents (72)
+### 2. OpenCode Agents (85)
 
 Agents auto-load when you describe what you're testing. Each is a `SKILL.md` file in `.opencode/agents/<name>/` with YAML frontmatter and markdown body.
 
 | Domain | Count | Agent names |
 |--------|-------|-------------|
-| Recon & OSINT | 4 | `offensive-osint`, `web2-recon`, `osint-methodology`, `bb-local-toolkit` |
+| Pipeline & Dispatch | 10 | `autopilot`, `consult`, `scope`, `pintel`, `recon`, `surface`, `hunt`, `capture`, `validate`, `report` |
+| Recon & OSINT | 5 | `offensive-osint`, `web2-recon`, `osint-methodology`, `bb-local-toolkit`, `search-agent` |
 | Web App Hunting | 49 | `hunt-xss`, `hunt-sqli`, `hunt-idor`, `hunt-ssrf`, `hunt-rce`, `hunt-file-upload`, `hunt-graphql`, `hunt-xxe`, `hunt-ssti`, `hunt-csrf`, `hunt-oauth`, `hunt-saml`, `hunt-ato`, `hunt-mfa-bypass`, `hunt-auth-bypass`, `hunt-brute-force`, `hunt-cors`, `hunt-deserialization`, `hunt-dom`, `hunt-host-header`, `hunt-http-smuggling`, `hunt-ldap`, `hunt-lfi`, `hunt-nosqli`, `hunt-open-redirect`, `hunt-session`, `hunt-source-leak`, `hunt-subdomain`, `hunt-tls-network`, `hunt-websocket`, `hunt-api-misconfig`, `hunt-cache-poison`, `hunt-cloud-misconfig`, `hunt-business-logic`, `hunt-cicd`, `hunt-grpc`, `hunt-k8s`, `hunt-laravel`, `hunt-nextjs`, `hunt-nodejs`, `hunt-springboot`, `hunt-aspnet`, `hunt-sharepoint`, `hunt-ntlm-info`, `hunt-misc`, `hunt-race-condition`, `hunt-llm-ai`, `hunt-dispatch`, `web2-vuln-classes` |
 | Enterprise Platform | 7 | `m365-entra-attack`, `okta-attack`, `cloud-iam-deep`, `vmware-vcenter-attack`, `enterprise-vpn-attack`, `apk-redteam-pipeline`, `supply-chain-attack-recon` |
 | Red Team Tradecraft | 2 | `redteam-mindset`, `mid-engagement-ir-detection` |
-| Workflow & Validation | 5 | `bb-methodology`, `bug-bounty`, `triage-validation`, `security-arsenal`, `hunt-dispatch` |
+| Workflow & Validation | 6 | `bb-methodology`, `bug-bounty`, `deep-think`, `triage-validation`, `security-arsenal`, `hunt-dispatch` |
 | Reporting & Hygiene | 4 | `report-writing`, `bugcrowd-reporting`, `evidence-hygiene`, `redteam-report-template` |
 | Specialized | 2 | `web3-audit`, `meme-coin-audit` |
 
@@ -120,7 +121,7 @@ Supplementary wordlists for recon and fuzzing: API endpoints, common paths, para
 
 ### 6. Skills Reference (`skills/`)
 
-Reference copies of all agent SKILL.md files (74 total). The active versions are in `.opencode/agents/`.
+Reference copies of all agent SKILL.md files (85 total). The active versions are in `.opencode/agents/`.
 
 ---
 

@@ -27,7 +27,8 @@ warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 hit()  { echo -e "${MAG}[SECRET]${NC} $1"; }
 err()  { echo -e "${RED}[-]${NC} $1" >&2; }
 
-MODE=""; TARGET=""; OUT_DIR="${SECRETS_OUT_DIR:-$(pwd)/runtime/findings/secrets/$(date +%Y%m%d_%H%M%S)}"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+MODE=""; TARGET=""; OUT_DIR="${SECRETS_OUT_DIR:-$SCRIPT_DIR/../../runtime/findings/secrets/$(date +%Y%m%d_%H%M%S)}"
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --filesystem)  MODE="fs";   shift; TARGET="${1:-}" ;;
@@ -50,8 +51,13 @@ log "Findings → $OUT_DIR"
 _run_trufflehog() {
   local target="$1" subcmd="$2"
   log "trufflehog $subcmd $target"
-  trufflehog "$subcmd" "$target" --json --no-update --only-verified 2>/dev/null \
-    > "$OUT_DIR/trufflehog.jsonl" || true
+  if [ "$subcmd" = "github" ]; then
+    trufflehog github --org "$target" --json --no-update --only-verified 2>/dev/null \
+      > "$OUT_DIR/trufflehog.jsonl" || true
+  else
+    trufflehog "$subcmd" "$target" --json --no-update --only-verified 2>/dev/null \
+      > "$OUT_DIR/trufflehog.jsonl" || true
+  fi
   local n; n=$(wc -l < "$OUT_DIR/trufflehog.jsonl" | tr -d ' ')
   [ "$n" -gt 0 ] && hit "trufflehog: $n verified secret(s)" || ok "trufflehog: clean"
 }
@@ -89,9 +95,6 @@ case "$MODE" in
     _have gitleaks    && _run_gitleaks    "$TARGET" detect
     ;;
   js)
-    # Pull every .js fetched during recon and grep with regex + (if available)
-    # trufflehog filesystem mode. Recon stores raw contents inline only for the
-    # secrets-grep step, so we re-fetch top JS bundles here for verification.
     JS_LIST="$TARGET/urls/js_files.txt"
     [ -s "$JS_LIST" ] || { err "no js_files.txt under $TARGET"; exit 1; }
     JS_DIR="$OUT_DIR/js_bundles"
@@ -104,7 +107,6 @@ case "$MODE" in
     done
     _have trufflehog  && _run_trufflehog  "$JS_DIR" filesystem
     _have noseyparker && _run_noseyparker "$JS_DIR"
-    # Fallback regex pass — runs even without trufflehog/noseyparker installed
     log "Regex fallback grep over downloaded JS..."
     grep -rEho '(api[_-]?key|api[_-]?secret|access[_-]?token|auth[_-]?token|client[_-]?secret|private[_-]?key|bearer)["\s:=]+[a-zA-Z0-9_\-]{20,}' \
       "$JS_DIR" | sort -u > "$OUT_DIR/regex_hits.txt" 2>/dev/null || true

@@ -64,7 +64,7 @@ for path in "${COMMON_PATHS[@]}"; do
     log_ok "  $BASE_URL/$path -> $STATUS"
     echo "$BASE_URL/$path -> $STATUS" >> "$OUT_DIR/common_paths.txt"
   else
-    log_step "  $BASE_URL/$path -> $STATUS"
+    log_info "  $BASE_URL/$path -> $STATUS"
   fi
 done
 

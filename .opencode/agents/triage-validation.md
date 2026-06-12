@@ -336,7 +336,7 @@ When a previously-claimed finding fails reproduction — **never silently drop i
 - **`bugcrowd-reporter`** — When a Bugcrowd VRT mapping is needed for an accepted finding. Workflow primitive: after this skill validates the finding, `bugcrowd-reporter` decides the VRT category and severity-request paragraph.
 - **`evidence-hygiene`** — When the validated finding needs PoC evidence captured. Workflow primitive: this skill says "Q6 requires proof of impact"; `evidence-hygiene` provides the capture-and-redact protocol for that proof.
 - **`security-arsenal`** — When checking the always-rejected / conditionally-valid tables. Workflow primitive: this skill's "Never Submit List" and `security-arsenal`'s "Always Rejected" table are aligned; either entry-point lookup decides whether a primitive is reportable alone or only with a chain.
-- **`bb-methodology`** — When Phase 5 (Validate & Report) starts. Workflow primitive: Phase 5's pre-report gate explicitly invokes `/validate` (this skill's 7Q gate) before any report is drafted.
+- **`bb-methodology`** — When Phase 11 (Validate) or Phase 12 (Report) starts. Workflow primitive: the pre-report gate explicitly invokes `/validate` (this skill's 7Q gate) before any report is drafted.
 
 ---
 

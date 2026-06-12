@@ -5,7 +5,7 @@
 Dristi is a security testing platform with two interfaces that work together:
 
 1. **MCP Server** (86 tools) — provides the OWASP WSTG methodology, engagement management, findings database, phase gates, WAF identification/evasion, and reporting as callable tools
-2. **OpenCode Agents** (83 agents) — provides per-class bug hunting tradecraft, enterprise platform attack chains, and engagement lifecycle management via `@agent-name`
+2. **OpenCode Agents** (85 agents) — provides per-class bug hunting tradecraft, enterprise platform attack chains, and engagement lifecycle management via `@agent-name`
 
 Together they turn an LLM into a methodical bug hunter: the agents tell it *what to look for and how*, the MCP server gives it the *structured methodology and tracking*, and Burp Suite provides *HTTP request execution*.
 
@@ -49,7 +49,7 @@ graph TB
 
 The loop: **describe → agent loads → MCP tracks → references guide → Burp executes → analyze → log finding → validate → report**
 
-All agents are invoked via `@agent-name`. 10 pipeline agents: `@autopilot` → `@consult` → `@scope` → `@pintel` → `@recon` → `@surface` → `@hunt` → `@capture` → `@validate` → `@report`. 54 specialized `@hunt-*` agents + 18 non-hunt specialty agents (82 total).
+All agents are invoked via `@agent-name`. 12 pipeline agents: `@autopilot` → `@consult` → `@scope` → `@pintel` → `@recon` → `@surface` → `@hunt` → `@deep-think` → `@exploit` → `@search-agent` → `@capture` → `@validate` → `@report`. 48 specialized `@hunt-*` agents + 25 non-hunt specialty agents (85 total).
 
 **Two modes:**
 - **`@autopilot`** — runs fully autonomous, dispatches phases 2-7 via `task()` to sub-agents, ends with report
@@ -58,17 +58,21 @@ All agents are invoked via `@agent-name`. 10 pipeline agents: `@autopilot` → `
 
 ---
 
-## The Pipeline (7 Phases + Auth)
+## The Pipeline (7 Phases + conditional sub-phases)
 
 ```
-Phase 1:   SCOPE     → register domains, load config, create task tree
-Phase 1.5: AUTH      → test credentials, detect WAF, save auth deliverable
-Phase 2:   RECON     → subdomain enum, crawl, params, nuclei, secrets
-Phase 3:   SURFACE   → load recon, classify tiers, prioritize endpoints
-Phase 4:   HUNT      → test all bug classes via 54 hunt-* sub-agents
-Phase 5:   CAPTURE   → evidence collection, screenshots, redaction
-Phase 6:   VALIDATE  → re-validate PoCs, 7-Question Gate
-Phase 7:   REPORT    → coverage check, generate final report
+Phase 1:   SCOPE       → register domains, load config, create task tree
+Phase 2:   AUTH        → test credentials, detect WAF, save auth deliverable
+Phase 3:   INTEL       → passive OSINT: WHOIS, M365, cloud, spoof check
+Phase 4:   RECON       → subdomain enum, crawl, params, nuclei, secrets
+Phase 5:   SURFACE     → load recon, classify tiers, prioritize endpoints
+Phase 6:   HUNT        → test all bug classes via 48 hunt-* sub-agents
+Phase 7:   DEEP-THINK  → (conditional) first-principles gap analysis when HUNT yields zero
+Phase 8:   EXPLOIT     → deepen confirmed findings, escalate impact
+Phase 9:   SEARCH-AGENT → (conditional) 13-resource retrieval when EXPLOIT stalls
+Phase 10:  CAPTURE     → evidence collection, screenshots, redaction
+Phase 11:  VALIDATE    → re-validate PoCs, 7-Question Gate
+Phase 12:  REPORT      → coverage check, generate final report
 ```
 
 ```mermaid
@@ -116,7 +120,7 @@ flowchart LR
 
 ---
 
-### Phase 1.5: AUTH
+### Phase 2: AUTH
 
 **Goal:** Obtain authentication credentials and detect WAF before testing.
 
@@ -142,7 +146,7 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 
 #---
 
-### Phase 1.75: Intel (passive)
+### Phase 3: Intel (passive)
 
 **Goal:** Passive intelligence gathering — WHOIS, cloud footprint, third-party exposure, email spoofability.
 
@@ -162,7 +166,7 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 
 ---
 
-## Phase 2: RECON
+## Phase 4: RECON
 
 **Goal:** Discover attack surface — subdomains, endpoints, technologies, secrets.
 
@@ -184,7 +188,7 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 
 ---
 
-### Phase 3: SURFACE
+### Phase 5: SURFACE
 
 **Goal:** Convert raw recon output into a prioritized "test these first" list.
 
@@ -197,11 +201,11 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 | 5 | Save ranked deliverable | `save_deliverable('endpoint_map_ranked', ...)` |
 | 6 | Gate check | `phase_gate_check(phase_completed=2)` |
 
-**Output:** `endpoint_map_ranked` deliverable consumed by Phase 4.
+**Output:** `endpoint_map_ranked` deliverable consumed by Phase 6.
 
 ---
 
-### Phase 4: HUNT
+### Phase 6: HUNT
 
 **Goal:** Test for specific vulnerability classes using per-class tradecraft and reference libraries.
 
@@ -209,8 +213,8 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 |------|--------|-----------|
 | 1 | Load endpoint_map_ranked + auth_analysis | `get_deliverable()` |
 | 2 | Run deep testing (API fuzzing, method override, content-type switch, GraphQL probing, race conditions, UUID analysis, JWT manipulation) | — |
-| 3 | **WAF handling:** If WAF detected in Phase 1.5, apply vendor-specific bypasses | `identify_waf()`, `get_waf_bypass()`, `knowledge/waf/` |
-| 4 | **Test all applicable bug classes** via 54 hunt-* sub-agents | `get_wstg_test()`, `get_technique_guide()`, `get_test_payloads()`, `get_witness_payloads()` |
+| 3 | **WAF handling:** If WAF detected in Phase 2, apply vendor-specific bypasses | `identify_waf()`, `get_waf_bypass()`, `knowledge/waf/` |
+| 4 | **Test all applicable bug classes** via 48 hunt-* sub-agents | `get_wstg_test()`, `get_technique_guide()`, `get_test_payloads()`, `get_witness_payloads()` |
 | 6 | For each confirmed finding: validate PoC, log, track test, check chaining | `validate_poc()`, `log_finding()`, `track_test()`, `find_chains()` |
 | 7 | Gate check | `phase_gate_check(phase_completed=3)` |
 
@@ -263,7 +267,7 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 
 ---
 
-### Phase 5: CAPTURE
+### Phase 10: CAPTURE
 
 **Goal:** Capture evidence with proper hygiene — redact cookies, PII, sanitize.
 
@@ -283,7 +287,7 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 
 ---
 
-### Phase 6: VALIDATE
+### Phase 11: VALIDATE
 
 **Goal:** Decide whether a finding is reportable before writing anything.
 
@@ -318,7 +322,7 @@ Q7: Is this NOT on the never-submit list?
 
 ---
 
-### Phase 7: REPORT
+### Phase 12: REPORT
 
 **Goal:** Generate a submission-ready report with coverage validation.
 
@@ -395,11 +399,12 @@ graph TB
 
 | Feature | `@autopilot` | `@consult` | Manual |
 |---------|-------------|------------|--------|
-| Phases | 1–7 autonomous | 1–7 with prompts | Step-by-step |
+| Phases | 1–7 autonomous + conditional 4.25/4.75 | 1–7 with prompts + conditional 4.25/4.75 | Step-by-step |
 | Sub-agent dispatch | `task()` for phases 2-7 | `task()` for phases 2-7 | Direct agent invocation |
 | Phase gates | Automatic check + checkpoint | Ask before each gate | Manual |
-| WAF handling | Automatic detection in Phase 1.5 | Detected + suggested bypasses | Manual |
+| WAF handling | Automatic detection in Phase 2 | Detected + suggested bypasses | Manual |
 | Reference fetching | Automatic pre-hunt reading | Suggested before testing | On-demand |
+| Intelligence fallback | Auto-activates deep-think/search-agent | Asks user before activating | Manual |
 | Recovery | Auto-retry on gate failure | Suggests recovery options | Manual |
 | Best for | Full engagement, no interruptions | Learning, guided testing | Targeted single-class testing |
 

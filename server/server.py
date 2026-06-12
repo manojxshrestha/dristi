@@ -11,6 +11,7 @@ import json
 import logging
 import os
 import re
+import shlex
 import subprocess  # nosec B404
 import tempfile
 import threading
@@ -5906,8 +5907,6 @@ def validate_poc(
         expected_no_match: String that MUST NOT appear in the response body
         label: Optional human-readable label for this PoC (e.g. 'Config leak', 'Admin takeover')
     """
-    import subprocess  # nosec B404
-
     label_str = f" [{label}]" if label else ""
     _append_event(
         engagement_id,
@@ -5920,9 +5919,9 @@ def validate_poc(
 
     try:
         start_time = time.time()
-        result = subprocess.run(  # nosec B602
-            command,
-            shell=True,
+        result = subprocess.run(
+            shlex.split(command),
+            shell=False,
             capture_output=True,
             text=True,
             timeout=POC_VALIDATION_TIMEOUT,

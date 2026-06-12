@@ -228,11 +228,11 @@ Runs the entire P1–P8 pipeline **autonomously** — no prompts at each step. O
 
 **What it does:**
 1. Asks for target + platform + scope (once at the start)
-2. Gets credentials (Phase 1.5) and saves auth_analysis deliverable
+2. Gets credentials (Phase 2) and saves auth_analysis deliverable
 3. Runs full recon via scripts (batch_subdomain_enum, web_crawl, cariddi, nuclei, etc.)
 4. Ranks attack surface (endpoint_map_raw → endpoint_map_ranked)
 5. Loads auth context, tests every bug class with candidates using `@hunt-*` tradecraft
-6. Exploits validated findings with deep-research techniques and WAF bypass (Phase 4.5)
+6. Exploits validated findings with deep-research techniques and WAF bypass (Phase 8)
 7. Logs findings, validates PoCs, tracks coverage
 8. Generates final report and presents evidence — you review and submit
 

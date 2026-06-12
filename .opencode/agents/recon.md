@@ -1,5 +1,12 @@
 ---
-description: Pipeline Phase 2 — Full recon: subdomains, live hosts, crawl, params, nuclei, secrets
+description: Pipeline Phase 4 — Full recon: subdomains, live hosts, crawl, params, nuclei, secrets
+mode: subagent
+permission:
+  read: allow
+  bash: allow
+  edit: deny
+  grep: allow
+  glob: allow
 ---
 
 # RECON
@@ -15,7 +22,7 @@ You are about to map infrastructure. **Without an authenticated session, you wil
 - Authenticated API misconfigurations
 - Any finding that requires a logged-in state
 
-**If the target has an auth wall, stop and get credentials first** (see `@autopilot` Phase 1.5). Recon without auth is useful for infrastructure mapping, but your crawl results will be incomplete, your parameter extraction will miss authenticated endpoints, and your nuclei scan will only find public CVEs.
+**If the target has an auth wall, stop and get credentials first** (see `@autopilot` Phase 2). Recon without auth is useful for infrastructure mapping, but your crawl results will be incomplete, your parameter extraction will miss authenticated endpoints, and your nuclei scan will only find public CVEs.
 
 If you proceed without auth, label every finding `[UNAUTHENTICATED]`.
 
@@ -182,4 +189,4 @@ After all tools have run, compile the answers to the 3 questions:
 
 This triage IS the output of recon. Everything else (CSP headers, cookie flags, server banners) is interesting but does not find exploits.
 
-Save this triage via `wstg_save_deliverable(deliverable_type='endpoint_map_raw', content=<triage_markdown>)` for Phase 3 to consume.
+Save this triage via `wstg_save_deliverable(deliverable_type='endpoint_map_raw', content=<triage_markdown>)` for Phase 5 to consume.

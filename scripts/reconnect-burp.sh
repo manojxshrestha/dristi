@@ -38,7 +38,7 @@ print_banner
 info "Checking for stale MCP proxy processes..."
 STALE_PIDS=$(pgrep -f "mcp-proxy-all" 2>/dev/null || true)
 if [ -n "$STALE_PIDS" ]; then
-  kill $STALE_PIDS 2>/dev/null || true
+  kill "$STALE_PIDS" 2>/dev/null || true
   sleep 1
   ok "Killed stale MCP proxy: PID $STALE_PIDS"
 else

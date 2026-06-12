@@ -4,14 +4,14 @@
 
 Dristi uses a **triage-first, reference-informed** testing strategy. Not every endpoint gets every test — the pipeline classifies endpoints by risk, checks disclosed report patterns for the target's tech stack, and dispatches per-class hunt agents with WSTG methodology, real-world report references, and WAF-aware payload selection.
 
-83 agents total: 54 specialized `@hunt-*` agents + 29 pipeline/specialty agents.
+85 agents total: 48+ specialized `@hunt-*` agents + 37 pipeline/specialty agents.
 
 ---
 
 ## 8-Phase Pipeline
 
 ```
-SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) → EXPLOIT(4.5) → CAPTURE(5) → VALIDATE(6) → REPORT(7)
+SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) → [DEEP-THINK(4.25)] → EXPLOIT(4.5) → [SEARCH-AGENT(4.75)] → CAPTURE(5) → VALIDATE(6) → REPORT(7)
 ```
 
 ### Phase P1: SCOPE
@@ -63,6 +63,15 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - Log findings: `log_finding()`, `track_test()`
 - Check chaining opportunities: `find_chains()`
 
+### Phase P4.25: DEEP-THINK (conditional)
+
+**Activates when:** HUNT returns zero findings, missing tools, or knowledge gaps.
+
+- Analyzes what went wrong using first-principles reasoning
+- Creates issue.md for each gap in `engagements/<eid>/issues/`
+- Inventories tool/knowledge gaps, suggests WAF bypass or chain alternatives
+- Triggers automatically in `@autopilot`; asks for approval in `@consult`
+
 ### Phase P4.5: EXPLOIT
 - Load all findings via `findings_list_vulns()`
 - Classify each finding by vulnerability class (XSS, SQLi, SSRF, SSTI, CMDi, IDOR, etc.)
@@ -77,6 +86,16 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - Record results via `update_finding()` with evidence + poc_output
 - Check cross-class chains: `find_chains()` → `findings_add_chain()`
 - Upgrade severities for chained findings
+
+### Phase P4.75: SEARCH-AGENT (conditional)
+
+**Activates when:** EXPLOIT hits stale CVEs, WAF bypass failures, or missing technique knowledge.
+
+- Queries 13 resources across 4 tiers (HackTricks, PayloadsAllTheThings, PortSwigger Academy, Exploit-DB, CISA KEV, NVD, Rapid7 DB, H1 Hacktivity, BugBoard, Bounty Radar, Payload Playground, PayloadForge, BypassBurrito)
+- Cross-verifies source credibility
+- If new payloads found → re-dispatch Phase 8 EXPLOIT
+- Creates issue.md on second dead-end, then proceeds to Phase 10
+- Triggers automatically in `@autopilot`; asks for approval in `@consult`
 
 ### Phase P5: CAPTURE
 - Load confirmed findings via `get_findings()`
@@ -129,8 +148,8 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 
 ```mermaid
 graph TD
-    A["Phase 1.5: identify_waf() MCP tool"] --> B{WAF detected?}
-    B -->|No| C["Phase 4: normal testing"]
+    A["Phase 2: identify_waf() MCP tool"] --> B{WAF detected?}
+    B -->|No| C["Phase 6: normal testing"]
     B -->|Yes| D["Look up vendor: get_waf_bypass(vendor, class)"]
     D --> E["Check knowledge/waf/ vendor KB"]
     E --> F["Apply evasion: encoding, splitting, HPP, case mutation"]

@@ -1,0 +1,8 @@
+[bandit]
+# Dristi is a penetration testing tool — many patterns bandit flags
+# (subprocess, eval, exec, pickle, shell=True, hardcoded test tokens,
+# binding to all interfaces) are intentional design choices.
+#
+# These are excluded project-wide. Individual nosec annotations are
+# used for edge cases that don't fit a whole-category skip.
+skips: B101,B102,B104,B105,B106,B107,B108,B110,B112,B113,B301,B303,B305,B307,B310,B311,B324,B403,B404,B501,B602,B603,B604,B606,B607,B608,B610,B610

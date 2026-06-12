@@ -2,7 +2,7 @@
 
 ## Overview
 
-Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive security: bug hunting, external red-team engagements, and authorized penetration tests. It provides the complete OWASP Web Security Testing Guide methodology as an MCP server with 86 tools, paired with 75 autonomous agents covering vulnerability hunting, enterprise platform attacks, and full engagement lifecycle management.
+Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive security: bug hunting, external red-team engagements, and authorized penetration tests. It provides the complete OWASP Web Security Testing Guide methodology as an MCP server with 86 tools, paired with 85 autonomous agents covering vulnerability hunting, enterprise platform attacks, and full engagement lifecycle management.
 
 **Goal:** Turn an LLM into an autonomous, methodical, reference-informed bug hunter that can run a full penetration test from scope to report — discovering subdomains, crawling endpoints, fingerprinting WAFs, dispatching per-class exploit agents, validating PoCs, capturing redacted evidence, and generating a submission-ready report — without human intervention between phases. The pipeline is modeled on real bug bounty workflows: triage by attack surface, read disclosed reports for technique guidance, bypass WAFs before exploiting, and run every finding through a 7-Question Gate before drafting.
 
@@ -11,7 +11,7 @@ Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive
 - **`@consult`** — interactive: same pipeline but pauses at every phase transition to present findings, suggest next steps, and ask for confirmation before proceeding. Best for learning or guided testing.
 
 **Stats:**
-- 86 MCP tools · 75 agents (48 hunt-* + 27 pipeline/specialty)
+- 86 MCP tools · 85 agents (48 hunt-* + 37 pipeline/specialty)
 - 13 WSTG categories · 96 test cases
 - 57 CLI tool wrapper scripts · 20 GF patterns for parameter discovery
 - 7-phase autonomous pipeline (autopilot)
@@ -50,7 +50,7 @@ Layer 4: Validation + Reporting      — how to ship it (7-Question Gate, VRT, r
 │   ├── tool_verification.py    Tool output quality verification
 │   └── data/                   WSTG test cases, technique guides
 ├── .opencode/
-│   ├── agents/                 81 agent definition files
+│   ├── agents/                 85 agent definition files
 │   ├── commands-bughunt/       7 CLI entry points
 │   ├── rules/                  Agent permission rules
 │   └── .mcp.json               MCP server configuration
@@ -92,8 +92,10 @@ Layer 4: Validation + Reporting      — how to ship it (7-Question Gate, VRT, r
 | 1.75 Intel   | phase-intel.sh | WHOIS, M365/Azure, third-party misconfigs, spoof check, cloud bucket enum | — |
 | 2  RECON     | recon.md      | Subdomain enum, DNS, crawl, params, nuclei, secrets | phase_completed=1 |
 | 3  SURFACE   | surface.md    | Prioritize endpoints, rank attack surface | phase_completed=2 |
-| 4  HUNT      | hunt.md       | Dispatch 54 hunt-* sub-agents, test all bug classes | phase_completed=3 |
+| 4  HUNT      | hunt.md       | Dispatch 48 hunt-* sub-agents, test all bug classes | phase_completed=3 |
+| 4.25 DEEP-THINK | deep-think.md | (conditional) First-principles gap analysis when HUNT yields zero | — |
 | 4.5 EXPLOIT  | exploit.md    | Second-wave exploitation: PoC all findings, WAF bypass, chaining | — |
+| 4.75 SEARCH-AGENT | search-agent.md | (conditional) 13-resource retrieval when EXPLOIT stalls | — |
 | 5  CAPTURE   | capture.md    | Evidence collection, screenshots, redaction | phase_completed=4 |
 | 6  VALIDATE  | validate.md   | Re-validate PoCs, 7-Question Gate, severity | phase_completed=5 |
 | 7  REPORT    | report.md     | Coverage check, generate report | phase_completed=6 |
@@ -210,16 +212,20 @@ Autopilot is a thin orchestrator (248 lines) — phases 2-7 are dispatched via `
 
 ---
 
-## Agents (83)
+## Agents (85)
 
-### Pipeline Agents (11)
-autopilot, consult, capture, exploit, hunt, pintel, recon, report, scope, surface, validate
+### Pipeline Agents (13)
+autopilot, consult, capture, deep-think, exploit, hunt, pintel, recon, report, scope, search-agent, surface, validate
 
-### Bug Class Agents (54 hunt-*)
+### Bug Class Agents (48 hunt-*)
 api-misconfig, aspnet, ato, auth-bypass, brute-force, business-logic, cache-poison, cicd, clickjacking, cloud-misconfig, cors, csrf, deserialization, dispatch, dom, file-upload, graphql, host-header, http-smuggling, idor, jwt-confusion, k8s, laravel, ldap, lfi, llm-ai, mfa-bypass, misc, nextjs, nodejs, nosqli, ntlm-info, oauth, open-redirect, race-condition, rce, saml, session, sharepoint, source-leak, springboot, sqli, ssrf, ssti, subdomain, tls-network, websocket, xss, xxe
 
-### Specialty Agents (18)
+### Specialty Agents (22)
 apk-redteam-pipeline, bb-local-toolkit, bb-methodology, bug-bounty, bugcrowd-reporting, cloud-iam-deep, enterprise-vpn-attack, evidence-hygiene, m365-entra-attack, meme-coin-audit, mid-engagement-ir-detection, offensive-osint, okta-attack, osint-methodology, redteam-mindset, redteam-report-template, report-writing, supply-chain-attack-recon, triage-validation, web2-recon, web2-vuln-classes, web3-audit
+
+### Intelligence-Fallback Agents (2)
+deep-think — Strategic reasoning, first-principles analysis, persistent issue tracking
+search-agent — Real-time research, CVE/bypass/report retrieval, gap documentation
 
 ### Agent Reference Sections
 Every hunt agent includes:
@@ -344,8 +350,11 @@ All domain-mode: accept domain as $1, auto-discover recon output, output to runt
 - **Skills drive per-agent methodology**: Load relevant skill via `skill()` MCP tool for each vulnerability class
 - **Browser close after every op**: playwright_browser_close() mandate
 - **No context.newContext()**: Default context routes through Burp
-- **No consult.md agent file**: Consult command exists but agent file not found
-- **Deliverable-based data flow**: auth_analysis → Phase 4, endpoint_map_raw → Phase 3 → endpoint_map_ranked → Phase 4
+- **consult.md frontmatter added**: Was missing entirely, now loads correctly
+- **12 pipeline agents frontmatter fixed**: Added mode + permission blocks
+- **deep-think + search-agent added**: Conditional intelligence fallback phases (4.25, 4.75)
+- **pipeline updated**: Re-exploitation loop after search-agent finds new payloads
+- **Deliverable-based data flow**: auth_analysis → Phase 6, endpoint_map_raw → Phase 5 → endpoint_map_ranked → Phase 6
 
 ---
 

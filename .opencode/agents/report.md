@@ -1,5 +1,12 @@
 ---
-description: Pipeline Phase 7 — Coverage check, phase gates, final report
+description: Pipeline Phase 12 — Coverage check, phase gates, final report
+mode: subagent
+permission:
+  read: allow
+  bash: allow
+  edit: deny
+  grep: allow
+  glob: allow
 ---
 
 # REPORT

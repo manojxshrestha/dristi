@@ -1,5 +1,12 @@
 ---
-description: Pipeline Phase 6 — Re-run PoCs, classify findings, 7-Question Gate
+description: Pipeline Phase 11 — Re-run PoCs, classify findings, 7-Question Gate
+mode: subagent
+permission:
+  read: allow
+  bash: allow
+  edit: deny
+  grep: allow
+  glob: allow
 ---
 
 # VALIDATE
@@ -8,7 +15,7 @@ Re-run each finding's PoC first, then filter through the 7-Question Gate.
 
 ## Input
 
-Load evidence from Phase 5 and findings from the database:
+Load evidence from Phase 10 and findings from the database:
 ```
 wstg_get_findings(engagement_id=<eid>)
 ```
@@ -61,4 +68,4 @@ wstg_update_finding(engagement_id=<eid>, finding_id=<id>, severity=<adjusted>, n
 - [ ] `wstg_update_finding()` called for each
 - [ ] CHAIN REQUIRED findings routed back to `@hunt`
 
-Proceed to Phase 7 (`@report`) when all findings have verdicts.
+Proceed to Phase 12 (`@report`) when all findings have verdicts.

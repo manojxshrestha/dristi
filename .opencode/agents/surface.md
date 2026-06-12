@@ -1,5 +1,12 @@
 ---
-description: Pipeline Phase 3 — Analyze recon output, rank P1/P2/P3 attack surface
+description: Pipeline Phase 5 — Analyze recon output, rank P1/P2/P3 attack surface
+mode: subagent
+permission:
+  read: allow
+  bash: allow
+  edit: deny
+  grep: allow
+  glob: allow
 ---
 
 # SURFACE
@@ -8,7 +15,7 @@ Analyze the recon output and build a ranked, actionable attack surface. The outp
 
 ## Input
 
-Read the endpoint_map_raw deliverable from Phase 2 (recon):
+Read the endpoint_map_raw deliverable from Phase 4 (recon):
 
 ```
 wstg_get_deliverable(deliverable_type='endpoint_map_raw')
@@ -32,7 +39,7 @@ For every endpoint that accepts user input, answer these 3 questions:
 **Q3: Impact if exploitable?** — data read (low), data write (medium), code exec (high), auth bypass (critical)
 
 ### Tier 0 — Feed Into Entry Point Testing
-Endpoints that accept user input AND are public. No auth barrier. These feed directly into Phase 4's Step 4.0 entry point testing (parameter fuzzing, method mutation, content-type switching, etc.).
+Endpoints that accept user input AND are public. No auth barrier. These feed directly into Phase 6's Step 4.0 entry point testing (parameter fuzzing, method mutation, content-type switching, etc.).
 
 ```
 <tier-0-list>
@@ -51,7 +58,7 @@ Endpoints that accept user input AND need authentication. These are where IDOR, 
 </tier-1-list>
 ```
 
-**Get credentials before testing these** (see Phase 1.5). If you can't get auth, note that Tier 1 is blind and focus on Tier 0.
+**Get credentials before testing these** (see Phase 2). If you can't get auth, note that Tier 1 is blind and focus on Tier 0.
 
 ### Tier 2 — Infrastructure & Passive
 Endpoints and technologies that don't accept input but reveal attack surface:
@@ -92,7 +99,7 @@ Each endpoint JSON object should include: `method`, `path`, `parameters` (list),
 
 Higher score = test first. Override the engine's ranking with the 6 prioritization rules below if needed.
 
-## Save Deliverable for Phase 4
+## Save Deliverable for Phase 6
 
 After classification (and optional prioritization), save the ranked list as a deliverable that `@hunt` consumes:
 
@@ -106,9 +113,9 @@ wstg_save_deliverable(
 
 ## Verification
 
-- [ ] Endpoint map deliverable loaded from Phase 2 (or raw files read)
+- [ ] Endpoint map deliverable loaded from Phase 4 (or raw files read)
 - [ ] Tier 0 list: public endpoints that accept input
 - [ ] Tier 1 list: auth-gated endpoints that accept input
 - [ ] Tier 2 list: infrastructure findings (not directly exploitable)
 - [ ] `wstg_prioritize_endpoints()` called with endpoint data
-- [ ] Deliverable saved for Phase 4 consumption
+- [ ] Deliverable saved for Phase 6 consumption
