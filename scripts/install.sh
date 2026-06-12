@@ -382,6 +382,18 @@ if [ -d "$REPO_DIR/.opencode/rules" ]; then
   ok "Rules linked ($(ls "$REPO_DIR/.opencode/rules"/*.md 2>/dev/null | wc -l) files)"
 fi
 
+# Commands (.opencode/commands-bughunt/*.md) → ~/.config/opencode/commands/
+OC_COMMANDS_DIR="$HOME/.config/opencode/commands"
+mkdir -p "$OC_COMMANDS_DIR"
+if [ -d "$REPO_DIR/.opencode/commands-bughunt" ]; then
+  for cmd_file in "$REPO_DIR/.opencode/commands-bughunt"/*.md; do
+    [ -f "$cmd_file" ] || continue
+    cmd_name="$(basename "$cmd_file")"
+    ln -sf "$cmd_file" "$OC_COMMANDS_DIR/$cmd_name"
+  done
+  ok "Commands linked ($(ls "$REPO_DIR/.opencode/commands-bughunt"/*.md 2>/dev/null | wc -l) files)"
+fi
+
 # Skills symlink (for manual browsing)
 DRISTI_SKILLS="$HOME/.dristi/skills"
 mkdir -p "$HOME/.dristi"
@@ -422,6 +434,12 @@ config_path = os.path.join(home, ".config", "opencode", "opencode.json")
 
 mcp = {}
 
+# Burp Suite MCP (SSE — requires Burp + MCP Server extension running)
+mcp["burp"] = {
+    "type": "sse",
+    "url": "http://127.0.0.1:9876/sse"
+}
+
 # WSTG server
 mcp["wstg"] = {
     "type": "local",
@@ -458,6 +476,7 @@ os.makedirs(os.path.dirname(config_path), exist_ok=True)
 with open(config_path, "w") as f:
     json.dump(config, f, indent=2)
 
+print("[+] Burp MCP configured (SSE :9876)")
 print("[+] WSTG MCP server configured")
 print("[+] Playwright MCP server configured")
 print("[!] Burp MCP not configured — install Burp Suite + MCP Server extension manually")

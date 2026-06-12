@@ -379,6 +379,18 @@ if [ -d "$DST/.opencode/rules" ]; then
   done
 fi
 
+# Commands (.opencode/commands-bughunt/*.md)
+if [ -d "$DST/.opencode/commands-bughunt" ]; then
+  OC_CMD_DIR="$HOME/.config/opencode/commands"
+  mkdir -p "$OC_CMD_DIR"
+  for cmd_file in "$DST/.opencode/commands-bughunt"/*.md; do
+    [ -f "$cmd_file" ] || continue
+    cmd_name="$(basename "$cmd_file")"
+    ln -sf "$cmd_file" "$OC_CMD_DIR/$cmd_name"
+    ok "Command $cmd_name — linked"
+  done
+fi
+
 # Skills directory (for manual browse)
 SKILLS_LINK="$HOME/.dristi/skills"
 mkdir -p "$HOME/.dristi"
