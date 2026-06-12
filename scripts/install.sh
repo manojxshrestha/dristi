@@ -347,16 +347,17 @@ else
 fi
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# PHASE 8: OpenCode agents + rules
+# PHASE 8: OpenCode agents + rules + commands
 # ═══════════════════════════════════════════════════════════════════════════════
-header "PHASE 8: OpenCode agents & rules"
+header "PHASE 8: OpenCode agents, rules & commands"
 
 OC_AGENTS_DIR="$HOME/.config/opencode/agents"
 OC_RULES_DIR="$HOME/.config/opencode/rules"
+OC_COMMANDS_DIR="$HOME/.config/opencode/commands"
 OC_HOME_AGENTS="$HOME/.opencode/agents"
 OC_HOME_RULES="$HOME/.opencode/rules"
 
-mkdir -p "$OC_AGENTS_DIR" "$OC_RULES_DIR" "$OC_HOME_AGENTS" "$OC_HOME_RULES"
+mkdir -p "$OC_AGENTS_DIR" "$OC_RULES_DIR" "$OC_COMMANDS_DIR" "$OC_HOME_AGENTS" "$OC_HOME_RULES"
 
 # Agents (.opencode/agents/*.md)
 if [ -d "$REPO_DIR/.opencode/agents" ]; then
@@ -380,6 +381,16 @@ if [ -d "$REPO_DIR/.opencode/rules" ]; then
     ln -sf "$rule_file" "$OC_HOME_RULES/$rule_name"
   done
   ok "Rules linked ($(ls "$REPO_DIR/.opencode/rules"/*.md 2>/dev/null | wc -l) files)"
+fi
+
+# Commands (.opencode/commands-bughunt/*.md)
+if [ -d "$REPO_DIR/.opencode/commands-bughunt" ]; then
+  for cmd_file in "$REPO_DIR/.opencode/commands-bughunt"/*.md; do
+    [ -f "$cmd_file" ] || continue
+    cmd_name="$(basename "$cmd_file")"
+    ln -sf "$cmd_file" "$OC_COMMANDS_DIR/$cmd_name"
+  done
+  ok "Commands linked ($(ls "$REPO_DIR/.opencode/commands-bughunt"/*.md 2>/dev/null | wc -l) files)"
 fi
 
 # Skills symlink (for manual browsing)
