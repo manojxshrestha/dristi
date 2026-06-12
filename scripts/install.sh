@@ -385,15 +385,17 @@ fi
 # Commands (.opencode/commands-bughunt/*.md) → ~/.config/opencode/commands/
 OC_COMMANDS_DIR="$HOME/.config/opencode/commands"
 PROJECT_CMD_DIR="$REPO_DIR/.opencode/commands"
-mkdir -p "$OC_COMMANDS_DIR" "$PROJECT_CMD_DIR"
+HOME_CMD_DIR="$HOME/.opencode/commands"
+mkdir -p "$OC_COMMANDS_DIR" "$PROJECT_CMD_DIR" "$HOME_CMD_DIR"
 if [ -d "$REPO_DIR/.opencode/commands-bughunt" ]; then
   for cmd_file in "$REPO_DIR/.opencode/commands-bughunt"/*.md; do
     [ -f "$cmd_file" ] || continue
     cmd_name="$(basename "$cmd_file")"
-    ln -sf "$cmd_file" "$OC_COMMANDS_DIR/$cmd_name"
-    ln -sf "$cmd_file" "$PROJECT_CMD_DIR/$cmd_name"
+    cp "$cmd_file" "$OC_COMMANDS_DIR/$cmd_name"
+    cp "$cmd_file" "$PROJECT_CMD_DIR/$cmd_name"
+    cp "$cmd_file" "$HOME_CMD_DIR/$cmd_name"
   done
-  ok "Commands linked ($(ls "$REPO_DIR/.opencode/commands-bughunt"/*.md 2>/dev/null | wc -l) files)"
+  ok "Commands installed ($(ls "$REPO_DIR/.opencode/commands-bughunt"/*.md 2>/dev/null | wc -l) files)"
 fi
 
 # Skills symlink (for manual browsing)

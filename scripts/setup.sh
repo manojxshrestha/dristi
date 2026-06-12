@@ -379,17 +379,19 @@ if [ -d "$DST/.opencode/rules" ]; then
   done
 fi
 
-# Commands (.opencode/commands-bughunt/*.md) → project + global
+# Commands (.opencode/commands-bughunt/*.md) → all 3 locations
 if [ -d "$DST/.opencode/commands-bughunt" ]; then
   OC_CMD_DIR="$HOME/.config/opencode/commands"
   PROJECT_CMD_DIR="$DST/.opencode/commands"
-  mkdir -p "$OC_CMD_DIR" "$PROJECT_CMD_DIR"
+  HOME_CMD_DIR="$HOME/.opencode/commands"
+  mkdir -p "$OC_CMD_DIR" "$PROJECT_CMD_DIR" "$HOME_CMD_DIR"
   for cmd_file in "$DST/.opencode/commands-bughunt"/*.md; do
     [ -f "$cmd_file" ] || continue
     cmd_name="$(basename "$cmd_file")"
-    ln -sf "$cmd_file" "$OC_CMD_DIR/$cmd_name"
-    ln -sf "$cmd_file" "$PROJECT_CMD_DIR/$cmd_name"
-    ok "Command $cmd_name — linked"
+    cp "$cmd_file" "$OC_CMD_DIR/$cmd_name"
+    cp "$cmd_file" "$PROJECT_CMD_DIR/$cmd_name"
+    cp "$cmd_file" "$HOME_CMD_DIR/$cmd_name"
+    ok "Command $cmd_name — installed"
   done
 fi
 
