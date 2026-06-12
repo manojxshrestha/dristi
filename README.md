@@ -76,6 +76,23 @@ If you're running an internal red team that includes domain-takeover chains via 
 
 85 agents group into 10 pipeline agents + 48 `@hunt-*` + 27 specialty agents (including deep-think, search-agent, and Phase 8 exploitation). Agents auto-load when their description keywords match what you're describing to OpenCode.
 
+> **OpenCode vs Dristi:** `/plan` and `/build` are OpenCode's built-in modes. Dristi adds 12 pipeline phases below — invoke via `@agent-name` or let `@autopilot`/`@consult` run them sequentially.
+
+| # | Phase | Agent | What it does |
+|---|-------|-------|-------------|
+| 1 | **SCOPE** | `@scope` | Register target, scope boundaries, credentials |
+| 2 | **AUTH** | (autopilot) | Get tokens/cookies, detect WAF |
+| 3 | **INTEL** | `@pintel` | Passive OSINT: WHOIS, M365, cloud, spoof |
+| 4 | **RECON** | `@recon` | Subdomains, crawl, params, nuclei, secrets |
+| 5 | **SURFACE** | `@surface` | Classify endpoints, prioritize attack surface |
+| 6 | **HUNT** | `@hunt` | Test all 25 bug classes via 48 `@hunt-*` |
+| 7 | **DEEP-THINK** | `@deep-think` | *(conditional)* First-principles gap analysis |
+| 8 | **EXPLOIT** | `@exploit` | Deep-research exploitation + WAF bypass |
+| 9 | **SEARCH-AGENT** | `@search-agent` | *(conditional)* Re-dispatch for uncovered classes |
+| 10 | **CAPTURE** | `@capture` | Evidence collection, screenshots, redaction |
+| 11 | **VALIDATE** | `@validate` | Re-validate PoCs, 7-Question Gate |
+| 12 | **REPORT** | `@report` | Coverage check, generate report |
+
 ```mermaid
 graph TB
     classDef pipeline fill:#FFE4D1,stroke:#DA7756,stroke-width:2px,color:#080705
