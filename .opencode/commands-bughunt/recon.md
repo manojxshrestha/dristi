@@ -1,6 +1,6 @@
 ---
 name: recon
-description: Run full recon pipeline on a target — subdomain enum (crt.sh + subfinder), live host discovery (dnsx + httpx), URL crawl (katana + waybackurls), gf pattern classification, nuclei scan. Outputs to recon/<target>/ directory. Usage: /recon target.com
+description: Subdomain enum, live host discovery, URL crawl, nuclei scan, and attack surface classification
 ---
 
 # /recon

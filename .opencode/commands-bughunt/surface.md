@@ -1,6 +1,6 @@
 ---
 name: surface
-description: Show ranked attack surface for a target based on recon output + hunt memory. Invokes recon-ranker agent. Usage: /surface target.com
+description: Reads recon output and hunt memory to rank P1/P2/Kill-List attack surface for a target
 ---
 
 # /surface
