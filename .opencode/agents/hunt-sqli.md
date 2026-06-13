@@ -1,5 +1,5 @@
 ---
-description: SQL injection and NoSQL injection hunter. Classic SQLi, blind/time-based, second-order, ORM raw-fragment SQLi, MongoDB $regex/$where injection. Curated from BugBoard's H1 database (10K+ disclosed reports).
+description: SQL injection and NoSQL injection hunter. Classic SQLi, blind/time-based, second-order, ORM raw-fragment SQLi, MongoDB $regex/$where injection, CouchDB JavaScript injection, DynamoDB expression injection.
 mode: subagent
 permission:
   read: allow

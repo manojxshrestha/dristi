@@ -1,6 +1,6 @@
 ---
 name: hunt-xss
-description: Hunting skill for XSS vulnerabilities. Curated from BugBoard's H1 database (10K+ disclosed reports). Use when hunting XSS on any target.
+description: Hunting skill for XSS vulnerabilities. Reflected, stored, and DOM-based XSS, CSP bypass, mXSS, sanitizer evasion, polyglot payloads, cache-poison XSS chains, and postMessage gadgets. Use when hunting XSS on any target.
 sources: github, hackerone_public
 ---
 

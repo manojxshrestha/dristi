@@ -1,5 +1,5 @@
 ---
-description: Insecure Direct Object Reference hunter. UUID enumeration, sequential IDs, GraphQL IDOR, multi-tenant data access. Curated from BugBoard's H1 database (10K+ disclosed reports).
+description: Insecure Direct Object Reference hunter. UUID enumeration, sequential IDs, GraphQL IDOR, multi-tenant data access, mass assignment chaining, and parameter-based object reference bypass.
 mode: subagent
 permission:
   read: allow

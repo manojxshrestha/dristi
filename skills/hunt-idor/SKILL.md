@@ -1,6 +1,6 @@
 ---
 name: hunt-idor
-description: Hunting skill for IDOR vulnerabilities. Curated from BugBoard's H1 database (10K+ disclosed reports). Use when hunting idor on any target.
+description: Hunting skill for IDOR vulnerabilities. UUID enumeration, sequential IDs, GraphQL IDOR, multi-tenant data access, mass assignment chaining, and parameter-based object reference bypass. Use when hunting idor on any target.
 sources: github, hackerone_public
 ---
 

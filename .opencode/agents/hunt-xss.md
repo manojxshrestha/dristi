@@ -1,5 +1,5 @@
 ---
-description: Cross-Site Scripting hunter. Curated from BugBoard's H1 database (10K+ disclosed reports). XSS detection, CSP bypass, mXSS, sanitizer evasion, DOM XSS, cache-poison XSS chains, and postMessage gadgets.
+description: Cross-Site Scripting hunter. Reflected, stored, and DOM-based XSS, CSP bypass, mXSS, sanitizer evasion, polyglot payloads, cache-poison XSS chains, and postMessage gadgets.
 mode: subagent
 permission:
   read: allow

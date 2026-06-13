@@ -28,13 +28,13 @@ AGENTS_DIR = HOME / "dristi/.opencode/agents"
 PHASE_1 = {
     "hunt-xss": {
         "agent": "xss-hunter",
-        "description": "Cross-Site Scripting hunter. Curated from BugBoard's H1 database (10K+ disclosed reports). XSS detection, CSP bypass, mXSS, sanitizer evasion, DOM XSS, cache-poison XSS chains, and postMessage gadgets.",
+        "description": "Cross-Site Scripting hunter. Reflected, stored, and DOM-based XSS, CSP bypass, mXSS, sanitizer evasion, polyglot payloads, cache-poison XSS chains, and postMessage gadgets.",
         "wstg": "INPV-01 (Reflected XSS), INPV-02 (Stored XSS), CLNT-01 (DOM XSS)",
         "dristi_prompt": "input-validation.md, client-side.md",
     },
     "hunt-sqli": {
         "agent": "sqli-hunter",
-        "description": "SQL injection and NoSQL injection hunter. Classic SQLi, blind/time-based, second-order, ORM raw-fragment SQLi, MongoDB $regex/$where injection. Curated from BugBoard's H1 database (10K+ disclosed reports).",
+        "description": "SQL injection and NoSQL injection hunter. Classic SQLi, blind/time-based, second-order, ORM raw-fragment SQLi, MongoDB $regex/$where injection, CouchDB JavaScript injection, DynamoDB expression injection.",
         "wstg": "INPV-05 (SQL Injection), INPV-06 (NoSQL Injection)",
         "dristi_prompt": "input-validation.md",
     },
@@ -64,7 +64,7 @@ PHASE_1 = {
     },
     "hunt-idor": {
         "agent": "idor-hunter",
-        "description": "Insecure Direct Object Reference hunter. UUID enumeration, sequential IDs, GraphQL IDOR, multi-tenant data access. Curated from BugBoard's H1 database (10K+ disclosed reports).",
+        "description": "Insecure Direct Object Reference hunter. UUID enumeration, sequential IDs, GraphQL IDOR, multi-tenant data access, mass assignment chaining, and parameter-based object reference bypass.",
         "wstg": "ATHZ-01 (IDOR)",
         "dristi_prompt": "authorization.md",
     },
