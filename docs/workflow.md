@@ -258,7 +258,7 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 | WAF Fingerprints | `knowledge/waf/waf-knowledge-base/02-waf-fingerprints/` | 144 vendor fingerprints |
 | WAF Bypasses | `knowledge/waf/waf-knowledge-base/04-known-bypasses/` | 24 vendor bypass files |
 | WAF Evasion | `knowledge/waf/waf-knowledge-base/03-evasion-techniques/` | 21 evasion categories |
-| WAF Skills | `knowledge/waf/skills/` | 15 WAF skills (loadable via `skill()`) |
+| WAF Skills | `skills/waf-*/` | 15 WAF skills (loadable via `skill()`) |
 | Payloads | `knowledge/payloads/` | 64 PAT categories, 12 with test.sh |
 
 **MCP tools used:** `get_wstg_test`, `get_test_payloads`, `get_technique_guide`, `get_witness_payloads`, `get_evidence_checklist`, `get_slot_types`, `log_finding`, `create_exploitation_queue`, `validate_exploitation_queue`, `get_exploitation_queue`, `get_waf_bypass`, `identify_waf`, `track_test`, `add_graph_node`, `add_graph_edge`, `find_chains`, `validate_poc`

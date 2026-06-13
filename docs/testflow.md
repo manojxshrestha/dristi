@@ -177,7 +177,7 @@ If Cloudflare: redirect 80% of effort to API subdomain (api.*), use Playwright s
 | WAF Fingerprints | `knowledge/waf/waf-knowledge-base/02-waf-fingerprints/` | 144 vendor fingerprints |
 | WAF Bypasses | `knowledge/waf/waf-knowledge-base/04-known-bypasses/` | 24 vendor bypass files |
 | WAF Evasion | `knowledge/waf/waf-knowledge-base/03-evasion-techniques/` | 21 evasion categories |
-| WAF Skills | `knowledge/waf/skills/` | 15 loadable WAF skills |
+| WAF Skills | `skills/waf-*/` | 15 loadable WAF skills |
 | PAT Test Harnesses | `scripts/payloads/` | 12 test.sh for automated class testing |
 
 ---

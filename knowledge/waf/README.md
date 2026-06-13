@@ -12,7 +12,7 @@ This dataset contains comprehensive knowledge about Web Application Firewalls (W
   - `03-evasion-techniques/` - 21 categories of WAF evasion techniques
   - `04-known-bypasses/` - Documented payloads for bypassing 24+ WAF vendors
   - `05-tools-and-research/` - Tools, research papers, presentations, and scripts
-- **skills/** - Structured skill modules (like Dristi's skills/)
+- **skills/** (moved to `skills/waf-*/`) - Structured skill modules (like Dristi's skills/)
 - **configs/** - Configuration templates
 
 ## Contents
