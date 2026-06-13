@@ -2,7 +2,7 @@
 
 ## Overview
 
-Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive security: bug hunting, external red-team engagements, and authorized penetration tests. It provides the complete OWASP Web Security Testing Guide methodology as an MCP server with 86 tools, paired with 85 autonomous agents covering vulnerability hunting, enterprise platform attacks, and full engagement lifecycle management.
+Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive security: bug hunting, external red-team engagements, and authorized penetration tests. It provides the complete OWASP Web Security Testing Guide methodology as an MCP server with 86 tools, paired with 87 autonomous agents covering vulnerability hunting, enterprise platform attacks, and full engagement lifecycle management.
 
 **Goal:** Turn an LLM into an autonomous, methodical, reference-informed bug hunter that can run a full penetration test from scope to report — discovering subdomains, crawling endpoints, fingerprinting WAFs, dispatching per-class exploit agents, validating PoCs, capturing redacted evidence, and generating a submission-ready report — without human intervention between phases. The pipeline is modeled on real bug bounty workflows: triage by attack surface, read disclosed reports for technique guidance, bypass WAFs before exploiting, and run every finding through a 7-Question Gate before drafting.
 
@@ -11,7 +11,7 @@ Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive
 - **`@consult`** — interactive: same pipeline but pauses at every phase transition to present findings, suggest next steps, and ask for confirmation before proceeding. Best for learning or guided testing.
 
 **Stats:**
-- 86 MCP tools · 85 agents (48 hunt-* + 37 pipeline/specialty)
+- 86 MCP tools · 87 agents (54 hunt-* + 33 pipeline/specialty)
 - 13 WSTG categories · 96 test cases
 - 57 CLI tool wrapper scripts · 20 GF patterns for parameter discovery
 - 7-phase autonomous pipeline (autopilot)
@@ -25,7 +25,7 @@ Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive
 
 ```
 Layer 1: Methodology + Agents        — how to think (5-phase workflow, critical thinking)
-Layer 2: 48 hunt-* agents            — what to look for (per-class detection + bypass)
+Layer 2: 54 hunt-* agents            — what to look for (per-class detection + bypass)
 Layer 3: Enterprise attack chains    — what to hit on the perimeter (M365, Okta, K8s, VPN, IAM)
 Layer 4: Validation + Reporting      — how to ship it (7-Question Gate, VRT, redaction)
 ```
@@ -50,7 +50,7 @@ Layer 4: Validation + Reporting      — how to ship it (7-Question Gate, VRT, r
 │   ├── tool_verification.py    Tool output quality verification
 │   └── data/                   WSTG test cases, technique guides
 ├── .opencode/
-│   ├── agents/                 85 agent definition files
+│   ├── agents/                 87 agent definition files
 │   ├── commands-bughunt/       7 CLI entry points
 │   ├── rules/                  Agent permission rules
 │   └── .mcp.json               MCP server configuration
@@ -92,7 +92,7 @@ Layer 4: Validation + Reporting      — how to ship it (7-Question Gate, VRT, r
 | 1.75 Intel   | phase-intel.sh | WHOIS, M365/Azure, third-party misconfigs, spoof check, cloud bucket enum | — |
 | 2  RECON     | recon.md      | Subdomain enum, DNS, crawl, params, nuclei, secrets | phase_completed=1 |
 | 3  SURFACE   | surface.md    | Prioritize endpoints, rank attack surface | phase_completed=2 |
-| 4  HUNT      | hunt.md       | Dispatch 48 hunt-* sub-agents, test all bug classes | phase_completed=3 |
+| 4  HUNT      | hunt.md       | Dispatch 54 hunt-* sub-agents, test all bug classes | phase_completed=3 |
 | 4.25 DEEPTHINK | deepthink.md | (conditional) First-principles gap analysis when HUNT yields zero | — |
 | 4.5 EXPLOIT  | exploit.md    | Second-wave exploitation: PoC all findings, WAF bypass, chaining | — |
 | 4.75 SEARCH | search.md | (conditional) 13-resource retrieval when EXPLOIT stalls | — |
@@ -212,20 +212,20 @@ Autopilot is a thin orchestrator (248 lines) — phases 2-7 are dispatched via `
 
 ---
 
-## Agents (85)
+## Agents (87)
 
-### Pipeline Agents (13)
-autopilot, consult, capture, deepthink, exploit, hunt, pintel, recon, report, scope, search, surface, validate
+### Pipeline Agents (12)
+scope, auth, pintel, recon, surface, hunt, exploit, capture, validate, report, deepthink, search
 
-### Bug Class Agents (48 hunt-*)
+### Bug Class Agents (54 hunt-*)
 api-misconfig, aspnet, ato, auth-bypass, brute-force, business-logic, cache-poison, cicd, clickjacking, cloud-misconfig, cors, csrf, deserialization, dispatch, dom, file-upload, graphql, host-header, http-smuggling, idor, jwt-confusion, k8s, laravel, ldap, lfi, llm-ai, mfa-bypass, misc, nextjs, nodejs, nosqli, ntlm-info, oauth, open-redirect, race-condition, rce, saml, session, sharepoint, source-leak, springboot, sqli, ssrf, ssti, subdomain, tls-network, websocket, xss, xxe
 
-### Specialty Agents (22)
-apk-redteam-pipeline, bb-local-toolkit, bb-methodology, bug-bounty, bugcrowd-reporting, cloud-iam-deep, enterprise-vpn-attack, evidence-hygiene, m365-entra-attack, meme-coin-audit, mid-engagement-ir-detection, offensive-osint, okta-attack, osint-methodology, redteam-mindset, redteam-report-template, report-writing, supply-chain-attack-recon, triage-validation, web2-recon, web2-vuln-classes, web3-audit
+### Orchestrator Agents (2)
+autopilot — Fully autonomous 12-phase pipeline runner
+consult — Interactive pipeline with user approval and suggestions
 
-### Intelligence-Fallback Agents (2)
-deepthink — Strategic reasoning, first-principles analysis, persistent issue tracking
-search — Real-time research, CVE/bypass/report retrieval, gap documentation
+### Specialty Agents (21)
+apk-redteam-pipeline, bug-bounty, bugcrowd-reporting, cloud-iam-deep, credential-attack, enterprise-vpn-attack, evidence-hygiene, m365-entra-attack, meme-coin-audit, offensive-osint, okta-attack, osint-methodology, redteam-mindset, redteam-report-template, report-writing, supply-chain-attack-recon, triage-validation, web2-recon, web2-vuln-classes, web3-audit
 
 ### Agent Reference Sections
 Every hunt agent includes:

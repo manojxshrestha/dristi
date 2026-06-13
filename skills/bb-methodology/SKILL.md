@@ -151,7 +151,12 @@ Before touching any tool:
 
 1. **Define**: "Today I target [feature/domain] to achieve [C/I/A/ATO/RCE]"
 2. **Select**: Choose 1-2 vuln classes (IDOR, XSS, SSRF, etc.)
-3. **Execute**: Focus ONLY on selected techniques
+3. **Identity**: Anonymous or authenticated? If the bugs you're hunting need a
+   session (IDOR, BOLA, privilege escalation, auth bypass, mass-assignment),
+   load auth **once** at session start. Then every downstream probe tool sends
+   those headers automatically and findings are stamped with a stable
+   `session_id` hash for cross-identity verification.
+4. **Execute**: Focus ONLY on selected techniques
 
 **Route selection -- Wide or Deep?**
 
@@ -192,6 +197,7 @@ Google Dorks -> JS file download -> Hidden param discovery -> API mapping
 
 **Checklist:**
 - [ ] Map all endpoints (Burp/Caido sitemap + JS analysis)
+- [ ] **Classify endpoints into functional groups** (auth, profile, api, admin, search, file, payment, infra) by path prefix — endpoints in the same group should be tested as a unit
 - [ ] Identify auth model (cookie, JWT, OAuth, SAML?)
 - [ ] Find business-critical flows (payment, registration, password reset, data export)
 - [ ] Download and analyze JS files for hidden routes, secrets, logic
@@ -388,10 +394,13 @@ What did you find?
     -> Find connector gadget for chain
 ```
 
+**Multi-auth-context probing:** For every confirmed finding, replay the exploit with ALL available auth contexts (anonymous, user-1, user-2, admin). A vulnerability that works in one session might not work in another — and a vulnerability that requires a specific privilege level is still reportable if the attacker can obtain that privilege. Auth-context rotation also surfaces session-isolation gaps where one user's token grants access to another user's data.
+
 **After proving impact, check:**
 - [ ] Can attack work with 0-1 clicks? (minimize prerequisites)
 - [ ] Does it affect all users or specific role?
 - [ ] What's the business $ impact?
+- [ ] **Did you try this finding with ALL available sessions?** If not, run it through each auth context before moving on.
 
 ### Phase 5: VALIDATE & REPORT
 

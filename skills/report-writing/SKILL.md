@@ -492,6 +492,26 @@ Authorization: Bearer ACCOUNT_A_TOKEN
 
 ---
 
+## PERSISTENCE RULE
+
+Every report-writing session must leave a complete finding folder on disk before closing. Silently holding findings in memory risks losing evidence if interrupted.
+
+**Finding folder structure:**
+```
+findings/<program>/<finding-slug>/
+  report.md            # final report draft
+  request.txt          # curl or raw HTTP request
+  response.txt         # full response body
+  poc.png / poc.har    # evidence screenshot / HAR
+```
+
+This serves three purposes:
+1. **Survivability** — session crash doesn't lose days of work
+2. **Reproducibility** — triager can re-run from the saved request
+3. **Re-review** — come back fresh next session and verify the finding still holds
+
+---
+
 ## Operator Notes
 
 > Engagement-derived additions to the vendored foundation. Wisdom from real

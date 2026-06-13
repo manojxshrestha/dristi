@@ -62,7 +62,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Auth-aware hunting: load BBHUNT_AUTH_HEADERS into BB_AUTH_ARGS.
-# shellcheck source=tools/_auth_helper.sh
+# shellcheck source=./_auth_helper.sh
 . "$SCRIPT_DIR/_auth_helper.sh"
 bb_auth_active && bb_auth_banner
 

@@ -6,6 +6,7 @@
 |-------|-------------|
 | `@bb-methodology` | Start of every engagement. 5-phase workflow: recon → mapping → vuln discovery → exploitation → report. Selects mode (bounty/redteam/pentest/audit). |
 | `@bug-bounty` | General bug bounty workflow. Program selection, duplicate detection, payout optimization. Use after scope is confirmed. |
+| `credential-attack` (skill) | Load via `skill("credential-attack")` when a login endpoint is in scope and program policy permits password testing. 4-stage pipeline: wordlist-gen (cewler → hashcat rules) → breach-check (HIBP k-anonymity) → OSINT employees (theHarvester → username-anarchy) → spray (http-form / oauth / o365 / okta). |
 | `@hunt-dispatch` / `@hunt-dispatcher` | When you have a target but don't know which hunt agent to use. Fingerprints tech stack, routes to the correct agent. |
 | `@redteam-mindset` | Before any engagement. Sets operational discipline, anti-patterns, burnout avoidance. Read once per engagement. |
 | `@web2-vuln-classes` | Reference for 20 bug classes with root causes, bypass tables, exploit techniques. Use when learning a new vuln class or writing reports. |

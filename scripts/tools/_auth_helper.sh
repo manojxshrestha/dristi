@@ -1,58 +1,61 @@
 #!/bin/bash
-# source-only auth loader for BBHUNT_AUTH_HEADERS
+# =============================================================================
+# Auth-helper — sourced by recon_engine.sh, vuln_scanner.sh, full_hunt.sh.
+#
+# Reads BBHUNT_AUTH_HEADERS (newline-separated "Name: value" entries) and
+# BBHUNT_SESSION_ID from the environment, exposes them as:
+#
+#   BB_AUTH_ARGS=(-H 'Name1: value1' -H 'Name2: value2' ...)    # bash array
+#   BB_AUTH_SESSION_ID="<12-char-hex>"                          # safe to log
+#
+# Callers splat the array into curl/httpx/katana/nuclei/ffuf invocations:
+#
+#   curl -sk ${BB_AUTH_ARGS[@]+"${BB_AUTH_ARGS[@]}"} "$url"
+#   nuclei -l "$list" ${BB_AUTH_ARGS[@]+"${BB_AUTH_ARGS[@]}"} -o "$out"
+#
+# The verbose expansion is intentional: bash 3.2 on macOS aborts under set -u
+# when expanding an empty array as "${BB_AUTH_ARGS[@]}".
+# Empty session = empty array = no behavior change for anonymous hunts.
+# Compatible with bash 3.2 (macOS default).
+# =============================================================================
 
+# Guard: source-only, no execution.
 [ "${BASH_SOURCE[0]}" = "$0" ] && {
-    echo "source me, don't run me" >&2
+    echo "auth_helper.sh must be sourced, not executed" >&2
     return 1 2>/dev/null || exit 1
 }
 
 BB_AUTH_ARGS=()
 BB_AUTH_SESSION_ID="${BBHUNT_SESSION_ID:-}"
 
-_bb_log() {
-    [ -n "${BB_AUTH_DEBUG:-}" ] && echo "[auth] $*" >&2
-}
-
 if [ -n "${BBHUNT_AUTH_HEADERS:-}" ]; then
-    declare -a _tmp=()
-    _cnt=0 _bad=0
-
-    while IFS= read -r _line; do
-        case "$_line" in ''|'#') continue ;; esac
-        [[ "$_line" == *$'\r'* ]] && { _bb_log "skip CR: ${_line//$'\r'/\\r}"; ((_bad++)); continue; }
-        [[ "$_line" != *":"* ]] && { _bb_log "skip no colon: $_line"; ((_bad++)); continue; }
-        _tmp+=(-H "$_line")
-        ((_cnt++))
+    while IFS= read -r _bb_h; do
+        case "$_bb_h" in
+            ''|'#'*) continue ;;
+        esac
+        case "$_bb_h" in
+            *$'\r'*) continue ;;
+        esac
+        BB_AUTH_ARGS+=(-H "$_bb_h")
     done <<< "$BBHUNT_AUTH_HEADERS"
+    unset _bb_h
 
-    BB_AUTH_ARGS=("${_tmp[@]}")
-    [ $_bad -gt 0 ] && _bb_log "skipped $_bad invalid, $_cnt valid"
-    unset _tmp _line _cnt _bad
-
-    if [ -z "$BB_AUTH_SESSION_ID" ] && [ ${#BB_AUTH_ARGS[@]} -gt 0 ]; then
-        _input=""
-        for ((i=1; i<${#BB_AUTH_ARGS[@]}; i+=2)); do
-            _input+="${BB_AUTH_ARGS[$i]}"$'\n'
-        done
-        _input="${_input%$'\n'}"
-        _hash=""
-        if command -v shasum >/dev/null; then
-            _hash=$(printf '%s' "$_input" | shasum -a 256 2>/dev/null | cut -c1-12)
-        elif command -v sha256sum >/dev/null; then
-            _hash=$(printf '%s' "$_input" | sha256sum 2>/dev/null | cut -c1-12)
-        elif command -v cksum >/dev/null; then
-            _hash=$(printf '%s' "$_input" | cksum | cut -d' ' -f1 | cut -c1-12)
+    if [ -z "$BB_AUTH_SESSION_ID" ]; then
+        _bb_hash=""
+        if command -v shasum >/dev/null 2>&1; then
+            _bb_hash=$(printf '%s' "$BBHUNT_AUTH_HEADERS" | LC_ALL=C sort | shasum -a 256 2>/dev/null | cut -c1-12)
+        elif command -v sha256sum >/dev/null 2>&1; then
+            _bb_hash=$(printf '%s' "$BBHUNT_AUTH_HEADERS" | LC_ALL=C sort | sha256sum 2>/dev/null | cut -c1-12)
         fi
-        [ -n "$_hash" ] && BB_AUTH_SESSION_ID="$_hash" && export BBHUNT_SESSION_ID="$_hash"
-        unset _input _hash
+        BB_AUTH_SESSION_ID="$_bb_hash"
+        export BBHUNT_SESSION_ID="$_bb_hash"
+        unset _bb_hash
     fi
 fi
 
 bb_auth_banner() {
     if [ -n "$BB_AUTH_SESSION_ID" ]; then
         echo "[auth] session=$BB_AUTH_SESSION_ID headers=$(( ${#BB_AUTH_ARGS[@]} / 2 ))"
-    else
-        echo "[auth] inactive"
     fi
 }
 

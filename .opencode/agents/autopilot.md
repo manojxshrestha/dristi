@@ -140,10 +140,11 @@ task(
 1. Load endpoint_map_raw deliverable via wstg_get_deliverable()
 2. Read raw recon outputs from scripts/recon/<domain>/
 3. Build Tier 0 (public+input), Tier 1 (auth-gated), Tier 2 (infra) lists
-4. Call wstg_prioritize_endpoints() with endpoint data
-5. Save endpoint_map_ranked deliverable via wstg_save_deliverable()
-6. Call wstg_phase_gate_check(phase_completed=2)
-7. Call wstg_save_checkpoint()
+4. Classify endpoints into functional groups (auth, profile, api, admin, search, file, payment, infra) by path prefix
+5. Call wstg_prioritize_endpoints() with endpoint data + group membership
+6. Save endpoint_map_ranked deliverable via wstg_save_deliverable()
+7. Call wstg_phase_gate_check(phase_completed=2)
+8. Call wstg_save_checkpoint()
 
 Return: Tier 0 count, Tier 1 count, gate result (PASS/FAIL), top 5 priority endpoints.",
   subagent_type="surface"
@@ -164,11 +165,18 @@ task(
 1. Load endpoint_map_ranked deliverable via wstg_get_deliverable()
 2. Load auth_analysis deliverable via wstg_get_deliverable()
 3. Run Step 4.0 entry point testing (API fuzzing, method override, content-type switch, GraphQL probing, race conditions, UUID analysis, JWT manipulation)
-4. Test ALL applicable bug classes: XSS, SQLi, SSRF, IDOR, SSTI, LFI, RCE, auth bypass, API misconfig, GraphQL, file upload, race condition, OAuth, CORS, CSRF, open redirect, business logic, JWT confusion, source leak, NoSQLi, XXE, host header, etc.
-5. For each confirmed finding: wstg_validate_poc() + wstg_log_finding() + wstg_track_test()
-6. Check chaining: find_chains() + wstg_findings_add_chain()
-7. Call wstg_phase_gate_check(phase_completed=3)
-8. Call wstg_save_checkpoint()
+4. **Group-based testing:** Endpoints are pre-classified into functional groups (auth, profile, api, admin, search, file, payment, infra). For each group, pick 1-2 representative endpoints and test ALL applicable bug classes. If a bug class is confirmed in a representative, follow up on non-representative siblings. If all representatives are clean, skip that bug class for the whole group.
+5. **Parallel: credential-attack** — if login surface found AND program policy permits password testing, run:
+   - `scripts/tools/wordlist_engine.sh <target>` → website-crawled wordlist
+   - `scripts/tools/breach_checker.py <wordlist>` → HIBP-ranked (k-anonymity)
+   - `scripts/tools/osint_employees.sh <target>` → real usernames from OSINT
+   - `scripts/tools/spray_orchestrator.sh <url> --mode http-form` → low-rate spray
+   - See `skill("credential-attack")` for full methodology + legal guardrails
+6. Test ALL applicable bug classes: XSS, SQLi, SSRF, IDOR, SSTI, LFI, RCE, auth bypass, API misconfig, GraphQL, file upload, race condition, OAuth, CORS, CSRF, open redirect, business logic, JWT confusion, source leak, NoSQLi, XXE, host header, etc.
+7. For each confirmed finding: wstg_validate_poc() + wstg_log_finding() + wstg_track_test()
+8. Check chaining: find_chains() + wstg_findings_add_chain()
+9. Call wstg_phase_gate_check(phase_completed=3)
+10. Call wstg_save_checkpoint()
 
 Return: findings summary by severity (Critical/High/Medium/Low/Info), number of classes tested, gate result, top 3 chaining opportunities.",
   subagent_type="hunt"
@@ -179,6 +187,7 @@ Return: findings summary by severity (Critical/High/Medium/Low/Info), number of 
 - Check findings: zero findings? tools missing? knowledge gaps? dead-ends?
 - If ANY of those conditions are true → dispatch Phase 7 (deepthink) first, then gate Phase 6
 - If all findings confirmed and no gaps → skip Phase 7, gate Phase 6 directly
+- **Ralph Wiggum loop — exhaustive coverage gate:** Every endpoint from the ranked deliverable must have been tested on at least one bug class. Cross-reference `track_test()` endpoints_tested against the endpoint_map_ranked deliverable. If any endpoint was missed, flag it and require dispatch-back to Phase 6 with explicit instructions to cover the gap. Do not pass the phase gate with untested endpoints.
 - `wstg_phase_gate_check(phase_completed=3)` → PASS → checkpoint → proceed.
 
 ## Phase 7: DEEPTHINK (conditional dispatch — gap analysis)
@@ -217,10 +226,11 @@ task(
 2. Classify each finding to a vulnerability class (XSS, SQLi, SSRF, SSTI, CMDi, etc.)
 3. For each unique class, load technique guide: wstg_get_technique_guide(<CATEGORY>)
 4. For EACH finding, attempt exploitation:
-   a. wstg_validate_poc() with class-specific payloads
-   b. If blocked → wstg_get_waf_bypass() → retry with bypass
-   c. If success → wstg_update_finding() with evidence + poc_output
-   d. If blocked after exhaustive bypass → document as potential
+   a. Replay with ALL available auth contexts — if multiple sessions exist (anonymous, user-1, user-2, admin), try the same exploit with each session to find auth-gated exploitation paths
+   b. wstg_validate_poc() with class-specific payloads
+   c. If blocked → wstg_get_waf_bypass() → retry with bypass
+   d. If success → wstg_update_finding() with evidence + poc_output
+   e. If blocked after exhaustive bypass → document as potential
 5. After individual exploitation: wstg_findings_find_chains()
 6. Upgrade severities for chained findings
 7. Track all tests via wstg_track_test()
@@ -236,6 +246,7 @@ Return: number of findings exploited, number blocked (potential), number of chai
 - Check for WAF bypass failures or stale technique guides
 - If WAF bypasses all failed or guides were missing → dispatch Phase 9 (search)
 - Otherwise → `wstg_save_checkpoint()` → proceed to Phase 10
+- **Exhaustive exploitation gate:** Cross-reference every confirmed finding — each must have either a validated PoC (success) or documented bypass exhaustion (potential). If any finding was skipped, flag it and re-dispatch Phase 8 with explicit instructions to cover the gap.
 
 ## Phase 9: SEARCH (conditional dispatch — research gaps)
 

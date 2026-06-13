@@ -97,6 +97,56 @@ Check the NEVER SUBMIT list below. If it's on this list without a chain → **KI
 
 ---
 
+### Q8: Identity check — which session found this, and does it survive?
+
+For any finding made under an authenticated hunt, record the answer to each:
+
+```
+1. Session ID:        [stable session_id hash from audit log]
+2. Identity:          [low-priv user A / high-priv user B / API key / etc.]
+3. Anonymous repro:   Does the same request work with NO auth header?
+4. Cross-identity:    Does it work under session B with the same data scope?
+5. Stale-cred repro:  Does a logged-out / expired session still get the data?
+```
+
+Why this matters:
+- **IDOR / BOLA**: must work with session A reading session B's data — if it
+  only works with no auth, that's "missing auth" not IDOR (different bug,
+  different severity).
+- **Priv-esc**: must work with low-priv session reading high-priv data — if
+  both sessions can already see it, no bug.
+- **Auth bypass**: must work *without* a valid session — if it stops working
+  when you log out, you've found a permissions issue, not a bypass.
+- **Always check both directions**: a finding that only reproduces under
+  one identity is often a real, scoped permission boundary, not a vuln.
+
+If you cannot answer the identity questions, treat the finding as unproven.
+
+---
+
+## COMMON N/A CLASSES — KILL SIGNALS
+
+These pass basic gut-check but consistently come back N/A. Each row has a **specific signal** that tells you to kill it *before* writing the report.
+
+| Finding | Why it N/As | Kill signal — if you see this, stop |
+|---|---|---|
+| Reflected XSS | CSP blocks execution; sandbox context; no session access | Dalfox found `alert(1)` but no cookie in response; `Content-Security-Policy` header present |
+| SSRF — DNS callback only | No internal data reached; programs require HTTP response with data | Interactsh/Collaborator got DNS ping but no HTTP reply with internal content |
+| IDOR — own data only | Attacker == victim; no cross-account access proven | User ID in response matches your own test account |
+| SQLi — error message only | WAF filtered or error is cosmetic; no data exfiltrated | Got DB error string but no actual table rows returned |
+| CORS wildcard `*` | `*` blocks `withCredentials`; no PII actually exfiltrated | `Access-Control-Allow-Credentials: true` absent; credentialed request returns 403 |
+| Rate limit missing — non-sensitive endpoint | Program only pays for rate-limit on auth/payment/OTP surfaces | Endpoint handles search, contact form, or sits behind Cloudflare |
+| Nuclei `info` template match | Version detection, not exploitation | Template severity is `info`; no CVE PoC executed against live service |
+| MFA rate limit (no lockout) | Impact depends on OTP brute-force succeeding — it usually doesn't | 15 requests returned 200 but no OTP code was accepted |
+| Open redirect alone | Redirect is informational without token theft chain | No OAuth `redirect_uri` parameter; no auth code or token in the redirected URL |
+| Auth bypass — admin precondition | Requires compromised admin to trigger; attacker can't get there | "Admin can do X on behalf of user" — attacker must already be admin |
+| XSS via `alert(document.domain)` | Not proof of session theft | PoC shows domain popup only; no `document.cookie` exfil, no event listener |
+| SAML metadata exposed | Disclosure only — aids attack but is not standalone impact | No private key or signing cert extracted; metadata is publicly documented by IdP |
+
+**Decision rule:** if your finding matches a kill signal → classify as `[INFORMATIONAL]`, do **not** run `/validate`, move on.
+
+---
+
 ## 4 PRE-SUBMISSION GATES
 
 Run in sequence. ALL 4 must PASS.

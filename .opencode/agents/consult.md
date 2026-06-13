@@ -45,8 +45,9 @@ Same P1–P12 pipeline as `/autopilot`, but **you ask the user for approval at e
 **You ask:** "Recon complete. Found <N> live hosts, <M> endpoints with params. Want me to rank the attack surface next?"
 
 ### Phase 5: SURFACE (inline)
-**You do:** Load `endpoint_map_raw`, build Tier 0/1/2, save `endpoint_map_ranked`.
+**You do:** Load `endpoint_map_raw`, build Tier 0/1/2, **classify into functional groups** (auth, profile, api, admin, search, file, payment, infra), save `endpoint_map_ranked`.
 **Show:** "Tier 0 (public + input): <N> endpoints — test these first. Tier 1 (auth-gated): <M> endpoints."
+**Suggest:** "Endpoints classified into <N> functional groups. Testing by group (1-2 reps per group) reduces redundant probes without losing coverage."
 **Suggest:** "Next I'll start hunting. I'd recommend starting with the highest-impact classes:
    1. SSRF — <N> candidate endpoints
    2. SQLi — <M> candidate endpoints
@@ -62,9 +63,14 @@ Same P1–P12 pipeline as `/autopilot`, but **you ask the user for approval at e
    - <class-2> — <reason>
    - <class-3> — <reason>
    Want me to run all applicable classes or focus on specific ones?"
+**Also suggest group-based testing:**
+- "Endpoints are classified into <N> functional groups. Testing by group (1-2 reps per group) means we don't need to probe every sibling endpoint for every bug class — if all reps are clean for a class, the whole group is skipped for that class."
+**Also suggest credential-attack if login surface found:**
+- "I also noticed a login endpoint at <url>. If the program permits password testing, credential-attack is a parallel branch — wordlist-gen → breach-check → OSINT employees → low-rate spray. See the `credential-attack` skill for legal guardrails."
 **After dispatch returns, show:** "Findings: <N> Critical, <M> High, <P> Medium"
 **Check for gaps:** zero findings? missing tools? knowledge dead-ends? If yes → suggest deepthink.
-**You ask:** "Full hunt complete. <N> findings confirmed. <GAPS_DETECTED> Want me to run gap analysis first (deepthink) or jump straight to exploitation?"
+**Ralph Wiggum loop — coverage validation:** Before passing the gate, cross-reference `track_test()` endpoints_tested against the endpoint_map_ranked deliverable. If any endpoint has no `track_test()` coverage, flag it: "Endpoint <N> at <url> was never tested. Re-dispatch to cover it before moving on?"
+**You ask:** "Full hunt complete. <N> findings confirmed. <GAPS_DETECTED> <COVERAGE_GAPS> Want me to run gap analysis first (deepthink) or jump straight to exploitation?"
 
 ### Phase 7: DEEPTHINK (conditional — gap analysis)
 
@@ -90,10 +96,11 @@ Return: issues found, chains discovered, recommended actions.",
 ### Phase 8: EXPLOIT (dispatch via task)
 **You do:** Launch via `task(subagent_type="exploit", ...)` to attempt second-wave exploitation on all findings.
 **Before dispatch, suggest:**
-- "Exploitation phase will attempt PoC for each finding using class-specific payloads and technique guides. This may produce screenshots, collaborator callbacks, or data extraction."
+- "Exploitation phase will attempt PoC for each finding using class-specific payloads, technique guides, and **all available auth contexts** (anonymous, user-1, user-2, admin). Findings will be replayed across sessions to surface privilege-dependent exploitation paths and session-isolation gaps."
 **After dispatch returns, show:** "Exploited: <N> findings | Blocked (potential): <M> | Chains found: <P>"
 **Check for stale payloads/CVEs:** WAF bypasses all failed? CVEs missing for target version? If yes → suggest search.
-**You ask:** "Exploitation complete. <WAF_FAILURES> Want to run research (search) to find current bypasses/CVEs, or proceed to capture?"
+**Exhaustive exploitation gate:** Verify every confirmed finding was either exploited (PoC) or exhausted (bypass attempts documented). If any finding was skipped, suggest re-dispatch.
+**You ask:** "Exploitation complete. <WAF_FAILURES> Every finding was attempted. Want to run research (search) to find current bypasses/CVEs, or proceed to capture?"
 
 ### Phase 9: SEARCH (conditional — research gaps)
 

@@ -1,6 +1,6 @@
 # Test Flow — Mastering Dristi
 
-All interactions use `@agent-name` — no `/commands`. 11 pipeline agents on Tab: `@autopilot` → `@consult` → `@scope` → `@pintel` → `@recon` → `@surface` → `@hunt` → `@exploit` → `@capture` → `@validate` → `@report`. 48 specialized `@hunt-*` agents + 24 specialty agents (83 total) via `@`.
+All interactions use `@agent-name` — no `/commands`. 12 pipeline agents on Tab: `@autopilot` → `@consult` → `@scope` → `@pintel` → `@recon` → `@surface` → `@hunt` → `@deepthink` → `@exploit` → `@search` → `@capture` → `@validate` → `@report`. 54 specialized `@hunt-*` agents + 21 specialty agents (87 total) via `@`.
 
 ## Guided Flow
 
@@ -289,8 +289,8 @@ Dristi covers the full red-team kill chain — from perimeter recon through expl
 | `@apk-redteam-pipeline` | APK acquisition (Play Store), jadx/apktool decompile, secret/JWT/Firebase grep, Frida instrumentation, cert pinning bypass, intent analysis |
 | `@supply-chain-attack-recon` | Dependency confusion, package squatting, typosquatting, GH Actions injection, SBOM mining, registry poisoning |
 
-### Web App Exploitation (48 `@hunt-*` agents + 11 pipeline + 24 specialty)
-Every OWASP-classified bug class: XSS (174 H1 reports), SQLi, SSRF (11 IP bypass techniques), IDOR, RCE (67 reports), SSTI (Jinja2/Twig/Freemarker/ERB/Spring), GraphQL, race conditions, deserialization (Java/PHP/.NET/pickle), HTTP smuggling (CL.TE/TE.CL/H2.CL), cache poisoning, JWT confusion, prototype pollution, XXE, WebSocket abuse, CORS, CSRF, file upload (10 bypass techniques), SAML (XSW1–XSW8), OAuth/OIDC, NoSQLi, ATO (9 paths), MFA bypass (7 patterns), business logic, source leak, Laravel/Spring Boot/Next.js/ASP.NET/Node.js framework abuse, and more.
+### Web App Exploitation (54 `@hunt-*` agents + 12 pipeline + 21 specialty)
+Every OWASP-classified bug class: XSS (reflected/stored/DOM/mXSS/CSP bypass), SQLi (classic/blind/out-of-band), SSRF (11 IP bypass techniques), IDOR (UUID/sequential/GraphQL), RCE (OS command/SSTI→RCE/deserialization), SSTI (Jinja2/Twig/Freemarker/ERB/Spring), GraphQL, race conditions, deserialization (Java/PHP/.NET/pickle), HTTP smuggling (CL.TE/TE.CL/H2.CL), cache poisoning, JWT confusion, prototype pollution, XXE, WebSocket abuse, CORS, CSRF, file upload (10 bypass techniques), SAML (XSW1–XSW8), OAuth/OIDC, NoSQLi, ATO (9 paths), MFA bypass (7 patterns), business logic, source leak, Laravel/Spring Boot/Next.js/ASP.NET/Node.js framework abuse, and more.
 
 ### Post-Exploitation & Reporting
 | Agent | Capability |

@@ -578,7 +578,7 @@ echo -e "${BOLD}${G}
 echo ""
 echo "  Commands:   dristi, dristi-server, dristi-update, dristi-recon"
 echo "  OpenCode:   opencode  (launches with Dristi pre-configured)"
-echo "  Agents:     85 OpenCode agents"
+  echo "  Agents:     87 OpenCode agents"
 echo "  Tools:      $($QUICK && echo 'skipped (re-run without --quick)' || echo '50+ security tools')"
 echo ""
 echo "  Quick start:"

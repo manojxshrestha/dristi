@@ -26,7 +26,7 @@ BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
 # Auth-aware hunting: load BBHUNT_AUTH_HEADERS / BBHUNT_SESSION_ID into
 # BB_AUTH_ARGS=(-H 'Name: val' ...). Empty session = no-op.
-# shellcheck source=tools/_auth_helper.sh
+# shellcheck source=./_auth_helper.sh
 . "$(dirname "$0")/_auth_helper.sh"
 
 # Domain-list mode: if the target is a readable regular file, treat its

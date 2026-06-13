@@ -4,14 +4,18 @@
 
 Dristi uses a **triage-first, reference-informed** testing strategy. Not every endpoint gets every test — the pipeline classifies endpoints by risk, checks disclosed report patterns for the target's tech stack, and dispatches per-class hunt agents with WSTG methodology, real-world report references, and WAF-aware payload selection.
 
-85 agents total: 48+ specialized `@hunt-*` agents + 37 pipeline/specialty agents.
+87 agents total: 54 specialized `@hunt-*` agents + 33 pipeline/specialty agents.
 
 ---
 
-## 8-Phase Pipeline
+## 12-Phase Pipeline
 
 ```
 SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) → [DEEPTHINK(4.25)] → EXPLOIT(4.5) → [SEARCH(4.75)] → CAPTURE(5) → VALIDATE(6) → REPORT(7)
+                                                              ├─ group-based testing (1-2 reps per functional group)
+                                                              ├─ Ralph Wiggum loop: every endpoint covered before gate
+                                                              ├─ (parallel) credential-attack
+                                                              └─ multi-auth-context probing (exploit: replay with all sessions)
 ```
 
 ### Phase P1: SCOPE
@@ -48,13 +52,17 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 ### Phase P3: SURFACE
 - Load `endpoint_map_raw` deliverable
 - Classify into Tiers (T0: public+input, T1: auth+input, T2: infra)
+- **Classify into functional groups** (auth, profile, api, admin, search, file, payment, infra) by path prefix — see [Group-Based Testing](#group-based-testing)
 - Risk-score each endpoint via `prioritize_endpoints()`
-- Save `endpoint_map_ranked` deliverable
+- Save `endpoint_map_ranked` deliverable with group membership
 
 ### Phase P4: HUNT
 - Load `endpoint_map_ranked` + `auth_analysis`
 - **Deep testing** — API fuzzing, method override, content-type switch, GraphQL probing, race conditions, UUID analysis, JWT manipulation
+- **Group-based testing** — For each functional group, pick 1-2 representative endpoints and test ALL applicable bug classes. If clean for a class, skip the whole group. If vulnerable, follow up on non-representative siblings.
 - **WAF handling** — apply vendor-specific bypass payloads from `get_waf_bypass()` + `knowledge/waf/`
+- **Parallel: credential-attack** — if login endpoint found and program permits, run `skill("credential-attack")`: wordlist-gen → breach-check → osint-employees → spray. See `scripts/tools/wordlist_engine.sh`, `breach_checker.py`, `osint_employees.sh`, `spray_orchestrator.sh`.
+- **Ralph Wiggum loop** — Before passing the HUNT gate, cross-reference every endpoint in the ranked deliverable against `track_test()` calls. Any endpoint with zero coverage triggers a re-dispatch.
 - For each endpoint tier, dispatch applicable `@hunt-*` agents:
   - Tier 0 endpoints → full battery (XSS, SSRF, SQLi, SSTI, CMDI, IDOR, CSRF, etc.)
   - Tier 1 endpoints → auth-dependent tests (ATO, IDOR, OAuth, JWT, business logic)
@@ -78,6 +86,7 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - Load technique guide per class: `get_technique_guide()`
 - Load payload library from `knowledge/payloads/<Class>/`
 - Load bypass techniques from hunt agent files
+- **Multi-auth-context probing:** For each finding, replay the exploit with ALL available sessions (anonymous, user-1, user-2, admin) — a vulnerability that works in one auth context may not work in another, and session-isolation gaps only surface through cross-context testing
 - Attempt exploitation in escalating tiers:
   - Tier 1: Confirm reflection/execution
   - Tier 2: Demonstrate impact (data extraction, command execution, access)
@@ -86,6 +95,7 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - Record results via `update_finding()` with evidence + poc_output
 - Check cross-class chains: `find_chains()` → `findings_add_chain()`
 - Upgrade severities for chained findings
+- **Exhaustive exploitation gate:** Before moving on, verify every confirmed finding was either exploited (PoC success) or exhausted (bypass attempts documented). No finding is skipped without a decision.
 
 ### Phase P4.75: SEARCH (conditional)
 
@@ -198,19 +208,22 @@ For each endpoint tier:
     │                   @hunt-host-header, @hunt-file-upload, @hunt-nosqli,
     │                   @hunt-ldap, @hunt-race-condition, @hunt-cache-poison,
     │                   @hunt-dom, @hunt-source-leak, @hunt-http-smuggling,
-    │                   @hunt-deserialization, @hunt-lfi
+    │                   @hunt-deserialization, @hunt-lfi,
+    │                   @hunt-crlf, @hunt-http-param-pollution,
+    │                   @hunt-prototype-pollution
     │
     ├── T1 → dispatch: @hunt-ato, @hunt-oauth, @hunt-jwt-confusion,
     │                   @hunt-session, @hunt-business-logic, @hunt-mfa-bypass,
     │                   @hunt-auth-bypass, @hunt-api-misconfig, @hunt-idor,
     │                   @hunt-brute-force, @hunt-aspnet, @hunt-laravel,
     │                   @hunt-springboot, @hunt-sharepoint, @hunt-nodejs,
-    │                   @hunt-nextjs, @hunt-saml
+    │                   @hunt-nextjs, @hunt-saml,
+    │                   @hunt-clickjacking, @hunt-mass-assignment
     │
     └── T2 → dispatch: @hunt-subdomain, @hunt-tls-network,
                         @hunt-cloud-misconfig, @hunt-ntlm-info,
-                        @hunt-k8s, @hunt-cicd
-                        @hunt-websocket
+                        @hunt-k8s, @hunt-cicd,
+                        @hunt-websocket, @hunt-dependency-confusion
     │
     ▼
 Each hunt agent:
@@ -249,3 +262,44 @@ Every `@hunt-*` agent contains in its SKILL prompt:
 5. **Validate before logging**: `validate_poc()` catches false positives before they enter the database
 6. **Chain awareness**: `find_chains()` runs after each finding is logged to build attack paths
 7. **Coverage tracking**: Every test and tool execution is tracked for report completeness
+
+---
+
+## Key Patterns (from "Hacking Google with AI" writeup)
+
+Three target-agnostic patterns integrated into the pipeline to catch what per-class tradecraft might miss.
+
+### 1. Group-Based Endpoint Classification
+
+Endpoints are classified into functional groups (auth, profile, api, admin, search, file, payment, infra) by path prefix during SURFACE. Testing happens per-group rather than per-endpoint:
+
+```
+/auth/*       → auth group    → test SSRF, SQLi, IDOR, auth bypass, rate limiting
+/api/v1/*     → API group     → test IDOR, mass assignment, GraphQL, JWT, rate limiting
+/search/*     → search group  → test XSS, SQLi, NoSQLi, prototype pollution
+/file/*       → file group    → test file upload RCE, path traversal, XXE, SSRF
+```
+
+**Rule:** For each group, pick 1-2 representative endpoints and test ALL applicable bug classes. If all representatives are clean for a class, skip that class for the entire group. If a bug class is confirmed in a representative, follow up on non-representative siblings to assess blast radius.
+
+### 2. Multi-Auth-Context Probing
+
+Every finding is replayed across ALL available sessions before being called "exploited" or "blocked":
+
+| Auth context | What it finds |
+|---|---|
+| Anonymous (no session) | Unauthenticated access, information disclosure |
+| User-1 (low-priv) | IDOR to user-1's own data, horizontal access |
+| User-2 (low-priv, different) | IDOR across users, horizontal privilege escalation |
+| Admin (high-priv) | Admin-only endpoints, vertical privilege escalation |
+
+**Rule:** If a finding succeeds in one auth context but not another, that IS the finding — it proves an authorization boundary is broken. Document which sessions work and which don't.
+
+### 3. Ralph Wiggum Loop (Exhaustive Testing Gate)
+
+Before any phase gate passes, every endpoint from the ranked deliverable must be accounted for:
+
+- **HUNT gate:** Every endpoint must appear in at least one `track_test()` endpoints_tested field. Any untested endpoint triggers re-dispatch with explicit instructions to cover the gap.
+- **EXPLOIT gate:** Every confirmed finding must have either a validated PoC (exploited) or documented bypass exhaustion (potential). No finding is skipped.
+
+**Purpose:** Prevents the common failure mode where an agent stops testing early because it found a "good enough" finding on a popular endpoint, while other endpoints — potentially carrying higher-impact bugs — are never probed.

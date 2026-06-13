@@ -94,6 +94,26 @@ multiple matches → load all matching platform skills.
 
 invoke each skill in order via the Skill tool.
 
+### step 2.5 — classify endpoints into functional groups
+
+Before testing, read the ranked deliverable and group endpoints by function. Endpoints in the same group are tested as a unit — proving a vulnerability in one endpoint in a group automatically tests the same class across all endpoints in the group.
+
+**Standard groups (auto-classify by path prefix):**
+```
+/auth/*        → auth group (login, register, forgot-password, reset, MFA, OAuth)
+/profile/*     → profile group (update, avatar, preferences, settings)
+/api/v1/*      → API group (REST/GraphQL endpoints, data CRUD)
+/admin/*       → admin group (dashboard, user mgmt, config, audit)
+/search/*      → search group (search, filter, query)
+/file/*        → file group (upload, download, serve, attachment)
+/payment/*     → payment group (checkout, coupon, subscription, invoice)
+/health, /info,*→ infra group (health, info, metrics, swagger, actuator)
+```
+
+**Testing rule:** For each group, pick 1-2 representative endpoints and test ALL applicable bug classes. If any bug is confirmed in a representative, the group is marked as "vulnerable-<class>" and non-representative siblings get targeted follow-up. If all representatives are clean, the group is skipped for that bug class — no need to test each sibling individually.
+
+**Gate:** Before returning control to `/hunt`, confirm every endpoint was assigned to a group. Unassigned endpoints must be flagged.
+
 ### mode=redteam
 
 always-on (load first):
@@ -161,7 +181,9 @@ hunt-brute-force     hunt-session         hunt-ldap
 hunt-nextjs          hunt-nodejs          hunt-dom
 hunt-websocket       hunt-grpc            hunt-laravel
 hunt-springboot      hunt-k8s             hunt-cicd
-hunt-source-leak     hunt-tls-network
+hunt-source-leak     hunt-tls-network       hunt-clickjacking
+hunt-crlf             hunt-dependency-confusion  hunt-http-param-pollution
+hunt-mass-assignment  hunt-prototype-pollution
 ```
 
 report format: `report-writer` (`bugcrowd-reporter` if the target is on bugcrowd).
@@ -199,7 +221,10 @@ loaded for wapt ({blackbox|greybox}): {N} skills
   cloud:      hunt-cloud-misconfig
   ai:         hunt-llm-ai
   stack:      hunt-aspnet, hunt-sharepoint, hunt-ntlm-info
-  misc:       hunt-misc, hunt-csrf
+  misc:       hunt-misc, hunt-csrf, hunt-clickjacking, hunt-crlf
+              hunt-dependency-confusion, hunt-http-param-pollution
+              hunt-prototype-pollution
+  api:        hunt-mass-assignment
   reporting:  bb-methodology, security-arsenal, triage-validator
 ```
 

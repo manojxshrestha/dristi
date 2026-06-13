@@ -16,13 +16,13 @@
   <img src="https://img.shields.io/badge/WSTG-v4.2-purple" alt="WSTG v4.2">
   <img src="https://img.shields.io/badge/MCP%20tools-86-orange" alt="86 MCP Tools">
   <img src="https://img.shields.io/badge/H1%20reports-8.3k+-red" alt="8,300+ H1 Reports">
-  <img src="https://img.shields.io/badge/agents-85-blueviolet" alt="85 Agents">
+  <img src="https://img.shields.io/badge/agents-87-blueviolet" alt="87 Agents">
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs Welcome">
 </p>
 
 <p align="center">
   Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for bug hunting,
-  external red-team work, and authorized pentests — <b>85 agents</b> · <b>86 MCP tools</b> ·
+  external red-team work, and authorized pentests — <b>87 agents</b> · <b>86 MCP tools</b> ·
   OWASP WSTG v4.2 methodology across 25 vulnerability classes ·
   enterprise identity + infrastructure attack matrices ·
   engagement management · Burp MCP integration ·
@@ -38,7 +38,8 @@ Dristi is an LLM-powered security toolkit that provides the complete OWASP Web S
 Four layers stack:
 
 - **Methodology + agents** — *how to think.* 5-phase non-linear hunting workflow, critical-thinking framework, developer-psychology heuristics, anomaly detection patterns, and the red-team operator-discipline corrections (when scope is "external red team" not "bug hunting / WAPT"). Available as auto-loading OpenCode agents.
-- **48 `@hunt-*` agents** — *what to look for in webapps.* Per-class detection patterns, payloads, bypass tables, and chain templates — curated from OWASP WSTG v4.2 methodology across 25 vulnerability classes, plus 20+ framework/surface skills (Next.js, Spring Boot, Laravel, Kubernetes, CI/CD, WebSocket, deserialization, ...).
+- **54 `@hunt-*` agents** — *what to look for in webapps.* Per-class detection patterns, payloads, bypass tables, and chain templates — curated from OWASP WSTG v4.2 methodology across 25 vulnerability classes, plus 20+ framework/surface skills (Next.js, Spring Boot, Laravel, Kubernetes, CI/CD, WebSocket, deserialization, ...).
+- **Credential-attack pipeline** — *password spray as a parallel branch to web vuln hunting.* 4-stage pipeline: company-specific wordlist generation (cewler + hashcat rules) → HIBP k-anonymity breach ranking → OSINT employee discovery (theHarvester + username-anarchy) → low-rate spray (http-form / oauth / o365 / okta). Legal guardrails, lockout math, and spray → authenticated hunt chain template.
 - **Enterprise platform attack chains** — *what to look for on the perimeter.* M365/Entra ID, Okta, cloud IAM, VMware vCenter, enterprise VPN, SharePoint, ASP.NET, NTLM, APK red-team pipeline, supply-chain recon — current CVE chains, AADSTS error references, version-fingerprint matrices, and post-credential escalation paths.
 - **Validation + reporting** — *how to ship it.* 7-Question Gate, VRT category fallback, severity-request paragraphs, OOS rebuttals, cookie/PII redaction, client-facing red-team deliverable format, and SOC-patch / mid-engagement attacker detection methodology.
 
@@ -74,7 +75,7 @@ If you're running an internal red team that includes domain-takeover chains via 
 
 ## Capability Map
 
-85 agents group into 10 pipeline agents + 48 `@hunt-*` + 27 specialty agents (including deepthink, search, and Phase 8 exploitation). Agents auto-load when their description keywords match what you're describing to OpenCode.
+87 agents group into 12 pipeline agents + 54 `@hunt-*` + 21 specialty agents. Agents auto-load when their description keywords match what you're describing to OpenCode.
 
 > **OpenCode vs Dristi:** `/plan` and `/build` are OpenCode's built-in modes. Dristi adds 12 pipeline phases below — invoke via `@agent-name` or let `@autopilot`/`@consult` run them sequentially.
 
@@ -85,7 +86,7 @@ If you're running an internal red team that includes domain-takeover chains via 
 | 3 | **INTEL** | `@pintel` | Passive OSINT: WHOIS, M365, cloud, spoof |
 | 4 | **RECON** | `@recon` | Subdomains, crawl, params, nuclei, secrets |
 | 5 | **SURFACE** | `@surface` | Classify endpoints, prioritize attack surface |
-| 6 | **HUNT** | `@hunt` | Test all 25 bug classes via 48 `@hunt-*` |
+| 6 | **HUNT** | `@hunt` | Test all 25 bug classes via 54 `@hunt-*` |
 | 7 | **DEEPTHINK** | `@deepthink` | *(conditional)* First-principles gap analysis |
 | 8 | **EXPLOIT** | `@exploit` | Deep-research exploitation + WAF bypass |
 | 9 | **SEARCH** | `@search` | *(conditional)* Re-dispatch for uncovered classes |
@@ -125,7 +126,7 @@ graph TB
         R3["@osint-methodology<br/>5-stage pipeline"]:::recon
     end
 
-    subgraph HUNT ["Hunt — Web App (48 @hunt-* agents)"]
+    subgraph HUNT ["Hunt — Web App (54 @hunt-* agents)"]
         direction TB
         H1["Injection<br/>@hunt-sqli · @hunt-xss · @hunt-ssti · @hunt-rce"]:::hunt
         H2["Authorization<br/>@hunt-idor · @hunt-auth-bypass · @hunt-csrf"]:::hunt
@@ -208,7 +209,7 @@ flowchart TD
     Surface["3. SURFACE<br/>Rank Tier 0/1/2<br/>endpoint_map_raw → endpoint_map_ranked<br/>agent: @surface"]:::phase
     Surface --> Hunt
 
-    Hunt["4. HUNT<br/>Test bug-class hypotheses<br/>Apply payloads from Pattern Libraries<br/>48 @hunt-* agents auto-load by keyword"]:::phase
+    Hunt["4. HUNT<br/>Test bug-class hypotheses<br/>Apply payloads from Pattern Libraries<br/>54 @hunt-* agents auto-load by keyword"]:::phase
     Hunt --> Think
 
     Think{"Gaps found?"}:::decision
@@ -260,7 +261,7 @@ flowchart TD
 
 ## How agents work
 
-Dristi agents are flat `.md` files invoked via `@agent-name`. **10 pipeline agents**: `@autopilot` → `@consult` → `@scope` → `@recon` → `@surface` → `@hunt` → `@exploit` → `@capture` → `@validate` → `@report`. **48 `@hunt-*` agents** for per-class tradecraft. **25 specialty agents** for OSINT, enterprise attack, red-team ops, reporting.
+Dristi agents are flat `.md` files invoked via `@agent-name`. **12 pipeline agents**: `@autopilot` → `@consult` → `@scope` → `@pintel` → `@recon` → `@surface` → `@hunt` → `@deepthink` → `@exploit` → `@search` → `@capture` → `@validate` → `@report`. **54 `@hunt-*` agents** for per-class tradecraft. **21 specialty agents** for OSINT, enterprise attack, red-team ops, reporting.
 
 | How to invoke | What happens |
 |---|---|---|
@@ -303,7 +304,7 @@ dristi/
 │   │   ├── evidence-hygiene.md        # cookie/PII/HAR redaction discipline
 │   │   ├── hunt-api-misconfig.md      # mass assignment, JWT, prototype pollution
 │   │   ├── hunt-aspnet.md             # ASP.NET ViewState, machineKey, WebForms
-│   │   ├── ... (48 @hunt-* agents)    # per-class hunting tradecraft
+│   │   ├── ... (54 @hunt-* agents)    # per-class hunting tradecraft
 │   │   ├── m365-entra-attack.md       # M365/Entra full chain
 │   │   ├── meme-coin-audit.md         # token rug-pull + SPL audit
 │   │   ├── offensive-osint.md         # 15-reference probe arsenal
@@ -351,7 +352,7 @@ dristi/
 
 ## Agent Index
 
-85 agents across 10 pipeline + 48 `@hunt-*` + 27 specialty agents. **Agents auto-load by `@name`** — invoke the pipeline agents directly (`@scope` → `@recon` → ...) or describe what you're testing and the matching `@hunt-*` agent loads.
+87 agents across 12 pipeline + 54 `@hunt-*` + 21 specialty agents. **Agents auto-load by `@name`** — invoke the pipeline agents directly (`@scope` → `@recon` → ...) or describe what you're testing and the matching `@hunt-*` agent loads.
 
 ### Quick lookup — find an agent by what you're seeing
 
@@ -385,28 +386,28 @@ If none of the above match: tell the LLM *"I want to test for X"* (where X is th
 | Agent | What it covers | Coverage source |
 |---|---|---|
 | `@hunt-aspnet` | ASP.NET ViewState · machineKey · WebForms · WCF · request-validator bypass | authorized-engagement |
-| `@hunt-csrf` | Cross-site request forgery (chain-required impact) | 10 H1 reports |
+| `@hunt-csrf` | Cross-site request forgery (chain-required impact) | WSTG-SESS-05 |
 | `@hunt-dom` | Client-side DOM — DOM clobbering, postMessage abuse, client-side prototype pollution, CSS exfil | community v3 |
 | `@hunt-file-upload` | File upload bypass — 10 techniques (double-ext, magic-bytes, polyglot, ZIP slip, SVG XSS) | curated |
 | `@hunt-host-header` | Host header injection — reset-poisoning → ATO, routing-based SSRF, OAuth redirect poisoning | community v3 |
-| `@hunt-idor` | IDOR / broken object-level authorization · cross-tenant access | 26 H1 reports |
+| `@hunt-idor` | IDOR / broken object-level authorization · cross-tenant access | WSTG-ATHZ-04 |
 | `@hunt-lfi` | LFI / RFI / path traversal — `/etc/passwd`, PHP wrappers, log poisoning, phar | community v3 |
 | `@hunt-nosqli` | NoSQL injection — Mongo operator injection (`$where`, `$ne`, `$regex`), Redis-via-SSRF | community v3 |
 | `@hunt-open-redirect` | Open redirect — bypass table, chained to OAuth token theft → ATO | community v3 |
-| `@hunt-sqli` | SQL injection (classic, blind, time-based) | 8 H1 reports |
-| `@hunt-ssti` | Server-side template injection (Jinja2, Twig, Freemarker, ERB, Spring) | curated |
-| `@hunt-xss` | Reflected · Stored · DOM · blind XSS · CSP bypass | 174 H1 reports |
-| `@hunt-xxe` | XML external entity (in-band, OOB, XXE-via-DOCX) | 4 H1 reports |
+| `@hunt-sqli` | SQL injection (classic, blind, time-based) | WSTG-INPV-05 |
+| `@hunt-ssti` | Server-side template injection (Jinja2, Twig, Freemarker, ERB, Spring) | WSTG-INPV-18 |
+| `@hunt-xss` | Reflected · Stored · DOM · blind XSS · CSP bypass | WSTG-INPV-01/02 |
+| `@hunt-xxe` | XML external entity (in-band, OOB, XXE-via-DOCX) | WSTG-INPV-07 |
 
 ### Authentication & Identity (7 agents)
 
 | Agent | What it covers | Coverage source |
 |---|---|---|
 | `@hunt-ato` | Account takeover taxonomy — 9 distinct paths + chains | curated |
-| `@hunt-auth-bypass` | Broken authentication / access control · function-level authz | 4 H1 reports |
+| `@hunt-auth-bypass` | Broken authentication / access control · function-level authz | WSTG-ATHN-04 |
 | `@hunt-brute-force` | Missing/weak rate limiting — login + OTP/2FA brute force, credential stuffing | community v3 |
 | `@hunt-mfa-bypass` | MFA / 2FA bypass — 7 patterns (OTP brute, race, recovery dump, factor downgrade) | curated |
-| `@hunt-oauth` | OAuth 2.0 / OIDC flaws · open-redirect chain · state-parameter abuse | 10 H1 reports |
+| `@hunt-oauth` | OAuth 2.0 / OIDC flaws · open-redirect chain · state-parameter abuse | curated |
 | `@hunt-saml` | SAML / SSO attacks · XML signature wrapping · comment injection | curated |
 | `@hunt-session` | Session management — fixation, low-entropy prediction, missing invalidation, JWT | community v3 |
 
@@ -419,13 +420,13 @@ If none of the above match: tell the LLM *"I want to test for X"* (where X is th
 | `@hunt-cloud-misconfig` | Cloud misconfig — public S3, Lambda URLs, GCS/Blob, IMDS-via-SSRF | curated |
 | `@hunt-cors` | CORS misconfig — reflect-any-origin + credentials, null origin, subdomain-regex bypass | community v3 |
 | `@hunt-deserialization` | Insecure deserialization — Java (ysoserial), PHP (phpggc), .NET, Python pickle, Log4Shell | community v3 |
-| `@hunt-graphql` | GraphQL — introspection, alias batching, depth abuse, node() IDOR | 3 H1 reports |
+| `@hunt-graphql` | GraphQL — introspection, alias batching, depth abuse, node() IDOR | curated |
 | `@hunt-k8s` | Kubernetes / Docker — anon API, kubelet :10250 exec, etcd :2379, docker.sock, SA-token abuse | community v3 |
 | `@hunt-ldap` | LDAP / XPath injection — auth bypass, AD data exfiltration | community v3 |
-| `@hunt-rce` | RCE — crown-jewel chains, deserialization, code injection | 67 H1 reports |
+| `@hunt-rce` | RCE — crown-jewel chains, deserialization, code injection | WSTG-INPV-12 |
 | `@hunt-source-leak` | Source / artifact leakage — JS source maps, `.git`, `.DS_Store`, exposed Swagger | community v3 |
-| `@hunt-ssrf` | SSRF + 11 IP-bypass techniques · cloud metadata exfil | 9 H1 reports |
-| `@hunt-subdomain` | Subdomain takeover — 27+ provider fingerprints + chain to ATO | 11 H1 reports |
+| `@hunt-ssrf` | SSRF + 11 IP-bypass techniques · cloud metadata exfil | curated |
+| `@hunt-subdomain` | Subdomain takeover — 27+ provider fingerprints + chain to ATO | curated |
 | `@hunt-tls-network` | TLS / DNS misconfig — missing HSTS, weak ciphers, AXFR, SPF/DMARC/CAA | community v3 |
 | `@hunt-websocket` | WebSocket — CSWSH, missing auth, message tampering, socket.io | community v3 |
 
@@ -442,12 +443,12 @@ If none of the above match: tell the LLM *"I want to test for X"* (where X is th
 
 | Agent | What it covers | Coverage source |
 |---|---|---|
-| `@hunt-business-logic` | Business logic flaws — coupon abuse, balance manipulation, state-machine reversal | 7 H1 reports |
-| `@hunt-cache-poison` | Web cache poisoning · cache deception · CDN exploitation | 4 H1 reports |
+| `@hunt-business-logic` | Business logic flaws — coupon abuse, balance manipulation, state-machine reversal | WSTG-BUSL-01 |
+| `@hunt-cache-poison` | Web cache poisoning · cache deception · CDN exploitation | curated |
 | `@hunt-http-smuggling` | HTTP request smuggling (CL.TE, TE.CL, H2.CL, H2.TE) | curated |
 | `@hunt-llm-ai` | LLM / agentic AI — prompt injection, ASCII smuggling, ASI01–ASI10 | curated |
-| `@hunt-misc` | Catch-all for less-common classes (clickjacking, open-redirect, XS-leaks, etc.) | 225 H1 reports |
-| `@hunt-race-condition` | Race conditions / TOCTOU — double-spend, MFA-bypass-via-race | 3 H1 reports |
+| `@hunt-misc` | Catch-all for less-common classes (clickjacking, open-redirect, XS-leaks, etc.) | curated |
+| `@hunt-race-condition` | Race conditions / TOCTOU — double-spend, MFA-bypass-via-race | curated |
 
 ### Enterprise Identity & Cloud Attack (3 agents)
 
@@ -539,7 +540,7 @@ Dristi provides the methodology ("what to test and how to exploit it"), Burp pro
 
 1. **Knowledge layer** — WSTG v4.2 (96 tests, 12 categories) + PortSwigger Academy technique guides (payloads, WAF bypass)
 2. **Engagement layer** — scope registration, findings database, test tracking, phase gates, QA review, reporting
-3. **Agent layer** — 85 OpenCode agents: 10 pipeline agents, 48 `@hunt-*` agents, 27 specialty agents
+3. **Agent layer** — 87 OpenCode agents: 12 pipeline agents, 54 `@hunt-*` agents, 21 specialty agents
 
 ### Integration points
 
@@ -837,7 +838,7 @@ This bundle was built and validated through authorized engagements that exposed 
 4. **No client-facing deliverable format** — bug-bounty report templates don't fit enterprise red-team where output is a 50KB+ MD + DOCX with embedded screenshots → `redteam-report-template`
 5. **No post-credential escalation model** — when recon yielded credentials (AWS keys, JWTs, GCP JSON), it was unclear what they granted or how to escalate → `cloud-iam-deep`
 
-The per-class `@hunt-*` agents address gap-zero (*"what should I look for in webapps"*) — 48 agents codifying patterns from OWASP WSTG v4.2 methodology, covering injection, authorization, server-side, identity, API, business logic, frameworks, and infrastructure. The enterprise-platform and red-team-tradecraft layers address what bug-bounty alone cannot: external red-team engagements against monitored enterprise targets.
+The per-class `@hunt-*` agents address gap-zero (*"what should I look for in webapps"*) — 54 agents codifying patterns from OWASP WSTG v4.2 methodology, covering injection, authorization, server-side, identity, API, business logic, frameworks, and infrastructure. The enterprise-platform and red-team-tradecraft layers address what bug-bounty alone cannot: external red-team engagements against monitored enterprise targets.
 
 ---
 

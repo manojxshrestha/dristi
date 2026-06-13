@@ -1590,6 +1590,13 @@ The `/hunt` slash-command and the `hunt <target>` shell helper (see this repo's 
 
 Use the scaffold from the start. Half-organized engagements lose findings — a probe result from hour 2 that didn't seem important until hour 14 is unrecoverable if it wasn't logged.
 
+### Related Skills
+
+- **`bb-methodology`** — The 5-phase non-linear workflow that this orchestrator runs against. Use when you need the full hunting methodology (developer psychology, session discipline, tool routing by phase).
+- **`credential-attack`** — Parallel pipeline to web vuln hunting. Password spray methodology for targets with discoverable login endpoints and permissive program policies.
+- **`triage-validation`** — 7-Question Gate + kill signals. Run before writing any report.
+- **`web2-recon`** — Recon sub-pipeline (subdomain enum → HTTP probing → tech detect).
+
 ### When the orchestrator gets it wrong
 
 Across 30+ Phase 2 verification tests in this repo, the orchestrator correctly auto-triggered the matching skill in every test — zero misfires. If on a future target the orchestrator misroutes (loads the wrong hunt-* for the topic), the cause is almost always the `description:` frontmatter field on the target skill: a missing keyword that would have matched the user's intent. Fix forward by editing that skill's frontmatter `description:` field to include the missing trigger word. Don't add another layer of dispatch logic; tighten the description.

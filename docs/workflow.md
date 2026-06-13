@@ -5,7 +5,7 @@
 Dristi is a security testing platform with two interfaces that work together:
 
 1. **MCP Server** (86 tools) — provides the OWASP WSTG methodology, engagement management, findings database, phase gates, WAF identification/evasion, and reporting as callable tools
-2. **OpenCode Agents** (85 agents) — provides per-class bug hunting tradecraft, enterprise platform attack chains, and engagement lifecycle management via `@agent-name`
+2. **OpenCode Agents** (87 agents) — provides per-class bug hunting tradecraft, enterprise platform attack chains, and engagement lifecycle management via `@agent-name`
 
 Together they turn an LLM into a methodical bug hunter: the agents tell it *what to look for and how*, the MCP server gives it the *structured methodology and tracking*, and Burp Suite provides *HTTP request execution*.
 
@@ -49,7 +49,7 @@ graph TB
 
 The loop: **describe → agent loads → MCP tracks → references guide → Burp executes → analyze → log finding → validate → report**
 
-All agents are invoked via `@agent-name`. 12 pipeline agents: `@autopilot` → `@consult` → `@scope` → `@pintel` → `@recon` → `@surface` → `@hunt` → `@deepthink` → `@exploit` → `@search` → `@capture` → `@validate` → `@report`. 48 specialized `@hunt-*` agents + 25 non-hunt specialty agents (85 total).
+All agents are invoked via `@agent-name`. 12 pipeline agents: `@autopilot` → `@consult` → `@scope` → `@pintel` → `@recon` → `@surface` → `@hunt` → `@deepthink` → `@exploit` → `@search` → `@capture` → `@validate` → `@report`. 54 specialized `@hunt-*` agents + 21 non-hunt specialty agents (87 total).
 
 **Two modes:**
 - **`@autopilot`** — runs fully autonomous, dispatches phases 2-7 via `task()` to sub-agents, ends with report
@@ -65,10 +65,15 @@ Phase 1:   SCOPE       → register domains, load config, create task tree
 Phase 2:   AUTH        → test credentials, detect WAF, save auth deliverable
 Phase 3:   INTEL       → passive OSINT: WHOIS, M365, cloud, spoof check
 Phase 4:   RECON       → subdomain enum, crawl, params, nuclei, secrets
-Phase 5:   SURFACE     → load recon, classify tiers, prioritize endpoints
-Phase 6:   HUNT        → test all bug classes via 48 hunt-* sub-agents
+Phase 5:   SURFACE     → load recon, classify tiers + functional groups, prioritize endpoints
+Phase 6:   HUNT        → test all bug classes via 54 hunt-* sub-agents
+                        ├── group-based testing (1-2 reps per functional group)
+                        ├── Ralph Wiggum loop: every endpoint must be covered before gate
+                        └── (parallel) credential-attack → wordlist-gen → breach-check → osint-employees → spray
 Phase 7:   DEEPTHINK  → (conditional) first-principles gap analysis when HUNT yields zero
 Phase 8:   EXPLOIT     → deepen confirmed findings, escalate impact
+                        ├── multi-auth-context probing (replay every finding with all sessions)
+                        └── exhaustive exploitation gate (no finding skipped)
 Phase 9:   SEARCH → (conditional) 13-resource retrieval when EXPLOIT stalls
 Phase 10:  CAPTURE     → evidence collection, screenshots, redaction
 Phase 11:  VALIDATE    → re-validate PoCs, 7-Question Gate
@@ -77,7 +82,12 @@ Phase 12:  REPORT      → coverage check, generate final report
 
 ```mermaid
 flowchart LR
-    SCOPE --> AUTH --> OSINT --> RECON --> SURFACE --> HUNT --> CAPTURE --> VALIDATE --> REPORT
+    SCOPE --> AUTH --> OSINT --> RECON --> SURFACE --> HUNT --> DEEPTHINK --> EXPLOIT --> CAPTURE --> VALIDATE --> REPORT
+    HUNT -->|"Ralph Wiggum: untested endpoints?"| HUNT
+    EXPLOIT -->|"Exhaustive gate: un-exploited findings?"| EXPLOIT
+    HUNT -.->|"zero findings"| DEEPTHINK
+    EXPLOIT -.->|"WAF/CVE gaps"| SEARCH["SEARCH (research)"]
+    SEARCH -->|"payloads found"| EXPLOIT
     VALIDATE -->|PASS| REPORT
     VALIDATE -->|KILL| DISCARD["Discard"]
     VALIDATE -->|DOWNGRADE| REPORT
@@ -197,9 +207,10 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 | 1 | Load endpoint_map_raw deliverable | `get_deliverable('endpoint_map_raw')` |
 | 2 | Check skills for relevant hunt-class tradecraft | skills/ |
 | 3 | Classify into Tiers | Tier 0 (public+input) / Tier 1 (auth+input) / Tier 2 (infra) |
-| 4 | Risk-score each endpoint | `prioritize_endpoints()` |
-| 5 | Save ranked deliverable | `save_deliverable('endpoint_map_ranked', ...)` |
-| 6 | Gate check | `phase_gate_check(phase_completed=2)` |
+| 4 | **Classify into functional groups** (auth, profile, api, admin, search, file, payment, infra) by path prefix | — |
+| 5 | Risk-score each endpoint | `prioritize_endpoints()` |
+| 6 | Save ranked deliverable with group membership | `save_deliverable('endpoint_map_ranked', ...)` |
+| 7 | Gate check | `phase_gate_check(phase_completed=2)` |
 
 **Output:** `endpoint_map_ranked` deliverable consumed by Phase 6.
 
@@ -207,16 +218,18 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 
 ### Phase 6: HUNT
 
-**Goal:** Test for specific vulnerability classes using per-class tradecraft and reference libraries.
+**Goal:** Test for specific vulnerability classes using per-class tradecraft and reference libraries. Run credential-attack in parallel if the target has a login surface.
 
 | Step | Action | MCP Tools |
 |------|--------|-----------|
 | 1 | Load endpoint_map_ranked + auth_analysis | `get_deliverable()` |
 | 2 | Run deep testing (API fuzzing, method override, content-type switch, GraphQL probing, race conditions, UUID analysis, JWT manipulation) | — |
 | 3 | **WAF handling:** If WAF detected in Phase 2, apply vendor-specific bypasses | `identify_waf()`, `get_waf_bypass()`, `knowledge/waf/` |
-| 4 | **Test all applicable bug classes** via 48 hunt-* sub-agents | `get_wstg_test()`, `get_technique_guide()`, `get_test_payloads()`, `get_witness_payloads()` |
+| 4 | **Group-based testing:** Endpoints are pre-classified into functional groups (auth, profile, api, admin, search, file, payment, infra). Pick 1-2 reps per group and test ALL applicable bug classes. If clean, skip the group for that class. | `get_wstg_test()`, `get_technique_guide()`, `get_test_payloads()`, `get_witness_payloads()` |
+| 5 | **Parallel: credential-attack** — if login endpoint found and program permits password testing, run wordlist-gen → breach-check → osint-employees → spray pipeline | `scripts/tools/wordlist_engine.sh`, `breach_checker.py`, `osint_employees.sh`, `spray_orchestrator.sh` |
 | 6 | For each confirmed finding: validate PoC, log, track test, check chaining | `validate_poc()`, `log_finding()`, `track_test()`, `find_chains()` |
-| 7 | Gate check | `phase_gate_check(phase_completed=3)` |
+| 7 | **Ralph Wiggum loop — exhaustive coverage gate:** Every endpoint in the ranked deliverable must be covered by at least one `track_test()`. Cross-reference endpoints_tested against the endpoint list. If any endpoint is untested, re-dispatch before passing the gate. | `get_deliverable('endpoint_map_ranked')`, `track_test()` |
+| 8 | Gate check | `phase_gate_check(phase_completed=3)` |
 
 **Agent auto-loading examples:**
 
@@ -250,6 +263,7 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 | "Token audit — honeypot, liquidity, rug-pull" | `@meme-coin-audit` |
 | "K8s pod escape" | `@hunt-k8s` |
 | "Next.js API route without auth" | `@hunt-nextjs` |
+| "Password spray on login — wordlist gen, breach check, OSINT employees" | `credential-attack` (skill — load via `skill("credential-attack")`) |
 
 **Reference Libraries** (available to every hunt agent during testing):
 
@@ -264,6 +278,37 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 **MCP tools used:** `get_wstg_test`, `get_test_payloads`, `get_technique_guide`, `get_witness_payloads`, `get_evidence_checklist`, `get_slot_types`, `log_finding`, `create_exploitation_queue`, `validate_exploitation_queue`, `get_exploitation_queue`, `get_waf_bypass`, `identify_waf`, `track_test`, `add_graph_node`, `add_graph_edge`, `find_chains`, `validate_poc`
 
 **Output:** Confirmed findings logged to engagement database, exploitation queues created.
+
+---
+
+### Phase 7: DEEPTHINK (conditional)
+
+**Goal:** First-principles gap analysis when HUNT yields zero findings or hits dead-ends. See `.opencode/agents/deepthink.md`.
+
+---
+
+### Phase 8: EXPLOIT
+
+**Goal:** Deepen confirmed findings — chain them, escalate impact, and attempt PoC exploitation.
+
+| Step | Action | MCP Tools |
+|------|--------|-----------|
+| 1 | Load all confirmed findings | `findings_list_vulns()` |
+| 2 | Classify each finding to a vulnerability class (XSS, SQLi, SSRF, etc.) | `get_technique_guide()` |
+| 3 | **Multi-auth-context probing:** For each finding, replay with ALL available sessions (anonymous, user-1, user-2, admin) to surface privilege-dependent exploitation paths and session-isolation gaps | `get_engagement_config()`, session headers |
+| 4 | Attempt PoC exploitation with class-specific payloads | `validate_poc()` |
+| 5 | If blocked — apply WAF bypasses | `get_waf_bypass()` |
+| 6 | Run chaining analysis across findings | `find_chains()`, `findings_add_chain()` |
+| 7 | **Exhaustive exploitation gate:** Every finding must have either a validated PoC or documented bypass exhaustion — no skipped findings | `validate_poc()` |
+| 8 | Gate check | `phase_gate_check(phase_completed=4)` |
+
+**Output:** Findings with PoC evidence attached or bypass exhaustion documented.
+
+---
+
+### Phase 9: SEARCH (conditional)
+
+**Goal:** Research stale payloads, missing CVEs, and WAF bypass techniques when EXPLOIT stalls. See `.opencode/agents/search.md`.
 
 ---
 
@@ -399,8 +444,12 @@ graph TB
 
 | Feature | `@autopilot` | `@consult` | Manual |
 |---------|-------------|------------|--------|
-| Phases | 1–7 autonomous + conditional 4.25/4.75 | 1–7 with prompts + conditional 4.25/4.75 | Step-by-step |
-| Sub-agent dispatch | `task()` for phases 2-7 | `task()` for phases 2-7 | Direct agent invocation |
+| Phases | 1–12 autonomous + conditional | 1–12 interactive | Step-by-step |
+| Sub-agent dispatch | `task()` for phases 4-12 | `task()` for phases 4-12 | Direct agent invocation |
+| Group-based testing | Auto: endpoints grouped by function, 1-2 reps per group | Suggests grouping before HUNT | Manual |
+| Multi-auth probing | Auto: all auth contexts per finding | Suggests context rotation before EXPLOIT | Manual |
+| Ralph Wiggum loop | Auto: validates every endpoint covered before gate | Suggests coverage check before gate | Manual |
+| Exhaustive exploit gate | Auto: verifies every finding exploited | Suggests exploit completeness check | Manual |
 | Phase gates | Automatic check + checkpoint | Ask before each gate | Manual |
 | WAF handling | Automatic detection in Phase 2 | Detected + suggested bypasses | Manual |
 | Reference fetching | Automatic pre-hunt reading | Suggested before testing | On-demand |
@@ -420,3 +469,6 @@ graph TB
 6. **Burp is optional** — curl + browser works fine for most testing
 7. **References guide technique** — real H1 reports, WAF KBs, and payload libs inform every test
 8. **Browser close after every op** — `playwright_browser_close()` mandate to prevent context leaks
+9. **Group before hunt** — classify endpoints into functional groups and test by group, not individually, to reduce redundant probes without losing coverage
+10. **Probe every auth context** — the same exploit may succeed or fail depending on session; rotate through all available sessions before calling a finding dead
+11. **Ralph Wiggum loop** — no endpoint passes the gate untested; cross-reference coverage before every phase transition
