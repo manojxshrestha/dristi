@@ -75,17 +75,52 @@ def bridge(src, dst, src_to_dst=True):
 
 #### Auto-deployment
 
-`connect-burp.sh` copies the proxy script to Windows via the shared `/mnt/c/` filesystem, then starts it via `cmd.exe /c start /b`:
+`connect-burp.sh` copies the proxy script to Windows via the shared `/mnt/c/` filesystem, then starts it via `cmd.exe /c start /b`. Python is auto-detected via `resolve_python()`:
 
 ```bash
-# WSL path for copy
-WIN_HOME_WSL="/mnt/c/Users/manoj"
-cp "$DST/scripts/burp_proxy.py" "$WIN_HOME_WSL/burp_proxy.py"
-
-# Raw Windows path for cmd.exe
-WIN_HOME_RAW="C:\Users\manoj"
-cmd.exe /c "start /b \"\" \"python\" \"C:\Users\manoj\burp_proxy.py\""
+resolve_python() {
+  # 1. Try py -3 (Python launcher)
+  test_out=$(cmd.exe /c "py -3 --version" | tr -d '\r\n')
+  if echo "$test_out" | grep -qi "Python 3"; then echo "py -3"; return 0; fi
+  # 2. Try App Execution Aliases (python3.11, python3 — work for Store installs)
+  for alias in python3.11 python3; do
+    test_out=$(cmd.exe /c "$alias --version" | tr -d '\r\n')
+    if echo "$test_out" | grep -qi "Python 3"; then echo "$alias"; return 0; fi
+  done
+  # 3. Try where python results (they might be real, test each)
+  while IFS= read -r line; do
+    test_out=$(cmd.exe /c "\"$line\" --version" | tr -d '\r\n')
+    if echo "$test_out" | grep -qi "Python 3"; then echo "$line"; return 0; fi
+  done <<< "$(cmd.exe /c 'where python 2>nul')"
+  # 4. Scan WindowsApps subfolder for Store-installed Python
+  local s="$WIN_HOME_RAW\\AppData\\Local\\Microsoft\\WindowsApps"
+  for f in python3.11.exe python3.exe; do
+    test_out=$(cmd.exe /c "if exist \"$s\\$f\" \"$s\\$f\" --version" | tr -d '\r\n')
+    if echo "$test_out" | grep -qi "Python 3"; then echo "$s\\$f"; return 0; fi
+  done
+  # 5. Fallback: common MSI install paths
+  for p in "C:\\Python313\\python.exe" "C:\\Python312\\python.exe" \
+           "$WIN_HOME_RAW\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" \
+           "$WIN_HOME_RAW\\AppData\\Local\\Programs\\Python\\Python312\\python.exe"; do
+    test_out=$(cmd.exe /c "if exist \"$p\" \"$p\" --version" | tr -d '\r\n')
+    if echo "$test_out" | grep -qi "Python 3"; then echo "$p"; return 0; fi
+  done
+  return 1
+}
 ```
+
+Then starts the proxy:
+```bash
+PYTHON_WIN_RAW=$(resolve_python)
+cmd.exe /c "cd /d C:\ && $PYTHON_WIN_RAW $PROXY_DST_RAW" > /dev/null 2>&1 &
+```
+
+**`start /b` is avoided** because:
+1. `start /b` cannot resolve App Execution Aliases (like `python3.11` from a Store install)
+2. `cmd.exe` launched from WSL inherits a UNC working directory (`\\wsl.localhost\...`) which Windows doesn't support — it defaults to `C:\Windows\System32` and concatenates quoted script paths with it (e.g. `C:\Windows\"C:\Users\manoj\burp_proxy.py"`)
+3. The fix: `cd /d C:\` sets a clean Windows working directory; unquoted path works because there are no spaces in the profile path; `&` backgrounds the process
+
+**`resolve_python()`** handles Python discovery because `where python` on Windows returns the Microsoft Store redirector stub (`%USERPROFILE%\AppData\Local\Microsoft\WindowsApps\python.exe`), a 0-byte stub that silently opens the Store instead of running the script.
 
 ### Layer 2: MCP stdio Bridge (`burp-mcp-bridge.py`)
 
@@ -152,8 +187,38 @@ Step 6: Restart Dristi WSTG server
 
 No hardcoded usernames or IPs:
 - Windows user profile: `cmd.exe /c "echo %USERPROFILE%"`
-- Windows Python path: `cmd.exe /c "where python"`
+- Windows Python path: `resolve_python()` → tries `py -3`, App Execution Aliases (`python3.11`), `where python`, WindowsApps subfolder scan, then common MSI paths
 - Windows IP: `ip route | grep default | awk '{print $3}'`
+
+### Pitfall Fixed: `start /b` + App Execution Aliases + UNC Working Directory
+
+Three problems with `start /b` in WSL→Windows context:
+
+1. **App Execution Aliases**: `start /b` uses `CreateProcess` which can't resolve Microsoft Store App Execution Aliases (e.g., `python3.11`).
+2. **UNC working directory**: When `cmd.exe` is launched from WSL with a UNC path (`\\wsl.localhost\...`), Windows falls back to `C:\Windows\System32` as the CWD.
+3. **Quoted paths concatenated**: A quoted script path like `"C:\Users\manoj\burp_proxy.py"` gets concatenated with the fallback CWD → `C:\Windows\System32\"C:\Users\manoj\burp_proxy.py"` → file not found.
+
+**Fixed by avoiding `start /b` entirely:**
+```bash
+# Broken: start /b "" python3.11 "C:\...\burp_proxy.py"
+#   → "Windows cannot find '\\'" (alias not resolved)
+# Broken: cmd.exe /c python3.11 "C:\...\burp_proxy.py"
+#   → UNC CWD + quoted path → file not found
+
+# Fixed: cd /d C:\ + unquoted path + background &
+cmd.exe /c "cd /d C:\ && python3.11 C:\Users\manoj\burp_proxy.py" > /dev/null 2>&1 &
+```
+
+### Pitfall Fixed: Windows Store Python Stub
+
+`where python` on a fresh Windows install returns `%USERPROFILE%\AppData\Local\Microsoft\WindowsApps\python.exe` — this is a **0-byte Store redirector stub**, not a real Python interpreter. It silently opens the Microsoft Store when executed, so `cmd.exe /c start /b` launches it, it exits immediately, and the proxy never starts.
+
+The resolution order now handles this:
+1. `py -3` (Python launcher) — works with MSI installs
+2. `python3.11` / `python3` — **App Execution Aliases** that work with Store-installed Python
+3. `where python` results — validated with `--version` (the stub fails, but other results pass)
+4. Direct scan of `WindowsApps\python3.11.exe` — the actual Store-installed Python binary
+5. Common MSI paths as final fallback
 
 ### Pitfall Fixed: `echo -e` Eating Backslashes
 
@@ -301,3 +366,5 @@ Then restart Burp Suite and enable MCP Server extension.
 13. **Renamed to `connect-burp.sh`**: Old `reconnect-burp.sh` → `connect-burp.sh`; updated all references
 14. **Fixed `echo -e` backslash eating**: Windows paths displayed with `\b` in `\burp_proxy.py` were mangled by `echo -e`; switched to `printf`
 15. **Fixed WSTG server env**: Removed `UV_PROJECT_ENVIRONMENT=venv` override that prevented `uv run` from finding `.venv`
+16. **Fixed Windows Store Python stub**: `where python` returned `WindowsApps\python.exe` (Store redirector, 0 bytes). Added `resolve_python()` that tries `py -3`, App Execution Aliases (`python3.11`), `where python` results, WindowsApps subfolder scan, then MSI fallback — each validated with `--version`.
+17. **Fixed `start /b` triple failure**: `start /b` can't resolve App Execution Aliases; UNC CWD concatenates quoted paths with `C:\Windows\System32`. Replaced `start /b` with `cd /d C:\ && python3.11 <unquoted_path>` in background `&`.

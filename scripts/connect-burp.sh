@@ -73,10 +73,6 @@ info "Setting up Python proxy on Windows..."
 # Auto-detect Windows paths (no hardcoded usernames)
 WIN_HOME_RAW=$(cmd.exe /c "echo %USERPROFILE%" 2>/dev/null | tr -d '\r\n')
 WIN_HOME_WSL=$(echo "$WIN_HOME_RAW" | sed 's|C:|/mnt/c|' | sed 's|\\|/|g')
-PYTHON_WIN_RAW=$(cmd.exe /c "where python 2>nul" 2>/dev/null | tr -d '\r\n' | head -1)
-if [ -z "$PYTHON_WIN_RAW" ]; then
-  PYTHON_WIN_RAW="$WIN_HOME_RAW\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe"
-fi
 PROXY_DST_RAW="$WIN_HOME_RAW\\burp_proxy.py"
 PROXY_DST_WSL="$WIN_HOME_WSL/burp_proxy.py"
 
@@ -84,6 +80,81 @@ PROXY_DST_WSL="$WIN_HOME_WSL/burp_proxy.py"
 cp "$PROXY_SRC" "$PROXY_DST_WSL"
 # shellcheck disable=SC2059
 printf "${G}[✓]${N} Proxy script copied to %s\n" "$PROXY_DST_RAW"
+
+# Find a working Python on Windows
+resolve_python() {
+  local test_out
+  # 1. Try py -3 (Python launcher — ships with any proper install)
+  test_out=$(cmd.exe /c "py -3 --version" 2>/dev/null | tr -d '\r\n')
+  if echo "$test_out" | grep -qi "Python 3"; then
+    echo "py -3"
+    return 0
+  fi
+  # 2. Try App Execution Aliases (python3.11, python3 — work for Store installs)
+  for alias in python3.11 python3; do
+    test_out=$(cmd.exe /c "$alias --version" 2>/dev/null | tr -d '\r\n')
+    if echo "$test_out" | grep -qi "Python 3"; then
+      echo "$alias"
+      return 0
+    fi
+  done
+  # 3. Try where python — skip the 0-byte Store stub (python.exe alone),
+  #    but try the actual Store install in the subfolder
+  local raw_paths
+  raw_paths=$(cmd.exe /c "where python 2>nul" 2>/dev/null | tr -d '\r')
+  while IFS= read -r line; do
+    line=$(echo "$line" | tr -d '\r' | sed 's/ *$//')
+    test_out=$(cmd.exe /c "\"$line\" --version" 2>/dev/null | tr -d '\r\n')
+    if echo "$test_out" | grep -qi "Python 3"; then
+      echo "$line"
+      return 0
+    fi
+  done <<< "$raw_paths"
+  # 4. Scan WindowsApps subfolder for Store-installed Python
+  local store_base="$WIN_HOME_RAW\\AppData\\Local\\Microsoft\\WindowsApps"
+  test_out=$(cmd.exe /c "if exist \"$store_base\\python3.11.exe\" \"$store_base\\python3.11.exe\" --version" 2>/dev/null | tr -d '\r\n')
+  if echo "$test_out" | grep -qi "Python 3"; then
+    echo "$store_base\\python3.11.exe"
+    return 0
+  fi
+  test_out=$(cmd.exe /c "if exist \"$store_base\\python3.exe\" \"$store_base\\python3.exe\" --version" 2>/dev/null | tr -d '\r\n')
+  if echo "$test_out" | grep -qi "Python 3"; then
+    echo "$store_base\\python3.exe"
+    return 0
+  fi
+  # 5. Fallback: common MSI install paths
+  local paths=(
+    "C:\\Python313\\python.exe"
+    "C:\\Python312\\python.exe"
+    "C:\\Python311\\python.exe"
+    "C:\\Program Files\\Python313\\python.exe"
+    "C:\\Program Files\\Python312\\python.exe"
+    "C:\\Program Files\\Python311\\python.exe"
+    "$WIN_HOME_RAW\\AppData\\Local\\Programs\\Python\\Python313\\python.exe"
+    "$WIN_HOME_RAW\\AppData\\Local\\Programs\\Python\\Python312\\python.exe"
+    "$WIN_HOME_RAW\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"
+  )
+  for p in "${paths[@]}"; do
+    test_out=$(cmd.exe /c "if exist \"$p\" \"$p\" --version" 2>/dev/null | tr -d '\r\n')
+    if echo "$test_out" | grep -qi "Python 3"; then
+      echo "$p"
+      return 0
+    fi
+  done
+  echo ""
+  return 1
+}
+
+PYTHON_WIN_RAW=$(resolve_python)
+if [ -z "$PYTHON_WIN_RAW" ]; then
+  err "No working Python 3 found on Windows"
+  echo ""
+  echo "  Install Python from https://python.org — ensure 'py -3' launcher is available"
+  echo "  or re-run the Python installer and check 'Add Python to PATH'"
+  echo ""
+  exit 1
+fi
+info "Using Windows Python: $PYTHON_WIN_RAW"
 
 # Check if proxy already running
 PROXY_PID=""
@@ -96,7 +167,12 @@ if [ -n "$PROXY_PID" ]; then
   ok "Python proxy already running (PID $PROXY_PID)"
 else
   info "Starting Python proxy on Windows..."
-  cmd.exe /c "start /b \"\" \"$PYTHON_WIN_RAW\" \"$PROXY_DST_RAW\"" 2>/dev/null
+  # cmd.exe launched from WSL inherits a UNC working directory (\\wsl.localhost\...)
+  # which Windows doesn't support — it defaults to C:\Windows\System32 and
+  # concatenates quoted script paths with it. Fix: cd /d C:\ and use unquoted path.
+  # Also: start /b can't resolve App Execution Aliases (Store Python).
+  # Use background & to detach from the shell.
+  cmd.exe /c "cd /d C:\ && $PYTHON_WIN_RAW $PROXY_DST_RAW" > /dev/null 2>&1 &
   sleep 3
   if [ -x "/mnt/c/Windows/System32/netstat.exe" ]; then
     NETSTAT_OUT=$(/mnt/c/Windows/System32/netstat.exe -ano 2>/dev/null | grep ":$WIN_PROXY_PORT" | grep LISTENING || true)
@@ -105,7 +181,8 @@ else
   if [ -n "$PROXY_PID" ]; then
     ok "Python proxy started (PID $PROXY_PID)"
   else
-    err "Failed to start Python proxy"
+    err "Failed to start Python proxy — tried: $PYTHON_WIN_RAW"
+    echo "  Check that Python is installed: run 'py -3 --version' from Windows cmd"
     exit 1
   fi
 fi
