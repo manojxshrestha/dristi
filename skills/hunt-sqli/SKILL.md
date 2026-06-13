@@ -1,8 +1,7 @@
 ---
 name: hunt-sqli
-description: Hunting skill for sqli vulnerabilities. Built from 12 public bug bounty reports including modern NoSQL injection (Rocket.Chat CVE-2021-22911 MongoDB $regex, Mongoose ORM CVE-2024-53900 $where bypass), modern ORM raw-fragment SQLi (Django CVE-2024-42005, Sequelize GHSA-wrh9-cjv3-2hpw), second-order SOQL injection (HackerOne Salesforce), time-based blind SQLi in GraphQL resolvers, and SQLi on OIDC-proxy backends. Use when hunting SQLi / NoSQLi on any target.
+description: Hunting skill for sqli vulnerabilities. Curated from BugBoard's H1 database (10K+ disclosed reports) including modern NoSQL injection (Rocket.Chat CVE-2021-22911 MongoDB $regex, Mongoose ORM CVE-2024-53900 $where bypass), modern ORM raw-fragment SQLi (Django CVE-2024-42005, Sequelize GHSA-wrh9-cjv3-2hpw), second-order SOQL injection (HackerOne Salesforce), time-based blind SQLi in GraphQL resolvers, and SQLi on OIDC-proxy backends. Use when hunting SQLi / NoSQLi on any target.
 sources: github, hackerone_public, github_security_advisories, snyk_research, sonarsource_research
-report_count: 12
 ---
 
 ## Crown Jewel Targets

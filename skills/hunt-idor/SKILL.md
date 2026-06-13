@@ -1,8 +1,7 @@
 ---
 name: hunt-idor
-description: Hunting skill for idor vulnerabilities. Built from 26 public bug bounty reports. Use when hunting idor on any target.
+description: Hunting skill for IDOR vulnerabilities. Curated from BugBoard's H1 database (10K+ disclosed reports). Use when hunting idor on any target.
 sources: github, hackerone_public
-report_count: 26
 ---
 
 ## Crown Jewel Targets
