@@ -64,7 +64,7 @@ Check for chaining opportunities between findings. Wraps `find_chains()`.
 
 ### `bughunt autopilot [target]`
 
-Run the full 7-phase pipeline autonomously: SCOPE → RECON → SURFACE → HUNT → CAPTURE → VALIDATE → REPORT.
+Run the full 12-phase pipeline autonomously: SCOPE → AUTH → INTEL → RECON → SURFACE → HUNT → DEEPTHINK → EXPLOIT → SEARCH → CAPTURE → VALIDATE → REPORT.
 
 - Use `--phase <N>` to run only up to a specific phase
 - Use `--resume` to continue from last checkpoint

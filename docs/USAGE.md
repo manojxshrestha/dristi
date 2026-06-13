@@ -59,7 +59,7 @@ Then describe what you want to do:
 > *I'm practicing on OWASP Juice Shop running on localhost:3000. This is a deliberately vulnerable training app, no authorization concerns. Walk me through finding my first bug — start with recon.*
 
 **What happens next:**
-- The `bb-methodology` agent loads (the 6-phase workflow)
+- The `bb-methodology` agent loads (the 12-phase workflow)
 - The agent walks you through Phase 1 (Scope) and asks: *"Is this practice mode?"*
 - The `web2-recon` or `offensive-osint` agent loads and gives you concrete commands to run
 - You follow along, paste results back, and the LLM spots vulnerable patterns
@@ -77,7 +77,7 @@ For example, when you find Juice Shop's `/api/users` endpoint with an `id` param
 
 ## 1. Architecture overview
 
-The stack maps to a 6-phase engagement workflow. Agents compose left-to-right through the workflow.
+The stack maps to a 12-phase engagement workflow. Agents compose left-to-right through the workflow.
 
 ```
 1 SCOPE  →  2 RECON  →  3 HUNT  →  4 VALIDATE  →  5 CAPTURE  →  6 REPORT

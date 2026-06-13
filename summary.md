@@ -14,7 +14,7 @@ Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive
 - 86 MCP tools · 87 agents (54 hunt-* + 33 pipeline/specialty)
 - 13 WSTG categories · 96 test cases
 - 57 CLI tool wrapper scripts · 20 GF patterns for parameter discovery
-- 7-phase autonomous pipeline (autopilot)
+- 12-phase autonomous pipeline (autopilot)
 - Burp Suite MCP integration · Playwright browser automation
 
 ---
@@ -83,24 +83,24 @@ Layer 4: Validation + Reporting      — how to ship it (7-Question Gate, VRT, r
 
 ## Pipeline (Autopilot)
 
-8-phase autonomous pipeline orchestrated by `autopilot.md`. Each phase has gate checks via `wstg_phase_gate_check()`.
+12-phase autonomous pipeline orchestrated by `autopilot.md`. Each phase has gate checks via `wstg_phase_gate_check()`.
 
 | Phase | Agent | Description | Gate |
 |-------|-------|-------------|------|
 | 1  SCOPE     | scope.md      | Register target, scope, credentials, task tree | phase_completed=0 |
-| 1.5 AUTH     | (inline)      | Auth flow test, WAF detection, token capture | — |
-| 1.75 Intel   | phase-intel.sh | WHOIS, M365/Azure, third-party misconfigs, spoof check, cloud bucket enum | — |
-| 2  RECON     | recon.md      | Subdomain enum, DNS, crawl, params, nuclei, secrets | phase_completed=1 |
-| 3  SURFACE   | surface.md    | Prioritize endpoints, rank attack surface | phase_completed=2 |
-| 4  HUNT      | hunt.md       | Dispatch 54 hunt-* sub-agents, test all bug classes | phase_completed=3 |
-| 4.25 DEEPTHINK | deepthink.md | (conditional) First-principles gap analysis when HUNT yields zero | — |
-| 4.5 EXPLOIT  | exploit.md    | Second-wave exploitation: PoC all findings, WAF bypass, chaining | — |
-| 4.75 SEARCH | search.md | (conditional) 13-resource retrieval when EXPLOIT stalls | — |
-| 5  CAPTURE   | capture.md    | Evidence collection, screenshots, redaction | phase_completed=4 |
-| 6  VALIDATE  | validate.md   | Re-validate PoCs, 7-Question Gate, severity | phase_completed=5 |
-| 7  REPORT    | report.md     | Coverage check, generate report | phase_completed=6 |
+| 2  AUTH      | (inline)      | Auth flow test, WAF detection, token capture | — |
+| 3  INTEL     | phase-intel.sh | WHOIS, M365/Azure, third-party misconfigs, spoof check, cloud bucket enum | — |
+| 4  RECON     | recon.md      | Subdomain enum, DNS, crawl, params, nuclei, secrets | phase_completed=1 |
+| 5  SURFACE   | surface.md    | Prioritize endpoints, rank attack surface | phase_completed=2 |
+| 6  HUNT      | hunt.md       | Dispatch 54 hunt-* sub-agents, test all bug classes | phase_completed=3 |
+| 7  DEEPTHINK | deepthink.md | (conditional) First-principles gap analysis when HUNT yields zero | — |
+| 8  EXPLOIT   | exploit.md    | Second-wave exploitation: PoC all findings, WAF bypass, chaining | — |
+| 9  SEARCH    | search.md     | (conditional) 13-resource retrieval when EXPLOIT stalls | — |
+| 10 CAPTURE   | capture.md    | Evidence collection, screenshots, redaction | phase_completed=4 |
+| 11 VALIDATE  | validate.md   | Re-validate PoCs, 7-Question Gate, severity | phase_completed=5 |
+| 12 REPORT    | report.md     | Coverage check, generate report | phase_completed=6 |
 
-Autopilot is a thin orchestrator (248 lines) — phases 2-7 are dispatched via `task()` to specialized sub-agents to avoid context exhaustion.
+Autopilot is a thin orchestrator (248 lines) — phases 4-12 are dispatched via `task()` to specialized sub-agents to avoid context exhaustion.
 
 ---
 
@@ -352,7 +352,7 @@ All domain-mode: accept domain as $1, auto-discover recon output, output to runt
 - **No context.newContext()**: Default context routes through Burp
 - **consult.md frontmatter added**: Was missing entirely, now loads correctly
 - **12 pipeline agents frontmatter fixed**: Added mode + permission blocks
-- **deepthink + search added**: Conditional intelligence fallback phases (4.25, 4.75)
+- **deepthink + search added**: Conditional intelligence fallback phases (7, 9)
 - **pipeline updated**: Re-exploitation loop after search finds new payloads
 - **Deliverable-based data flow**: auth_analysis → Phase 6, endpoint_map_raw → Phase 5 → endpoint_map_ranked → Phase 6
 

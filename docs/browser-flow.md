@@ -83,7 +83,7 @@ await page.goto('https://target.com/app');
 
 ## Per-Phase Browser Workflow
 
-### P1.5: AUTHENTICATE — Browser-Based Login
+### P2: AUTH — Browser-Based Login
 
 - Navigate to the app to see the login/signup flow
 - Fill and submit the registration form to create a test account
@@ -91,7 +91,7 @@ await page.goto('https://target.com/app');
 - Take a screenshot of the authenticated dashboard as proof of session
 - Store cookies for reuse across phases
 
-### P2: RECON — Map Client-Side Surface
+### P4: RECON — Map Client-Side Surface
 
 - Navigate through the app to let it generate traffic through Burp Proxy
 - Open multiple tabs to map different sections
@@ -99,7 +99,7 @@ await page.goto('https://target.com/app');
 - Use `playwright_browser_network_requests(true)` to discover API calls
 - Use `playwright_browser_snapshot()` to get the full accessibility tree of each page
 
-### P3: SURFACE — Interactive Probing
+### P5: SURFACE — Interactive Probing
 
 - Navigate to endpoints identified in recon
 - Use `playwright_browser_evaluate()` to inspect DOM state:
@@ -109,7 +109,7 @@ await page.goto('https://target.com/app');
 - Fill forms and submit to discover hidden parameters
 - Take snapshots for each distinct endpoint type
 
-### P4: HUNT — Vulnerability Validation
+### P6: HUNT — Vulnerability Validation
 
 #### Open Redirect
 
@@ -192,7 +192,7 @@ const storage = await page.evaluate(() => ({
 }));
 ```
 
-### P5: CAPTURE — Evidence Collection
+### P10: CAPTURE — Evidence Collection
 
 - `playwright_browser_take_screenshot('png')` — full-page or viewport screenshot
 - `playwright_browser_snapshot()` — accessibility tree for DOM-based bugs

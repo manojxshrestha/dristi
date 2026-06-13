@@ -18,10 +18,10 @@ If stuck: just say *"What should I do next?"*
 
 ---
 
-## The 8-Phase Pipeline
+## The 12-Phase Pipeline
 
 ```
-SCOPE → AUTH → RECON → SURFACE → HUNT → EXPLOIT → CAPTURE → VALIDATE → REPORT
+SCOPE(1) → AUTH(2) → INTEL(3) → RECON(4) → SURFACE(5) → HUNT(6) → DEEPTHINK(7) → EXPLOIT(8) → SEARCH(9) → CAPTURE(10) → VALIDATE(11) → REPORT(12)
 ```
 
 ### P1: SCOPE — Define the Target
@@ -39,7 +39,7 @@ SCOPE → AUTH → RECON → SURFACE → HUNT → EXPLOIT → CAPTURE → VALIDA
 
 ---
 
-### P1.5: AUTHENTICATE — Get Credentials First
+### P2: AUTH — Get Credentials First
 
 | Step | Action | What Happens |
 |------|--------|--------------|
@@ -54,7 +54,7 @@ SCOPE → AUTH → RECON → SURFACE → HUNT → EXPLOIT → CAPTURE → VALIDA
 
 ---
 
-### P2: RECON — Discover Endpoints
+### P4: RECON — Discover Endpoints
 
 | Step | Action | What Happens |
 |------|--------|--------------|
@@ -67,7 +67,7 @@ SCOPE → AUTH → RECON → SURFACE → HUNT → EXPLOIT → CAPTURE → VALIDA
 
 ---
 
-### P3: SURFACE — Ranked Attack Surface
+### P5: SURFACE — Ranked Attack Surface
 
 | Step | Action | What Happens |
 |------|--------|--------------|
@@ -80,7 +80,7 @@ SCOPE → AUTH → RECON → SURFACE → HUNT → EXPLOIT → CAPTURE → VALIDA
 
 ---
 
-### P4: HUNT — Active Vulnerability Testing
+### P6: HUNT — Active Vulnerability Testing
 
 Invoke `@hunt` or jump directly to a specific `@hunt-*` agent:
 
@@ -154,7 +154,7 @@ Invoke `@hunt` or jump directly to a specific `@hunt-*` agent:
 
 ---
 
-### P4.5: EXPLOIT — Deep-Research Exploitation
+### P8: EXPLOIT — Deep-Research Exploitation
 
 Invoke `@exploit` to systematically validate and escalate findings:
 
@@ -200,7 +200,7 @@ Q7: Is this NOT on the never-submit list?
 
 **Never-submit list:** missing headers, introspection alone, clickjacking alone, self-XSS, open redirect alone, SSRF DNS-only, logout CSRF, rate limits on non-critical forms, cookie flags alone.
 
-**→ Transition:** PASS → *"Validated. → @report"* | KILL → *"Dead. Back to hunting."* | CHAIN → *"Back to P4."*
+**→ Transition:** PASS → *"Validated. → @report"* | KILL → *"Dead. Back to hunting."* | CHAIN → *"Back to P6."*
 
 ---
 
@@ -313,7 +313,7 @@ Every OWASP-classified bug class: XSS (reflected/stored/DOM/mXSS/CSP bypass), SQ
 [ ] P4: Hunt — relevant @hunt-* agents against findings
 [ ] P4: Findings logged via log_finding()
 [ ] P4: WSTG tests tracked via track_test()
-[ ] P4.5: Exploit — deep-research, WAF bypass, chain findings
+[ ] P8: Exploit — deep-research, WAF bypass, chain findings
 [ ] P5: Evidence captured with hygiene
 [ ] P6: Every finding validated via @validate
 [ ] P7: Report drafted via @report

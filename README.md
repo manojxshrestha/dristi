@@ -177,7 +177,7 @@ graph TB
 
 ## Engagement Flow
 
-Every engagement follows the same 8-phase loop. Agents auto-load at each phase. The Validate gate has 4 possible outcomes — only **PASS** or **DOWNGRADE** continue forward to a report; **KILL** and **CHAIN REQUIRED** return you to Hunt with a verdict that prevents wasted reporting effort.
+Every engagement follows the same 12-phase pipeline. Agents auto-load at each phase. The Validate gate has 4 possible outcomes — only **PASS** or **DOWNGRADE** continue forward to a report; **KILL** and **CHAIN REQUIRED** return you to Hunt with a verdict that prevents wasted reporting effort.
 
 ```mermaid
 flowchart TD
@@ -612,7 +612,7 @@ Once installed, open OpenCode in the project directory and describe your target:
 
 ```text
 > Dristi engagement on [target] — HackerOne program with web app, API, mobile, and cloud.
-  Run full 6-phase workflow: scope intake → recon → hunt → validate → capture → report.
+  Run full 12-phase workflow: scope → auth → intel → recon → surface → hunt → deepthink → exploit → search → capture → validate → report.
 ```
 
 Agents auto-load as you describe what you're testing:
@@ -859,8 +859,8 @@ The per-class `@hunt-*` agents address gap-zero (*"what should I look for in web
 | Doc | Contents |
 |---|---|
 | [`README.md`](README.md) | This file — capability map, structure, quick start |
-| [`docs/architecture.md`](docs/architecture.md) | 6-phase architecture · skill-to-phase mapping · engagement composition |
-| [`docs/workflow.md`](docs/workflow.md) | Working principle · 6-phase workflow · Mermaid diagrams · WSTG walkthrough |
+| [`docs/architecture.md`](docs/architecture.md) | 12-phase architecture · skill-to-phase mapping · engagement composition |
+| [`docs/workflow.md`](docs/workflow.md) | Working principle · 12-phase workflow · Mermaid diagrams · WSTG walkthrough |
 | [`docs/USAGE.md`](docs/USAGE.md) | Full engagement walkthrough · hunt class table · Dristi-specific prompts |
 | [`SECURITY.md`](SECURITY.md) | Authorized-use posture · responsible disclosure · what's excluded |
 

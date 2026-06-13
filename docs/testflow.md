@@ -11,11 +11,11 @@ Dristi uses a **triage-first, reference-informed** testing strategy. Not every e
 ## 12-Phase Pipeline
 
 ```
-SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) → [DEEPTHINK(4.25)] → EXPLOIT(4.5) → [SEARCH(4.75)] → CAPTURE(5) → VALIDATE(6) → REPORT(7)
-                                                              ├─ group-based testing (1-2 reps per functional group)
-                                                              ├─ Ralph Wiggum loop: every endpoint covered before gate
-                                                              ├─ (parallel) credential-attack
-                                                              └─ multi-auth-context probing (exploit: replay with all sessions)
+SCOPE(1) → AUTH(2) → INTEL(3) → RECON(4) → SURFACE(5) → HUNT(6) → [DEEPTHINK(7)] → EXPLOIT(8) → [SEARCH(9)] → CAPTURE(10) → VALIDATE(11) → REPORT(12)
+                                                                      ├─ group-based testing (1-2 reps per functional group)
+                                                                      ├─ Ralph Wiggum loop: every endpoint covered before gate
+                                                                      ├─ (parallel) credential-attack
+                                                                      └─ multi-auth-context probing (exploit: replay with all sessions)
 ```
 
 ### Phase P1: SCOPE
@@ -23,14 +23,14 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - Load engagement config
 - Create task tree
 
-### Phase P1.5: AUTH
+### Phase P2: AUTH
 - Sign-up / credential validation
 - Fingerprint WAF via `identify_waf()` MCP tool
 - Look up vendor fingerprints in `knowledge/waf/waf-knowledge-base/02-waf-fingerprints/`
 - Apply stealth proxy (Playwright CF bypass) if Cloudflare detected
 - Save `auth_analysis` deliverable
 
-### Phase P1.75: OSINT (passive)
+### Phase P3: INTEL (passive)
 - WHOIS lookup, M365/Azure tenant discovery (`whois` + `msftrecon`)
 - Scopify scope analysis from registered domain
 - Third-party SaaS misconfiguration scan (`misconfig-mapper`)
@@ -40,7 +40,7 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - Output to `runtime/engagements/<eid>/recon/<domain>/intel/`
 - Skipped: `ip_info` (requires `WHOISXML_API` key)
 
-### Phase P2: RECON
+### Phase P4: RECON
 - Subdomain enumeration + DNS bruteforce
 - Web crawling, parameter extraction
 - Nuclei, directory bruteforce, 403 bypass, vhost fuzzing
@@ -49,14 +49,14 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - Answer 3 triage questions per endpoint
 - Save `endpoint_map_raw` deliverable
 
-### Phase P3: SURFACE
+### Phase P5: SURFACE
 - Load `endpoint_map_raw` deliverable
 - Classify into Tiers (T0: public+input, T1: auth+input, T2: infra)
 - **Classify into functional groups** (auth, profile, api, admin, search, file, payment, infra) by path prefix — see [Group-Based Testing](#group-based-testing)
 - Risk-score each endpoint via `prioritize_endpoints()`
 - Save `endpoint_map_ranked` deliverable with group membership
 
-### Phase P4: HUNT
+### Phase P6: HUNT
 - Load `endpoint_map_ranked` + `auth_analysis`
 - **Deep testing** — API fuzzing, method override, content-type switch, GraphQL probing, race conditions, UUID analysis, JWT manipulation
 - **Group-based testing** — For each functional group, pick 1-2 representative endpoints and test ALL applicable bug classes. If clean for a class, skip the whole group. If vulnerable, follow up on non-representative siblings.
@@ -71,7 +71,7 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - Log findings: `log_finding()`, `track_test()`
 - Check chaining opportunities: `find_chains()`
 
-### Phase P4.25: DEEPTHINK (conditional)
+### Phase P7: DEEPTHINK (conditional)
 
 **Activates when:** HUNT returns zero findings, missing tools, or knowledge gaps.
 
@@ -80,7 +80,7 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - Inventories tool/knowledge gaps, suggests WAF bypass or chain alternatives
 - Triggers automatically in `@autopilot`; asks for approval in `@consult`
 
-### Phase P4.5: EXPLOIT
+### Phase P8: EXPLOIT
 - Load all findings via `findings_list_vulns()`
 - Classify each finding by vulnerability class (XSS, SQLi, SSRF, SSTI, CMDi, IDOR, etc.)
 - Load technique guide per class: `get_technique_guide()`
@@ -97,7 +97,7 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - Upgrade severities for chained findings
 - **Exhaustive exploitation gate:** Before moving on, verify every confirmed finding was either exploited (PoC success) or exhausted (bypass attempts documented). No finding is skipped without a decision.
 
-### Phase P4.75: SEARCH (conditional)
+### Phase P9: SEARCH (conditional)
 
 **Activates when:** EXPLOIT hits stale CVEs, WAF bypass failures, or missing technique knowledge.
 
@@ -107,7 +107,7 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - Creates issue.md on second dead-end, then proceeds to Phase 10
 - Triggers automatically in `@autopilot`; asks for approval in `@consult`
 
-### Phase P5: CAPTURE
+### Phase P10: CAPTURE
 - Load confirmed findings via `get_findings()`
 - Load evidence-hygiene for redaction protocol
 - Capture raw HTTP + screenshot (Playwright) + collaborator (if OOB)
@@ -115,14 +115,14 @@ SCOPE(1) → AUTH(1.5) → OSINT(1.75) → RECON(2) → SURFACE(3) → HUNT(4) �
 - Apply redaction (cookies, PII, tokens)
 - Save sanitized evidence
 
-### Phase P6: VALIDATE
+### Phase P11: VALIDATE
 - Re-validate each PoC via `validate_poc()` or `validate_finding_poc()`
 - Cross-reference severity against MCP technique guides
 - Run the 7-Question Gate (real request? accepted impact? in scope? no privileged access? not known? provable? not never-submit?)
 - Assign verdict: PASS / KILL / DOWNGRADE / CHAIN-REQUIRED
 - Update finding via `update_finding()`
 
-### Phase P7: REPORT
+### Phase P12: REPORT
 - Check WSTG coverage: `get_coverage()`
 - Check tool coverage: `get_tool_coverage()`
 - Gate check: `phase_gate_check(phase_completed=6)`

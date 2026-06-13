@@ -33,21 +33,21 @@ Dristi pairs with [Burp Suite's MCP Server](https://github.com/PortSwigger/burp-
 - Browse to the target to capture initial traffic
 - **Tools**: `burp_set_proxy_intercept_state(True/False)`, `burp_get_proxy_http_history()`
 
-### P2: RECON — Map the Attack Surface
+### P4: RECON — Map the Attack Surface
 
 - Browse the app with proxy on — every endpoint, parameter, and auth token lands in proxy history
 - Review history periodically: `burp_get_proxy_http_history()`
 - Search for patterns: use `burp_get_proxy_http_history_regex(regex)` with gf-patterns
 - Save interesting endpoints to Organizer: `burp_get_organizer_items()`
 
-### P3: SURFACE — Manual Endpoint Probing
+### P5: SURFACE — Manual Endpoint Probing
 
 - Send promising endpoints to Repeater for manual inspection: `burp_create_repeater_tab(content, ...)`
 - Toggle intercept to modify requests in-flight: `burp_set_active_editor_contents(text)`
 - Read current request: `burp_get_active_editor_contents()`
 - Probe for auth, access control, info disclosure
 
-### P4: HUNT — Active Vulnerability Testing
+### P6: HUNT — Active Vulnerability Testing
 
 | Technique | Burp Tool | MCP Call |
 |-----------|-----------|----------|
@@ -67,7 +67,7 @@ Test flow per finding:
 4. If fuzzing needed, send to Intruder with payload positions
 5. Save confirmed PoC to a named Repeater tab for evidence
 
-### P5: CAPTURE — Evidence Collection
+### P10: CAPTURE — Evidence Collection
 
 - Re-execute the PoC via Repeater: `burp_create_repeater_tab()`
 - Read the raw request/response: `burp_get_active_editor_contents()`
@@ -75,13 +75,13 @@ Test flow per finding:
 - Take browser screenshots of the Repeater tab showing the exploit
 - Save evidence and proceed to validation
 
-### P6: VALIDATE — Reproducibility Check
+### P11: VALIDATE — Reproducibility Check
 
 - Re-run the exact PoC via Repeater to confirm it still works
 - Verify the response matches expected vulnerable behavior
 - Run the 7-Question Gate (`@triage-validation`) before logging
 
-### P7: REPORT — Evidence Export
+### P12: REPORT — Evidence Export
 
 - Export saved Repeater tabs as evidence
 - Pull Organizer items for the report
