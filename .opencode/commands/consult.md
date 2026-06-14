@@ -49,7 +49,9 @@ Phase 12 (REPORT)     → suggest next → ask user → advance on approval
 | RECON | Live hosts, endpoints, secrets found | "Rank attack surface into tiers" | "Start hunting Tier 0 immediately" |
 | SURFACE | Tier 0/1/2 list built | "Start hunting — recommend class order by impact" | "Focus on specific class, or run all" |
 | HUNT | Findings by severity | "Run gap analysis (deepthink) if zero findings" | "Skip to exploitation" |
+| DEEPTHINK | (conditional) Gaps documented, root causes identified | "Re-dispatch HUNT with gap fixes" | "Skip to exploitation anyway" |
 | EXPLOIT | Findings exploited or blocked | "Run research (search) if blocked by WAF/CVEs" | "Proceed to capture" |
+| SEARCH | (conditional) CVEs/payloads researched | "Re-dispatch EXPLOIT with fresh payloads" | "Proceed to capture" |
 | CAPTURE | Evidence saved, redacted | "Validate through 7-Question Gate" | "Skip validation, go straight to report" |
 | VALIDATE | PASS/DOWNGRADE/KILL counts | "Draft final report" | "Review findings before reporting" |
 

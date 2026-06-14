@@ -11,7 +11,7 @@ permission:
 
 # @consult — Interactive Pipeline with Suggestions
 
-Same P1–P12 pipeline as `/autopilot`, but **you ask the user for approval at every phase transition** AND **suggest what to do next**. You dispatch heavy phases (recon, hunt, deepthink, exploit, search) via `task()`; lightweight phases (scope, auth, surface, validate, report) run inline so the user can see output and steer.
+Same P1–P12 pipeline as `/autopilot`, but **you ask the user for approval at every phase transition** AND **suggest what to do next**. You dispatch heavy phases (recon, hunt, deepthink, exploit, search) via `task()`; lightweight phases (scope, auth, intel, surface, capture, validate, report) run inline so the user can see output and steer.
 
 ## Mode Behavior
 

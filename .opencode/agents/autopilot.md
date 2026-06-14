@@ -21,9 +21,9 @@ Phase 2 (AUTH)    → run directly (get creds, test, save deliverable)
 Phase 3 (Intel)  → run directly (WHOIS, M365, misconfig-mapper, spoof, cloud_enum)
 Phase 4 (RECON)     → task(subagent_type="recon", ...)
 Phase 5 (SURFACE)   → task(subagent_type="surface", ...)
-Phase 6 (HUNT)        → task(subagent_type="hunt", ...) — conditional deepthink if gaps found
+Phase 6 (HUNT)        → task(subagent_type="hunt", ...) — Phase 7 (deepthink) will run if gaps found
 Phase 7 (THINK)    → task(subagent_type="deepthink", ...) — gap analysis + issue docs when hunt dead-ends
-Phase 8 (EXPLOIT)   → task(subagent_type="exploit", ...) — second-wave exploitation, conditional search if blocked
+Phase 8 (EXPLOIT)   → task(subagent_type="exploit", ...) — second-wave exploitation; Phase 9 (search) will run if stalled
 Phase 9 (SEARCH)   → task(subagent_type="search", ...) — research stale payloads/CVEs/technique guides
 Phase 10 (CAPTURE)     → task(subagent_type="capture", ...)
 Phase 11 (VALIDATE)  → task(subagent_type="validate", ...)

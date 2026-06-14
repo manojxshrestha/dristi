@@ -1,6 +1,6 @@
 ---
 name: autopilot
-description: Run autonomous hunt loop on a target — scope check → recon → rank surface → hunt → validate → report with configurable checkpoints. Usage: /autopilot target.com [--paranoid|--normal|--yolo]
+description: Run autonomous hunt loop on a target — full 12-phase P1–P12 pipeline: scope → auth → intel → recon → surface → hunt → deepthink → exploit → search → capture → validate → report. Usage: /autopilot target.com [--paranoid|--normal|--yolo]
 ---
 
 # /autopilot

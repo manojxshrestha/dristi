@@ -49,7 +49,7 @@ graph TB
 
 The loop: **describe → agent loads → MCP tracks → references guide → Burp executes → analyze → log finding → validate → report**
 
-All agents are invoked via `@agent-name`. 12 pipeline agents: `@autopilot` → `@consult` → `@scope` → `@pintel` → `@recon` → `@surface` → `@hunt` → `@deepthink` → `@exploit` → `@search` → `@capture` → `@validate` → `@report`. 54 specialized `@hunt-*` agents + 21 non-hunt specialty agents (87 total).
+All agents are invoked via `@agent-name`. 14 pipeline agents: `@autopilot` → `@consult` → `@scope` → `@pintel` → `@recon` → `@surface` → `@hunt` → `@deepthink` → `@exploit` → `@search` → `@capture` → `@validate` → `@report`. 54 specialized `@hunt-*` agents + 21 non-hunt specialty agents (89 total).
 
 **Two modes:**
 - **`@autopilot`** — runs fully autonomous, dispatches phases 2-12 via `task()` to sub-agents, ends with report
@@ -82,7 +82,7 @@ Phase 12:  REPORT      → coverage check, generate final report
 
 ```mermaid
 flowchart LR
-    SCOPE --> AUTH --> OSINT --> RECON --> SURFACE --> HUNT --> DEEPTHINK --> EXPLOIT --> CAPTURE --> VALIDATE --> REPORT
+    SCOPE --> AUTH --> INTEL --> RECON --> SURFACE --> HUNT --> DEEPTHINK --> EXPLOIT --> SEARCH --> CAPTURE --> VALIDATE --> REPORT
     HUNT -->|"Ralph Wiggum: untested endpoints?"| HUNT
     EXPLOIT -->|"Exhaustive gate: un-exploited findings?"| EXPLOIT
     HUNT -.->|"zero findings"| DEEPTHINK

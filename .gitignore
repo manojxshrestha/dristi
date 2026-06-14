@@ -54,5 +54,7 @@ server/data/
 .venv/
 venv/
 # Virtual environment (our name is venv/, not .venv/)
+got-issue.md
+# Local issue log — never pushed
 .vscode/
 .wrangler/
