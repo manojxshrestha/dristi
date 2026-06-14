@@ -2959,39 +2959,29 @@ def _get_phase_brainstorming(
 
     if phase == 0:
         suggestions.append(
-            "Did you check if the login page redirects to a different domain "
-            "(SSO/OIDC/SAML/Keycloak/Auth0/Okta)? If so, register all domains "
-            "with register_scope() and set up a cookie jar for cross-domain auth."
+            "SCOPE done. Did you check for SSO/OIDC/SAML redirects to a different domain? "
+            "If the login redirects to auth.example.com, register it with register_scope()."
         )
-        suggestions.append("Did you check for non-standard ports? nmap may reveal services " "on 8080, 8443, 3000, 9090, etc.")
-        suggestions.append("Did JavaScript analysis reveal hidden API endpoints? " "Check katana -jc and gau output carefully.")
-        suggestions.append("Look for exposed config files: /.env, /.git/HEAD, " "/docker-compose.yml, /config.yml, /.DS_Store")
-        suggestions.append("Check for API documentation: /swagger, /api-docs, /graphql, " "/openapi.json, /redoc")
-        if "gau" not in tracked_tools or tracked_tools["gau"].get("status") != "run":
-            suggestions.append("gau (GetAllURLs) can find historical endpoints from web " "archives that are no longer linked but still accessible.")
+        suggestions.append("Did the user provide credentials? If not, label everything [UNAUTHENTICATED] " "and note blind spots for the AUTH phase.")
+        suggestions.append("If Cloudflare detected, route 80% of curl testing to api.<target> " "and use Playwright for CF-protected pages.")
+        suggestions.append("Check if there are API subdomains (api.*) or different auth domains " "that should be in scope.")
 
     if phase == 1:
         suggestions.append("Check Wayback Machine (web.archive.org) for old site versions " "that may reveal removed endpoints or sensitive files.")
         suggestions.append("Search GitHub/GitLab for the target domain — leaked credentials, " "config files, or source code.")
         suggestions.append("Try site:target.com filetype:pdf|xlsx|docx for sensitive documents.")
+        suggestions.append("Did you check for non-standard ports? nmap may reveal services " "on 8080, 8443, 3000, 9090, etc.")
+        suggestions.append("Look for exposed config files: /.env, /.git/HEAD, " "/docker-compose.yml, /config.yml, /.DS_Store")
+        suggestions.append("Check for API documentation: /swagger, /api-docs, /graphql, " "/openapi.json, /redoc")
+        if "gau" not in tracked_tools or tracked_tools["gau"].get("status") != "run":
+            suggestions.append("gau (GetAllURLs) can find historical endpoints from web " "archives that are no longer linked but still accessible.")
         if not findings:
             suggestions.append("Zero findings so far — are there information leakage issues " "you dismissed? Version disclosure, tech stack details, and " "internal path exposure are all valid findings.")
 
     if phase == 2:
-        suggestions.append("Test CORS with multiple origins: evil.com, null origin, " "subdomain origins, and HTTP vs HTTPS protocol switch.")
-        suggestions.append("Check for exposed debug endpoints: /debug, /actuator, /health, " "/metrics, /env, /configprops, /trace")
-        if has_oauth_issue or has_auth_broken:
-            suggestions.append(
-                "CRITICAL: OAuth/auth is broken. Did you try: "
-                "(1) Direct token endpoint with grant_type=password, "
-                "(2) client_credentials grant, "
-                "(3) Implicit grant (response_type=token), "
-                "(4) Device code flow, "
-                "(5) API keys in JavaScript files? "
-                "Any of these could bypass the broken callback."
-            )
-        suggestions.append("Test HTTP TRACE method — if enabled, it can steal HttpOnly " "cookies via cross-site tracing (XST).")
-        suggestions.append("Check for .git directory exposure: /.git/HEAD, /.git/config")
+        suggestions.append("SURFACE done. Did you prioritize endpoints using " "wstg_prioritize_endpoints()? Higher-risk endpoints should be tested first.")
+        suggestions.append("Review the endpoint map for authentication-required vs " "public endpoints. Auth-bypass candidates are high priority.")
+        suggestions.append("Flag any endpoints with interesting parameter names " "(id, user, file, url, redirect, token, key, api_key) for manual review.")
 
     if phase == 3:
         suggestions.append(
@@ -3009,6 +2999,20 @@ def _get_phase_brainstorming(
         suggestions.append("After logout, is the old session token still valid? " "Test session invalidation.")
         suggestions.append("IDOR: try negative IDs (-1), zero (0), very large numbers, " "UUIDs from other contexts, and strings where integers expected.")
         suggestions.append("Test mass assignment: can you set admin=true or role=admin " "when creating/updating your user profile?")
+        suggestions.append("Test CORS with multiple origins: evil.com, null origin, " "subdomain origins, and HTTP vs HTTPS protocol switch.")
+        suggestions.append("Check for exposed debug endpoints: /debug, /actuator, /health, " "/metrics, /env, /configprops, /trace")
+        suggestions.append("Test HTTP TRACE method — if enabled, it can steal HttpOnly " "cookies via cross-site tracing (XST).")
+        suggestions.append("Check for .git directory exposure: /.git/HEAD, /.git/config")
+        suggestions.append("XSS: test reflected, stored, and DOM variants. " "Check CSP headers — if missing or weak, XSS is easier to exploit.")
+        suggestions.append("SQLi: test both string and numeric parameters. " "Look for error-based, boolean blind, and time-based indicators.")
+        suggestions.append("SSRF: test DNS rebinding, IPv6 (::1), decimal IP, " "and cloud metadata at 169.254.169.254.")
+        suggestions.append("Test SECOND-ORDER injection: payload stored in one endpoint, " "triggered from another (e.g., username in profile displayed " "in admin panel without sanitization).")
+        suggestions.append("HTTP parameter pollution: send same param twice. Does the app " "use first, last, or both? This bypasses WAFs.")
+        suggestions.append("Test headers as injection points: Host, Referer, " "X-Forwarded-For, User-Agent, Accept-Language.")
+        suggestions.append("Business logic: can you change prices, apply discount codes " "multiple times, skip steps in multi-step workflows?")
+        suggestions.append("DOM XSS: look for document.location, document.referrer, " "window.name as sources and innerHTML, eval(), " "document.write() as sinks.")
+        suggestions.append("Open redirect: test //evil.com, \\/evil.com, /\\evil.com, " "and protocol-relative URLs in redirect parameters.")
+        suggestions.append("Check localStorage/sessionStorage for tokens, PII, or " "credentials — accessible to XSS attacks.")
         if has_auth_broken:
             suggestions.append("Auth is broken but don't give up! Try password grant, " "client_credentials, or crafting a JWT manually using " "information from the OIDC configuration endpoint.")
         athz04 = tracked_tests.get("WSTG-ATHZ-04", {})
@@ -3016,22 +3020,20 @@ def _get_phase_brainstorming(
             suggestions.append("IDOR testing was skipped. Even without full auth, try " "manipulating ID-like parameters in any accessible URLs " "(session IDs, user IDs in cookies, API version numbers).")
 
     if phase == 4:
-        suggestions.append("Test SECOND-ORDER injection: payload stored in one endpoint, " "triggered from another (e.g., username in profile displayed " "in admin panel without sanitization).")
-        suggestions.append("HTTP parameter pollution: send same param twice. Does the app " "use first, last, or both? This bypasses WAFs.")
-        suggestions.append("Test headers as injection points: Host, Referer, " "X-Forwarded-For, User-Agent, Accept-Language.")
-        suggestions.append("SSRF: test DNS rebinding, IPv6 (::1), decimal IP, " "and cloud metadata at 169.254.169.254.")
+        suggestions.append("CAPTURE done. Did you collect request/response evidence for all findings? " "Use wstg_validate_poc() to verify each finding is still reproducible.")
+        suggestions.append("Take screenshots of rendered PoCs (Playwright) and redact " "cookies, tokens, and PII using wstg_evidence_hygiene tools.")
+        suggestions.append("Verify collaborator payloads received interactions " "(use wstg_get_collaborator_interactions() to confirm).")
         xss_findings = [f for f in findings if "xss" in f.get("title", "").lower() or "INPV-01" in f.get("test_id", "") or "INPV-02" in f.get("test_id", "")]
         if xss_findings:
-            suggestions.append(f"XSS FOUND ({len(xss_findings)} instances). Chain: " "Can it steal admin tokens? Trigger actions as another user? " "Exfiltrate CSRF tokens?")
+            suggestions.append(f"XSS FOUND ({len(xss_findings)} instances). Capture rendered " "alert() screenshots as evidence.")
         sqli_findings = [f for f in findings if "sql" in f.get("title", "").lower() or "INPV-05" in f.get("test_id", "")]
         if sqli_findings:
-            suggestions.append("SQLi FOUND. Chain: extract password hashes, " "escalate to OS command execution via xp_cmdshell / " "INTO OUTFILE / COPY TO.")
+            suggestions.append("SQLi FOUND. Capture database fingerprint evidence " "(version banner, user, database name) for the report.")
 
     if phase == 5:
-        suggestions.append("Check localStorage/sessionStorage for tokens, PII, or " "credentials — accessible to XSS attacks.")
-        suggestions.append("Business logic: can you change prices, apply discount codes " "multiple times, skip steps in multi-step workflows?")
-        suggestions.append("DOM XSS: look for document.location, document.referrer, " "window.name as sources and innerHTML, eval(), " "document.write() as sinks.")
-        suggestions.append("Open redirect: test //evil.com, \\/evil.com, /\\evil.com, " "and protocol-relative URLs in redirect parameters.")
+        suggestions.append("VALIDATE done. Run the 7-Question Gate on every finding before reporting.")
+        suggestions.append("Check coverage: call wstg_get_coverage() and " "wstg_get_tool_coverage() to identify gaps before generating report.")
+        suggestions.append("For each finding, verify the vulnerability class is mapped " "to the correct severity and VRT category.")
 
     # Universal suggestions based on skip rate
     if len(skipped_tests) > 5:
@@ -3223,8 +3225,8 @@ def phase_gate_check(
                 if entry.get("status") == "skipped" and len(entry.get("notes", "")) < 10:
                     blockers.append(f"Test {test_id} skipped without adequate reason " f"(notes: '{entry.get('notes', '')}').")
 
-            # Phase 4 special: core test gate
-            if phase_completed == 4 and "core_tests" in reqs:
+            # Core test gate (HUNT phase = 3, old INPV special case)
+            if phase_completed == 3 and "core_tests" in reqs:
                 core_completed = sum(1 for tid in reqs["core_tests"] if tracked_tests.get(tid, {}).get("status") == "completed")
                 core_na = sum(1 for tid in reqs["core_tests"] if tracked_tests.get(tid, {}).get("status") == "not_applicable")
                 core_attempted = sum(1 for tid in reqs["core_tests"] if tracked_tests.get(tid, {}).get("status") in ("completed", "skipped", "not_applicable"))
@@ -3292,8 +3294,8 @@ def phase_gate_check(
 
     # ── Quality heuristics ─────────────────────────────────────────
     # Zero findings in high-risk phases
-    if phase_completed in (3, 4) and not findings:
-        warnings.append(f"No findings logged after Phase {phase_completed}. This is unusual " "for auth/input validation testing. Did you test thoroughly?")
+    if phase_completed in (3, 5) and not findings:
+        warnings.append(f"No findings logged after Phase {phase_completed} (HUNT/VALIDATE). " "This is unusual for full pipeline testing. Did you dispatch hunt agents?")
 
     # Findings referencing tests that aren't tracked
     finding_test_ids = {f.get("test_id", "") for f in findings}
