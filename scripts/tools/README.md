@@ -202,10 +202,19 @@ When testing endpoints from `gf_xss.txt`, use payloads from `scripts/xss_payload
 
 ```
 runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/
+├── intel/                    # phase-intel.sh — passive intelligence
+│   ├── domain_info_general.txt       # WHOIS + msftrecon + Scopify
+│   ├── azure_tenant_domains.txt      # M365/Azure tenant discovery
+│   ├── scopify.txt                   # Scope analysis
+│   ├── 3rdparts_misconfigurations.txt # Exposed SaaS (Slack, Jira, GitHub, etc.)
+│   ├── spoof.txt                     # SPF/DMARC spoofability
+│   └── cloud_enum.txt                # Cloud storage buckets
 ├── subdomains/
 │   ├── all_subdomains.txt   # all discovered subs
 │   ├── live_domains.txt     # httpx-probed (domains only)
 │   └── live_urls.txt        # httpx-probed (full URLs)
+├── live/                    # httpx live host probes
+├── urls/                    # collected URL lists
 ├── crawl/
 │   ├── https-subs.txt       # live https:// URLs — each line: https://sub.domain.com (from httpx -probe)
 │   ├── alive-domains.txt    # unique domains only — each line: sub.domain.com (extracted from https-subs)
@@ -223,5 +232,16 @@ runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/
 ├── xss/                     # auto_xss.sh (dalfox + manual)
 ├── sqli/                    # auto_sqli.sh (sqlmap output)
 ├── nuclei/                  # auto_nuclei.sh (template findings)
-└── secrets/                 # auto_secrets.sh (validated cariddi hits)
+├── secrets/                 # auto_secrets.sh (validated cariddi hits)
+├── takeover/                # takeover_scanner.sh — subdomain takeover checks
+├── bypass/                  # bypass_403.sh — 403 bypass attempts
+├── cloud/                   # cloud_recon.sh — cloud infrastructure enumeration
+├── js/                      # extracted JavaScript files
+├── ports/                   # port scanning results
+├── wordlists/               # wordlist_engine.sh — generated target-specific wordlists
+└── evidence/                # validated PoC evidence (per finding subdirectory)
+    └── <finding-id>/
+        ├── evidence.md      # structured evidence report
+        ├── request.txt      # raw HTTP request
+        └── screenshot.png   # visual proof
 ```
