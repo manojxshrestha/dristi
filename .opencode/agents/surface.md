@@ -22,13 +22,13 @@ wstg_get_deliverable(deliverable_type='endpoint_map_raw')
 ```
 
 If no deliverable exists, read the raw recon files directly:
-- `runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<domain>/crawl/crawledurls.txt`
-- `runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<domain>/params/*.txt`
-- `runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<domain>/cariddi/cariddi.txt`
-- `runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<domain>/nuclei/nuclei_critical_high.txt`
-- `runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<domain>/nuclei/nuclei_tech.txt`
-- `runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<domain>/directories/discovered_paths.txt`
-- `runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<domain>/github_dorks/findings.txt`
+- `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/crawl/crawledurls.txt`
+- `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/params/*.txt`
+- `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/cariddi/cariddi.txt`
+- `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/nuclei/nuclei_critical_high.txt`
+- `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/nuclei/nuclei_tech.txt`
+- `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/directories/discovered_paths.txt`
+- `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/github_dorks/findings.txt`
 
 ## Output: The "Test These N First" List
 

@@ -9,7 +9,7 @@ description: "Hunt SAML / SSO attacks. Patterns: XML Signature Wrapping (XSW1-XS
 ### Attack Surface
 ```bash
 # Find SAML endpoints
-cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/urls.txt | grep -iE "saml|sso|login.*redirect|oauth|idp|sp"
+cat runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/urls.txt | grep -iE "saml|sso|login.*redirect|oauth|idp|sp"
 # Key endpoints: /saml/acs (assertion consumer service), /sso/saml, /auth/saml/callback
 ```
 

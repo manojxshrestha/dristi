@@ -25,10 +25,10 @@ if [[ "$1" == */* ]]; then
     [ -z "$TARGET" ] && TARGET="unknown"
 else
     TARGET="$1"
-    LIVE_FILE="${2:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/subdomains/https-subs.txt}"
+    LIVE_FILE="${2:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/subdomains/https-subs.txt}"
 fi
 
-OUT_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/nuclei"
+OUT_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/nuclei"
 mkdir -p "$OUT_DIR"
 LOG_FILE="$OUT_DIR/nuclei.log"
 

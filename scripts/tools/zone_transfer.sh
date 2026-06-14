@@ -22,7 +22,7 @@ log_warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 log_info() { echo -e "${CYAN}[*]${NC} $1"; }
 
 TARGET="${1:?Usage: $0 <domain>}"
-OUT_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/zone_transfer"
+OUT_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/zone_transfer"
 mkdir -p "$OUT_DIR"
 
 # ── Step 1: Enumerate NS records ────────────────────────────────────

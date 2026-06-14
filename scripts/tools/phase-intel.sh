@@ -39,7 +39,7 @@ log_step() { echo -e "\n${CYAN}════════════════�
 export PATH="$HOME/go/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
 
 # ── Default output: runtime/engagements/<ENGAGEMENT_ID>/recon/<domain>/ ──
-ENGAGEMENT_ID="${ENGAGEMENT_ID:-rea-group-bb-001}"
+ENGAGEMENT_ID="${ENGAGEMENT_ID:-default-engagement}"
 
 # ── Global timeout: 20 minutes per module ────────────────────────────
 MODULE_TIMEOUT=${MODULE_TIMEOUT:-1200}
@@ -318,10 +318,11 @@ log_info "Starting intel for $TARGET"
 log_info "Modules: domain_info, third_party_misconfigs, spoof, cloud_enum_scan"
 log_warn "Skipped: ip_info (requires WHOISXML_API key)"
 
-run_domain_info
-run_third_party_misconfigs
-run_spoof
-run_cloud_enum
+# Each module has a MODULE_TIMEOUT cap so one hanging tool doesn't block subsequent modules
+timeout "$MODULE_TIMEOUT" bash -c 'run_domain_info' 2>/dev/null || log_warn "domain_info timed out after ${MODULE_TIMEOUT}s"
+timeout "$MODULE_TIMEOUT" bash -c 'run_third_party_misconfigs' 2>/dev/null || log_warn "third_party_misconfigs timed out after ${MODULE_TIMEOUT}s"
+timeout "$MODULE_TIMEOUT" bash -c 'run_spoof' 2>/dev/null || log_warn "spoof timed out after ${MODULE_TIMEOUT}s"
+timeout "$MODULE_TIMEOUT" bash -c 'run_cloud_enum' 2>/dev/null || log_warn "cloud_enum_scan timed out after ${MODULE_TIMEOUT}s"
 
 echo -e "\n${GREEN}════════════════════════════════════════════${NC}"
 log_ok "Intel complete — results in $INTEL_DIR"

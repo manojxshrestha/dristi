@@ -27,7 +27,7 @@ log_info() { echo -e "${CYAN}[*]${NC} $1"; }
 
 TARGET="${1:?Usage: $0 <domain>}"
 
-OUT_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/subdomains"
+OUT_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/subdomains"
 TMP_DIR="$OUT_DIR/.tmp"
 mkdir -p "$TMP_DIR" "$OUT_DIR"
 

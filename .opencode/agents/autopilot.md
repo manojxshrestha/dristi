@@ -160,7 +160,7 @@ task(
   description="Phase 5 Surface for <domain>",
   prompt="Target: <domain>. Run Phase 5 surface analysis:
 1. Load endpoint_map_raw deliverable via wstg_get_deliverable()
-2. Read raw recon outputs from runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<domain>/
+2. Read raw recon outputs from runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/
 3. Build Tier 0 (public+input), Tier 1 (auth-gated), Tier 2 (infra) lists
 4. Classify endpoints into functional groups (auth, profile, api, admin, search, file, payment, infra) by path prefix
 5. Call wstg_prioritize_endpoints() with endpoint data + group membership
@@ -304,7 +304,7 @@ task(
 2. Load @evidence-hygiene for redaction protocol
 3. For each finding: capture raw HTTP, screenshot (if DOM/visual), check collaborator (if OOB)
 4. Apply redaction (cookies, PII, tokens)
-5. Save sanitized evidence files to runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<domain>/evidence/<finding-id>/
+5. Save sanitized evidence files to runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/evidence/<finding-id>/
 6. Call wstg_phase_gate_check(phase_completed=4)
 7. Call wstg_save_checkpoint()
 

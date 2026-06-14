@@ -98,7 +98,7 @@ curl -s "https://crt.sh/?q=%.${TARGET}&output=json" \
 # Step 2: subdomain_enum.sh (subfinder + assetfinder + findomain → dnsx → httpx)
 bash scripts/tools/subdomain_enum.sh $TARGET
 
-echo "[+] Subdomains: $(find runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/subdomains/ -name '*.txt' -exec cat {} + 2>/dev/null | sort -u | wc -l)"
+echo "[+] Subdomains: $(find runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/subdomains/ -name '*.txt' -exec cat {} + 2>/dev/null | sort -u | wc -l)"
 
 echo "[+] Total subdomains after all sources: $(wc -l < /tmp/subs.txt)"
 
@@ -140,7 +140,7 @@ nuclei -l /tmp/live.txt -t ~/nuclei-templates/ -severity critical,high,medium -o
 
 ```bash
 TARGET="target.com"
-RECON_DIR="runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET"
+RECON_DIR="runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET"
 mkdir -p $RECON_DIR
 
 # All outputs go here:
@@ -344,7 +344,7 @@ TARGET="target.com"
 KNOWN="/tmp/$TARGET-subs-known.txt"
 
 bash scripts/tools/subdomain_enum.sh $TARGET 2>/dev/null
-cp runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/subdomains/all_subdomains.txt /tmp/$TARGET-subs-fresh.txt
+cp runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/subdomains/all_subdomains.txt /tmp/$TARGET-subs-fresh.txt
 
 # Diff against known
 NEW=$(comm -23 <(sort /tmp/$TARGET-subs-fresh.txt) <(sort $KNOWN 2>/dev/null))
@@ -397,7 +397,7 @@ cat /tmp/live.txt | awk '{print $1}' | naabu -port 80,443,8080,8443,3000,4000,50
 # trufflehog — high-signal secret detection with entropy analysis
 # Scans JS files and git repos
 pip install trufflehog3 2>/dev/null || true
-trufflehog filesystem --only-verified runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/ 2>/dev/null
+trufflehog filesystem --only-verified runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/ 2>/dev/null
 
 # SecretFinder — manual JS bundle scan (already in tools/)
 source ~/tools/SecretFinder/.venv/bin/activate

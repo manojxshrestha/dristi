@@ -601,7 +601,7 @@ See [`docs/burp-flow.md`](docs/burp-flow.md) for the complete per-phase Burp tes
 ### Verify
 
 ```bash
-# Count the installed agents (should be 85)
+# Count the installed agents (should be 87)
 ls ~/.config/opencode/agents/*.md 2>/dev/null | wc -l
 
 # Spot-check a few agents loaded

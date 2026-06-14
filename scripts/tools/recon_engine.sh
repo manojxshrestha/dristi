@@ -22,7 +22,8 @@ log_done()  { echo -e "    ${GREEN}[✓]${NC} $1"; }
 
 TARGET="${1:?Usage: $0 <target> [--quick]  (target = FQDN, IP, CIDR, or path to a file of domains/hosts)}"
 QUICK_MODE="${2:-}"
-BASE_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 # Auth-aware hunting: load BBHUNT_AUTH_HEADERS / BBHUNT_SESSION_ID into
 # BB_AUTH_ARGS=(-H 'Name: val' ...). Empty session = no-op.
@@ -40,7 +41,7 @@ if [ -f "$TARGET" ] && [ -r "$TARGET" ]; then
     TARGET="${TARGET%.*}"
 fi
 
-RECON_DIR="${RECON_OUT_DIR:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET}"
+RECON_DIR="${RECON_OUT_DIR:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 THREADS=20
 RATE_LIMIT=50  # requests per second

@@ -43,7 +43,7 @@ done
 # If INPUT isn't a file, try as a domain name (look in standard recon path)
 if [ -n "$INPUT" ] && [ ! -f "$INPUT" ]; then
   ORIG_DOMAIN="$INPUT"
-  DOMAIN_FILE="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$INPUT/subdomains/all_subdomains.txt"
+  DOMAIN_FILE="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$INPUT/subdomains/all_subdomains.txt"
   if [ -f "$DOMAIN_FILE" ]; then
     INPUT="$DOMAIN_FILE"
     DOMAIN="$ORIG_DOMAIN"
@@ -53,9 +53,9 @@ fi
 [ -z "$INPUT" ] || [ ! -s "$INPUT" ] && { err "subdomains file required and non-empty"; exit 2; }
 
 if [ -n "$DOMAIN" ]; then
-  OUT_DIR="${TAKEOVER_OUT_DIR:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$DOMAIN/takeover}"
+  OUT_DIR="${TAKEOVER_OUT_DIR:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$DOMAIN/takeover}"
 else
-  OUT_DIR="${TAKEOVER_OUT_DIR:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/default/takeover}"
+  OUT_DIR="${TAKEOVER_OUT_DIR:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/default/takeover}"
 fi
 mkdir -p "$OUT_DIR"
 

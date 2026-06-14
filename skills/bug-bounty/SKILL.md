@@ -291,17 +291,17 @@ bash scripts/tools/subdomain_enum.sh TARGET
 #   live_domains.txt     — httpx output (status, title, tech)
 
 # Step 2: URL collection from live hosts
-cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/TARGET/subdomains/https-subs.txt \
+cat runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/TARGET/subdomains/https-subs.txt \
   | katana -d 3 -jc -kf all -silent \
-  | anew runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/TARGET/urls.txt
-echo TARGET | waybackurls | anew runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/TARGET/urls.txt
+  | anew runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/TARGET/urls.txt
+echo TARGET | waybackurls | anew runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/TARGET/urls.txt
 
 # Step 3: Nuclei scan
-nuclei -l runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/TARGET/subdomains/https-subs.txt \
-  -severity critical,high,medium -o runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/TARGET/nuclei.txt
+nuclei -l runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/TARGET/subdomains/https-subs.txt \
+  -severity critical,high,medium -o runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/TARGET/nuclei.txt
 
 # Step 4: JS secrets
-cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/TARGET/urls.txt | grep "\.js$" | sort -u > /tmp/jsfiles.txt
+cat runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/TARGET/urls.txt | grep "\.js$" | sort -u > /tmp/jsfiles.txt
 
 # Step 5: GitHub dorking (if target has public repos)
 # GitDorker -org TARGET_ORG -d dorks/alldorksv3
@@ -1634,7 +1634,7 @@ The `/hunt` slash-command and the `hunt <target>` shell helper (see this repo's 
 - `targets/<target>/findings/` — one MD per validated finding
 - `targets/<target>/evidence/` — HARs, screenshots, redacted curl transcripts
 - `targets/<target>/submissions.txt` — log of submitted-report URLs + states
-- `runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<target>/` — outputs from `subfinder | dnsx | httpx | katana`
+- `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<target>/` — outputs from `subfinder | dnsx | httpx | katana`
 
 Use the scaffold from the start. Half-organized engagements lose findings — a probe result from hour 2 that didn't seem important until hour 14 is unrecoverable if it wasn't logged.
 

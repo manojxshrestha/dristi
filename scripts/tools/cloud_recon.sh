@@ -55,7 +55,7 @@ if [ -z "$KEYWORD" ] && [ -n "$DOMAIN" ]; then
 fi
 
 BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
-TARGET_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/${DOMAIN:-$KEYWORD}"
+TARGET_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/${DOMAIN:-$KEYWORD}"
 OUT_DIR="${CLOUD_OUT_DIR:-$TARGET_DIR/cloud}"
 mkdir -p "$OUT_DIR"
 

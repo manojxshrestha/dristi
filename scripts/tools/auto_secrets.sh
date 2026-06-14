@@ -22,8 +22,8 @@ log_info() { echo -e "${CYAN}[*]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 
 TARGET="${1:?Usage: $0 <domain> [--cariddi <cariddi.txt>]}"
-CARIDDI_FILE="${3:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/cariddi/cariddi.txt}"
-OUT_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/secrets"
+CARIDDI_FILE="${3:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/cariddi/cariddi.txt}"
+OUT_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/secrets"
 mkdir -p "$OUT_DIR"
 
 if [ ! -f "$CARIDDI_FILE" ] || [ ! -s "$CARIDDI_FILE" ]; then

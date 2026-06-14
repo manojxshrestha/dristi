@@ -152,13 +152,13 @@ curl -s "https://securityheaders.com/?q=https://$TARGET&followRedirects=on" | \
 curl -s "https://crt.sh/?q=%25.$TARGET&output=json" | \
   python3 -m json.tool 2>/dev/null | grep "name_value" | \
   grep -oP '"name_value": "\K[^"]+' | \
-  sed 's/\*\.//g' | sort -u > runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/ct-subdomains.txt
+  sed 's/\*\.//g' | sort -u > runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/ct-subdomains.txt
 
-echo "[+] CT subdomains found: $(wc -l < runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/ct-subdomains.txt)"
+echo "[+] CT subdomains found: $(wc -l < runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/ct-subdomains.txt)"
 
 # Compare with existing subdomain list
-comm -23 <(sort runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/ct-subdomains.txt) \
-         <(sort runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/subdomains.txt 2>/dev/null) | head -20
+comm -23 <(sort runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/ct-subdomains.txt) \
+         <(sort runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/subdomains.txt 2>/dev/null) | head -20
 # New entries = recently issued certs = new services to investigate
 ```
 

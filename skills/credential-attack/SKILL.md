@@ -69,7 +69,7 @@ Crawls the target website with `cewler`, deduplicates, applies hashcat rules to 
 | `strict` *(default)* | API-doc-heavy sites (Twilio, Stripe). Drops CSS hex colors, URL slugs, random API tokens that cewler harvests as "words" |
 | `loose` | Marketing sites without API examples — keeps everything cewler found |
 
-**Output:** `runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<target>/wordlists/ranked.txt` — typically 50k-500k candidates depending on site size.
+**Output:** `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<target>/wordlists/ranked.txt` — typically 50k-500k candidates depending on site size.
 
 ---
 
@@ -258,7 +258,7 @@ Natural user instinct is `--post-data "username={USER}&password={PASSWORD}"`. Ou
 
 ### Pitfall 4 — theHarvester silently writes JSON to cwd
 
-`theHarvester -f runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<target>/osint/theharvester` does NOT write to that path. It writes `theharvester.json` to `$PWD` (the directory you ran the command from).
+`theHarvester -f runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<target>/osint/theharvester` does NOT write to that path. It writes `theharvester.json` to `$PWD` (the directory you ran the command from).
 
 **Fix:** `scripts/tools/osint_employees.sh` wraps the call in `(cd "$OUT_DIR" && theHarvester ... -f theharvester)`. If you invoke theHarvester directly, `cd` first.
 

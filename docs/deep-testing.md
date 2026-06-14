@@ -24,8 +24,8 @@ ffuf -u https://target.com/api/endpoint -X POST -d 'FUZZ=test' -H "Content-Type:
 
 ### GF patterns — grep for specific parameter names
 ```bash
-cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/target/params.txt | gf redirect | grep -oE '\w+=' | sort -u
-cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/target/params.txt | gf idor | grep -oE '(id|uid|user|account)=\w+' | sort -u
+cat runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/target/params.txt | gf redirect | grep -oE '\w+=' | sort -u
+cat runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/target/params.txt | gf idor | grep -oE '(id|uid|user|account)=\w+' | sort -u
 ```
 
 ### High-value parameter names to probe:

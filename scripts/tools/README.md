@@ -65,7 +65,7 @@ graph TD
 
 | Script | Purpose | When | Input → Output |
 |--------|---------|------|----------------|
-| `dns_bruteforce.sh` | DNS brute-force via puredns | Subdomain discovery | `domain` → `runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<domain>/dns/` |
+| `dns_bruteforce.sh` | DNS brute-force via puredns | Subdomain discovery | `domain` → `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/dns/` |
 | `subdomain_enum.sh` | Passive subdomain enum (subfinder + assetfinder + findomain → httpx) | Always run first | `domain` → `subdomains/all_subdomains.txt`, `live_domains.txt`, `live_urls.txt` |
 | `zone_transfer.sh` | AXFR check against NS servers | Subdomain discovery | `domain` → zone transfer results |
 | `github_dork.sh` | GitHub code search via `gh` | Subdomain discovery | `domain` → dork results (skipped if `gh` not logged in) |
@@ -201,7 +201,7 @@ When testing endpoints from `gf_xss.txt`, use payloads from `scripts/xss_payload
 ## Output Structure
 
 ```
-runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<domain>/
+runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/
 ├── subdomains/
 │   ├── all_subdomains.txt   # all discovered subs
 │   ├── live_domains.txt     # httpx-probed (domains only)

@@ -38,6 +38,9 @@ fi
 
 skip() { [[ "$SKIP" == *",$1"* ]]; }
 
+# ── Global timeout: 30 minutes per phase ────────────────────────────
+PHASE_TIMEOUT=${PHASE_TIMEOUT:-1800}
+
 START_TS=$(date +%s)
 log_info "=== Auto Recon for: $TARGET ==="
 echo ""
@@ -45,70 +48,70 @@ echo ""
 # ── 1. Subdomain Enumeration ────────────────────────────────────────
 if ! skip "subdomains"; then
   log_info "=== Phase 1: Subdomain Enumeration ==="
-  bash "$SCRIPT_DIR/subdomain_enum.sh" "$TARGET"
+  timeout "$PHASE_TIMEOUT" bash "$SCRIPT_DIR/subdomain_enum.sh" "$TARGET" || log_warn "Phase 1 (subdomains) timed out after ${PHASE_TIMEOUT}s"
   echo ""
 fi
 
 # ── 2. DNS Brute-force ──────────────────────────────────────────────
 if ! skip "dns"; then
   log_info "=== Phase 2: DNS Brute-force ==="
-  bash "$SCRIPT_DIR/dns_bruteforce.sh" "$TARGET"
+  timeout "$PHASE_TIMEOUT" bash "$SCRIPT_DIR/dns_bruteforce.sh" "$TARGET" || log_warn "Phase 2 (dns) timed out after ${PHASE_TIMEOUT}s"
   echo ""
 fi
 
 # ── 3. Web Crawling ─────────────────────────────────────────────────
 if ! skip "crawl"; then
   log_info "=== Phase 3: Web Crawling ==="
-  bash "$SCRIPT_DIR/web_crawl.sh" "$TARGET"
+  timeout "$PHASE_TIMEOUT" bash "$SCRIPT_DIR/web_crawl.sh" "$TARGET" || log_warn "Phase 3 (crawl) timed out after ${PHASE_TIMEOUT}s"
   echo ""
 fi
 
 # ── 4. Parameter Extraction ─────────────────────────────────────────
 if ! skip "params"; then
   log_info "=== Phase 4: Parameter Extraction ==="
-  bash "$SCRIPT_DIR/param_extract.sh" "$TARGET"
+  timeout "$PHASE_TIMEOUT" bash "$SCRIPT_DIR/param_extract.sh" "$TARGET" || log_warn "Phase 4 (params) timed out after ${PHASE_TIMEOUT}s"
   echo ""
 fi
 
 # ── 5. Cariddi Scan ─────────────────────────────────────────────────
 if ! skip "cariddi"; then
   log_info "=== Phase 5: Cariddi Scan ==="
-  bash "$SCRIPT_DIR/cariddi_scan.sh" "$TARGET"
+  timeout "$PHASE_TIMEOUT" bash "$SCRIPT_DIR/cariddi_scan.sh" "$TARGET" || log_warn "Phase 5 (cariddi) timed out after ${PHASE_TIMEOUT}s"
   echo ""
 fi
 
 # ── 6. Vhost Fuzzing ────────────────────────────────────────────────
 if ! skip "vhost"; then
   log_info "=== Phase 6: Vhost Fuzzing ==="
-  bash "$SCRIPT_DIR/vhost_fuzz.sh" "$TARGET"
+  timeout "$PHASE_TIMEOUT" bash "$SCRIPT_DIR/vhost_fuzz.sh" "$TARGET" || log_warn "Phase 6 (vhost) timed out after ${PHASE_TIMEOUT}s"
   echo ""
 fi
 
 # ── 7. Directory Brute-force ────────────────────────────────────────
 if ! skip "dir"; then
   log_info "=== Phase 7: Directory Brute-force ==="
-  bash "$SCRIPT_DIR/dir_bruteforce.sh" "$TARGET"
+  timeout "$PHASE_TIMEOUT" bash "$SCRIPT_DIR/dir_bruteforce.sh" "$TARGET" || log_warn "Phase 7 (dir) timed out after ${PHASE_TIMEOUT}s"
   echo ""
 fi
 
 # ── 8. Zone Transfer ────────────────────────────────────────────────
 if ! skip "zone"; then
   log_info "=== Phase 8: Zone Transfer Check ==="
-  bash "$SCRIPT_DIR/zone_transfer.sh" "$TARGET"
+  timeout "$PHASE_TIMEOUT" bash "$SCRIPT_DIR/zone_transfer.sh" "$TARGET" || log_warn "Phase 8 (zone) timed out after ${PHASE_TIMEOUT}s"
   echo ""
 fi
 
 # ── 9. GitHub Dorking ───────────────────────────────────────────────
 if ! skip "github"; then
   log_info "=== Phase 9: GitHub Dorking ==="
-  bash "$SCRIPT_DIR/github_dork.sh" "$TARGET"
+  timeout "$PHASE_TIMEOUT" bash "$SCRIPT_DIR/github_dork.sh" "$TARGET" || log_warn "Phase 9 (github) timed out after ${PHASE_TIMEOUT}s"
   echo ""
 fi
 
 # ── 10. S3 / Cloud Bucket Scan ──────────────────────────────────────
 if ! skip "s3"; then
   log_info "=== Phase 10: S3 / Cloud Bucket Scan ==="
-  bash "$SCRIPT_DIR/s3_buckets.sh" "$TARGET"
+  timeout "$PHASE_TIMEOUT" bash "$SCRIPT_DIR/s3_buckets.sh" "$TARGET" || log_warn "Phase 10 (s3) timed out after ${PHASE_TIMEOUT}s"
   echo ""
 fi
 
@@ -118,5 +121,5 @@ MINS=$((ELAPSED / 60))
 SECS=$((ELAPSED % 60))
 
 log_ok "=== Auto Recon Complete ==="
-log_ok "Results in: $BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/"
+log_ok "Results in: $BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/"
 log_ok "Elapsed: ${MINS}m ${SECS}s"

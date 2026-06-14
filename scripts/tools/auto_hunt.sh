@@ -70,5 +70,5 @@ skip secrets || run_phase "Phase 7: Secrets" "$SCRIPT_DIR/auto_secrets.sh"
 END_TS=$(date +%s)
 ELAPSED=$((END_TS - START_TS))
 log_ok "Auto Hunt Complete"
-log_ok "Results: $BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/"
+log_ok "Results: $BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/"
 log_ok "Time: $((ELAPSED / 60))m $((ELAPSED % 60))s"

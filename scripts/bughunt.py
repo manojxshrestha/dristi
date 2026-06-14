@@ -179,7 +179,7 @@ def recon_subdomains_via_subdomain_enum(target: str) -> set[str]:
     rc, _, _ = run_cmd(["bash", script, target], timeout=300)
     if rc != 0:
         return set()
-    out_dir = REPO_ROOT / "runtime" / "engagements" / os.environ.get("ENGAGEMENT_ID", "rea-group-bb-001") / "recon" / target / "subdomains"
+    out_dir = REPO_ROOT / "runtime" / "engagements" / os.environ.get("ENGAGEMENT_ID", "default-engagement") / "recon" / target / "subdomains"
     all_file = out_dir / "all_subdomains.txt"
     if all_file.exists():
         return {line.strip().lower() for line in all_file.read_text().splitlines() if line.strip()}
@@ -235,12 +235,10 @@ def configure_proxy_from_args(args: argparse.Namespace) -> None:
 
 def cmd_recon(args: argparse.Namespace) -> int:
     target = args.target
-    out_dir = REPO_ROOT / "runtime" / "engagements" / os.environ.get("ENGAGEMENT_ID", "rea-group-bb-001") / "recon" / target
+    out_dir = REPO_ROOT / "runtime" / "engagements" / os.environ.get("ENGAGEMENT_ID", "default-engagement") / "recon" / target
     resolved = out_dir.resolve()
-    safe = (REPO_ROOT / "recon").resolve()
-    # Real containment check — `startswith` is bypassable by a sibling that
-    # shares the prefix (e.g. recon-evil vs recon), so test ancestry properly.
-    if resolved != safe and safe not in resolved.parents:
+    safe = (REPO_ROOT / "runtime").resolve()
+    if safe not in resolved.parents:
         print(f"[error] invalid target: {target}", file=sys.stderr); return 1
     out_dir = resolved
     out_dir.mkdir(parents=True, exist_ok=True)

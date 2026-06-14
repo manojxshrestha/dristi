@@ -91,7 +91,7 @@ curl -s "https://$TARGET/_next/static/chunks/main.js.map" | head -5
 # Server Actions in Next.js 14+ use x-action-id or Next-Action header
 # Find action IDs in HTML source or JS bundles
 curl -s https://$TARGET/ | grep -oP '"action":"[a-f0-9]+"'
-grep -r "createActionURL\|$$ACTION_" runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/ --include="*.js" 2>/dev/null
+grep -r "createActionURL\|$$ACTION_" runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/ --include="*.js" 2>/dev/null
 
 # Call Server Action directly without auth
 curl -s -X POST https://$TARGET/target-page \

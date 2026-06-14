@@ -42,10 +42,10 @@ if [[ "$TARGET_RAW" == */* ]]; then
   [ -z "$TARGET" ] && TARGET="target"
 else
   TARGET="$TARGET_RAW"
-  [ -z "$HTTPS_SUBS" ] && HTTPS_SUBS="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/subdomains/live_urls.txt"
+  [ -z "$HTTPS_SUBS" ] && HTTPS_SUBS="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/subdomains/live_urls.txt"
 fi
 
-OUT_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/crawl"
+OUT_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/crawl"
 mkdir -p "$OUT_DIR"
 
 export PATH="$HOME/go/bin:/usr/local/bin:$PATH"

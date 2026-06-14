@@ -23,7 +23,7 @@ set -e
 TARGET="${1}"
 TARGETURL="https://${TARGET}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-OUT="runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/${TARGET}_${TIMESTAMP}"
+OUT="runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/${TARGET}_${TIMESTAMP}"
 TOOLS_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Auth (optional)

@@ -17,11 +17,11 @@ hunt-dispatch mode=wapt box=greybox
 
 ## step 1 — fingerprint (red team only)
 
-run a one-shot fingerprint and parse `runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<target>/live-hosts.txt` if present:
+run a one-shot fingerprint and parse `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<target>/live-hosts.txt` if present:
 
 ```bash
 curl -sI "https://$TARGET" 2>/dev/null | tr -d '\r'
-test -f "runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/live-hosts.txt" && cat "runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/live-hosts.txt"
+test -f "runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/live-hosts.txt" && cat "runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/live-hosts.txt"
 ```
 
 look for the following signals → platform skill mapping:
@@ -188,6 +188,6 @@ never echo back, log, or persist:
 
 - **`bb-methodology`** — When PART 0 mode confirmation completes. Workflow primitive: `bb-methodology` confirms engagement type (red team vs WAPT vs bug bounty); the answer feeds directly into this skill's `mode=redteam` / `mode=wapt` invocation.
 - **`redteam-mindset`** + **`mid-engagement-ir-detection`** — When `mode=redteam` is loaded. Workflow primitive: these are the always-on skills loaded first by step 2 of the redteam flow before any platform skill or hunt-* skill.
-- **`okta-attack`** / **`m365-entra-attack`** / **`enterprise-vpn-attack`** / **`vmware-vcenter-attack`** / **`cloud-iam-deep`** / **`supply-chain-attack-recon`** / **`apk-redteam-pipeline`** — When fingerprint signals match. Workflow primitive: step 1's curl fingerprint scan against `runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<target>/live-hosts.txt` maps banner / domain signals to one or more of these platform skills.
+- **`okta-attack`** / **`m365-entra-attack`** / **`enterprise-vpn-attack`** / **`vmware-vcenter-attack`** / **`cloud-iam-deep`** / **`supply-chain-attack-recon`** / **`apk-redteam-pipeline`** — When fingerprint signals match. Workflow primitive: step 1's curl fingerprint scan against `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<target>/live-hosts.txt` maps banner / domain signals to one or more of these platform skills.
 - **`hunt-rce`** / **`hunt-sqli`** / **`hunt-ssrf`** / **`hunt-ato`** / **all other hunt-* skills`** — When the mode-specific skill set is being printed. Workflow primitive: this skill is the loader; it names the hunt-* skills but does not run probes — actual hunting happens after step 4 returns control to `/hunt`.
 - **`report-writing`** vs **`redteam-report-template`** — When the taxonomy print specifies the report format. Workflow primitive: `mode=wapt` ends with `report-writing` as the deliverable format; `mode=redteam` ends with `redteam-report-template` instead.

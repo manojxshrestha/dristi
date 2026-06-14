@@ -37,7 +37,7 @@ Admin: /api/admin/*, /api/internal/*
 ### Phase 1 — Discover CORS Endpoints
 ```bash
 # Probe all API endpoints for CORS headers
-cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/api-endpoints.txt | while read url; do
+cat runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/api-endpoints.txt | while read url; do
   result=$(curl -s -I "$url" \
     -H "Origin: https://evil.com" \
     -H "Cookie: $SESSION_COOKIE" | \
@@ -46,7 +46,7 @@ cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/api-end
 done
 
 # httpx bulk check
-cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/live-hosts.txt | awk '{print $1}' | \
+cat runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/live-hosts.txt | awk '{print $1}' | \
   httpx -H "Origin: https://evil.com" -match-string "access-control-allow-origin"
 ```
 
@@ -103,7 +103,7 @@ fetch("https://TARGET/api/me", {credentials: "include"})
 ### Phase 5 — postMessage Check
 ```bash
 # Grep JS files for postMessage handlers without origin check
-grep -r "addEventListener.*message" runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/ --include="*.js" | \
+grep -r "addEventListener.*message" runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/ --include="*.js" | \
   grep -v "event.origin"
 # Look for handlers that process data without origin validation
 ```
@@ -124,7 +124,7 @@ while read url; do
   result=$(curl -sI "$url" -H "Origin: https://evil.com" \
     | grep -i "access-control-allow-origin")
   [ -n "$result" ] && echo "$url: $result"
-done < runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/api-endpoints.txt
+done < runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/api-endpoints.txt
 ```
 
 ---

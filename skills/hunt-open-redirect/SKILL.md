@@ -72,18 +72,18 @@ Open redirect alone is Low. Chained to OAuth = Critical (ATO).
 ### Phase 1 — Discover Redirect Parameters
 ```bash
 # Extract all redirect candidates from crawl
-cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/urls.txt | gf redirect > runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/redirect-candidates.txt
-wc -l runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/redirect-candidates.txt
+cat runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/urls.txt | gf redirect > runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/redirect-candidates.txt
+wc -l runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/redirect-candidates.txt
 
 # Less common param names
 grep -E "(\?|&)(return|next|dest|go|forward|location|to|jump|target|out|link|logout)" \
-  runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/urls.txt >> runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/redirect-candidates.txt
+  runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/urls.txt >> runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/redirect-candidates.txt
 ```
 
 ### Phase 2 — Basic Test
 ```bash
 COLLAB="https://evil.com"
-cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/redirect-candidates.txt | qsreplace "$COLLAB" | while read url; do
+cat runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/redirect-candidates.txt | qsreplace "$COLLAB" | while read url; do
   LOC=$(curl -s -I --max-redirs 0 "$url" | grep -i "^location:")
   STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-redirs 0 "$url")
   [ -n "$LOC" ] && echo "$STATUS | $LOC | $url"
@@ -110,7 +110,7 @@ done
 ### Phase 4 — OAuth Chain Test
 ```bash
 # If target has OAuth, check if redirect_uri accepts open redirect
-grep -i "oauth\|authorize\|redirect_uri" runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/urls.txt | head -20
+grep -i "oauth\|authorize\|redirect_uri" runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/urls.txt | head -20
 
 # Construct OAuth URL with open redirect as redirect_uri
 # Normal: redirect_uri=https://target.com/callback
@@ -135,13 +135,13 @@ curl -s "https://$TARGET/fetch?url=http://169.254.169.254/latest/meta-data/" \
 ```bash
 # openredirex
 pip3 install openredirex
-openredirex -l runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/redirect-candidates.txt -p evil.com
+openredirex -l runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/redirect-candidates.txt -p evil.com
 
 # nuclei
 nuclei -u https://$TARGET -t redirect/ -severity medium,high
 
 # gf + qsreplace
-cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/urls.txt | gf redirect | qsreplace "https://evil.com" | \
+cat runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/urls.txt | gf redirect | qsreplace "https://evil.com" | \
   xargs -I{} curl -s -o /dev/null -w "%{http_code} %{redirect_url}\n" --max-redirs 0 {}
 ```
 
