@@ -414,19 +414,19 @@ Priority 5: Admin/debug endpoints → auth bypass candidates
 
 ---
 
-## Toolchain fallback (when `dnsx` / `httpx` crash)
+## Toolchain fallback (when scripts fail due to `dnsx` / `httpx` crashes)
 
-The projectdiscovery Go binaries (`dnsx`, `httpx`, `naabu`) occasionally `SIGSEGV` on macOS arm64 due to a cgo / system-resolver interaction. The crash signature is identical regardless of install method — both `brew install` and `go install github.com/projectdiscovery/<tool>@latest` produce binaries that segfault at the same address. Smoke-test once before relying on them in a real engagement:
+**DO NOT use this section unless `subdomain_enum.sh` fails** with a dnsx/httpx segfault. Run the scripts first:
 
 ```bash
-dnsx -version   # if SIGSEGV: use the dig fallback below
-httpx -version  # if SIGSEGV: use the curl fallback below
+bash scripts/tools/subdomain_enum.sh $TARGET     # Always use this first
 ```
 
-### `dnsx` → `dig` fallback
+The projectdiscovery Go binaries (`dnsx`, `httpx`, `naabu`) occasionally `SIGSEGV` on macOS arm64. If `subdomain_enum.sh` fails due to this, use fallbacks:
+
+### `dnsx` → `dig` fallback (ONLY if subdomain_enum.sh failed)
 
 ```bash
-# Replaces: dnsx -l subs.txt -a -resp -silent
 while read s; do
   ips=$(dig +short +tries=1 +time=3 "$s" \
     | grep -E '^[0-9.]+$' \
@@ -435,10 +435,9 @@ while read s; do
 done < subs.txt
 ```
 
-### `httpx` → `curl` fallback
+### `httpx` → `curl` fallback (ONLY if subdomain_enum.sh failed)
 
 ```bash
-# Replaces: httpx -l subs.txt -silent -status-code -title -tech-detect
 while read s; do
   resp=$(curl -s -L -m 5 -o /tmp/body \
     -w "%{http_code}|%{url_effective}|%{header_server}" \
@@ -451,7 +450,7 @@ while read s; do
 done < subs.txt
 ```
 
-**Trade-off:** Serial vs. concurrent. The fallback handles ~24 subdomains in 14 seconds; the same workload on `httpx` with default 50 threads finishes in 2-3 seconds. For VDP-scale recon (< 100 subdomains) the fallback is fine. For mass recon (1000+) fix the toolchain first.
+**Trade-off:** Serial vs. concurrent (~24 subs in 14s vs 2-3s with httpx). For mass recon (1000+) fix the toolchain first.
 
 Verified against HackerOne's own VDP in `docs/verification/recon-hackerone-vdp.md`.
 
@@ -643,7 +642,7 @@ employee-*         hr.*               jobs.*
 sso.*              auth.*             id.*
 ```
 
-Internal-looking subdomains often expose more surface than the marketing site — `partner.target.com` and `vendor-portal.target.com` frequently have weaker auth than the main app because they're scoped for "trusted" external users. Always send a probe to the long-tail wordlist after the standard subfinder run completes.
+Internal-looking subdomains often expose more surface than the marketing site — `partner.target.com` and `vendor-portal.target.com` frequently have weaker auth than the main app because they're scoped for "trusted" external users. Always send a probe to the long-tail wordlist after `subdomain_enum.sh` completes.
 
 ### Live-host probe: how to fingerprint stack quickly
 
@@ -682,4 +681,4 @@ Phase 2C verified both patterns live. Always check the EXACT response body strin
 
 ### Toolchain fallback
 
-Already covered in this file's Phase 2C addition. Quick reminder: dnsx/httpx may segfault on macOS arm64; the dig+curl fallback works for < 100-host runs in ~14 seconds. Don't burn an hour debugging Go binary panics when the fallback gets you to the same URL set.
+Already covered above. The fallback is ONLY for when `subdomain_enum.sh` fails due to dnsx/httpx segfault on macOS arm64.
