@@ -1,6 +1,6 @@
 # Architecture
 
-Dristi is a dual-interface security testing platform: an **MCP server** (89 tools for methodology, tracking, findings management) and an **OpenCode agent bundle** (87 auto-loading agents for bug hunting tradecraft).
+Dristi is a dual-interface security testing platform: an **MCP server** (87 tools for methodology, tracking, findings management) and an **OpenCode agent bundle** (87 auto-loading agents for bug hunting tradecraft).
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -11,7 +11,7 @@ Dristi is a dual-interface security testing platform: an **MCP server** (89 tool
           ▼                         ▼
 ┌──────────────────┐    ┌──────────────────────────┐
 │  Dristi MCP      │    │  OpenCode Agents (87)    │
-│  Server (89 tools)│    │                         │
+│  Server (87 tools)│    │                         │
 │  ──────────────── │    │  ──────────────────────  │
 │  • WSTG v4.2     │    │  • hunt-xss, hunt-sqli   │
 │  • WAF bypass    │    │  • triage-validation     │
@@ -42,7 +42,7 @@ Dristi is a dual-interface security testing platform: an **MCP server** (89 tool
 
 ### 1. MCP Server (`server/server.py`)
 
-The core methodology engine. 89 tools organized into:
+The core methodology engine. 87 tools organized into:
 
 | Category | Tools | Purpose |
 |----------|-------|---------|
@@ -120,7 +120,7 @@ Supplementary wordlists for recon and fuzzing: API endpoints, common paths, para
 
 ### 6. Skills Reference (`skills/`)
 
-Reference copies of all agent SKILL.md files (85 total). The active versions are in `.opencode/agents/`.
+Reference copies of all agent SKILL.md files (96 total). The active versions are in `.opencode/agents/`.
 
 ---
 

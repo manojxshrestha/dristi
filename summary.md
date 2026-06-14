@@ -2,7 +2,7 @@
 
 ## Overview
 
-Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive security: bug hunting, external red-team engagements, and authorized penetration tests. It provides the complete OWASP Web Security Testing Guide methodology as an MCP server with 89 tools, paired with 87 autonomous agents covering vulnerability hunting, enterprise platform attacks, and full engagement lifecycle management.
+Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive security: bug hunting, external red-team engagements, and authorized penetration tests. It provides the complete OWASP Web Security Testing Guide methodology as an MCP server with 87 tools, paired with 87 autonomous agents covering vulnerability hunting, enterprise platform attacks, and full engagement lifecycle management.
 
 **Goal:** Turn an LLM into an autonomous, methodical, reference-informed bug hunter that can run a full penetration test from scope to report — discovering subdomains, crawling endpoints, fingerprinting WAFs, dispatching per-class exploit agents, validating PoCs, capturing redacted evidence, and generating a submission-ready report — without human intervention between phases. The pipeline is modeled on real bug bounty workflows: triage by attack surface, read disclosed reports for technique guidance, bypass WAFs before exploiting, and run every finding through a 7-Question Gate before drafting.
 
@@ -11,7 +11,7 @@ Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive
 - **`@consult`** — interactive: same pipeline but pauses at every phase transition to present findings, suggest next steps, and ask for confirmation before proceeding. Best for learning or guided testing.
 
 **Stats:**
-- 89 MCP tools · 87 agents (54 hunt-* + 33 pipeline/specialty)
+- 87 MCP tools · 87 agents (54 hunt-* + 33 pipeline/specialty)
 - 13 WSTG categories · 109 test cases
 - 48 CLI tool wrapper scripts · 20 GF patterns for parameter discovery
 - 12-phase autonomous pipeline (autopilot)
@@ -35,7 +35,7 @@ Layer 4: Validation + Reporting      — how to ship it (7-Question Gate, VRT, r
 ```
 ~/dristi/
 ├── server/                     MCP server (Python + FastMCP)
-│   ├── server.py               89 tool definitions (6443 lines)
+│   ├── server.py               87 tool definitions (6443 lines)
 │   ├── waf_evasion.py          WAF identification + bypass engine
 │   ├── waf_vendors.json        144 vendor fingerprints
 │   ├── waf_bypasses.json       20 vendor bypass payload files
@@ -104,7 +104,7 @@ Autopilot is a thin orchestrator (248 lines) — phases 4-12 are dispatched via 
 
 ---
 
-## MCP Server (89 Tools)
+## MCP Server (87 Tools)
 
 ### WSTG Knowledge Base
 - `get_wstg_test(test_id)` — Full WSTG test case content
@@ -355,6 +355,72 @@ All domain-mode: accept domain as $1, auto-discover recon output, output to runt
 - **deepthink + search added**: Conditional intelligence fallback phases (7, 9)
 - **pipeline updated**: Re-exploitation loop after search finds new payloads
 - **Deliverable-based data flow**: auth_analysis → Phase 6, endpoint_map_raw → Phase 5 → endpoint_map_ranked → Phase 6
+
+---
+
+## Appendix A: Agent Roster (87)
+
+### Pipeline Agents (13)
+`autopilot` `consult` `scope` `pintel` `recon` `surface` `hunt` `deepthink` `exploit` `search` `capture` `validate` `report`
+
+### `@hunt-*` Vulnerability Agents (54)
+`hunt-api-misconfig` `hunt-aspnet` `hunt-ato` `hunt-auth-bypass` `hunt-brute-force` `hunt-business-logic` `hunt-cache-poison` `hunt-cicd` `hunt-clickjacking` `hunt-cloud-misconfig` `hunt-cors` `hunt-crlf` `hunt-csrf` `hunt-dependency-confusion` `hunt-deserialization` `hunt-dispatch` `hunt-dom` `hunt-file-upload` `hunt-graphql` `hunt-host-header` `hunt-http-param-pollution` `hunt-http-smuggling` `hunt-idor` `hunt-jwt-confusion` `hunt-k8s` `hunt-laravel` `hunt-ldap` `hunt-lfi` `hunt-llm-ai` `hunt-mass-assignment` `hunt-mfa-bypass` `hunt-misc` `hunt-nextjs` `hunt-nodejs` `hunt-nosqli` `hunt-ntlm-info` `hunt-oauth` `hunt-open-redirect` `hunt-prototype-pollution` `hunt-race-condition` `hunt-rce` `hunt-saml` `hunt-session` `hunt-sharepoint` `hunt-source-leak` `hunt-springboot` `hunt-sqli` `hunt-ssrf` `hunt-ssti` `hunt-subdomain` `hunt-tls-network` `hunt-websocket` `hunt-xss` `hunt-xxe`
+
+### Non-Hunt Specialty Agents (20)
+`apk-redteam-pipeline` `auth` `bug-bounty` `bugcrowd-reporting` `cloud-iam-deep` `enterprise-vpn-attack` `evidence-hygiene` `m365-entra-attack` `meme-coin-audit` `offensive-osint` `okta-attack` `osint` `osint-methodology` `redteam-mindset` `redteam-report-template` `report-writing` `supply-chain-attack-recon` `triage-validation` `web2-recon` `web2-vuln-classes`
+
+## Appendix B: MCP Tool Roster (87)
+
+### Engagement Lifecycle (17)
+`load_engagement_config` `get_engagement_config` `get_engagement_rules` `get_engagement_status` `register_scope` `register_scope_batch` `get_scope` `parse_scope_table` `track_test` `track_tool` `track_qa_review` `track_judge_review` `get_coverage` `get_tool_coverage` `generate_resume_prompt` `resume_engagement` `save_checkpoint`
+
+### Findings & Evidence (17)
+`findings_init` `findings_add_host` `findings_add_service` `findings_add_vuln` `findings_list_hosts` `findings_list_vulns` `update_finding` `log_finding` `get_findings` `findings_add_credential` `findings_add_chain` `findings_export` `findings_handoff` `findings_log_action` `findings_stats` `get_judge_data`
+
+### WSTG Methodology (6)
+`get_wstg_test` `get_test_payloads` `search_wstg` `list_wstg_categories` `list_tests_in_category` `list_portswigger_categories`
+
+### Technique Guides (4)
+`get_technique_guide` `search_techniques` `get_witness_payloads` `get_evidence_checklist`
+
+### WAF Evasion (4)
+`identify_waf` `get_waf_bypass` `list_waf_vendors` `get_slot_types`
+
+### Exploitation (5)
+`create_exploitation_queue` `get_exploitation_queue` `validate_exploitation_queue` `mark_exploited` `validate_poc`
+
+### PoC Validation (2)
+`validate_finding_poc` `verify_tool_result`
+
+### Phase Gates & QA (2)
+`phase_gate_check` `generate_report`
+
+### Source Code Analysis (3)
+`start_code_analysis` `save_code_analysis` `get_code_analysis`
+
+### Session & Browser (2)
+`get_browser_profile` `call_graphql_introspect`
+
+### Networking & HTTP (2)
+`burp_send_request` `execute_nuclei`
+
+### Deliverables (3)
+`save_deliverable` `get_deliverable` `list_deliverables`
+
+### Task Tree (6)
+`create_task_tree` `add_task_node` `update_task_node` `get_task_tree` `get_subtree` `get_task_summary`
+
+### Knowledge Graph (6)
+`add_graph_node` `add_graph_edge` `query_graph` `find_chains` `get_graph_summary` `get_engagement_summary`
+
+### Git Checkpoint (2)
+`git_checkpoint` `git_rollback`
+
+### Utility & Output (8)
+`ingest_tool_file` `parse_tool_output` `prioritize_endpoints` `get_priority_queue` `get_audit_log` `compress_phase_context` `list_checkpoints` `list_deliverables`
+
+### State Persistence (2)
+`get_code_analysis` (shared) `resume_engagement` (shared)
 
 ---
 
