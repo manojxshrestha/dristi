@@ -73,8 +73,15 @@ log_info "Running findomain ..."
 findomain -t "$TARGET" -q 2>/dev/null | sort -u > "$TMP_DIR/findomain.txt"
 log_ok "  findomain: $(wc -l < "$TMP_DIR/findomain.txt" | tr -d ' ') subs"
 
+log_info "Running crt.sh ..."
+curl -s "https://crt.sh/?q=%25.$TARGET&output=json" 2>/dev/null \
+  | jq -r '.[].name_value' 2>/dev/null \
+  | sed 's/\*\.//g' \
+  | sort -u > "$TMP_DIR/crtsh.txt"
+log_ok "  crt.sh: $(wc -l < "$TMP_DIR/crtsh.txt" | tr -d ' ') subs"
+
 # ── Step 2: Merge ───────────────────────────────────────────────────
-cat "$TMP_DIR/subfinder.txt" "$TMP_DIR/assetfinder.txt" "$TMP_DIR/findomain.txt" \
+cat "$TMP_DIR/subfinder.txt" "$TMP_DIR/assetfinder.txt" "$TMP_DIR/findomain.txt" "$TMP_DIR/crtsh.txt" \
   | sort -u > "$OUT_DIR/all_subdomains.txt"
 TOTAL=$(wc -l < "$OUT_DIR/all_subdomains.txt" | tr -d ' ')
 log_ok "Total unique subdomains: $TOTAL"
