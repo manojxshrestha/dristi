@@ -258,6 +258,7 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 | "M365 tenant — Entra ID, federation, SharePoint" | `@m365-entra-attack` |
 | "Android APK — decompile, secrets, endpoints" | `@apk-redteam-pipeline` |
 | "Token audit — honeypot, liquidity, rug-pull" | `@meme-coin-audit` |
+| "Smart contract audit — Solidity reentrancy" | `web3-audit` (skill — load via `skill("web3-audit")`) |
 | "K8s pod escape" | `@hunt-k8s` |
 | "Next.js API route without auth" | `@hunt-nextjs` |
 | "Password spray on login — wordlist gen, breach check, OSINT employees" | `credential-attack` (skill — load via `skill("credential-attack")`) |
