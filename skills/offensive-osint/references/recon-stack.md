@@ -51,8 +51,8 @@ curl -sk "https://api.certspotter.com/v1/issuances?domain=${D}&include_subdomain
 # 3. CertStream archive (Calidog) — historical CT log mirror
 curl -sk "https://crt.calidog.io/?q=${D}" | jq -r '.[].name_value' | sort -u
 
-# 4. Subfinder bundled aggregator (uses 30+ sources internally — Chaos, Anubis, BinaryEdge, BufferOver, Censys, CertSpotter, Crobat, Crtsh, DNSDumpster, FOFA, Fullhunt, GitHub, HackerTarget, IntelX, PassiveTotal, Quake, Rapiddns, Shodan, Spyse, ThreatBook, ThreatMiner, URLScan, VirusTotal, WhoisXML, ZoomEye, etc.)
-subfinder -d ${D} -all -recursive -silent
+# 4. Subfinder (via subdomain_enum.sh) — uses 30+ sources (Chaos, Anubis, etc.)
+bash scripts/tools/subdomain_enum.sh "$D"
 
 # 5. AlienVault OTX — free, no key
 curl -sk "https://otx.alienvault.com/api/v1/indicators/domain/${D}/passive_dns" | \
@@ -83,7 +83,7 @@ function Get-Subs {
       Start-Sleep -Seconds 5
     }
   }
-  "crt.sh down — pivot to Subfinder: subfinder -d $D -all -silent" | Out-Host
+  "crt.sh down — pivot to subdomain_enum.sh: bash scripts/tools/subdomain_enum.sh $D" | Out-Host
   return @()
 }
 ```
@@ -112,12 +112,11 @@ function Get-Subs {
 
 **Tooling:**
 ```bash
-# Subfinder + brute-force with assetnote 100k
-subfinder -d target.example -all -recursive | tee passive.txt
-puredns bruteforce assetnote-best-dns-wordlist.txt target.example -r resolvers.txt | tee brute.txt
-cat passive.txt brute.txt | sort -u > all-subs.txt
+# Use the automation scripts instead of raw commands:
+bash scripts/tools/subdomain_enum.sh target.example   # subfinder + assetfinder + findomain → dnsx → httpx
+bash scripts/tools/dns_bruteforce.sh target.example    # puredns brute-force with validated resolvers
 
-# Content brute-force on alive hosts
+# Content brute-force on alive hosts (post-recon):
 ffuf -u "https://target.example/FUZZ" -w raft-large-words.txt -mc 200,301,403 -t 50 -ac
 ```
 
