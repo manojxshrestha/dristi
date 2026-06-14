@@ -288,7 +288,7 @@ Dristi agents are flat `.md` files invoked via `@agent-name`. **12 pipeline agen
 ```
 dristi/
 ├── .opencode/
-│   ├── agents/                    # 85 flat .md OpenCode agents
+│   ├── agents/                    # 87 flat .md OpenCode agents
 │   │   ├── autopilot.md               # fully autonomous P1–P12 pipeline
 │   │   ├── scope.md                   # engagement scaffold/program rules
 │   │   ├── recon.md                   # recon orchestration

@@ -49,7 +49,7 @@ graph TB
 
 The loop: **describe → agent loads → MCP tracks → references guide → Burp executes → analyze → log finding → validate → report**
 
-All agents are invoked via `@agent-name`. 14 pipeline agents: `@autopilot` → `@consult` → `@scope` → `@pintel` → `@recon` → `@surface` → `@hunt` → `@deepthink` → `@exploit` → `@search` → `@capture` → `@validate` → `@report`. 54 specialized `@hunt-*` agents + 21 non-hunt specialty agents (89 total).
+All agents are invoked via `@agent-name`. 14 pipeline agents: `@autopilot` → `@consult` → `@scope` → `@pintel` → `@recon` → `@surface` → `@hunt` → `@deepthink` → `@exploit` → `@search` → `@capture` → `@validate` → `@report`. 54 specialized `@hunt-*` agents + 19 non-hunt specialty agents (87 total).
 
 **Two modes:**
 - **`@autopilot`** — runs fully autonomous, dispatches phases 2-12 via `task()` to sub-agents, ends with report
@@ -257,7 +257,6 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 | "Cloud IAM — AWS/Azure/GCP privilege escalation" | `@cloud-iam-deep` |
 | "M365 tenant — Entra ID, federation, SharePoint" | `@m365-entra-attack` |
 | "Android APK — decompile, secrets, endpoints" | `@apk-redteam-pipeline` |
-| "Smart contract audit — Solidity reentrancy" | `@web3-audit` |
 | "Token audit — honeypot, liquidity, rug-pull" | `@meme-coin-audit` |
 | "K8s pod escape" | `@hunt-k8s` |
 | "Next.js API route without auth" | `@hunt-nextjs` |
