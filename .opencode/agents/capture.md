@@ -16,8 +16,13 @@ Collect sanitized evidence for each confirmed finding. Each finding gets its own
 ## Browser Hygiene (Mandatory)
 
 Every browser operation leaks a page unless explicitly closed. Always:
-1. `playwright_browser_navigate()` or `playwright_browser_take_screenshot()`
+1. `playwright_browser_navigate(url=...)` or `playwright_browser_take_screenshot(type='png', filename=<full_path>)`
 2. `playwright_browser_close()` — immediately after, every time
+
+**⚠ ALWAYS pass `filename` to `playwright_browser_take_screenshot()`** — without it, Playwright saves to the current working directory (repo root), creating messy artifacts. Use the engagement evidence path:
+```
+playwright_browser_take_screenshot(type='png', filename=runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/evidence/<finding-id>/screenshot.png)
+```
 
 Never leave open pages. They accumulate memory and break subsequent phases.
 
@@ -48,9 +53,11 @@ curl -sv <poc-command> 2>&1 > runtime/engagements/${ENGAGEMENT_ID:-default-engag
 
 ### Step 3: Screenshot (if DOM/visual bug)
 For reflected XSS, DOM XSS, clickjacking, or any visual proof:
-```
+```bash
+EVIDENCE_DIR="runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/evidence/<finding-id>"
+mkdir -p "$EVIDENCE_DIR"
 playwright_browser_navigate(url=<poc-url>)
-playwright_browser_take_screenshot(type='png', filename=runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/evidence/<finding-id>/screenshot.png)
+playwright_browser_take_screenshot(type='png', filename="$EVIDENCE_DIR/screenshot.png")
 playwright_browser_close()
 ```
 

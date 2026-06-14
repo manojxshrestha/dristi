@@ -16,8 +16,10 @@ Coordinate specialized `@hunt-*` subagents based on surface findings.
 ## Browser Hygiene (Mandatory)
 
 If you use the Playwright browser for any test (CF-challenged domains, DOM inspection, PoC screenshots):
-1. Use the operation
+1. Use the operation — **always pass `filename`** to `playwright_browser_take_screenshot()`, e.g. `filename=runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/evidence/<finding-id>/screenshot.png`
 2. `playwright_browser_close()` — immediately after, every time
+
+**⚠ ALWAYS specify `filename`** — omitting it saves to the repo root and creates messy artifact dirs.
 
 NEVER call `browser.newContext()`. The default context already routes through Burp via `--proxy-server`.
 

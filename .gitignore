@@ -58,3 +58,15 @@ got-issue.md
 # Local issue log — never pushed
 .vscode/
 .wrangler/
+
+# Browser screenshot artifacts (created when AI omits filename param in playwright_browser_take_screenshot)
+/rea-group-homepage/
+/rea-homepage/
+/rea-id-login/
+/rea-id-login-page/
+/rea-id-login-form/
+/rea-id-login-screen/
+/flatmates-staging/
+/flatmates-staging-page/
+/developersites-page/
+/server/testsearchquery123/
