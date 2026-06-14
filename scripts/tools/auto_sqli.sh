@@ -19,8 +19,8 @@ log_info() { echo -e "${CYAN}[*]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 
 TARGET="${1:?Usage: $0 <domain> [--gf-sqli <file>]}"
-GF_SQLI="${3:-$BASE_DIR/recon/$TARGET/params/gf_sqli.txt}"
-OUT_DIR="$BASE_DIR/recon/$TARGET/sqli"
+GF_SQLI="${3:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/params/gf_sqli.txt}"
+OUT_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/sqli"
 mkdir -p "$OUT_DIR"
 
 export PATH="$HOME/go/bin:/usr/local/bin:$PATH"

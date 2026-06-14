@@ -28,7 +28,7 @@ log_step() { echo -e "\n${CYAN}════════════════�
 export PATH="$HOME/go/bin:/usr/local/bin:$PATH"
 
 TARGET="${1:?Usage: $0 <domain> [recon_dir]}"
-RECON_DIR="${2:-$BASE_DIR/recon/$TARGET}"
+RECON_DIR="${2:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET}"
 SUBDOMAIN_DIR="$RECON_DIR/subdomains"
 CLOUD_DIR="$RECON_DIR/clouds"
 mkdir -p "$CLOUD_DIR" "$SUBDOMAIN_DIR"

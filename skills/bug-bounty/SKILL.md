@@ -1586,7 +1586,7 @@ The `/hunt` slash-command and the `hunt <target>` shell helper (see this repo's 
 - `targets/<target>/findings/` — one MD per validated finding
 - `targets/<target>/evidence/` — HARs, screenshots, redacted curl transcripts
 - `targets/<target>/submissions.txt` — log of submitted-report URLs + states
-- `targets/<target>/recon/` — outputs from `subfinder | dnsx | httpx | katana`
+- `runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<target>/` — outputs from `subfinder | dnsx | httpx | katana`
 
 Use the scaffold from the start. Half-organized engagements lose findings — a probe result from hour 2 that didn't seem important until hour 14 is unrecoverable if it wasn't logged.
 

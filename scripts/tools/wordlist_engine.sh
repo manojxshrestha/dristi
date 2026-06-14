@@ -99,7 +99,7 @@ if [ ! -f "$RULE_FILE" ]; then
 fi
 
 # Output layout — fits existing recon/<target>/ convention
-OUT_DIR="recon/${TARGET}/wordlists"
+OUT_DIR="runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/${TARGET}/wordlists"
 mkdir -p "$OUT_DIR"
 RAW="$OUT_DIR/from-website.txt"
 CLEAN="$OUT_DIR/cleaned.txt"

@@ -58,11 +58,11 @@ LFI bugs that reach RCE are Critical. File-read-only is High when it exposes sec
 ### Phase 1 — Identify Candidates
 ```bash
 # Find LFI parameter candidates
-cat recon/$TARGET/urls.txt | gf lfi > recon/$TARGET/lfi-candidates.txt
+cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/urls.txt | gf lfi > runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/lfi-candidates.txt
 
 # Manual patterns
 grep -E "(\?|&)(page|file|path|template|view|lang|module|include|doc|load|read|content)=" \
-  recon/$TARGET/urls.txt
+  runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/urls.txt
 
 # Discover file-serving endpoints
 ffuf -u "https://$TARGET/FUZZ" -w ~/wordlists/lfi-paths.txt -mc 200,301,302

@@ -40,7 +40,7 @@ if [ -f "$TARGET" ] && [ -r "$TARGET" ]; then
     TARGET="${TARGET%.*}"
 fi
 
-RECON_DIR="${RECON_OUT_DIR:-$BASE_DIR/recon/$TARGET}"
+RECON_DIR="${RECON_OUT_DIR:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 THREADS=20
 RATE_LIMIT=50  # requests per second

@@ -41,7 +41,7 @@ done
 # Resolve domain → list mode: auto-discover crawl output
 BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 if [ -n "$DOMAIN" ]; then
-  RECON_DIR="$BASE_DIR/recon/$DOMAIN"
+  RECON_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$DOMAIN"
   CRAWL_FILE="$RECON_DIR/crawl/crawledurls.txt"
   if [ -f "$CRAWL_FILE" ] && [ -s "$CRAWL_FILE" ]; then
     LIST="$CRAWL_FILE"
@@ -59,7 +59,7 @@ fi
 if [ -n "$DOMAIN" ]; then
   OUT_DIR="${PARAM_OUT_DIR:-$RECON_DIR/params}"
 else
-  OUT_DIR="${PARAM_OUT_DIR:-$BASE_DIR/recon/$(echo "${URL:-$(head -1 "$LIST")}" | sed 's|https\?://||;s|/.*||')/params}"
+  OUT_DIR="${PARAM_OUT_DIR:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$(echo "${URL:-$(head -1 "$LIST")}" | sed 's|https\?://||;s|/.*||')/params}"
 fi
 mkdir -p "$OUT_DIR"
 

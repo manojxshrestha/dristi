@@ -21,7 +21,7 @@ log_info() { echo -e "${CYAN}[*]${NC} $1"; }
 TARGET="${1:?Usage: $0 <domain> [--wordlist <file>]}"
 WORDLIST="${3:-}"
 
-OUT_DIR="${RECON_OUT_DIR:-$BASE_DIR/recon/$TARGET}"
+OUT_DIR="${RECON_OUT_DIR:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET}"
 mkdir -p "$OUT_DIR"
 
 export PATH="$HOME/go/bin:/usr/local/bin:$PATH"

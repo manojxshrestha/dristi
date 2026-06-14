@@ -104,7 +104,7 @@ curl -s https://$TARGET/ | grep -E "window\.[a-zA-Z]+\.(url|src|href|token|key)"
 
 ```bash
 # Find postMessage handlers in JS files
-grep -r "addEventListener.*message\|postMessage" recon/$TARGET/ --include="*.js" 2>/dev/null | \
+grep -r "addEventListener.*message\|postMessage" runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/ --include="*.js" 2>/dev/null | \
   grep -v "event\.origin\|e\.origin\|msg\.origin\|source\.origin"
 
 # Also check inline scripts
@@ -224,7 +224,7 @@ print(payload)
 
 ```bash
 # Find React apps using dangerouslySetInnerHTML with user content
-grep -r "dangerouslySetInnerHTML" recon/$TARGET/ --include="*.js" 2>/dev/null
+grep -r "dangerouslySetInnerHTML" runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/ --include="*.js" 2>/dev/null
 
 # In minified bundles
 curl -s "https://$TARGET/_next/static/chunks/pages/index.js" | \
@@ -244,7 +244,7 @@ curl -s "https://$TARGET/_next/static/chunks/pages/index.js" | \
 # Mustache/Handlebars: {{ constructor.constructor('alert(1)')() }}
 
 # Grep for template libraries
-grep -r "angular\|vue\|handlebars\|mustache\|nunjucks" recon/$TARGET/ --include="*.js" 2>/dev/null | head -5
+grep -r "angular\|vue\|handlebars\|mustache\|nunjucks" runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/ --include="*.js" 2>/dev/null | head -5
 
 # Test Angular template injection
 curl -s "https://$TARGET/search?q={{7*7}}" | grep "49"

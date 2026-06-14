@@ -49,7 +49,7 @@ done
 
 # Domain mode: auto-discover live URLs from recon path
 if [ -n "$DOMAIN" ]; then
-  RECON_DIR="$BASE_DIR/recon/$DOMAIN"
+  RECON_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$DOMAIN"
   LIVE_FILE="$RECON_DIR/subdomains/https-subs.txt"
   [ -f "$LIVE_FILE" ] && [ -s "$LIVE_FILE" ] && TARGET="$LIVE_FILE"
   # Fallback: try crawl output
@@ -62,9 +62,9 @@ fi
 [ -z "$TARGET" ] && { err "target, domain, or file required"; exit 2; }
 
 if [ -n "$DOMAIN" ]; then
-  OUT_DIR="${CVE_OUT_DIR:-$BASE_DIR/recon/$DOMAIN/cve}"
+  OUT_DIR="${CVE_OUT_DIR:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$DOMAIN/cve}"
 else
-  OUT_DIR="${CVE_OUT_DIR:-$BASE_DIR/recon/default/cve}"
+  OUT_DIR="${CVE_OUT_DIR:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/default/cve}"
 fi
 mkdir -p "$OUT_DIR"
 

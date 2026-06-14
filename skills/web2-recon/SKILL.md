@@ -68,7 +68,7 @@ TARGET="target.com"
 ### Output structure (auto-managed)
 
 ```
-recon/$TARGET/
+runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/
 ├── subdomains/all_subdomains.txt       # all discovered subs
 ├── subdomains/live_domains.txt         # httpx-probed domains
 ├── subdomains/live_urls.txt            # full https:// URLs
@@ -121,7 +121,7 @@ recon/$TARGET/
 # Run param_extract.sh after web_crawl.sh — does all of this automatically:
 ./scripts/tools/param_extract.sh $TARGET
 
-# Output: recon/$TARGET/params/
+# Output: runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/params/
 #   paramurls.txt     — all URLs with parameters
 #   gf_xss.txt        — XSS candidates
 #   gf_sqli.txt       — SQLi candidates
@@ -142,19 +142,19 @@ recon/$TARGET/
 
 ```bash
 # Parameters worth testing
-cat recon/$TARGET/crawl/crawledurls.txt | grep -E "[?&](id|user|file|path|url|redirect|next|src|token|key|api_key)=" | tee recon/$TARGET/params/interesting-params.txt
+cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/crawl/crawledurls.txt | grep -E "[?&](id|user|file|path|url|redirect|next|src|token|key|api_key)=" | tee runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/params/interesting-params.txt
 
 # API endpoints
-cat recon/$TARGET/crawl/crawledurls.txt | grep -E "/api/|/v1/|/v2/|/v3/|/graphql|/rest/|/gql" | tee recon/$TARGET/params/api-endpoints.txt
+cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/crawl/crawledurls.txt | grep -E "/api/|/v1/|/v2/|/v3/|/graphql|/rest/|/gql" | tee runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/params/api-endpoints.txt
 
 # File upload endpoints
-cat recon/$TARGET/crawl/crawledurls.txt | grep -E "upload|file|attachment|document|image|avatar|photo|media" | tee recon/$TARGET/params/uploads.txt
+cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/crawl/crawledurls.txt | grep -E "upload|file|attachment|document|image|avatar|photo|media" | tee runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/params/uploads.txt
 
 # Admin/internal paths
-cat recon/$TARGET/crawl/crawledurls.txt | grep -E "/admin|/internal|/debug|/test|/staging|/dev|/management|/console" | tee recon/$TARGET/params/admin-paths.txt
+cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/crawl/crawledurls.txt | grep -E "/admin|/internal|/debug|/test|/staging|/dev|/management|/console" | tee runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/params/admin-paths.txt
 
 # Authentication endpoints
-cat recon/$TARGET/crawl/crawledurls.txt | grep -E "/oauth|/login|/auth|/sso|/saml|/oidc|/callback|/token" | tee recon/$TARGET/params/auth-paths.txt
+cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/crawl/crawledurls.txt | grep -E "/oauth|/login|/auth|/sso|/saml|/oidc|/callback|/token" | tee runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/params/auth-paths.txt
 ```
 
 ---
@@ -359,7 +359,7 @@ cat /tmp/live.txt | awk '{print $1}' | naabu -port 80,443,8080,8443,3000,4000,50
 # trufflehog — high-signal secret detection with entropy analysis
 # Scans JS files and git repos
 pip install trufflehog3 2>/dev/null || true
-trufflehog filesystem --only-verified recon/$TARGET/ 2>/dev/null
+trufflehog filesystem --only-verified runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/ 2>/dev/null
 
 # SecretFinder — manual JS bundle scan (already in tools/)
 source ~/tools/SecretFinder/.venv/bin/activate

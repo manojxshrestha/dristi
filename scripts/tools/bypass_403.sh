@@ -40,7 +40,7 @@ done
 # Resolve domain → list mode: auto-discover live URLs
 BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 if [ -n "$DOMAIN" ]; then
-  RECON_DIR="$BASE_DIR/recon/$DOMAIN"
+  RECON_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$DOMAIN"
   LIVE_FILE="$RECON_DIR/subdomains/https-subs.txt"
   [ -f "$LIVE_FILE" ] && [ -s "$LIVE_FILE" ] && LIST="$LIVE_FILE"
   # Fallback: try live_urls.txt
@@ -61,7 +61,7 @@ fi
 if [ -n "$DOMAIN" ]; then
   OUT_DIR="${BYPASS_OUT_DIR:-$RECON_DIR/bypass}"
 else
-  OUT_DIR="${BYPASS_OUT_DIR:-$BASE_DIR/recon/$(echo "${URL:-$(head -1 "$LIST")}" | sed 's|https\?://||;s|/.*||')/bypass}"
+  OUT_DIR="${BYPASS_OUT_DIR:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$(echo "${URL:-$(head -1 "$LIST")}" | sed 's|https\?://||;s|/.*||')/bypass}"
 fi
 mkdir -p "$OUT_DIR"
 

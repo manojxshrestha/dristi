@@ -139,7 +139,7 @@ nuclei -l /tmp/live.txt -t ~/nuclei-templates/ -severity critical,high,medium -o
 
 ```bash
 TARGET="target.com"
-RECON_DIR="recon/$TARGET"
+RECON_DIR="runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET"
 mkdir -p $RECON_DIR
 
 # All outputs go here:
@@ -395,7 +395,7 @@ cat /tmp/live.txt | awk '{print $1}' | naabu -port 80,443,8080,8443,3000,4000,50
 # trufflehog — high-signal secret detection with entropy analysis
 # Scans JS files and git repos
 pip install trufflehog3 2>/dev/null || true
-trufflehog filesystem --only-verified recon/$TARGET/ 2>/dev/null
+trufflehog filesystem --only-verified runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/ 2>/dev/null
 
 # SecretFinder — manual JS bundle scan (already in tools/)
 source ~/tools/SecretFinder/.venv/bin/activate

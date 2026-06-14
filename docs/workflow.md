@@ -319,7 +319,7 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 | 3 | For each finding: capture raw HTTP, screenshot (if DOM/visual), check collaborator (if OOB) | `validate_poc()` |
 | 4 | **WAF evidence:** Capture blocked vs. bypassed request pairs, note evasion technique used | — |
 | 5 | Apply redaction (cookies, PII, tokens) | — |
-| 6 | Save sanitized evidence | `scripts/recon/<domain>/evidence/<finding-id>/` |
+| 6 | Save sanitized evidence | `runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<domain>/evidence/<finding-id>/` |
 **Browser rules:** Use Playwright for screenshots. Call `playwright_browser_close()` after every operation. Never call `browser.newContext()` — default context already routes through Burp via `--proxy-server`.
 
 **Output:** Sanitized evidence pack for each finding.

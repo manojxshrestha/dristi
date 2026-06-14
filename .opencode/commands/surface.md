@@ -9,7 +9,7 @@ View the prioritized attack surface for a target.
 
 ## What This Does
 
-1. Reads cached recon output from `recon/<target>/`
+1. Reads cached recon output from `runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<target>/`
 2. Reads hunt memory for patterns and previously tested endpoints
 3. Invokes the `recon-ranker` agent to produce a prioritized ranking
 4. Outputs P1 (start here), P2 (after P1), and Kill List (skip)

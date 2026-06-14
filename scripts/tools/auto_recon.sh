@@ -118,5 +118,5 @@ MINS=$((ELAPSED / 60))
 SECS=$((ELAPSED % 60))
 
 log_ok "=== Auto Recon Complete ==="
-log_ok "Results in: $BASE_DIR/recon/$TARGET/"
+log_ok "Results in: $BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/"
 log_ok "Elapsed: ${MINS}m ${SECS}s"

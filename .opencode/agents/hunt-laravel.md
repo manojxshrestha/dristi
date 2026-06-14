@@ -151,7 +151,7 @@ curl -s "https://$TARGET/storage/logs/laravel.log" | tail -100 | grep -i "except
 ```bash
 # Laravel signed URLs contain signature param: ?signature=HASH
 # Find signed URL endpoints
-cat recon/$TARGET/urls.txt | grep "signature="
+cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/urls.txt | grep "signature="
 
 # Test: modify a non-signature parameter — should fail validation
 SIGNED_URL="https://$TARGET/unsubscribe?user=123&email=test@test.com&signature=VALID_SIG"

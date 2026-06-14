@@ -19,8 +19,8 @@ log_info() { echo -e "${CYAN}[*]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 
 TARGET="${1:?Usage: $0 <domain> [--gf-xss <file>]}"
-GF_XSS="${3:-$BASE_DIR/recon/$TARGET/params/gf_xss.txt}"
-OUT_DIR="$BASE_DIR/recon/$TARGET/xss"
+GF_XSS="${3:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/params/gf_xss.txt}"
+OUT_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/xss"
 mkdir -p "$OUT_DIR"
 
 export PATH="$HOME/go/bin:/usr/local/bin:$PATH"

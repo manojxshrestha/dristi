@@ -51,7 +51,7 @@ Read the README before/during testing for enriched methodology and bypass techni
 ### Attack Surface
 ```bash
 # Find SAML endpoints
-cat recon/$TARGET/urls.txt | grep -iE "saml|sso|login.*redirect|oauth|idp|sp"
+cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/urls.txt | grep -iE "saml|sso|login.*redirect|oauth|idp|sp"
 # Key endpoints: /saml/acs (assertion consumer service), /sso/saml, /auth/saml/callback
 ```
 

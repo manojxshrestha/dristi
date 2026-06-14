@@ -42,15 +42,15 @@ Read the hygiene agent's redaction protocol before collecting any evidence.
 ### Step 2: Capture Raw HTTP Request/Response
 Re-execute the PoC via curl and save the raw exchange:
 ```
-mkdir -p scripts/recon/<domain>/evidence/<finding-id>/
-curl -sv <poc-command> 2>&1 > scripts/recon/<domain>/evidence/<finding-id>/request.txt
+mkdir -p runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<domain>/evidence/<finding-id>/
+curl -sv <poc-command> 2>&1 > runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<domain>/evidence/<finding-id>/request.txt
 ```
 
 ### Step 3: Screenshot (if DOM/visual bug)
 For reflected XSS, DOM XSS, clickjacking, or any visual proof:
 ```
 playwright_browser_navigate(url=<poc-url>)
-playwright_browser_take_screenshot(type='png', filename=scripts/recon/<domain>/evidence/<finding-id>/screenshot.png)
+playwright_browser_take_screenshot(type='png', filename=runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<domain>/evidence/<finding-id>/screenshot.png)
 playwright_browser_close()
 ```
 
@@ -59,7 +59,7 @@ For blind SSRF, blind XXE, blind SQLi, log4shell — check Burp Collaborator:
 ```
 burp_get_collaborator_interactions(payloadId=<id>)
 ```
-Save any interaction evidence to `scripts/recon/<domain>/evidence/<finding-id>/collaborator.txt`
+Save any interaction evidence to `runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<domain>/evidence/<finding-id>/collaborator.txt`
 
 ### Step 5: Apply Hygiene
 - **Redact** cookies, auth headers, session tokens, API keys
@@ -80,7 +80,7 @@ wstg_save_deliverable(deliverable_type='evidence', content=<clean-request+respon
 - [ ] Screenshot taken for DOM/visual bugs
 - [ ] Collaborator interactions checked for OOB findings
 - [ ] Redaction applied to all evidence (cookies, PII, tokens stripped)
-- [ ] Evidence files exist at `scripts/recon/<domain>/evidence/<finding-id>/`
+- [ ] Evidence files exist at `runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<domain>/evidence/<finding-id>/`
 - [ ] Deliverable saved for Phase 11 consumption
 
 Proceed to Phase 11 (`@validate`) when all findings have clean evidence.

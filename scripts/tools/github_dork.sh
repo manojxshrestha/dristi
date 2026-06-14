@@ -34,7 +34,7 @@ if ! gh auth status 2>/dev/null | grep -q "Logged in"; then
   exit 0
 fi
 
-OUT_DIR="$BASE_DIR/recon/$TARGET/github_dorks"
+OUT_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/github_dorks"
 mkdir -p "$OUT_DIR"
 RESULTS="$OUT_DIR/findings.txt"
 

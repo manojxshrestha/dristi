@@ -229,7 +229,7 @@ def configure_proxy_from_args(args: argparse.Namespace) -> None:
 
 def cmd_recon(args: argparse.Namespace) -> int:
     target = args.target
-    out_dir = REPO_ROOT / "recon" / target
+    out_dir = REPO_ROOT / "runtime" / "engagements" / os.environ.get("ENGAGEMENT_ID", "rea-group-bb-001") / "recon" / target
     resolved = out_dir.resolve()
     safe = (REPO_ROOT / "recon").resolve()
     # Real containment check — `startswith` is bypassable by a sibling that

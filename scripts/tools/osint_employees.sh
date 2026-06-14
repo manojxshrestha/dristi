@@ -76,7 +76,7 @@ if [ ${#MISSING[@]} -gt 0 ]; then
     exit 1
 fi
 
-OUT_DIR="recon/${TARGET}/osint"
+OUT_DIR="runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/${TARGET}/osint"
 mkdir -p "$OUT_DIR"
 HARVESTER_OUT="$OUT_DIR/theharvester"
 EMAILS="$OUT_DIR/emails.txt"
@@ -203,5 +203,5 @@ echo "  Next steps:"
 echo "    - Manually review $NAMES — drop obvious false positives"
 echo "    - Combine with /wordlist-gen output for spray (PR #5):"
 echo "        cat $USERNAMES > users.txt"
-echo "        cat recon/${TARGET}/wordlists/ranked.txt $PERSONAL_PW > passes.txt"
+echo "        cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/${TARGET}/wordlists/ranked.txt $PERSONAL_PW > passes.txt"
 echo "============================================="

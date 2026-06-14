@@ -39,10 +39,10 @@ node_modules/
 __pycache__/
 *.pyo
 # Python
-recon/*
+runtime/engagements/*
 runtime/
 # Runtime data (per-pentest output, contains cookies/tokens/creds/cookies)
-scripts/recon/*
+# runtime/engagements/<id>/recon/ — managed by pipeline
 scripts/tools/filter.sh
 scripts/wordlists/
 server/data/

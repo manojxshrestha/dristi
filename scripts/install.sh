@@ -294,8 +294,25 @@ if ! $QUICK; then
     ok "GF patterns installed → ~/.gf/"
   fi
 
+  # gum — progress bars
+  header "Phase 5c: gum progress bars"
+  if command -v gum &>/dev/null; then
+    ok "gum — already installed"
+  else
+    info "Installing gum (progress bars)..."
+    if command -v go &>/dev/null; then
+      go install github.com/charmbracelet/gum@latest 2>/dev/null || warn "gum install failed"
+      if [ -f "$HOME/go/bin/gum" ]; then
+        cp "$HOME/go/bin/gum" "$HOME/.local/bin/gum" 2>/dev/null || true
+        ok "gum installed"
+      fi
+    else
+      warn "go not found — install gum manually: go install github.com/charmbracelet/gum@latest"
+    fi
+  fi
+
   # SecLists
-  header "Phase 5c: SecLists wordlists"
+  header "Phase 5d: SecLists wordlists"
   SECLISTS="/opt/SecLists"
   if [ -d "$SECLISTS" ]; then
     ok "SecLists found at $SECLISTS"
@@ -305,6 +322,25 @@ if ! $QUICK; then
       ok "SecLists cloned" || warn "SecLists clone failed"
   fi
 fi # end if ! $QUICK
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 5e: Python reconnaissance tools (Spoofy, cloud_enum, msftrecon, Scopify)
+# ═══════════════════════════════════════════════════════════════════════════════
+if ! $QUICK; then
+  header "Phase 5e: Python recon tools (Spoofy, cloud_enum, msftrecon, Scopify)"
+
+  INTEL_SCRIPT="$REPO_DIR/scripts/tools/phase-intel.sh"
+  if [ -f "$INTEL_SCRIPT" ]; then
+    if command -v uv &>/dev/null && command -v git &>/dev/null; then
+      info "Installing intel tools via phase-intel.sh..."
+      bash "$INTEL_SCRIPT" --install 2>&1 || warn "Some intel tools failed to install (see log)"
+    else
+      warn "uv or git missing — skip intel tool install"
+    fi
+  else
+    warn "phase-intel.sh not found at $INTEL_SCRIPT"
+  fi
+fi
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # PHASE 6: Playwright Chromium

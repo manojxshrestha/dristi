@@ -71,18 +71,18 @@ RESULTS=()
 run_enum() {
   local domain="$1"
   local idx="$2"
-  local out_file="$BASE_DIR/recon/$domain/subdomains/batch-status.txt"
+  local out_file="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$domain/subdomains/batch-status.txt"
 
-  mkdir -p "$BASE_DIR/recon/$domain/subdomains"
+  mkdir -p "$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$domain/subdomains"
   echo "started" > "$out_file"
 
   bash "$SCRIPT_DIR/subdomain_enum.sh" "$domain" 2>&1
   local exit_code=$?
 
   if [ $exit_code -eq 0 ]; then
-    if [ -f "$BASE_DIR/recon/$domain/subdomains/https-subs.txt" ]; then
+    if [ -f "$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$domain/subdomains/https-subs.txt" ]; then
       local count
-      count=$(wc -l < "$BASE_DIR/recon/$domain/subdomains/https-subs.txt" | tr -d ' ')
+      count=$(wc -l < "$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$domain/subdomains/https-subs.txt" | tr -d ' ')
       echo "done:$count" > "$out_file"
       echo "[$idx/$TOTAL] $domain — OK ($count live URLs)"
     else
@@ -134,7 +134,7 @@ echo ""
 log_info "=== Batch Results ==="
 LIVE_TOTAL=0
 for domain in "${DOMAINS[@]}"; do
-  status_file="$BASE_DIR/recon/$domain/subdomains/batch-status.txt"
+  status_file="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$domain/subdomains/batch-status.txt"
   if [ -f "$status_file" ]; then
     status=$(cat "$status_file")
     case "$status" in

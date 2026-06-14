@@ -241,7 +241,7 @@ Dispatched: `@capture` sub-agent
 - `@evidence-hygiene`: Not invoked (no PII to redact)
 - Browser sessions: Not used (all testing via curl)
 - Collaborator: Not needed — no OOB findings (SSRF blocked by Imgix sig)
-- Evidence path: `/home/pwn/dristi/scripts/recon/20min.ch/evidence/`
+- Evidence path: `runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/20min.ch/evidence/`
 
 ---
 

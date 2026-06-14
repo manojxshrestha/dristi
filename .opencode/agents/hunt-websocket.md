@@ -54,11 +54,11 @@ CSWSH (Cross-Site WebSocket Hijacking) without CSRF token = High (session data t
 
 ```bash
 # Grep JS files for WebSocket connections
-grep -r "new WebSocket\|io.connect\|socket.io\|ws://" recon/$TARGET/ --include="*.js" 2>/dev/null | \
+grep -r "new WebSocket\|io.connect\|socket.io\|ws://" runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/ --include="*.js" 2>/dev/null | \
   grep -oE "(wss?://[^'\"]+|/[a-zA-Z0-9/_-]+socket[^'\"]*)" | sort -u
 
 # Look for socket.io or WS endpoints in crawl
-cat recon/$TARGET/urls.txt | grep -iE "socket|ws\b|websocket|stream|realtime|live|chat|events"
+cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/urls.txt | grep -iE "socket|ws\b|websocket|stream|realtime|live|chat|events"
 
 # HTTP upgrade headers
 curl -sI https://$TARGET/ws 2>/dev/null | grep -i "upgrade\|websocket"

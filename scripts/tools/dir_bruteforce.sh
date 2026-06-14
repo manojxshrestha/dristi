@@ -24,7 +24,7 @@ log_info() { echo -e "${CYAN}[*]${NC} $1"; }
 TARGET="${1:?Usage: $0 <domain> [--url <base-url>]}"
 BASE_URL="${3:-https://$TARGET}"
 
-OUT_DIR="$BASE_DIR/recon/$TARGET/directories"
+OUT_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/directories"
 mkdir -p "$OUT_DIR"
 
 WORDLIST_DIR="$BASE_DIR/wordlists/content"
