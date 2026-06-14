@@ -48,7 +48,7 @@ MODULE_TIMEOUT=${MODULE_TIMEOUT:-1200}
 _run_with_timeout() {
     local logfile="$1"
     shift
-    timeout "$MODULE_TIMEOUT" bash -c "$* > '$logfile' 2>/dev/null"
+    timeout "$MODULE_TIMEOUT" bash -c "$* >> '$logfile' 2>&1"
     local rc=$?
     if [ $rc -eq 124 ]; then
         log_warn "Timed out after ${MODULE_TIMEOUT}s"
@@ -318,11 +318,30 @@ log_info "Starting intel for $TARGET"
 log_info "Modules: domain_info, third_party_misconfigs, spoof, cloud_enum_scan"
 log_warn "Skipped: ip_info (requires WHOISXML_API key)"
 
-# Each module has a MODULE_TIMEOUT cap so one hanging tool doesn't block subsequent modules
-timeout "$MODULE_TIMEOUT" bash -c 'run_domain_info' 2>/dev/null || log_warn "domain_info timed out after ${MODULE_TIMEOUT}s"
-timeout "$MODULE_TIMEOUT" bash -c 'run_third_party_misconfigs' 2>/dev/null || log_warn "third_party_misconfigs timed out after ${MODULE_TIMEOUT}s"
-timeout "$MODULE_TIMEOUT" bash -c 'run_spoof' 2>/dev/null || log_warn "spoof timed out after ${MODULE_TIMEOUT}s"
-timeout "$MODULE_TIMEOUT" bash -c 'run_cloud_enum' 2>/dev/null || log_warn "cloud_enum_scan timed out after ${MODULE_TIMEOUT}s"
+_run_module() {
+    local name="$1"
+    shift
+    # Pass all function definitions + needed variables to subshell (timeout + bash -c)
+    local funcs
+    funcs="$(declare -f)"
+    local vars
+    vars="TARGET='$TARGET'; INTEL_DIR='$INTEL_DIR'; TOOLS_DIR='$TOOLS_DIR'; MODULE_TIMEOUT=$MODULE_TIMEOUT;"
+    vars="$vars GREEN='$GREEN'; RED='$RED'; YELLOW='$YELLOW'; CYAN='$CYAN'; NC='$NC';"
+    vars="$vars HOME='$HOME'; PATH='$PATH';"
+    timeout "$MODULE_TIMEOUT" bash -c "$funcs; $vars; $*" 2>&1
+    local rc=$?
+    if [ $rc -eq 124 ]; then
+        log_warn "${name} timed out after ${MODULE_TIMEOUT}s"
+    elif [ $rc -ne 0 ]; then
+        log_err "${name} failed (exit $rc)"
+    fi
+    return $rc
+}
+
+_run_module "domain_info" run_domain_info
+_run_module "third_party_misconfigs" run_third_party_misconfigs
+_run_module "spoof" run_spoof
+_run_module "cloud_enum_scan" run_cloud_enum
 
 echo -e "\n${GREEN}════════════════════════════════════════════${NC}"
 log_ok "Intel complete — results in $INTEL_DIR"

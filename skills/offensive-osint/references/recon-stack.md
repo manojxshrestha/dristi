@@ -2,6 +2,10 @@
 
 > Reference content for the `offensive-osint` skill. Originally §27 + §28 of the monolithic SKILL.md (refactored 2026-05-02 for size/load efficiency).
 
+> **⚠ Active recon:** Use the automation scripts instead of raw commands below.
+> See `scripts/tools/subdomain_enum.sh`, `scripts/tools/dns_bruteforce.sh`, `scripts/tools/auto_recon.sh`.
+> The raw examples below are reference/educational only.
+
 ## 27. Subdomain-Source Stack (Passive)
 
 Practical "what actually returns useful data in 2026" reference, ordered by recall:

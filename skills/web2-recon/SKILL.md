@@ -94,7 +94,7 @@ runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/
 |-------|--------|------|-------|
 | 4 | `auto_xss.sh` | dalfox + curl | `params/gf_xss.txt` + `scripts/xss_payloads.txt` |
 | 5 | `auto_sqli.sh` | sqlmap | `params/gf_sqli.txt` |
-| 6 | `auto_nuclei.sh` | nuclei | `crawl/https-subs.txt` |
+| 6 | `auto_nuclei.sh` (manual) | nuclei | `crawl/https-subs.txt` |
 | 7 | `auto_secrets.sh` | curl | `cariddi/cariddi.txt` |
 
 ### How auto_recon maps to phases
@@ -304,9 +304,12 @@ Set up once per target. Alerts you before other hunters.
 ```bash
 #!/bin/bash
 TARGET="target.com"
+RECON_BASE="runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET"
 KNOWN="/tmp/$TARGET-subs-known.txt"
 
-subfinder -d $TARGET -silent > /tmp/$TARGET-subs-fresh.txt
+# Use existing script — fresh full enumeration
+bash scripts/tools/subdomain_enum.sh $TARGET
+cat "$RECON_BASE/subdomains/all_subdomains.txt" > /tmp/$TARGET-subs-fresh.txt
 
 # Diff against known
 NEW=$(comm -23 <(sort /tmp/$TARGET-subs-fresh.txt) <(sort $KNOWN 2>/dev/null))

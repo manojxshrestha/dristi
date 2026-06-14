@@ -75,82 +75,26 @@ which subfinder httpx dnsx nuclei katana waybackurls dalfox ffuf anew gf interac
 
 ---
 
-## STANDARD RECON PIPELINE
+## STANDARD RECON PIPELINE — USE EXISTING SCRIPTS
 
-### Pre-Hunt: Always Run First
-
-```bash
-TARGET="target.com"
-
-# Step 0: Passive — crt.sh certificate transparency (no API key needed)
-curl -s "https://crt.sh/?q=%.${TARGET}&output=json" \
-  | jq -r '.[].name_value' \
-  | sed 's/\*\.//g' \
-  | sort -u > /tmp/subs.txt
-echo "[+] crt.sh: $(wc -l < /tmp/subs.txt) subdomains"
-
-# Step 1: crt.sh (certificate transparency — no API key needed)
-curl -s "https://crt.sh/?q=%.${TARGET}&output=json" \
-  | jq -r '.[].name_value' \
-  | sed 's/\*\.//g' \
-  >> /tmp/subs.txt 2>/dev/null || true
-
-# Step 2: subdomain_enum.sh (subfinder + assetfinder + findomain → dnsx → httpx)
-bash scripts/tools/subdomain_enum.sh $TARGET
-
-echo "[+] Subdomains: $(find runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/subdomains/ -name '*.txt' -exec cat {} + 2>/dev/null | sort -u | wc -l)"
-
-echo "[+] Total subdomains after all sources: $(wc -l < /tmp/subs.txt)"
-
-# Step 3: DNS resolution + live host check
-cat /tmp/subs.txt | dnsx -silent | httpx -silent -status-code -title -tech-detect | tee /tmp/live.txt
-
-echo "[+] Live hosts: $(wc -l < /tmp/live.txt)"
-
-# Step 3b: Filter out language/locale subdomains (2-letter codes like fr, ja, zh, hi)
-grep -v -E '^https://[a-z]{2}\.' /tmp/live.txt > /tmp/live-filtered.txt 2>/dev/null || true
-
-# Step 4: URL crawl
-cat /tmp/live.txt | awk '{print $1}' | katana -d 3 -jc -kf all -silent | anew /tmp/urls.txt
-
-# Step 5: Historical URLs
-echo $TARGET | waybackurls | anew /tmp/urls.txt
-# gau removed — waymore already covers Wayback Machine (340K+ URLs on test target, gau returned 0)
-
-echo "[+] Total URLs: $(wc -l < /tmp/urls.txt)"
-
-# Step 5b: Cariddi — secrets, info disclosure, endpoints, errors, juicy extensions
-cat /tmp/urls.txt | cariddi -intensive -s -info -e -err -ext 1 \
-  -c 30 -d 1 -plain \
-  -oh /tmp/cariddi.html \
-  -ot /tmp/cariddi.txt 2>/dev/null || true
-
-echo "[+] Cariddi findings: $(wc -l < /tmp/cariddi.txt 2>/dev/null || echo 0)"
-
-# Cariddi output is consumed in P3 Surface / P4 Hunt:
-#   cariddi.txt → parsed into secrets.txt, info_disclosure.txt, endpoints.txt
-#   secrets + info disclosure → hunt-misc for validation
-#   endpoints → merged into API candidate pool
-
-# Step 6: Nuclei scan
-nuclei -l /tmp/live.txt -t ~/nuclei-templates/ -severity critical,high,medium -o /tmp/nuclei.txt
-```
-
-### Output to Organized Directory
+**Do NOT run raw subfinder/amass/dnsx/httpx/katana/gau/nuclei commands.** Use the automation scripts:
 
 ```bash
-TARGET="target.com"
-RECON_DIR="runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET"
-mkdir -p $RECON_DIR
+# Full recon (Phase 0-3): subdomains → crawl → params → cariddi
+bash scripts/tools/auto_recon.sh $TARGET
 
-# All outputs go here:
-/tmp/subs.txt         → $RECON_DIR/subdomains.txt
-/tmp/live.txt         → $RECON_DIR/live-hosts.txt
-/tmp/urls.txt         → $RECON_DIR/urls.txt
-/tmp/cariddi.txt      → $RECON_DIR/cariddi.txt
-/tmp/cariddi.html     → $RECON_DIR/cariddi.html
-/tmp/nuclei.txt       → $RECON_DIR/nuclei.txt
+# Or individual phases:
+bash scripts/tools/subdomain_enum.sh $TARGET      # subfinder + assetfinder + findomain → dnsx → httpx
+bash scripts/tools/dns_bruteforce.sh $TARGET       # DNS brute-force via puredns
+bash scripts/tools/web_crawl.sh $TARGET            # multi-engine crawl (hakrawler + katana + waymore + gau → filter.sh)
+bash scripts/tools/param_extract.sh $TARGET        # param URLs + GF pattern classification
+bash scripts/tools/cariddi_scan.sh $TARGET         # secrets + info disclosure
+# nuclei skipped — too slow on live hosts. Run: bash scripts/tools/auto_nuclei.sh $TARGET
 ```
+
+Output goes to `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/` — the scripts manage this automatically.
+
+See the **recon agent** (`.opencode/agents/recon.md`) for the full workflow with 9 steps covering subdomain enum → crawl → params → cariddi/nuclei/dirbrute → 403 bypass/vhost → zone/takeover → cloud/CVE/secrets → triage → deliverable.
 
 ---
 
@@ -175,23 +119,20 @@ cat /tmp/urls.txt | grep -E "/admin|/internal|/debug|/test|/staging|/dev|/manage
 cat /tmp/urls.txt | grep -E "/oauth|/login|/auth|/sso|/saml|/oidc|/callback|/token" | tee /tmp/auth-paths.txt
 ```
 
-### gf Patterns (Quick Classification)
+### GF Pattern Classification
+
+Already handled by `param_extract.sh` — GF classification runs automatically. Output at:
+
+```
+runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/params/gf_*.txt
+```
+
+If you need to run GF manually on additional URL sets:
 
 ```bash
-# Install gf: https://github.com/tomnomnom/gf
-# Get custom patterns:
-#   git clone https://github.com/manojxshrestha/Gf-Patterns
-#   mkdir -p ~/.gf
-#   mv Gf-Patterns/*.json ~/.gf/
-#   rm -rf Gf-Patterns
-
-cat /tmp/urls.txt | gf xss | tee /tmp/xss-candidates.txt
-cat /tmp/urls.txt | gf ssrf | tee /tmp/ssrf-candidates.txt
-cat /tmp/urls.txt | gf idor | tee /tmp/idor-candidates.txt
-cat /tmp/urls.txt | gf sqli | tee /tmp/sqli-candidates.txt
-cat /tmp/urls.txt | gf redirect | tee /tmp/redirect-candidates.txt
-cat /tmp/urls.txt | gf lfi | tee /tmp/lfi-candidates.txt
-cat /tmp/urls.txt | gf rce | tee /tmp/rce-candidates.txt
+RECON_BASE="runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET"
+cat $RECON_BASE/crawl/crawledurls.txt | gf xss | tee $RECON_BASE/params/gf_xss_manual.txt
+cat $RECON_BASE/crawl/crawledurls.txt | gf ssrf | tee $RECON_BASE/params/gf_ssrf_manual.txt
 ```
 
 ---

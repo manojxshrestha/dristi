@@ -265,8 +265,9 @@ grep -r "xmlrpc" scope_urls.txt
 # Find SSO indicators in JS
 grep -rE "(SAMLResponse|samlRequest|RelayState|onelogin|shibboleth)" *.js
 
-# Find partner/admin subdomains
-subfinder -d target.com | grep -E "(admin|partner|internal|sso|auth|login)"
+# Find partner/admin subdomains from subdomain_enum.sh output
+grep -iE "(admin|partner|internal|sso|auth|login)" \
+  runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/target.com/subdomains/all_subdomains.txt
 ```
 
 ---
