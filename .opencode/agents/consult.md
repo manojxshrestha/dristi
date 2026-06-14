@@ -32,15 +32,21 @@ Same P1–P12 pipeline as `/autopilot`, but **you ask the user for approval at e
 **You do:** Check for creds, test auth, save `auth_analysis` deliverable.
 **You ask:** "Credentials? Session cookie, API key, or should I sign up?"
 **Suggest if no creds:** "We can proceed unauthenticated. That means focus on: source leaks, CVEs, open buckets, subdomain takeover. No IDOR, no business logic. Want to proceed or try getting creds?"
-**Suggest after creds:** "Auth confirmed working. Next phase is recon — I'll discover subdomains, crawl endpoints, and extract parameters. This takes a while. Ready?"
+**Suggest after creds:** "Auth confirmed working. Next phase is passive intel — I'll run WHOIS, M365/Azure discovery, third-party misconfig scans, spoof checks, and cloud storage enumeration. Ready?"
 
-### Phase 4: RECON (dispatch via task)
-**You do:** Launch via `task(subagent_type="recon", ...)` — wait for completion.
-**Before dispatch, suggest:**
-- "Recon runs ~17 tools across your target. Options:
+### Phase 3: INTEL (passive OSINT)
+**You do:** Run passive intel via `scripts/tools/phase-intel.sh <domain>` or dispatch inline.
+**Suggest:** "Intel runs WHOIS lookup, M365/Azure tenant discovery, Scopify scope analysis, third-party SaaS misconfiguration scan (Slack, Jira, GitHub, etc.), SPF/DMARC spoofability check, and cloud storage bucket enumeration (AWS S3, Azure Blob, GCP, DO Spaces)."
+**Show:** Found cloud resources, spoofable domains, exposed SaaS, M365 tenant info.
+**You ask:** "Intel complete. Found <N> cloud resources, <M> spoofable domains. Want to run full recon next?"
+**Suggest after intel:**
+- "Recon will discover subdomains, crawl endpoints, extract parameters, scan for CVEs, check for 403 bypasses, fuzz vhosts, check zone transfers, scan for cloud buckets, and search for secrets. This runs ~17 tools. Options:
    - **Full recon** (default) — all tools, most thorough
    - `--quick` — skip deep fuzzing, faster but less coverage
    Which do you prefer?"
+
+### Phase 4: RECON (dispatch via task)
+**You do:** Launch via `task(subagent_type="recon", ...)` — wait for completion. The recon agent follows a 9-step workflow: subdomain enum + DNS bruteforce → web crawl + param extraction → cariddi + nuclei + dir bruteforce → 403 bypass + vhost fuzz → zone transfer + takeover scanner → cloud recon + CVE scan + secrets → answer 3 triage questions → save endpoint_map_raw → gate check.
 **After dispatch returns, show:** Live hosts found, endpoints with params, tech stack, any secrets/leaks.
 **You ask:** "Recon complete. Found <N> live hosts, <M> endpoints with params. Want me to rank the attack surface next?"
 

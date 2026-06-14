@@ -12,7 +12,7 @@
 #   . ./tools/external_arsenal.sh && _have nuclei && nuclei ...
 # =============================================================================
 
-set -uo pipefail
+set -euo pipefail
 
 export PATH="$HOME/go/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 

@@ -10,7 +10,7 @@
 #   ./tools/param_discovery.sh -l <urls-file>
 # =============================================================================
 
-set -uo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 . "$SCRIPT_DIR/external_arsenal.sh"
@@ -39,7 +39,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 # Resolve domain → list mode: auto-discover crawl output
-BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 if [ -n "$DOMAIN" ]; then
   RECON_DIR="$BASE_DIR/recon/$DOMAIN"
   CRAWL_FILE="$RECON_DIR/crawl/crawledurls.txt"

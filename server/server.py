@@ -6436,7 +6436,13 @@ def burp_send_request(
 
 
 def main():
-    mcp.run(transport="stdio")
+    transport = os.environ.get("WSTG_TRANSPORT", "stdio")  # "stdio", "sse", or "streamable-http"
+    if transport == "sse":
+        import uvicorn
+        starlette_app = mcp.sse_app()
+        uvicorn.run(starlette_app, host=mcp.settings.host, port=mcp.settings.port, log_level=mcp.settings.log_level.lower())
+    else:
+        mcp.run(transport=transport)
 
 
 if __name__ == "__main__":

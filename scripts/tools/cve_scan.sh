@@ -15,7 +15,7 @@
 #   ./tools/cve_scan.sh --year 2024 <target>      # filter by CVE year
 # =============================================================================
 
-set -uo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 . "$SCRIPT_DIR/external_arsenal.sh"
@@ -28,7 +28,7 @@ hit()  { echo -e "${MAG}[CVE]${NC} $1" >&2; }
 err()  { echo -e "${RED}[-]${NC} $1" >&2; }
 
 DOMAIN=""; TARGET=""; YEAR=""
-BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+BASE_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --recon) shift; TARGET="${1:-}/live/urls.txt" ;;

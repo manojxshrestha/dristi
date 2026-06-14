@@ -225,7 +225,7 @@ if ! $QUICK; then
       ok "$pkg — already installed"
     else
       info "Installing $pkg..."
-      if pip3 install -q --user --break-system-packages "$pkg" 2>/dev/null; then
+      if uv pip install --system "$pkg" 2>/dev/null; then
         ok "$pkg installed"
       else
         warn "$pkg install failed"
@@ -240,7 +240,7 @@ if ! $QUICK; then
 
   if ! command -v pipx &>/dev/null; then
     info "Installing pipx..."
-    pip3 install --user --break-system-packages pipx 2>/dev/null && ok "pipx installed" || warn "pipx install failed"
+    uv tool install pipx 2>/dev/null && ok "pipx installed" || warn "pipx install failed"
     export PATH="$HOME/.local/bin:$PATH"
   fi
 
@@ -484,7 +484,6 @@ with open(config_path, "w") as f:
 print("[+] Burp MCP configured (SSE :9876)")
 print("[+] WSTG MCP server configured")
 print("[+] Playwright MCP server configured")
-print("[!] Burp MCP not configured — install Burp Suite + MCP Server extension manually")
 PYEOF
 
 # ═══════════════════════════════════════════════════════════════════════════════

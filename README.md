@@ -319,7 +319,7 @@ dristi/
 │   │   └── web2-vuln-classes.md       # 20 bug class reference
 │   └── opencode.json                # OpenCode configuration
 ├── server/
-│   ├── server.py                    # MCP server (86 tools) + 14 server modules
+│   ├── server.py                    # MCP server (89 tools) + 14 server modules
 │   ├── findings_db.py               # 7-table SQLite findings database
 │   ├── endpoint_priority.py         # Risk-based endpoint prioritization
 │   ├── knowledge_graph.py           # Vulnerability chaining graph

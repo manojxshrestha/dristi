@@ -23,10 +23,10 @@
 #   cloud_enum.txt                — Discovered cloud storage buckets
 # =============================================================================
 
-set -uo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 TOOLS_DIR="$HOME/.local/bin"
 
 GREEN='\033[0;32m'; RED='\033[0;31m'; YELLOW='\033[1;33m'; CYAN='\033[0;36m'; NC='\033[0m'
@@ -61,7 +61,7 @@ install_repo() {
         (
             cd "$target_dir" || return 1
             uv venv venv &>/dev/null
-            "$target_dir/venv/bin/pip" install -r requirements.txt &>/dev/null
+            uv pip install --python "$target_dir/venv/bin/python" -r requirements.txt &>/dev/null
         ) && log_ok "$repo venv ready" || log_warn "$repo venv setup failed"
     fi
 
@@ -132,11 +132,12 @@ run_domain_info() {
     : > "$INTEL_DIR/azure_tenant_domains.txt"
 
     if check_repo_tool "msftrecon" "msftrecon/msftrecon.py"; then
-        if command -v python3 &>/dev/null; then
+        local msftrecon_venv="$TOOLS_DIR/msftrecon/venv/bin/python3"
+        if [ -x "$msftrecon_venv" ]; then
             log_info "Running msftrecon..."
             local msftrecon_out
             msftrecon_out=$(mktemp)
-            if python3 "$TOOLS_DIR/msftrecon/msftrecon/msftrecon.py" -d "$TARGET" > "$msftrecon_out" 2>/dev/null; then
+            if "$msftrecon_venv" "$TOOLS_DIR/msftrecon/msftrecon/msftrecon.py" -d "$TARGET" > "$msftrecon_out" 2>/dev/null; then
                 if [ -s "$msftrecon_out" ]; then
                     cat "$msftrecon_out" >> "$INTEL_DIR/domain_info_general.txt"
                     grep -iE 'microsoft|azure|tenant' "$msftrecon_out" > "$INTEL_DIR/azure_tenant_domains.txt" 2>/dev/null || true
@@ -146,18 +147,21 @@ run_domain_info() {
                 log_warn "msftrecon failed"
             fi
             rm -f "$msftrecon_out"
+        else
+            log_warn "msftrecon venv not found — run $0 --install"
         fi
     fi
 
     if check_repo_tool "Scopify" "scopify.py"; then
-        if command -v python3 &>/dev/null && command -v unfurl &>/dev/null; then
+        local scopify_venv="$TOOLS_DIR/Scopify/venv/bin/python3"
+        if [ -x "$scopify_venv" ] && command -v unfurl &>/dev/null; then
             log_info "Running Scopify..."
             local company_name
             company_name=$(unfurl format %r <<< "$TARGET" 2>/dev/null || echo "$TARGET" | awk -F. '{print $(NF-1)}')
-            python3 "$TOOLS_DIR/Scopify/scopify.py" -c "$company_name" > "$INTEL_DIR/scopify.txt" 2>/dev/null && \
+            "$scopify_venv" "$TOOLS_DIR/Scopify/scopify.py" -c "$company_name" > "$INTEL_DIR/scopify.txt" 2>/dev/null && \
                 log_ok "Scopify scope analysis saved" || log_warn "Scopify failed"
         else
-            log_warn "unfurl or python3 missing — skipping Scopify"
+            log_warn "unfurl or venv python missing — skipping Scopify"
         fi
     fi
 }

@@ -4,7 +4,7 @@
 
 Dristi is a security testing platform with two interfaces that work together:
 
-1. **MCP Server** (86 tools) — provides the OWASP WSTG methodology, engagement management, findings database, phase gates, WAF identification/evasion, and reporting as callable tools
+1. **MCP Server** (89 tools) — provides the OWASP WSTG methodology, engagement management, findings database, phase gates, WAF identification/evasion, and reporting as callable tools
 2. **OpenCode Agents** (87 agents) — provides per-class bug hunting tradecraft, enterprise platform attack chains, and engagement lifecycle management via `@agent-name`
 
 Together they turn an LLM into a methodical bug hunter: the agents tell it *what to look for and how*, the MCP server gives it the *structured methodology and tracking*, and Burp Suite provides *HTTP request execution*.
@@ -19,7 +19,7 @@ graph TB
     Matcher["`**OpenCode Agent Matcher**
     scans agent descriptions
     loads matching agents`"]
-    MCP["`**MCP Server - 86 tools**
+    MCP["`**MCP Server - 89 tools**
     • register scope / log finding
     • track coverage / identify WAF
     • get bypass payloads
@@ -52,13 +52,13 @@ The loop: **describe → agent loads → MCP tracks → references guide → Bur
 All agents are invoked via `@agent-name`. 12 pipeline agents: `@autopilot` → `@consult` → `@scope` → `@pintel` → `@recon` → `@surface` → `@hunt` → `@deepthink` → `@exploit` → `@search` → `@capture` → `@validate` → `@report`. 54 specialized `@hunt-*` agents + 21 non-hunt specialty agents (87 total).
 
 **Two modes:**
-- **`@autopilot`** — runs fully autonomous, dispatches phases 2-7 via `task()` to sub-agents, ends with report
+- **`@autopilot`** — runs fully autonomous, dispatches phases 2-12 via `task()` to sub-agents, ends with report
 - **`@consult`** — same pipeline, interactive at every phase transition with suggestions
 - **Manual** — `@scope` → `@recon` → ... step-by-step
 
 ---
 
-## The Pipeline (7 Phases + conditional sub-phases)
+## The Pipeline (12 Phases + conditional sub-phases)
 
 ```
 Phase 1:   SCOPE       → register domains, load config, create task tree
@@ -153,8 +153,6 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 **Output:** `auth_analysis` deliverable with tokens, WAF vendor info.
 
 ---
-
-#---
 
 ### Phase 3: Intel (passive)
 
@@ -300,8 +298,6 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 | 5 | If blocked — apply WAF bypasses | `get_waf_bypass()` |
 | 6 | Run chaining analysis across findings | `find_chains()`, `findings_add_chain()` |
 | 7 | **Exhaustive exploitation gate:** Every finding must have either a validated PoC or documented bypass exhaustion — no skipped findings | `validate_poc()` |
-| 8 | Gate check | `phase_gate_check(phase_completed=4)` |
-
 **Output:** Findings with PoC evidence attached or bypass exhaustion documented.
 
 ---
@@ -324,8 +320,6 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 | 4 | **WAF evidence:** Capture blocked vs. bypassed request pairs, note evasion technique used | — |
 | 5 | Apply redaction (cookies, PII, tokens) | — |
 | 6 | Save sanitized evidence | `scripts/recon/<domain>/evidence/<finding-id>/` |
-| 7 | Gate check | `phase_gate_check(phase_completed=4)` |
-
 **Browser rules:** Use Playwright for screenshots. Call `playwright_browser_close()` after every operation. Never call `browser.newContext()` — default context already routes through Burp via `--proxy-server`.
 
 **Output:** Sanitized evidence pack for each finding.
@@ -375,7 +369,7 @@ Q7: Is this NOT on the never-submit list?
 |------|--------|-----------|
 | 1 | Check WSTG coverage | `get_coverage()` |
 | 2 | Check tool coverage | `get_tool_coverage()` |
-| 3 | Final gate check | `phase_gate_check(phase_completed=6)` |
+| 3 | Final gate check | `phase_gate_check(phase_completed=5)` |
 | 4 | Generate full report | `generate_report()` |
 | 5 | Present report summary | — |
 | 6 | Ask which platform (H1/Bugcrowd/Client) | — |

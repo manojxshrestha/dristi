@@ -11,7 +11,7 @@
 #   ./tools/takeover_scanner.sh --recon <recon-dir>     # uses <recon-dir>/subdomains/all.txt
 # =============================================================================
 
-set -uo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 . "$SCRIPT_DIR/external_arsenal.sh"
@@ -24,7 +24,7 @@ hit()  { echo -e "${MAG}[TAKEOVER]${NC} $1"; }
 err()  { echo -e "${RED}[-]${NC} $1" >&2; }
 
 INPUT=""; DOMAIN=""
-BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+BASE_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --recon) shift; INPUT="${1:-}/subdomains/all.txt"; DOMAIN="${1:-}" ;;

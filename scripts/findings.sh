@@ -11,7 +11,7 @@
 #   add cred <engagement> <username> <secret> [--type password]
 #   add chain <engagement> <name> [--score 0] [--mitre X]
 #   log <engagement> <agent> <action> <summary>
-#   list hosts|vulns|services|creds|chains|log [engagement]
+#   list engagements|hosts|vulns|services|creds|chains|log [engagement]
 #   stats <engagement>
 #   export <engagement>
 #   handoff <engagement>
@@ -22,6 +22,11 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVER_DIR="$(cd "$SCRIPT_DIR/../server" && pwd)"
 DB_PATH="${DST_FINDINGS_DB:-$SERVER_DIR/data/findings.db}"
+PYTHON="${DRISTI_PYTHON:-}"
+if [ -z "$PYTHON" ]; then
+  PYTHON="$SERVER_DIR/venv/bin/python3"
+  [ ! -f "$PYTHON" ] && PYTHON="python3"
+fi
 
 usage() {
     sed -n 's/^# \?/  /p' "$0" | sed -n '3,/^$/p'
@@ -29,35 +34,40 @@ usage() {
 }
 
 # ── Helper: parse key=value args into JSON ──────────────────────────────────
+_py_set_json() {
+  local key="$1" val="$2"
+  echo "$json" | "$PYTHON" -c "import sys,json; d=json.load(sys.stdin); d[sys.argv[1]]=sys.argv[2]; print(json.dumps(d))" "$key" "$val"
+}
+
 parse_flags() {
     local json="{}"
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --client)    json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['client']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --type)      json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['etype']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --scope)     json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['scope']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --hostname)  json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['hostname']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --os)        json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['os']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --role)      json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['role']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --protocol)  json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['protocol']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --service)   json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['service']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --version)   json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['version']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --severity)  json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['severity']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --secret-type) json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['secret_type']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --access-level) json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['access_level']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --cvss)      json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['cvss']=$2; print(json.dumps(d))") ; shift 2 ;;
-            --url)       json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['affected_url']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --param)     json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['affected_parameter']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --test)      json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['test_id']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --tool)      json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['tool_used']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --cve)       json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['cve']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --mitre)     json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['mitre_ids']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --discovered) json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['discovered_by']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --domain)    json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['domain']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --score)     json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['score']=$2; print(json.dumps(d))") ; shift 2 ;;
-            --source)    json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['source']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            --notes)     json=$(echo "$json" | python3 -c "import sys,json; d=json.load(sys.stdin); d['notes']='$2'; print(json.dumps(d))") ; shift 2 ;;
-            *)           shift ;;
+            --client)       json=$(_py_set_json "client" "$2") ; shift 2 ;;
+            --type)         json=$(_py_set_json "etype" "$2") ; shift 2 ;;
+            --scope)        json=$(_py_set_json "scope" "$2") ; shift 2 ;;
+            --hostname)     json=$(_py_set_json "hostname" "$2") ; shift 2 ;;
+            --os)           json=$(_py_set_json "os" "$2") ; shift 2 ;;
+            --role)         json=$(_py_set_json "role" "$2") ; shift 2 ;;
+            --protocol)     json=$(_py_set_json "protocol" "$2") ; shift 2 ;;
+            --service)      json=$(_py_set_json "service" "$2") ; shift 2 ;;
+            --version)      json=$(_py_set_json "version" "$2") ; shift 2 ;;
+            --severity)     json=$(_py_set_json "severity" "$2") ; shift 2 ;;
+            --secret-type)  json=$(_py_set_json "secret_type" "$2") ; shift 2 ;;
+            --access-level) json=$(_py_set_json "access_level" "$2") ; shift 2 ;;
+            --cvss)         json=$(_py_set_json "cvss" "$2") ; shift 2 ;;
+            --url)          json=$(_py_set_json "affected_url" "$2") ; shift 2 ;;
+            --param)        json=$(_py_set_json "affected_parameter" "$2") ; shift 2 ;;
+            --test)         json=$(_py_set_json "test_id" "$2") ; shift 2 ;;
+            --tool)         json=$(_py_set_json "tool_used" "$2") ; shift 2 ;;
+            --cve)          json=$(_py_set_json "cve" "$2") ; shift 2 ;;
+            --mitre)        json=$(_py_set_json "mitre_ids" "$2") ; shift 2 ;;
+            --discovered)   json=$(_py_set_json "discovered_by" "$2") ; shift 2 ;;
+            --domain)       json=$(_py_set_json "domain" "$2") ; shift 2 ;;
+            --score)        json=$(_py_set_json "score" "$2") ; shift 2 ;;
+            --source)       json=$(_py_set_json "source" "$2") ; shift 2 ;;
+            --notes)        json=$(_py_set_json "notes" "$2") ; shift 2 ;;
+            *)              shift ;;
         esac
     done
     echo "$json"
@@ -67,7 +77,7 @@ cmd_init() {
     local id="$1"; shift
     local flags
     flags=$(parse_flags "$@")
-    python3 -c "
+    "$PYTHON" -c "
 import sys, json
 sys.path.insert(0, '$SERVER_DIR')
 from findings_db import get_db
@@ -84,7 +94,7 @@ cmd_add_host() {
     local ip="$1"; shift
     local flags
     flags=$(parse_flags "$@")
-    python3 -c "
+    "$PYTHON" -c "
 import sys, json
 sys.path.insert(0, '$SERVER_DIR')
 from findings_db import get_db
@@ -102,7 +112,7 @@ cmd_add_service() {
     local port="$1"; shift
     local flags
     flags=$(parse_flags "$@")
-    python3 -c "
+    "$PYTHON" -c "
 import sys, json
 sys.path.insert(0, '$SERVER_DIR')
 from findings_db import get_db
@@ -127,7 +137,7 @@ cmd_add_vuln() {
     local title="$1"; shift
     local flags
     flags=$(parse_flags "$@")
-    python3 -c "
+    "$PYTHON" -c "
 import sys, json
 sys.path.insert(0, '$SERVER_DIR')
 from findings_db import get_db
@@ -145,7 +155,7 @@ cmd_add_cred() {
     local secret="$1"; shift
     local flags
     flags=$(parse_flags "$@")
-    python3 -c "
+    "$PYTHON" -c "
 import sys, json
 sys.path.insert(0, '$SERVER_DIR')
 from findings_db import get_db
@@ -162,7 +172,7 @@ cmd_add_chain() {
     local name="$1"; shift
     local flags
     flags=$(parse_flags "$@")
-    python3 -c "
+    "$PYTHON" -c "
 import sys, json
 sys.path.insert(0, '$SERVER_DIR')
 from findings_db import get_db
@@ -180,7 +190,7 @@ cmd_log() {
     local summary="${1:-}"; shift || true
     local flags
     flags=$(parse_flags "$@")
-    python3 -c "
+    "$PYTHON" -c "
 import sys, json
 sys.path.insert(0, '$SERVER_DIR')
 from findings_db import get_db
@@ -194,12 +204,14 @@ print(json.dumps(e, indent=2, default=str))
 cmd_list() {
     local what="$1"
     local eid="${2:-}"
-    python3 -c "
+    "$PYTHON" -c "
 import sys, json
 sys.path.insert(0, '$SERVER_DIR')
 from findings_db import get_db
 db = get_db('$DB_PATH')
-if '$what' == 'hosts':
+if '$what' == 'engagements':
+    data = db.list_engagements()
+elif '$what' == 'hosts':
     data = db.list_hosts('$eid')
 elif '$what' == 'vulns':
     data = db.list_vulns(engagement_id='$eid')
@@ -223,7 +235,7 @@ print(json.dumps(data, indent=2, default=str))
 
 cmd_stats() {
     local eid="$1"
-    python3 -c "
+    "$PYTHON" -c "
 import sys, json
 sys.path.insert(0, '$SERVER_DIR')
 from findings_db import get_db
@@ -238,7 +250,7 @@ print(json.dumps(s, indent=2, default=str))
 
 cmd_export() {
     local eid="$1"
-    python3 -c "
+    "$PYTHON" -c "
 import sys, json
 sys.path.insert(0, '$SERVER_DIR')
 from findings_db import get_db
@@ -249,7 +261,7 @@ print(db.export_json('$eid'))
 
 cmd_handoff() {
     local eid="$1"
-    python3 -c "
+    "$PYTHON" -c "
 import sys
 sys.path.insert(0, '$SERVER_DIR')
 from findings_db import get_db

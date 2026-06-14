@@ -10,7 +10,7 @@
 #   ./tools/bypass_403.sh -l <urls-file>     # one URL per line, parallelised
 # =============================================================================
 
-set -uo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 . "$SCRIPT_DIR/external_arsenal.sh"
@@ -38,7 +38,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 # Resolve domain → list mode: auto-discover live URLs
-BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 if [ -n "$DOMAIN" ]; then
   RECON_DIR="$BASE_DIR/recon/$DOMAIN"
   LIVE_FILE="$RECON_DIR/subdomains/https-subs.txt"

@@ -5,7 +5,7 @@
 # Usage: ./recon_engine.sh <target-domain> [--quick]
 # =============================================================================
 
-set -uo pipefail
+set -euo pipefail
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -22,7 +22,7 @@ log_done()  { echo -e "    ${GREEN}[✓]${NC} $1"; }
 
 TARGET="${1:?Usage: $0 <target> [--quick]  (target = FQDN, IP, CIDR, or path to a file of domains/hosts)}"
 QUICK_MODE="${2:-}"
-BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+BASE_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 
 # Auth-aware hunting: load BBHUNT_AUTH_HEADERS / BBHUNT_SESSION_ID into
 # BB_AUTH_ARGS=(-H 'Name: val' ...). Empty session = no-op.

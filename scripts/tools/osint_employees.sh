@@ -72,7 +72,7 @@ if [ "$WITH_SOCIAL" = true ]; then
 fi
 if [ ${#MISSING[@]} -gt 0 ]; then
     log_err "Missing tools: ${MISSING[*]}"
-    log_err "Install: ./install_tools.sh --with-credential-attack"
+    log_err "Install: bash scripts/install.sh --with-credential-attack"
     exit 1
 fi
 

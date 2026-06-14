@@ -48,16 +48,21 @@ without losing findings.
 
 ## What This Does
 
-Runs the full hunt cycle without stopping for approval at each step:
+Runs the full 12-phase autonomous pipeline without stopping for approval at each step:
 
 ```
-1. SCOPE     Load and confirm program scope
-2. RECON     Run recon (or use cached if < 7 days old)
-3. RANK      Prioritize attack surface (recon-ranker agent)
-4. HUNT      Test P1 endpoints systematically
-5. VALIDATE  7-Question Gate on findings
-6. REPORT    Draft reports for validated findings
-7. CHECKPOINT  Present to human for review
+Phase 1:  SCOPE      → Register domains, load config, create task tree
+Phase 2:  AUTH       → Test credentials, detect WAF, save auth deliverable
+Phase 3:  INTEL      → Passive OSINT: WHOIS, M365, cloud, spoof check
+Phase 4:  RECON      → Subdomain enum, crawl, cariddi, nuclei, 403 bypass, vhost, zone transfer, cloud recon, CVE scan, secrets
+Phase 5:  SURFACE    → Load recon, classify tiers + functional groups, prioritize endpoints
+Phase 6:  HUNT       → Test all bug classes via 54 hunt-* sub-agents (group-based + Ralph Wiggum loop + parallel credential-attack)
+Phase 7:  DEEPTHINK  → (conditional) Gap analysis when HUNT yields zero
+Phase 8:  EXPLOIT    → Deepen findings, multi-auth-context probing, exhaustive exploitation gate
+Phase 9:  SEARCH     → (conditional) 13-resource retrieval when EXPLOIT stalls
+Phase 10: CAPTURE    → Evidence collection, screenshots, redaction
+Phase 11: VALIDATE   → Re-validate PoCs, 7-Question Gate
+Phase 12: REPORT     → Coverage check, generate final report
 ```
 
 ## Safety Guarantees

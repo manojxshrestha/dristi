@@ -15,10 +15,10 @@
 #   - waymore (passive, Wayback Machine) produces the bulk of URLs
 # =============================================================================
 
-set -uo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 GREEN='\033[0;32m'; RED='\033[0;31m'; YELLOW='\033[1;33m'; CYAN='\033[0;36m'; NC='\033[0m'
 log_ok()   { echo -e "${GREEN}[+]${NC} $1"; }
@@ -109,7 +109,7 @@ else
   log_info "Installing waymore in virtual environment ..."
   mkdir -p "$WAYMORE_DIR"
   python3 -m venv "$WAYMORE_DIR/venv"
-  "$WAYMORE_DIR/venv/bin/pip" install waymore -q 2>/dev/null
+  uv pip install --python "$WAYMORE_DIR/venv/bin/python" waymore -q 2>/dev/null
   WAYMORE_BIN="$WAYMORE_DIR/venv/bin/waymore"
   log_ok "waymore installed"
 fi

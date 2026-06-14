@@ -79,45 +79,67 @@ Proceed to Phase 3.
 
 ## Phase 3: Intel (passive)
 
-1. Run passive intel for each target domain:
-   ```bash
-   bash scripts/tools/phase-intel.sh <domain>
-   ```
-2. Output lands in `runtime/engagements/<eid>/recon/<domain>/intel/`:
-   - `domain_info_general.txt` — WHOIS data
-   - `azure_tenant_domains.txt` — M365/Azure tenant info
-   - `scopify.txt` — Scope analysis
-   - `3rdparts_misconfigurations.txt` — Exposed SaaS (Slack, Jira, GitHub, etc.)
-   - `spoof.txt` — SPF/DMARC spoofability
-   - `cloud_enum.txt` — Cloud storage buckets (AWS S3, Azure Blob, GCP)
-3. Save Intel deliverable:
-   ```
-   wstg_save_deliverable(
-     deliverable_type='intel_analysis',
-     content=<summary of findings>,
-     producer_agent='pintel'
-   )
-   ```
-4. Track tool: `wstg_track_tool(tool_name='pintel', status='run', notes='WHOIS + misconfig-mapper + Spoofy + cloud_enum')`
-5. If no intel tools are installed, log a warning `[MISSING TOOLS]` and proceed — Intel is informative, not blocking.
+Run passive intel for each target domain:
+
+```bash
+bash scripts/tools/phase-intel.sh <domain>
+```
+
+The script runs 4 modules. Track each individually:
+
+1. **domain_info** — WHOIS lookup, M365/Azure tenant discovery, Scopify scope analysis
+   - `wstg_track_tool(tool_name='whois', status='run', target='<domain>', notes='WHOIS + M365/Azure + Scopify')`
+
+2. **third_party_misconfigs** — misconfig-mapper scans for exposed SaaS (Slack, Jira, GitHub, etc.)
+   - `wstg_track_tool(tool_name='misconfig-mapper', status='run', target='<domain>', notes='Third-party SaaS misconfiguration scan')`
+
+3. **spoof** — SPF/DMARC spoofability analysis via Spoofy
+   - `wstg_track_tool(tool_name='spoofy', status='run', target='<domain>', notes='SPF/DMARC spoofability check')`
+
+4. **cloud_enum_scan** — Cloud storage bucket enumeration (AWS S3, Azure Blob, GCP, DO Spaces)
+   - `wstg_track_tool(tool_name='cloud_enum', status='run', target='<domain>', notes='Cloud storage bucket enumeration')`
+
+Output lands in `runtime/engagements/<eid>/recon/<domain>/intel/`:
+- `domain_info_general.txt` — WHOIS data
+- `azure_tenant_domains.txt` — M365/Azure tenant info
+- `scopify.txt` — Scope analysis
+- `3rdparts_misconfigurations.txt` — Exposed SaaS (Slack, Jira, GitHub, etc.)
+- `spoof.txt` — SPF/DMARC spoofability
+- `cloud_enum.txt` — Cloud storage buckets (AWS S3, Azure Blob, GCP)
+
+Save Intel deliverable:
+```
+wstg_save_deliverable(
+  deliverable_type='intel_analysis',
+  content=<summary of findings>,
+  producer_agent='pintel'
+)
+```
+
+If tools are not installed: `bash scripts/tools/phase-intel.sh --install`
+
+If tools still missing after install attempt, log `[MISSING TOOLS]` and proceed — Intel is informative, not blocking.
 
 Proceed to Phase 4.
 
 ## Phase 4: RECON (dispatch)
 
-Call `task()` to launch the recon sub-agent:
+Call `task()` to launch the recon sub-agent following its full 9-step workflow:
 
 ```
 task(
   description="Phase 4 Recon for <domain>",
-  prompt="Target: <domain>. Run the complete Phase 4 recon workflow:
-1. batch_subdomain_enum + dns_bruteforce + web_crawl + param_extract
-2. cariddi + nuclei + dir_bruteforce + bypass_403 + vhost_fuzz
-3. zone_transfer + takeover_scanner + cloud_recon + s3_buckets + cve_scan + auto_secrets
-4. Answer the 3 triage questions for every discovered endpoint
-5. Save endpoint_map_raw deliverable via wstg_save_deliverable()
-6. Call wstg_phase_gate_check(phase_completed=1)
-7. Call wstg_save_checkpoint()
+  prompt="Target: <domain>. Run the complete Phase 4 recon workflow following the RECON agent's 9-step pipeline:
+1. Subdomain enumeration + DNS bruteforce — wstg_track_tool()
+2. Web crawling + parameter extraction — wstg_track_tool()
+3. Cariddi + nuclei + directory bruteforce — wstg_track_tool()
+4. 403 bypass + vhost fuzzing — wstg_track_tool()
+5. Zone transfer + takeover scanner — wstg_track_tool()
+6. Cloud recon + CVE scan + secrets discovery — wstg_track_tool()
+7. Answer the 3 triage questions per endpoint
+8. Save endpoint_map_raw deliverable via wstg_save_deliverable()
+9. Gate check via wstg_phase_gate_check(phase_completed=1)
+10. wstg_save_checkpoint()
 
 Return: summary of findings, gate result (PASS/FAIL), number of endpoints discovered, any failures.",
   subagent_type="recon"
@@ -325,7 +347,7 @@ task(
   prompt="Target: <domain>. Run Phase 12 report generation:
 1. wstg_get_coverage() to verify WSTG coverage
 2. wstg_get_tool_coverage() to verify tool coverage
-3. wstg_phase_gate_check(phase_completed=6) as final gate
+    3. wstg_phase_gate_check(phase_completed=5) as final gate
 4. wstg_generate_report() to produce report
 5. Present report summary to user
 6. Ask which platform: HackerOne/Bugcrowd/Client
@@ -336,7 +358,7 @@ Return: report path, finding summary, coverage percentages.",
 ```
 
 **After dispatch returns:**
-- `wstg_phase_gate_check(phase_completed=6)` → PASS → checkpoint → done.
+- `wstg_phase_gate_check(phase_completed=5)` → PASS → checkpoint → done.
 
 ## RECOVERY: When Things Fail
 

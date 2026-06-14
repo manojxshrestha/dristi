@@ -1,9 +1,5 @@
 {
   "mcpServers": {
-    "wstg-pentest": {
-      "command": "uv",
-      "args": ["--directory", "./server", "run", "server.py"]
-    },
     "playwright": {
       "command": "bash",
       "args": ["./scripts/playwright-mcp.sh"]

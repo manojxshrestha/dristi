@@ -2,18 +2,18 @@
 
 ## Overview
 
-Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive security: bug hunting, external red-team engagements, and authorized penetration tests. It provides the complete OWASP Web Security Testing Guide methodology as an MCP server with 86 tools, paired with 87 autonomous agents covering vulnerability hunting, enterprise platform attacks, and full engagement lifecycle management.
+Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive security: bug hunting, external red-team engagements, and authorized penetration tests. It provides the complete OWASP Web Security Testing Guide methodology as an MCP server with 89 tools, paired with 87 autonomous agents covering vulnerability hunting, enterprise platform attacks, and full engagement lifecycle management.
 
 **Goal:** Turn an LLM into an autonomous, methodical, reference-informed bug hunter that can run a full penetration test from scope to report — discovering subdomains, crawling endpoints, fingerprinting WAFs, dispatching per-class exploit agents, validating PoCs, capturing redacted evidence, and generating a submission-ready report — without human intervention between phases. The pipeline is modeled on real bug bounty workflows: triage by attack surface, read disclosed reports for technique guidance, bypass WAFs before exploiting, and run every finding through a 7-Question Gate before drafting.
 
 **Two operational modes:**
-- **`@autopilot`** — fully autonomous: dispatches phases 2-7 via `task()` sub-agents, auto-checks phase gates, auto-checkpoints, ends with a full report. Best for unattended full engagements.
+- **`@autopilot`** — fully autonomous: dispatches phases 2-12 via `task()` sub-agents, auto-checks phase gates, auto-checkpoints, ends with a full report. Best for unattended full engagements.
 - **`@consult`** — interactive: same pipeline but pauses at every phase transition to present findings, suggest next steps, and ask for confirmation before proceeding. Best for learning or guided testing.
 
 **Stats:**
-- 86 MCP tools · 87 agents (54 hunt-* + 33 pipeline/specialty)
+- 89 MCP tools · 87 agents (54 hunt-* + 33 pipeline/specialty)
 - 13 WSTG categories · 96 test cases
-- 57 CLI tool wrapper scripts · 20 GF patterns for parameter discovery
+- 48 CLI tool wrapper scripts · 20 GF patterns for parameter discovery
 - 12-phase autonomous pipeline (autopilot)
 - Burp Suite MCP integration · Playwright browser automation
 
@@ -35,7 +35,7 @@ Layer 4: Validation + Reporting      — how to ship it (7-Question Gate, VRT, r
 ```
 ~/dristi/
 ├── server/                     MCP server (Python + FastMCP)
-│   ├── server.py               86 tool definitions (6147 lines)
+│   ├── server.py               89 tool definitions (6443 lines)
 │   ├── waf_evasion.py          WAF identification + bypass engine
 │   ├── waf_vendors.json        144 vendor fingerprints
 │   ├── waf_bypasses.json       20 vendor bypass payload files
@@ -69,7 +69,7 @@ Layer 4: Validation + Reporting      — how to ship it (7-Question Gate, VRT, r
 │   └── ...                     USAGE, ENGAGEMENTS, deep-testing, agent-reference
 ├── scripts/
 │   ├── payloads/               PAT test harnesses (deploy, lib, hunt, 12 test.sh)
-│   └── tools/                  57 CLI tool wrapper scripts
+│   └── tools/                  48 CLI tool wrapper scripts
 ├── prompts/                    13 per-category prompt templates
 ├── templates/                  Report templates, quality gates, guides
 ├── skills/                     70+ Dristi tradecraft skills
@@ -96,15 +96,15 @@ Layer 4: Validation + Reporting      — how to ship it (7-Question Gate, VRT, r
 | 7  DEEPTHINK | deepthink.md | (conditional) First-principles gap analysis when HUNT yields zero | — |
 | 8  EXPLOIT   | exploit.md    | Second-wave exploitation: PoC all findings, WAF bypass, chaining | — |
 | 9  SEARCH    | search.md     | (conditional) 13-resource retrieval when EXPLOIT stalls | — |
-| 10 CAPTURE   | capture.md    | Evidence collection, screenshots, redaction | phase_completed=4 |
+| 10 CAPTURE   | capture.md    | Evidence collection, screenshots, redaction | — |
 | 11 VALIDATE  | validate.md   | Re-validate PoCs, 7-Question Gate, severity | phase_completed=5 |
-| 12 REPORT    | report.md     | Coverage check, generate report | phase_completed=6 |
+| 12 REPORT    | report.md     | Coverage check, generate report | phase_completed=5 |
 
 Autopilot is a thin orchestrator (248 lines) — phases 4-12 are dispatched via `task()` to specialized sub-agents to avoid context exhaustion.
 
 ---
 
-## MCP Server (86 Tools)
+## MCP Server (89 Tools)
 
 ### WSTG Knowledge Base
 - `get_wstg_test(test_id)` — Full WSTG test case content
@@ -296,7 +296,7 @@ Constants: CATEGORIES (WSTG categories), TOOL_REGISTRY (CLI tool metadata), WITN
 
 ---
 
-## Scripts (57 CLI Tools)
+## Scripts (48 CLI Tools)
 
 Located in `scripts/tools/`: wrappers for subdomain enum, DNS bruteforce, web crawling, parameter extraction, directory bruteforce, vhost fuzzing, zone transfer, takeover scanning, cloud recon, CVE scanning, secret discovery, nuclei scanning, cariddi scanning, bypass 403, OSINT (whois, misconfig-mapper, Spoofy, cloud_enum), S3/cloud bucket scanning (cloud_enum + s3scanner + trufflehog), and more.
 
@@ -343,7 +343,7 @@ All domain-mode: accept domain as $1, auto-discover recon output, output to runt
 
 ## Key Design Decisions
 
-- **Autopilot as orchestrator, not monolith**: 248-line dispatcher; phases 2-7 via task()
+- **Autopilot as orchestrator, not monolith**: 248-line dispatcher; phases 2-12 via task()
 - **Nuclei as optional tier-2**: PAT curl test.sh is tier-1 (fast)
 - **Output to runtime/engagements/<id>/**: Consistent directory structure
 - **WAF as JSON at runtime**: 144 vendors loaded from JSON, avoids Python syntax issues

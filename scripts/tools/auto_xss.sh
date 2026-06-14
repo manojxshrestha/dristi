@@ -7,10 +7,10 @@
 #   ./tools/auto_xss.sh <domain> --gf-xss <gf_xss.txt>
 # =============================================================================
 
-set -uo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 GREEN='\033[0;32m'; RED='\033[0;31m'; YELLOW='\033[1;33m'; CYAN='\033[0;36m'; NC='\033[0m'
 log_ok()   { echo -e "${GREEN}[+]${NC} $1"; }
@@ -85,7 +85,7 @@ while IFS= read -r url; do
 
   while IFS= read -r payload; do
     [ -z "$payload" ] && continue
-    encoded=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$payload'))" 2>/dev/null || echo "$payload")
+    encoded=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$payload" 2>/dev/null || echo "$payload")
     test_url=$(echo "$url" | sed "s|$param=[^&]*|$param=$encoded|" 2>/dev/null || echo "$url?$param=$encoded")
 
     response=$(curl -s -L -m 5 "$test_url" 2>/dev/null)

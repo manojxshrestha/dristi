@@ -15,7 +15,7 @@
 #   ./tools/secrets_hunter.sh --github-org <org>          # needs trufflehog+token
 # =============================================================================
 
-set -uo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 . "$SCRIPT_DIR/external_arsenal.sh"

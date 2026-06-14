@@ -731,6 +731,10 @@ class FindingsDB:
 # ── Shorthand ─────────────────────────────────────────────────────────────────
 
 
+def get_db(db_path: str | Path | None = None) -> FindingsDB:
+    return FindingsDB(str(db_path or get_default_db_path()))
+
+
 def get_default_db_path() -> Path:
     return Path(
         os.environ.get(

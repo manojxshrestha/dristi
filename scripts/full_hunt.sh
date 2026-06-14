@@ -24,7 +24,7 @@ TARGET="${1}"
 TARGETURL="https://${TARGET}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 OUT="recon/${TARGET}_${TIMESTAMP}"
-TOOLS_DIR="$(dirname $0)/.."
+TOOLS_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Auth (optional)
 TOKEN=""
@@ -328,9 +328,9 @@ if [ "$(check_tool subzy)" = true ] && [ -s "$OUT/subdomains/all_subs.txt" ]; th
 fi
 
 # ── Generate dork URLs ────────────────────────────────────────────────────────
-if [ -f "$(dirname $0)/dork_runner.py" ]; then
+if [ -f "$TOOLS_DIR/dork_runner.py" ]; then
     log "Generating Google dorks..."
-    python3 "$(dirname $0)/dork_runner.py" -d "$TARGET" -c all \
+    python3 "$TOOLS_DIR/dork_runner.py" -d "$TARGET" -c all \
         -o "$OUT/reports/dorks.txt" \
         --html "$OUT/reports/dork_report.html" 2>/dev/null
     ok "Dork report → $OUT/reports/dork_report.html"

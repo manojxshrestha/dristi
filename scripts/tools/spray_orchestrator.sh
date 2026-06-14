@@ -209,7 +209,7 @@ case "$MODE" in
         ;;
     o365|okta)
         if ! command -v trevorspray &>/dev/null; then
-            log_err "trevorspray not installed. Run: ./install_tools.sh --with-credential-attack"
+            log_err "trevorspray not installed. Run: bash scripts/install.sh --with-credential-attack"
             exit 1
         fi
         log_warn "Dispatching to TREVORspray (its own rate-limit/SSH-proxy machinery)"

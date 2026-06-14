@@ -14,6 +14,11 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVER_DIR="$(cd "$SCRIPT_DIR/../server" && pwd)"
 DB_PATH="${DST_FINDINGS_DB:-$SERVER_DIR/data/findings.db}"
+PYTHON="${DRISTI_PYTHON:-}"
+if [ -z "$PYTHON" ]; then
+  PYTHON="$SERVER_DIR/venv/bin/python3"
+  [ ! -f "$PYTHON" ] && PYTHON="python3"
+fi
 
 if [[ $# -lt 1 ]]; then
     echo "Usage: $0 <engagement_id> [output.md]"
@@ -27,7 +32,7 @@ ENGAGEMENT_ID="$1"
 OUTPUT="${2:-}"
 
 # Generate the handoff report
-REPORT=$(python3 -c "
+REPORT=$("$PYTHON" -c "
 import sys
 sys.path.insert(0, '$SERVER_DIR')
 from findings_db import get_db

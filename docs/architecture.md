@@ -1,6 +1,6 @@
 # Architecture
 
-Dristi is a dual-interface security testing platform: an **MCP server** (86 tools for methodology, tracking, findings management) and an **OpenCode agent bundle** (85 auto-loading agents for bug hunting tradecraft).
+Dristi is a dual-interface security testing platform: an **MCP server** (89 tools for methodology, tracking, findings management) and an **OpenCode agent bundle** (87 auto-loading agents for bug hunting tradecraft).
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -10,8 +10,8 @@ Dristi is a dual-interface security testing platform: an **MCP server** (86 tool
           ┌────────────┴────────────┐
           ▼                         ▼
 ┌──────────────────┐    ┌──────────────────────────┐
-│  Dristi MCP      │    │  OpenCode Agents (85)    │
-│  Server (86 tools)│    │                         │
+│  Dristi MCP      │    │  OpenCode Agents (87)    │
+│  Server (89 tools)│    │                         │
 │  ──────────────── │    │  ──────────────────────  │
 │  • WSTG v4.2     │    │  • hunt-xss, hunt-sqli   │
  │  • WSTG v4.2     │    │  • bb-methodology        │
@@ -43,7 +43,7 @@ Dristi is a dual-interface security testing platform: an **MCP server** (86 tool
 
 ### 1. MCP Server (`server/server.py`)
 
-The core methodology engine. 86 tools organized into:
+The core methodology engine. 89 tools organized into:
 
 | Category | Tools | Purpose |
 |----------|-------|---------|
@@ -65,7 +65,7 @@ The core methodology engine. 86 tools organized into:
 | Findings Database | 13 | SQLite-backed CRUD + graph |
 | Utility | 9 | Status, audit, prioritize, verify |
 
-### 2. OpenCode Agents (85)
+### 2. OpenCode Agents (87)
 
 Agents auto-load when you describe what you're testing. Each is a `SKILL.md` file in `.opencode/agents/<name>/` with YAML frontmatter and markdown body.
 
@@ -113,7 +113,7 @@ Slash commands in `.opencode/commands/` that route to specific agents:
 | `scripts/connect-burp.sh` | Burp MCP connection |
 | `scripts/dork_runner.py` | Google dork automation |
 | `scripts/full_hunt.sh` | Full hunt pipeline |
-| `scripts/tools/` (37 files) | Scanners, testers, helpers |
+| `scripts/tools/` (48 files) | Scanners, testers, helpers |
 
 ### 5. Wordlists (`knowledge/wordlists/`)
 

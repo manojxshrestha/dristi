@@ -12,7 +12,7 @@ This section is for people who have **never used the bundle before, never used O
 
 ### What is this bundle, in plain English?
 
-It's a collection of 87 OpenCode agents + 86 MCP tools that turn OpenCode into a methodical bug-hunting assistant.
+It's a collection of 87 OpenCode agents + 89 MCP tools that turn OpenCode into a methodical bug-hunting assistant.
 
 Without the bundle, asking the LLM *"is this XSS?"* gets you a generic answer. With the bundle installed, the same question loads the `hunt-xss` agent — which contains specific detection patterns from disclosed reports, the exact payloads that have worked, and a validation gate that prevents you from filing a false-positive bug report.
 
@@ -203,7 +203,7 @@ Once submitted, use the MCP server to log the finding via `log_finding()` and ap
 
 ## 4. MCP Server Integration
 
-Dristi's WSTG MCP server provides 86 tools for methodology, tracking, and engagement management alongside the OpenCode agents.
+Dristi's WSTG MCP server provides 89 tools for methodology, tracking, and engagement management alongside the OpenCode agents.
 
 ### Typical workflow with MCP + agents
 
