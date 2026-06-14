@@ -1,17 +1,17 @@
 ---
 name: bb-methodology
-description: Use at the START of any bug bounty hunting session, when switching targets, or when feeling lost about what to do next. Master orchestrator that combines the 5-phase non-linear hunting workflow with the critical thinking framework (developer psychology, anomaly detection, What-If experiments). Routes to all other skills based on current hunting phase. Also use when asking "what should I do next" or "where am I in the process."
+description: Use at the START of any bug bounty hunting session, when switching targets, or when feeling lost about what to do next. Master orchestrator that combines the 12-phase pipeline (scope→auth→intel→recon→surface→hunt→deepthink→exploit→search→capture→validate→report) with the critical thinking framework (developer psychology, anomaly detection, What-If experiments). Routes to all other skills based on current hunting phase. Also use when asking "what should I do next" or "where am I in the process."
 ---
 
-# Bug Bounty Methodology: Workflow + Mindset
+# Bug Bounty Methodology: 12-Phase Pipeline + Mindset
 
-Master orchestrator for hunting sessions. Combines the 5-phase non-linear workflow with the critical thinking framework that separates top 1% hunters from the rest.
+Master orchestrator for hunting sessions. Combines the 12-phase pipeline with the critical thinking framework that separates top 1% hunters from the rest.
 
 ---
 
 ## PART 0: MODE CONFIRMATION (Before Anything Else)
 
-**Confirm the engagement type before deciding what counts as a finding.** The same target produces a different report shape depending on which mode applies. Getting this wrong is the single biggest waste of time in this workflow — answer it explicitly before Phase 0.
+**Confirm the engagement type before deciding what counts as a finding.** The same target produces a different report shape depending on which mode applies. Getting this wrong is the single biggest waste of time in this workflow — answer it explicitly before Phase 1.
 
 | Engagement type | What counts as a finding | What gets rejected |
 |---|---|---|
@@ -20,7 +20,7 @@ Master orchestrator for hunting sessions. Combines the 5-phase non-linear workfl
 | **Pentest** (signed SoW / WAPT) | Depends on SoW. Read scope explicitly. Usually accepts hygiene + impact + recon | Out-of-scope assets, unsigned testing |
 | **Internal audit** | Compliance-mapped findings (PCI / ISO / NIST / DPDPA / GDPR) | Findings without a control-mapping |
 
-**Hard rule:** Before Phase 0 runs, write the engagement type as the first line in your hunt notes. If you can't answer it from the user's instruction, ASK once. Don't assume — the mistake costs both you and the triager.
+**Hard rule:** Before Phase 1 runs, write the engagement type as the first line in your hunt notes. If you can't answer it from the user's instruction, ASK once. Don't assume — the mistake costs both you and the triager.
 
 **Lesson from an authorized engagement:** First-pass on this target produced 5 hygiene findings (SP2013 EoL, permissive CSP, stack traces) shipped in red-team format. The engagement was bug-bounty. Findings would have been N/A'd as "informational, no impact demonstrated." After the corrected pass with hygiene-as-context-not-finding, the same target yielded 11 impact-demonstrated bugs including 3 Critical.
 
@@ -123,40 +123,81 @@ Before touching any tool:
 
 ## PART 2: WORKFLOW (What to Do)
 
-### The 5-Phase Non-Linear Flow
+### The 12-Phase Pipeline (aligned with Dristi workflow.md)
 
 ```
-+-------------------------------------------------+
-|                                                 |
-|  +----------+    +----------+    +----------+   |
-|  | 1. RECON |---+| 2. MAP   |---+| 3. FIND  |  |
-|  +----------+    +-----+----+    +-----+-----+  |
-|       ^                |               |         |
-|       |                v               v         |
-|       |          +----------+    +----------+    |
-|       +----------| 4. PROVE |---+| 5. REPORT|   |
-|                  +----------+    +----------+    |
-|                                                  |
-|  Non-linear: stuck at any phase -> go back       |
-|  New API found at phase 3 -> return to phase 2   |
-|  WAF blocks at phase 4 -> origin IP from phase 1 |
-+-------------------------------------------------+
+Phase 1:   SCOPE       → register domains, load config, create task tree
+Phase 2:   AUTH        → test credentials, detect WAF, save auth deliverable
+Phase 3:   INTEL       → passive OSINT: WHOIS, M365, cloud, spoof check
+Phase 4:   RECON       → subdomain enum, crawl, params, nuclei, secrets
+Phase 5:   SURFACE     → load recon, classify tiers + functional groups, prioritize endpoints
+Phase 6:   HUNT        → test all bug classes via 54 hunt-* sub-agents
+                        ├── group-based testing (1-2 reps per functional group)
+                        ├── Ralph Wiggum loop: every endpoint must be covered before gate
+                        └── (parallel) credential-attack → wordlist-gen → breach-check → osint-employees → spray
+Phase 7:   DEEPTHINK  → (conditional) first-principles gap analysis when HUNT yields zero
+Phase 8:   EXPLOIT     → deepen confirmed findings, escalate impact
+                        ├── multi-auth-context probing (replay every finding with all sessions)
+                        └── exhaustive exploitation gate (no finding skipped)
+Phase 9:   SEARCH      → (conditional) 13-resource retrieval when EXPLOIT stalls
+Phase 10:  CAPTURE     → evidence collection, screenshots, redaction
+Phase 11:  VALIDATE    → re-validate PoCs, 7-Question Gate
+Phase 12:  REPORT      → coverage check, generate final report
+```
+
+```mermaid
+flowchart LR
+    SCOPE --> AUTH --> INTEL --> RECON --> SURFACE --> HUNT --> DEEPTHINK --> EXPLOIT --> CAPTURE --> VALIDATE --> REPORT
+    HUNT -->|"Ralph Wiggum: untested endpoints?"| HUNT
+    EXPLOIT -->|"Exhaustive gate: un-exploited findings?"| EXPLOIT
+    HUNT -.->|"zero findings"| DEEPTHINK
+    EXPLOIT -.->|"WAF/CVE gaps"| SEARCH["SEARCH (research)"]
+    SEARCH -->|"payloads found"| EXPLOIT
+    VALIDATE -->|PASS| REPORT
+    VALIDATE -->|KILL| DISCARD["Discard"]
+    VALIDATE -->|DOWNGRADE| REPORT
+    VALIDATE -->|CHAIN| HUNT
 ```
 
 **THIS IS NOT LINEAR.** Move freely between phases. When stuck, return to a previous phase.
 
-### Phase 0: SESSION START (Every Time)
+### Phase 1: SCOPE
 
-**Before touching any tool, answer these:**
+**Goal:** Understand the target, define what's in/out, scaffold the engagement.
 
-1. **Define**: "Today I target [feature/domain] to achieve [C/I/A/ATO/RCE]"
-2. **Select**: Choose 1-2 vuln classes (IDOR, XSS, SSRF, etc.)
-3. **Identity**: Anonymous or authenticated? If the bugs you're hunting need a
-   session (IDOR, BOLA, privilege escalation, auth bypass, mass-assignment),
-   load auth **once** at session start. Then every downstream probe tool sends
-   those headers automatically and findings are stamped with a stable
-   `session_id` hash for cross-identity verification.
-4. **Execute**: Focus ONLY on selected techniques
+| Step | Action | MCP Tools |
+|------|--------|-----------|
+| 1 | Ask user for target domain(s) and credentials | — |
+| 2 | Parse scope table if provided | `parse_scope_table()` |
+| 3 | Load engagement config | `load_engagement_config()` |
+| 4 | Register all domains with types | `register_scope()` / `register_scope_batch()` |
+| 5 | Create engagement in database | `findings_init()` |
+| 6 | Create phase tracking tree | `create_task_tree()` |
+| 7 | Gate check | `phase_gate_check(phase_completed=0)` |
+
+**Output:** Registered engagement with scope boundaries, task tree created.
+
+---
+
+### Phase 2: AUTH
+
+**Goal:** Obtain authentication credentials and detect WAF before testing.
+
+| Step | Action | MCP Tools |
+|------|--------|-----------|
+| 1 | Check for existing credentials | `get_engagement_config()` |
+| 2 | Sign up or provide API key | — |
+| 3 | Test auth works | `curl -sv <target>/api/me` |
+| 4 | **WAF fingerprint check** | `identify_waf()` with response headers + body |
+| 5 | If Cloudflare detected | Redirect 80% effort to API subdomain; use Playwright stealth for CF pages |
+| 6 | Look up vendor fingerprints | `knowledge/waf/waf-knowledge-base/02-waf-fingerprints/<vendor>.md` |
+| 7 | Save auth context with real tokens | `save_deliverable('auth_analysis', ...)` |
+
+**WAF Detection:**
+```bash
+curl -sI https://<domain>/ 2>&1 | grep -i "server:\|cf-ray\|x-sucuri\|x-iinfo\|x-mod-security\|x-waf"
+```
+Pass headers + body through `identify_waf()` MCP tool. If identified, check vendor-specific fingerprints and known bypasses at `knowledge/waf/`.
 
 **Route selection -- Wide or Deep?**
 
@@ -168,13 +209,41 @@ Before touching any tool:
 | Scope update (new domain added) | X | |
 | Found interesting subdomain | | X |
 
-### Phase 1: RECON
+### Phase 3: INTEL (passive OSINT)
 
-**Goal**: Maximize attack surface. Find what others missed.
+**Goal**: Passive intelligence gathering — WHOIS, cloud footprint, third-party exposure, email spoofability.
+
+| Step | Action | Tool |
+|------|--------|------|
+| 1 | WHOIS lookup, M365/Azure tenant discovery | `whois`, `msftrecon` |
+| 2 | Scope analysis from registered domain | `Scopify` |
+| 3 | Third-party SaaS misconfiguration scan (Slack, Jira, GitHub, etc.) | `misconfig-mapper` |
+| 4 | SPF/DMARC spoofability check | `Spoofy` |
+| 5 | Cloud storage bucket enumeration (AWS S3, Azure Blob, GCP, DO Spaces) | `cloud_enum` |
+
+**Script:** `scripts/tools/phase-intel.sh`
+
+**Output:** Intel data to `runtime/engagements/<id>/recon/<domain>/intel/` — consumed by RECON for target context and by HUNT agents for WAF/cloud/third-party awareness.
+
+### Phase 4: RECON
+
+**Goal**: Discover attack surface — subdomains, endpoints, technologies, secrets.
+
+| Step | Action | MCP Tools |
+|------|--------|-----------|
+| 1 | Subdomain enumeration | `bash scripts/tools/subdomain_enum.sh <domain>` |
+| 2 | Web crawling, parameter extraction | `track_tool()` |
+| 3 | Cariddi, nuclei, directory bruteforce | `track_tool()` |
+| 4 | 403 bypass, vhost fuzzing | `track_tool()` |
+| 5 | Zone transfer, takeover scanner | `track_tool()` |
+| 6 | Cloud recon, CVE scan, secrets discovery | `track_tool()` |
+| 7 | Answer 3 triage questions per endpoint | — |
+| 8 | Save endpoint map deliverable | `save_deliverable('endpoint_map_raw', ...)` |
+| 9 | Gate check | `phase_gate_check(phase_completed=1)` |
 
 **Wide approach** (initial sweep):
 ```
-Subdomain enum -> DNS resolution -> HTTP probing -> Port scan -> Tech detect
+bash scripts/tools/subdomain_enum.sh <domain>
 ```
 
 **Deep approach** (targeted):
@@ -184,23 +253,31 @@ Google Dorks -> JS file download -> Hidden param discovery -> API mapping
 
 | What you find | Next action |
 |--------------|-------------|
-| Live subdomains with tech stack | Phase 2 (Mapping) |
+| Live subdomains with tech stack | Phase 5 (Surface) |
 | Known software (WordPress, Jira) | Check CVEs + defaults immediately |
 | Cloud resources (S3, Firebase) | Test permissions (read/write/list) |
 | Nothing after 5 min on a host | Skip, try next host (5-minute rule) |
 
-**Command**: `/recon target.com`
+**Note**: `subdomain_enum.sh` runs subfinder + assetfinder + findomain → dnsx → httpx, outputting to `runtime/engagements/<id>/recon/<domain>/subdomains/`.
 
-### Phase 2: MAPPING & ANALYSIS
+### Phase 5: SURFACE (Mapping & Analysis)
 
-**Goal**: Understand the app like its developer does.
+**Goal**: Convert raw recon output into a prioritized "test these first" list. Understand the app like its developer does.
+
+| Step | Action | MCP Tools |
+|------|--------|-----------|
+| 1 | Load endpoint_map_raw deliverable | `get_deliverable('endpoint_map_raw')` |
+| 2 | Map all endpoints (Burp/Caido sitemap + JS analysis) | — |
+| 3 | Identify auth model (cookie, JWT, OAuth, SAML?) | — |
+| 4 | Find business-critical flows (payment, registration, password reset, data export) | — |
+| 5 | Download and analyze JS files for hidden routes, secrets, logic | — |
+| 6 | **Classify endpoints into functional groups** (auth, profile, api, admin, search, file, payment, infra) by path prefix — endpoints in the same group should be tested as a unit | — |
+| 7 | Risk-score each endpoint | `prioritize_endpoints()` |
+| 8 | Save ranked deliverable | `save_deliverable('endpoint_map_ranked', ...)` |
+| 9 | Gate check | `phase_gate_check(phase_completed=2)` |
 
 **Checklist:**
 - [ ] Map all endpoints (Burp/Caido sitemap + JS analysis)
-- [ ] **Classify endpoints into functional groups** (auth, profile, api, admin, search, file, payment, infra) by path prefix — endpoints in the same group should be tested as a unit
-- [ ] Identify auth model (cookie, JWT, OAuth, SAML?)
-- [ ] Find business-critical flows (payment, registration, password reset, data export)
-- [ ] Download and analyze JS files for hidden routes, secrets, logic
 - [ ] Identify roles and permissions (user, admin, API keys)
 - [ ] Note "weird" behaviors (anomalies in naming, errors, timing)
 
@@ -208,11 +285,11 @@ Google Dorks -> JS file download -> Hidden param discovery -> API mapping
 |--------------|-------------|
 | JS files with interesting code | Taint analysis (Sink -> Source) |
 | OAuth/SAML authentication | OAuth/SAML checklist |
-| API with ID parameters | Phase 3, target IDOR |
-| Complex business logic (payment, coupon) | Phase 3, target BizLogic |
+| API with ID parameters | Phase 6 (Hunt), target IDOR |
+| Complex business logic (payment, coupon) | Phase 6 (Hunt), target BizLogic |
 | postMessage listeners | DOM analysis, postMessage-tracker |
 
-### Phase 3: VULNERABILITY DISCOVERY
+### Phase 6: HUNT (Vulnerability Discovery — Unstructured)
 
 **Goal**: Find the bug. Use Error-based first, then Blind-based.
 
@@ -251,12 +328,12 @@ What input are you testing?
 | What you find | Next action |
 |--------------|-------------|
 | Low-impact behavior (redirect, self-XSS, cookie injection) | Chain it -- find a connector gadget |
-| Confirmed vuln (XSS, IDOR, SQLi) | Phase 4 (Prove and Escalate) |
+| Confirmed vuln (XSS, IDOR, SQLi) | Phase 8 (Exploit) |
 | Blocked by WAF/CSP/403 | Bypass techniques, then retry |
 | Known software vuln (CVE) | 1-day speed workflow |
 | Nothing after 20 min on this endpoint | Rotate (20-minute rule) |
 
-### Phase 3.5: STRUCTURED WSTG WALKTHROUGH (Full Coverage Mode)
+### Phase 6b: STRUCTURED WSTG WALKTHROUGH (Full Coverage HUNT)
 
 **Trigger:** User says `/full-hunt`, `/wstg`, "run full WSTG", "guided walkthrough", or "full coverage."
 
@@ -362,9 +439,33 @@ Next phase: VALIDATE — run /triage on each finding.
 
 ---
 
-### Phase 4: PROVE & ESCALATE
+### Phase 7: DEEPTHINK (conditional — gap analysis)
 
-**Goal**: Prove maximum business impact. Turn Low into Critical.
+**Goal**: First-principles gap analysis when HUNT yields zero findings or hits dead-ends.
+
+If Phase 6 produces zero confirmed findings, switch modes:
+- Re-read the endpoint map — look for surface you skipped
+- Check WAF bypasses you haven't tried
+- Research disclosed reports for similar tech stacks
+- Load 3+ additional `hunt-*` skills relevant to observed tech stack
+
+**Trigger:** Only when HUNT output is empty or blocked. See `.opencode/agents/deepthink.md`.
+
+---
+
+### Phase 8: EXPLOIT (Prove & Escalate)
+
+**Goal**: Deepen confirmed findings — chain them, escalate impact, and attempt PoC exploitation.
+
+| Step | Action | MCP Tools |
+|------|--------|-----------|
+| 1 | Load all confirmed findings | `findings_list_vulns()` |
+| 2 | Classify each finding to a vulnerability class (XSS, SQLi, SSRF, etc.) | `get_technique_guide()` |
+| 3 | **Multi-auth-context probing:** Replay each finding with ALL available sessions (anonymous, user-1, user-2, admin) | `get_engagement_config()` |
+| 4 | Attempt PoC exploitation with class-specific payloads | `validate_poc()` |
+| 5 | If blocked — apply WAF bypasses | `get_waf_bypass()` |
+| 6 | Run chaining analysis across findings | `find_chains()`, `findings_add_chain()` |
+| 7 | **Exhaustive exploitation gate:** Every finding must have either a validated PoC or documented bypass exhaustion | `validate_poc()` |
 
 **Escalation decision:**
 ```
@@ -402,17 +503,91 @@ What did you find?
 - [ ] What's the business $ impact?
 - [ ] **Did you try this finding with ALL available sessions?** If not, run it through each auth context before moving on.
 
-### Phase 5: VALIDATE & REPORT
+### Phase 9: SEARCH (conditional — research)
 
-**Goal**: Get paid. Make triager's job easy.
+**Goal:** Research stale payloads, missing CVEs, and WAF bypass techniques when EXPLOIT stalls.
 
-**Pre-report gate:**
+**Trigger:** Only when EXPLOIT hits a wall (WAF blocks, CVE payloads obsolete, technique unknown).
+
+**Resources:**
+- `websearch()` — current CVEs, disclosed reports, technique writeups
+- `webfetch()` — PortSwigger, HackTricks, PayloadsAllTheThings
+- `get_waf_bypass()` — vendor-specific bypass payloads
+- `search_techniques()` — technique guide cross-reference
+- `get_test_payloads()` — WSTG test payload repository
+- HackerOne disclosed reports for similar tech stacks
+- OWASP cheat sheets for current attack patterns
+
+See `.opencode/agents/search.md`.
+
+---
+
+### Phase 10: CAPTURE (Evidence Collection)
+
+**Goal**: Capture evidence with proper hygiene — redact cookies, PII, sanitize.
+
+| Step | Action | MCP Tools |
+|------|--------|-----------|
+| 1 | Load confirmed findings | `get_findings()` |
+| 2 | Load evidence-hygiene for redaction protocol | `@evidence-hygiene` |
+| 3 | For each finding: capture raw HTTP, screenshot (if DOM/visual), check collaborator (if OOB) | `validate_poc()` |
+| 4 | **WAF evidence:** Capture blocked vs. bypassed request pairs, note evasion technique used | — |
+| 5 | Apply redaction (cookies, PII, tokens) | — |
+| 6 | Save sanitized evidence | `runtime/engagements/<eid>/recon/<domain>/evidence/<finding-id>/` |
+
+---
+
+### Phase 11: VALIDATE
+
+**Goal**: Decide whether a finding is reportable before writing anything.
+
+| Step | Action | MCP Tools |
+|------|--------|-----------|
+| 1 | Load findings | `get_findings()` |
+| 2 | Re-validate each PoC | `validate_poc()` |
+| 3 | Cross-reference severity against MCP technique guides | `get_technique_guide()` |
+| 4 | Run the 7-Question Gate | `@triage-validation` |
+| 5 | Assign verdict | `update_finding()` |
+
+**The 7-Question Gate:**
 ```
-Run /validate (7-Question Gate)
-+-- All 7 pass? -> Write report
-+-- Any fail? -> KILL the finding. Don't waste time.
-+-- Borderline? -> Run /triage for quick go/no-go
+Q1: Can an attacker use this RIGHT NOW with a real HTTP request?
+Q2: Is the impact on the program's accepted-impact list?
+Q3: Is the vulnerable asset in scope?
+Q4: Does it work without privileged access an attacker can't get?
+Q5: Is this not already known or documented behavior?
+Q6: Can impact be proved beyond "technically possible"?
+Q7: Is this NOT on the never-submit list?
 ```
+
+**Outcomes:**
+- **PASS** — all 7 ✓ → proceed to Phase 12 (Report)
+- **DOWNGRADE** — Q2 or Q5 fails → lower severity, still report
+- **CHAIN REQUIRED** — needs another primitive → go back to Phase 6 (Hunt)
+- **KILL** — any other failure → discard, do not draft
+
+**Never-submit list:** Missing headers, introspection alone, clickjacking alone, self-XSS, open redirect alone, SSRF DNS-only, logout CSRF, rate limits on non-critical forms, cookie flags alone.
+
+---
+
+### Phase 12: REPORT
+
+**Goal**: Generate a submission-ready report with coverage validation.
+
+| Step | Action | MCP Tools |
+|------|--------|-----------|
+| 1 | Check WSTG coverage | `get_coverage()` |
+| 2 | Check tool coverage | `get_tool_coverage()` |
+| 3 | Final gate check | `phase_gate_check(phase_completed=5)` |
+| 4 | Generate full report | `generate_report()` |
+| 5 | Present report summary | — |
+| 6 | Ask which platform (H1/Bugcrowd/Client) | — |
+
+**Platform-specific reporters:**
+- `@report-writing` — HackerOne/generic format
+- `@bugcrowd-reporting` — Bugcrowd VRT mapping
+- `@redteam-report-template` — Client-facing DOCX
+- `@redteam-mindset` — Red-team ops posture
 
 **Multi-Tool Reproduction Bar (Critical / High only):**
 
@@ -451,13 +626,13 @@ Run /report
 
 | I'm stuck because... | Go to... |
 |----------------------|----------|
-| Can't find any subdomains | Phase 1: Try different recon sources, Google Dorks |
-| Found subdomain but don't know what to test | Phase 2: Map the app, download JS, understand auth |
-| Testing but nothing works | Phase 3: Switch vuln class (20-min rotation rule) |
-| Found a bug but impact is low | Phase 4: Escalation paths or gadget chaining |
+| Can't find any subdomains | Phase 4: Run subdomain_enum.sh, try different recon sources |
+| Found subdomain but don't know what to test | Phase 5: Map the app, download JS, classify functional groups |
+| Testing but nothing works | Phase 6: Switch vuln class (20-min rotation rule) |
+| Found a bug but impact is low | Phase 8: Escalation paths or gadget chaining |
 | WAF/CSP/403 blocking my payload | Bypass techniques, then return to current phase |
 | Been stuck for 45 min on one param | STOP. Rabbit hole. Move to next endpoint. |
-| New API endpoint discovered during testing | Return to Phase 2: map it before attacking |
+| New API endpoint discovered during testing | Return to Phase 5: map it before attacking |
 | Found one bug | A->B signal: same dev made more mistakes. Hunt 20 min for siblings. |
 
 ### 20-Minute Rotation Clock
@@ -485,7 +660,7 @@ Before pushing back with "I think we're done because X," do this:
 
 | Phase | Tools | Why this order |
 |-------|-------|----------------|
-| Recon: Subdomains | `subfinder` -> `amass` -> `puredns` -> `httpx` | Passive first (no detection) -> resolve DNS -> probe HTTP + tech stack |
+| Recon: Subdomains | `subdomain_enum.sh` (subfinder + assetfinder + findomain → dnsx → httpx) | Passive first (no detection) -> resolve DNS -> probe HTTP + tech stack |
 | Recon: URLs | `gau` + `waymore` -> `katana` -> `uro` | Archive (forgotten endpoints) -> active crawl (JS-rendered) -> deduplicate |
 | Recon: JS | `jsluice` + `mantra` + `trufflehog --only-verified` | Extract URLs/secrets -> find API keys -> verify keys actually work |
 | Recon: Ports | `naabu` (wide) -> `rustscan` (deep) | Fast top-1000 sweep -> full 65535 on interesting targets |
@@ -573,9 +748,9 @@ For any iteration that runs more than 5 times, **use Python (with try/except per
 ## Related Skills & Chains
 
 - **`hunt-dispatch`** — When PART 0 mode is confirmed (redteam / wapt + blackbox|greybox). Workflow primitive: after the engagement-type answer is locked, hand off to `hunt-dispatch` to fingerprint the target and load the matching platform + hunt-* skill set; this skill stops being the active context once dispatch prints its taxonomy.
-- **`bug-bounty`** — When the user asks a generic "what should I do" or starts a new target. Workflow primitive: `bug-bounty` is the orchestrator that names which `hunt-*` skills to load by topic; this skill (`bb-methodology`) provides the 5-phase workflow that orchestrator runs against.
-- **`triage-validation`** — When a finding completes Phase 4 and is about to be written up. Workflow primitive: Phase 5 explicitly calls `/validate` (the 7-Question Gate); only findings that pass all 7 questions get handed off to `report-writing`.
-- **`offensive-osint`** + **`web2-recon`** — When Phase 1 (Recon) is active. Workflow primitive: Phase 1's "Wide approach" delegates to `offensive-osint` for asset arsenal and `web2-recon` for the live-host + URL pipeline.
+- **`bug-bounty`** — When the user asks a generic "what should I do" or starts a new target. Workflow primitive: `bug-bounty` is the orchestrator that names which `hunt-*` skills to load by topic; this skill (`bb-methodology`) provides the 12-phase pipeline that orchestrator runs against.
+- **`triage-validation`** — When a finding completes Phase 8 (Exploit) and is about to be written up. Workflow primitive: Phase 11 (Validate) explicitly calls `/validate` (the 7-Question Gate); only findings that pass all 7 questions get handed off to `report-writing`.
+- **`offensive-osint`** + **`web2-recon`** — When Phase 4 (Recon) is active. Workflow primitive: Phase 4's "Wide approach" delegates to `offensive-osint` for asset arsenal and `web2-recon` for the live-host + URL pipeline.
 
 ---
 
@@ -588,7 +763,7 @@ For any iteration that runs more than 5 times, **use Python (with try/except per
 
 ### What the methodology doesn't tell you
 
-The vendored 5-phase workflow is a checklist; real engagements are improvisation. Sometimes you skip phases entirely — a client hands you a single URL and a JWT, recon was already done by their internal team, and Phase 1 collapses to a 10-minute fingerprint. Sometimes you spend 80% of the engagement in Phase 1 because the scope is a 200-asset financial-services parent org and asset discovery IS the work. The methodology is a map of terrain that exists in every engagement, not a sequence you traverse uniformly.
+The vendored 12-phase workflow is a checklist; real engagements are improvisation. Sometimes you skip phases entirely — a client hands you a single URL and a JWT, recon was already done by their internal team, and Phase 4 collapses to a 10-minute fingerprint. Sometimes you spend 80% of the engagement in Phase 4 because the scope is a 200-asset financial-services parent org and asset discovery IS the work. The methodology is a map of terrain that exists in every engagement, not a sequence you traverse uniformly.
 
 ### Mode-confirmation, in practice
 
@@ -602,7 +777,7 @@ When the language is mixed (common — clients often write WAPT-shaped SOWs and 
 
 ### Phase priority shifts by target type
 
-The 5 phases are not equal-weight. Engagement type dictates the time allocation:
+The 12 phases are not equal-weight. Engagement type dictates the time allocation:
 
 | Engagement | Recon | Hunt | Validate+Report |
 |---|---|---|---|
@@ -624,4 +799,4 @@ The same applies in reverse: if you've been hunting a candidate for 4+ hours and
 The discipline rules in this file — OOB Gate, Marker Discipline, Body-Diff Rule, Statistical-Sample Rule, Server-Policy-vs-State, Pre-Severity Gate, Shell-Loop Ban — are not methodology. They are quality gates. Methodology is the order of operations; these are the validation guarantees at each step.
 
 Verified across Phase 2D's hardened-lab campaign: 8/8 discipline rules fired correctly against fake-bug-shaped behavior (URL echo dressed as XSS, word collision dressed as reflection, status-code-only "bypasses" with byte-identical bodies, 200-OK leak-claims with no actual leak data). Validation rates fall sharply when these rules get skipped. The friction is the feature — if a rule feels obstructive, that's it doing its job. The findings it kills are the half that would have come back N/A anyway.
-- **`evidence-hygiene`** — When Phase 5 is collecting PoC screenshots / HARs. Workflow primitive: before any cookie / PII appears in a screenshot, hand off to `evidence-hygiene` for the redaction protocol.
+- **`evidence-hygiene`** — When Phase 10 is collecting PoC screenshots / HARs. Workflow primitive: before any cookie / PII appears in a screenshot, hand off to `evidence-hygiene` for the redaction protocol.

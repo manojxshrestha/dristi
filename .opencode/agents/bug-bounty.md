@@ -1,5 +1,5 @@
 ---
-description: Bug bounty master agent. Full pipeline: recon→learn→hunt→validate→report. 5-phase methodology, mindset frameworks, A→B signal chains, 17 critical rules, tool routing, discipline gates.
+description: Bug bounty master agent. Full pipeline: scope→auth→intel→recon→surface→hunt→deepthink→exploit→search→capture→validate→report. 12-phase methodology, mindset frameworks, A→B signal chains, 17 critical rules, tool routing, discipline gates.
 mode: subagent
 permission:
   read: allow
@@ -80,7 +80,7 @@ Full pipeline: Recon -> Learn -> Hunt -> Validate -> Report. One skill for every
 16. **TWO-EYE APPROACH** -- combine systematic testing (checklist) with anomaly detection (watch for unexpected behavior)
 17. **T-SHAPED KNOWLEDGE** -- go DEEP in one area and BROAD across everything else
 
-> **For the full hunting methodology** — 5-phase non-linear workflow, developer psychology framework, session discipline, tool routing by phase, and Wide/Deep route selection — see **`skills/bb-methodology/SKILL.md`**.
+> **For the full hunting methodology** — 12-phase pipeline (scope→auth→intel→recon→surface→hunt→deepthink→exploit→search→capture→validate→report), developer psychology framework, session discipline, tool routing by phase, and Wide/Deep route selection — see **`skills/bb-methodology/SKILL.md`**.
 
 ---
 
@@ -297,8 +297,7 @@ ffuf -w subs.txt -u https://FUZZ.target.com -ac
 ## Standard Recon Pipeline
 ```bash
 # Step 1: Subdomains
-subfinder -d TARGET -silent | anew /tmp/subs.txt
-assetfinder --subs-only TARGET | anew /tmp/subs.txt
+bash scripts/tools/subdomain_enum.sh TARGET
 
 # Step 2: Resolve + live hosts
 cat /tmp/subs.txt | dnsx -silent | httpx -silent -status-code -title -tech-detect -o /tmp/live.txt
@@ -1573,10 +1572,10 @@ Then in OpenCode, this agent loads automatically when you ask about bug bounty, 
 
 ## Related Skills & Chains
 
-- **`bb-methodology`** — When a hunting session starts and the user is "lost about what to do next." Workflow primitive: this skill is the orchestrator; `bb-methodology` is the 5-phase workflow it routes to. Load `bb-methodology` FIRST, then this skill names the topic-matched hunt-* skills.
+- **`bb-methodology`** — When a hunting session starts and the user is "lost about what to do next." Workflow primitive: this skill is the orchestrator; `bb-methodology` provides the 12-phase pipeline it routes to. Load `bb-methodology` FIRST, then this skill names the topic-matched hunt-* skills.
 - **`hunt-dispatch`** — When PART 0 mode (red team / WAPT) has been confirmed. Workflow primitive: this skill's "what should I do" routing hands off to `hunt-dispatch` for the platform fingerprint + skill-set load.
-- **`web2-recon`** + **`offensive-osint`** — When Phase 1 (recon) starts. Workflow primitive: this skill's "Standard Recon Pipeline" section delegates the live execution to `web2-recon` and the operational arsenal (probes / wordlists / regexes) to `offensive-osint`.
-- **`triage-validator`** + **`report-writing`** — When a finding completes Phase 4. Workflow primitive: this skill routes to `triage-validator` (7Q gate) → only if all 7 pass, hand off to `report-writing` for the platform-specific body.
+- **`web2-recon`** + **`offensive-osint`** — When Phase 4 (recon) starts. Workflow primitive: this skill's "Standard Recon Pipeline" section delegates the live execution to `web2-recon` and the operational arsenal (probes / wordlists / regexes) to `offensive-osint`.
+- **`triage-validator`** + **`report-writing`** — When a finding completes Phase 8 (Exploit). Workflow primitive: this skill routes to `triage-validator` (7Q gate) → only if all 7 pass, hand off to `report-writing` for the platform-specific body.
 
 ---
 
@@ -1616,7 +1615,7 @@ The `/hunt` slash-command and the `hunt <target>` shell helper (see this repo's 
 - `targets/<target>/findings/` — one MD per validated finding
 - `targets/<target>/evidence/` — HARs, screenshots, redacted curl transcripts
 - `targets/<target>/submissions.txt` — log of submitted-report URLs + states
-- `runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<target>/` — outputs from `subfinder | dnsx | httpx | katana`
+- `runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/<target>/subdomains/` — outputs from `subdomain_enum.sh`
 
 Use the scaffold from the start. Half-organized engagements lose findings — a probe result from hour 2 that didn't seem important until hour 14 is unrecoverable if it wasn't logged.
 
@@ -1629,7 +1628,7 @@ Across 30+ Phase 2 verification tests in this repo, the orchestrator correctly a
 
 ## PART 0: MODE CONFIRMATION (Before Anything Else)
 
-**Confirm the engagement type before deciding what counts as a finding.** The same target produces a different report shape depending on which mode applies. Getting this wrong is the single biggest waste of time in this workflow — answer it explicitly before Phase 0.
+**Confirm the engagement type before deciding what counts as a finding.** The same target produces a different report shape depending on which mode applies. Getting this wrong is the single biggest waste of time in this workflow — answer it explicitly before Phase 1.
 
 | Engagement type | What counts as a finding | What gets rejected |
 |---|---|---|
@@ -1638,7 +1637,7 @@ Across 30+ Phase 2 verification tests in this repo, the orchestrator correctly a
 | **Pentest** (signed SoW / WAPT) | Depends on SoW. Read scope explicitly. Usually accepts hygiene + impact + recon | Out-of-scope assets, unsigned testing |
 | **Internal audit** | Compliance-mapped findings (PCI / ISO / NIST / DPDPA / GDPR) | Findings without a control-mapping |
 
-**Hard rule:** Before Phase 0 runs, write the engagement type as the first line in your hunt notes. If you can't answer it from the user's instruction, ASK once. Don't assume — the mistake costs both you and the triager.
+**Hard rule:** Before Phase 1 runs, write the engagement type as the first line in your hunt notes. If you can't answer it from the user's instruction, ASK once. Don't assume — the mistake costs both you and the triager.
 
 **Lesson from an authorized engagement:** First-pass on this target produced 5 hygiene findings (SP2013 EoL, permissive CSP, stack traces) shipped in red-team format. The engagement was bug-bounty. Findings would have been N/A'd as "informational, no impact demonstrated." After the corrected pass with hygiene-as-context-not-finding, the same target yielded 11 impact-demonstrated bugs including 3 Critical.
 
@@ -2094,7 +2093,7 @@ Before pushing back with "I think we're done because X," do this:
 
 | Phase | Tools | Why this order |
 |-------|-------|----------------|
-| Recon: Subdomains | `subfinder` -> `amass` -> `puredns` -> `httpx` | Passive first (no detection) -> resolve DNS -> probe HTTP + tech stack |
+| Recon: Subdomains | `subdomain_enum.sh` (subfinder + assetfinder + findomain → dnsx → httpx) | Passive first (no detection) -> resolve DNS -> probe HTTP + tech stack |
 | Recon: URLs | `waymore` -> `katana` -> `uro` | Archive (waymore: 340K+ URLs on test target, gau returned 0 — removed) -> active crawl (JS-rendered) -> deduplicate |
 | Recon: JS | `jsluice` + `mantra` + `trufflehog --only-verified` | Extract URLs/secrets -> find API keys -> verify keys actually work |
 | Recon: Ports | `naabu` (wide) -> `rustscan` (deep) | Fast top-1000 sweep -> full 65535 on interesting targets |
@@ -2182,9 +2181,9 @@ For any iteration that runs more than 5 times, **use Python (with try/except per
 ## Related Skills & Chains
 
 - **`hunt-dispatch`** — When PART 0 mode is confirmed (redteam / wapt + blackbox|greybox). Workflow primitive: after the engagement-type answer is locked, hand off to `hunt-dispatch` to fingerprint the target and load the matching platform + hunt-* skill set; this skill stops being the active context once dispatch prints its taxonomy.
-- **`bug-bounty`** — When the user asks a generic "what should I do" or starts a new target. Workflow primitive: `bug-bounty` is the orchestrator that names which `hunt-*` skills to load by topic; this skill (`bb-methodology`) provides the 5-phase workflow that orchestrator runs against.
-- **`triage-validator`** — When a finding completes Phase 4 and is about to be written up. Workflow primitive: Phase 5 explicitly calls `/validate` (the 7-Question Gate); only findings that pass all 7 questions get handed off to `report-writing`.
-- **`offensive-osint`** + **`web2-recon`** — When Phase 1 (Recon) is active. Workflow primitive: Phase 1's "Wide approach" delegates to `offensive-osint` for asset arsenal and `web2-recon` for the live-host + URL pipeline.
+- **`bug-bounty`** — When the user asks a generic "what should I do" or starts a new target. Workflow primitive: `bug-bounty` is the orchestrator that names which `hunt-*` skills to load by topic; this skill (`bb-methodology`) provides the 12-phase pipeline that orchestrator runs against.
+- **`triage-validator`** — When a finding completes Phase 8 and is about to be written up. Workflow primitive: Phase 11 explicitly calls `/validate` (the 7-Question Gate); only findings that pass all 7 questions get handed off to `report-writing`.
+- **`offensive-osint`** + **`web2-recon`** — When Phase 4 (Recon) is active. Workflow primitive: Phase 4's "Wide approach" delegates to `offensive-osint` for asset arsenal and `web2-recon` for the live-host + URL pipeline.
 
 ---
 
@@ -2197,7 +2196,7 @@ For any iteration that runs more than 5 times, **use Python (with try/except per
 
 ### What the methodology doesn't tell you
 
-The vendored 5-phase workflow is a checklist; real engagements are improvisation. Sometimes you skip phases entirely — a client hands you a single URL and a JWT, recon was already done by their internal team, and Phase 1 collapses to a 10-minute fingerprint. Sometimes you spend 80% of the engagement in Phase 1 because the scope is a 200-asset financial-services parent org and asset discovery IS the work. The methodology is a map of terrain that exists in every engagement, not a sequence you traverse uniformly.
+The 12-phase pipeline is a checklist; real engagements are improvisation. Sometimes you skip phases entirely — a client hands you a single URL and a JWT, recon was already done by their internal team, and Phase 4 collapses to a 10-minute fingerprint. Sometimes you spend 80% of the engagement in Phase 4 because the scope is a 200-asset financial-services parent org and asset discovery IS the work. The methodology is a map of terrain that exists in every engagement, not a sequence you traverse uniformly.
 
 ### Mode-confirmation, in practice
 

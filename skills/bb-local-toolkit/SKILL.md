@@ -50,7 +50,7 @@ Full pipeline: Recon -> Learn -> Hunt -> Validate -> Report. One skill for every
 16. **TWO-EYE APPROACH** -- combine systematic testing (checklist) with anomaly detection (watch for unexpected behavior)
 17. **T-SHAPED KNOWLEDGE** -- go DEEP in one area and BROAD across everything else
 
-> **For the full hunting methodology** — 5-phase non-linear workflow, developer psychology framework, session discipline, tool routing by phase, and Wide/Deep route selection — see **`skills/bb-methodology/SKILL.md`**.
+> **For the full hunting methodology** — 12-phase pipeline, developer psychology framework, session discipline, tool routing by phase, and Wide/Deep route selection — see **`docs/workflow.md`**.
 
 ---
 
@@ -266,9 +266,8 @@ ffuf -w subs.txt -u https://FUZZ.target.com -ac
 
 ## Standard Recon Pipeline
 ```bash
-# Step 1: Subdomains
-subfinder -d TARGET -silent | anew /tmp/subs.txt
-assetfinder --subs-only TARGET | anew /tmp/subs.txt
+# Step 1: Subdomains (subdomain_enum.sh — subfinder + assetfinder + findomain → dnsx → httpx)
+bash scripts/tools/subdomain_enum.sh TARGET
 
 # Step 2: Resolve + live hosts
 cat /tmp/subs.txt | dnsx -silent | httpx -silent -status-code -title -tech-detect -o /tmp/live.txt
@@ -1547,4 +1546,4 @@ Then in OpenCode, this agent loads automatically when you ask about bug bounty, 
 - **`web2-recon`** — When recon needs to be run via specific tool invocations. Workflow primitive: this skill names the local install path (e.g., `~/tools/SecretFinder/.venv/bin/activate`); `web2-recon` is the pipeline that strings those tool paths together.
 - **`offensive-osint`** — When the operational arsenal (probes, regexes, wordlists) needs a tool to execute it. Workflow primitive: `offensive-osint` provides the regex / probe; this skill provides the local trufflehog / jhaddix / SecLists clone that runs it.
 - **`security-arsenal`** — When the payload library needs a tool to fire payloads at scale. Workflow primitive: `security-arsenal` is the payload syntax; this skill names the ffuf / dalfox / ghauri install that delivers them.
-- **`bb-methodology`** — When Phase 1 (Recon) or Phase 3 (Discovery) needs tooling routed. Workflow primitive: `bb-methodology`'s "Tool Routing by Phase" table is general; this skill resolves the abstract tool names to concrete local paths.
+- **`bb-methodology`** — When Phase 4 (Recon) or Phase 6 (Hunt) needs tooling routed. Workflow primitive: `bb-methodology`'s "Tool Routing by Phase" table is general; this skill resolves the abstract tool names to concrete local paths.

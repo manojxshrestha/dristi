@@ -9,7 +9,7 @@ Run the full recon pipeline on a target and produce a prioritized attack surface
 
 ## What This Does
 
-1. Enumerates subdomains (crt.sh + subfinder + assetfinder)
+1. Enumerates subdomains (subdomain_enum.sh — subfinder + assetfinder + findomain)
 2. Resolves DNS and finds live hosts (dnsx + httpx with status/title/tech)
 3. Crawls URLs (katana deep crawl + waybackurls historical)
 4. Classifies URLs by bug class (gf patterns)
@@ -43,11 +43,10 @@ curl -s "https://crt.sh/?q=%.${TARGET}&output=json" \
   | sed 's/\*\.//g' \
   | sort -u > runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/subdomains.txt 2>/dev/null || true
 
-# subfinder + assetfinder
-subfinder -d $TARGET -silent | anew runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/subdomains.txt
-assetfinder --subs-only $TARGET | anew runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/subdomains.txt
+# subdomain_enum.sh — subfinder + assetfinder + findomain + dnsx + httpx
+bash scripts/tools/subdomain_enum.sh $TARGET
 
-echo "[+] Subdomains: $(wc -l < runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/subdomains.txt)"
+echo "[+] Subdomains: $(find runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/subdomains/ -name '*.txt' -exec cat {} + 2>/dev/null | sort -u | wc -l)"
 ```
 
 ### Step 2: Live Host Discovery

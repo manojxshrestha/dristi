@@ -188,25 +188,10 @@ elif [ "${SCOPE_LOCK:-0}" = "1" ] && [ "$TARGET_TYPE" = "ip" ]; then
     echo "$TARGET" > "$RECON_DIR/subdomains/all.txt"
 else
 
-# Subfinder (passive, fast)
-if command -v subfinder &>/dev/null; then
-    log_step "Running subfinder..."
-    subfinder -d "$TARGET" -silent -all -o "$RECON_DIR/subdomains/subfinder.txt" 2>/dev/null || true
-    log_done "subfinder: $(wc -l < "$RECON_DIR/subdomains/subfinder.txt" 2>/dev/null || echo 0) subdomains"
-else
-    log_warn "subfinder not installed — skipping"
-fi
-
-# Amass (passive)
-if command -v amass &>/dev/null && [ "$QUICK_MODE" != "--quick" ]; then
-    log_step "Running amass (passive, 5min timeout)..."
-    timeout 300 amass enum -passive -d "$TARGET" -o "$RECON_DIR/subdomains/amass.txt" 2>/dev/null || true
-    # Ensure amass output file exists even if amass failed
-    [ ! -f "$RECON_DIR/subdomains/amass.txt" ] && touch "$RECON_DIR/subdomains/amass.txt"
-    log_done "amass: $(wc -l < "$RECON_DIR/subdomains/amass.txt" 2>/dev/null || echo 0) subdomains"
-else
-    [ "$QUICK_MODE" = "--quick" ] && log_warn "Skipping amass (quick mode)"
-fi
+# subdomain_enum.sh (passive multi-source + DNS resolution + HTTP probe)
+log_step "Running subdomain_enum.sh..."
+bash "$SCRIPT_DIR/subdomain_enum.sh" "$TARGET" 2>/dev/null || true
+log_done "Subdomain enumeration complete"
 
 # crt.sh (certificate transparency)
 log_step "Querying crt.sh..."

@@ -95,9 +95,10 @@ curl -s "https://crt.sh/?q=%.${TARGET}&output=json" \
   | sed 's/\*\.//g' \
   >> /tmp/subs.txt 2>/dev/null || true
 
-# Step 2: subfinder (passive multi-source)
-subfinder -d $TARGET -silent | anew /tmp/subs.txt
-assetfinder --subs-only $TARGET | anew /tmp/subs.txt
+# Step 2: subdomain_enum.sh (subfinder + assetfinder + findomain → dnsx → httpx)
+bash scripts/tools/subdomain_enum.sh $TARGET
+
+echo "[+] Subdomains: $(find runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/subdomains/ -name '*.txt' -exec cat {} + 2>/dev/null | sort -u | wc -l)"
 
 echo "[+] Total subdomains after all sources: $(wc -l < /tmp/subs.txt)"
 
@@ -342,7 +343,8 @@ Set up once per target. Alerts you before other hunters.
 TARGET="target.com"
 KNOWN="/tmp/$TARGET-subs-known.txt"
 
-subfinder -d $TARGET -silent > /tmp/$TARGET-subs-fresh.txt
+bash scripts/tools/subdomain_enum.sh $TARGET 2>/dev/null
+cp runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/$TARGET/subdomains/all_subdomains.txt /tmp/$TARGET-subs-fresh.txt
 
 # Diff against known
 NEW=$(comm -23 <(sort /tmp/$TARGET-subs-fresh.txt) <(sort $KNOWN 2>/dev/null))
@@ -655,7 +657,7 @@ Full attack-chain analysis is in `api-misconfig-hunter` → `NSwag / Swagger / O
 - **`osint-methodology`** — When you need a severity rubric for what you discovered. Workflow primitive: after recon outputs `subdomains.txt` / `live-hosts.txt` / `urls.txt`, score each asset against `osint-methodology`'s findings rubric to decide what gets a finding versus what stays in the asset graph.
 - **`subdomain-hunter`** — When recon surfaces stale CNAMEs / dangling DNS. Workflow primitive: any subdomain in `subdomains.txt` whose CNAME points to S3 / GitHub Pages / Heroku / Shopify / Azure should auto-route to `subdomain-hunter` for takeover validation.
 - **`security-arsenal`** — When the URL set is classified by `gf` and ready for active testing. Workflow primitive: `gf xss/ssrf/sqli/idor` output names become payload-class queries against `security-arsenal`'s payload library.
-- **`bb-methodology`** — When recon completes and Phase 1 transitions to Phase 2 (Mapping). Workflow primitive: hand the live host + URL set back to `bb-methodology` Phase 2 for endpoint mapping and Phase 3 vulnerability discovery routing.
+- **`bb-methodology`** — When recon completes and Phase 4 transitions to Phase 5 (Surface Mapping). Workflow primitive: hand the live host + URL set back to `bb-methodology` Phase 5 for endpoint mapping and Phase 6 vulnerability discovery routing.
 
 ---
 

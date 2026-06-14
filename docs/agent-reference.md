@@ -4,7 +4,7 @@
 
 | Agent | When to use |
 |-------|-------------|
-| `@bb-methodology` | Start of every engagement. 5-phase workflow: recon → mapping → vuln discovery → exploitation → report. Selects mode (bounty/redteam/pentest/audit). |
+| `@bb-methodology` | Start of every engagement. 12-phase pipeline: scope → auth → intel → recon → surface → hunt → deepthink → exploit → search → capture → validate → report. Selects mode (bounty/redteam/pentest/audit). |
 | `@bug-bounty` | General bug bounty workflow. Program selection, duplicate detection, payout optimization. Use after scope is confirmed. |
 | `credential-attack` (skill) | Load via `skill("credential-attack")` when a login endpoint is in scope and program policy permits password testing. 4-stage pipeline: wordlist-gen (cewler → hashcat rules) → breach-check (HIBP k-anonymity) → OSINT employees (theHarvester → username-anarchy) → spray (http-form / oauth / o365 / okta). |
 | `@hunt-dispatch` / `@hunt-dispatcher` | When you have a target but don't know which hunt agent to use. Fingerprints tech stack, routes to the correct agent. |
@@ -25,7 +25,7 @@
 
 | Agent | When to use | Input |
 |-------|-------------|-------|
-| `@exploit` | After Phase 4 HUNT completes. Reads all findings, classifies by vuln class, loads technique guides + payload libraries, attempts PoC exploitation with WAF bypass, and records evidence. | `findings_list_vulns()` |
+| `@exploit` | After Phase 8 EXPLOIT. Loads all findings from the exploitation queue, applies technique guides + payload libraries, attempts PoC exploitation with WAF bypass, and records evidence. | `findings_list_vulns()` |
 
 ## Web Application Vulnerabilities
 

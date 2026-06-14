@@ -82,11 +82,9 @@ Subdomain takeover is high-value because it allows an attacker to serve content 
 
 ## Step-by-Step Hunting Methodology
 
-1. **Enumerate all subdomains** for the target using passive + active sources:
-   - `subfinder -d target.com -all`
-   - `amass enum -passive -d target.com`
-   - `assetfinder --subs-only target.com`
-   - Certificate transparency: `crt.sh/?q=%.target.com`
+1. **Enumerate all subdomains** for the target using `subdomain_enum.sh`:
+   - `bash scripts/tools/subdomain_enum.sh target.com`
+   - Also check Certificate transparency: `crt.sh/?q=%.target.com`
 
 2. **Resolve all subdomains** and flag those with:
    - NXDOMAIN responses

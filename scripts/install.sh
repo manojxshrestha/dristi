@@ -294,23 +294,6 @@ if ! $QUICK; then
     ok "GF patterns installed → ~/.gf/"
   fi
 
-  # gum — progress bars
-  header "Phase 5c: gum progress bars"
-  if command -v gum &>/dev/null; then
-    ok "gum — already installed"
-  else
-    info "Installing gum (progress bars)..."
-    if command -v go &>/dev/null; then
-      go install github.com/charmbracelet/gum@latest 2>/dev/null || warn "gum install failed"
-      if [ -f "$HOME/go/bin/gum" ]; then
-        cp "$HOME/go/bin/gum" "$HOME/.local/bin/gum" 2>/dev/null || true
-        ok "gum installed"
-      fi
-    else
-      warn "go not found — install gum manually: go install github.com/charmbracelet/gum@latest"
-    fi
-  fi
-
   # SecLists
   header "Phase 5d: SecLists wordlists"
   SECLISTS="/opt/SecLists"

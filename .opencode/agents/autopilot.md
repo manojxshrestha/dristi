@@ -1,5 +1,5 @@
 ---
-description: Full autonomous pipeline — scope → recon → surface → hunt → capture → validate → report
+description: Full autonomous pipeline — scope → auth → intel → recon → surface → hunt → deepthink → exploit → search → capture → validate → report
 mode: all
 permission:
   read: allow

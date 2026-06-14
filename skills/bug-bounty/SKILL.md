@@ -1,6 +1,6 @@
 ---
 name: bug-bounty
-description: Complete bug bounty workflow — recon (subdomain enumeration, asset discovery, fingerprinting, HackerOne scope, source code audit), pre-hunt learning (disclosed reports, tech stack research, mind maps, threat modeling), vulnerability hunting (IDOR, SSRF, XSS, auth bypass, CSRF, race conditions, SQLi, XXE, file upload, business logic, GraphQL, HTTP smuggling, cache poisoning, OAuth, timing side-channels, OIDC, SSTI, subdomain takeover, cloud misconfig, ATO chains, agentic AI), LLM/AI security testing (chatbot IDOR, prompt injection, indirect injection, ASCII smuggling, exfil channels, RCE via code tools, system prompt extraction, ASI01-ASI10), A-to-B bug chaining (IDOR→auth bypass, SSRF→cloud metadata, XSS→ATO, open redirect→OAuth theft, S3→bundle→secret→OAuth), bypass tables (SSRF IP bypass, open redirect bypass, file upload bypass), language-specific grep (JS prototype pollution, Python pickle, PHP type juggling, Go template.HTML, Ruby YAML.load, Rust unwrap), and reporting (7-Question Gate, 4 validation gates, human-tone writing, templates by vuln class, CVSS 3.1, PoC generation, always-rejected list, conditional chain table, submission checklist). Use for ANY bug bounty task — starting a new target, doing recon, hunting specific vulns, auditing source code, testing AI features, validating findings, or writing reports.
+description: Complete bug bounty workflow — 12-phase pipeline: scope, auth, intel, recon, surface, hunt (54 hunt-* classes), deepthink, exploit, search, capture, validate, report. Pre-hunt learning (disclosed reports, tech stack research, mind maps, threat modeling), vulnerability hunting (IDOR, SSRF, XSS, auth bypass, CSRF, race conditions, SQLi, XXE, file upload, business logic, GraphQL, HTTP smuggling, cache poisoning, OAuth, timing side-channels, OIDC, SSTI, subdomain takeover, cloud misconfig, ATO chains, agentic AI), LLM/AI security testing (chatbot IDOR, prompt injection, indirect injection, ASCII smuggling, exfil channels, RCE via code tools, system prompt extraction, ASI01-ASI10), A-to-B bug chaining (IDOR→auth bypass, SSRF→cloud metadata, XSS→ATO, open redirect→OAuth theft, S3→bundle→secret→OAuth), bypass tables (SSRF IP bypass, open redirect bypass, file upload bypass), language-specific grep (JS prototype pollution, Python pickle, PHP type juggling, Go template.HTML, Ruby YAML.load, Rust unwrap), and reporting (7-Question Gate, 4 validation gates, human-tone writing, templates by vuln class, CVSS 3.1, PoC generation, always-rejected list, conditional chain table, submission checklist). Use for ANY bug bounty task — starting a new target, doing recon, hunting specific vulns, auditing source code, testing AI features, validating findings, or writing reports.
 ---
 
 # Bug Bounty Master Workflow
@@ -50,7 +50,7 @@ Full pipeline: Recon -> Learn -> Hunt -> Validate -> Report. One skill for every
 16. **TWO-EYE APPROACH** -- combine systematic testing (checklist) with anomaly detection (watch for unexpected behavior)
 17. **T-SHAPED KNOWLEDGE** -- go DEEP in one area and BROAD across everything else
 
-> **For the full hunting methodology** — 5-phase non-linear workflow, developer psychology framework, session discipline, tool routing by phase, and Wide/Deep route selection — see **`skills/bb-methodology/SKILL.md`**.
+> **For the full hunting methodology** — 12-phase pipeline, developer psychology framework, session discipline, tool routing by phase, and Wide/Deep route selection — see **`docs/workflow.md`**.
 
 ---
 
@@ -260,34 +260,81 @@ ffuf -w subs.txt -u https://FUZZ.target.com -ac
 ## AI-Assisted Tools
 - **strix** (usestrix.com) -- open-source AI scanner for automated initial sweep
 
----
+# PHASES (aligned with 12-pipeline workflow)
 
-# PHASE 1: RECON
+## Phase 1: SCOPE
+- Register domains, load config, create task tree in engagement DB
+- Parse scope table, register assets, init findings database
 
-## Standard Recon Pipeline
+## Phase 2: AUTH
+- Obtain auth credentials, test they work
+- **WAF fingerprint check** — `identify_waf()` with response headers
+- Save auth context deliverable
+
+## Phase 3: INTEL (passive OSINT)
+Run `scripts/tools/phase-intel.sh <domain>` for:
+- WHOIS, M365/Azure tenant discovery
+- Third-party SaaS misconfiguration scan
+- SPF/DMARC spoofability check
+- Cloud storage bucket enumeration
+
+## Phase 4: RECON
+
+### Standard Recon Pipeline
 ```bash
-# Step 1: Subdomains
-subfinder -d TARGET -silent | anew /tmp/subs.txt
-assetfinder --subs-only TARGET | anew /tmp/subs.txt
+# Step 1: Subdomain enumeration (subfinder + assetfinder + findomain → dnsx → httpx)
+bash scripts/tools/subdomain_enum.sh TARGET
+# Output: runtime/engagements/<id>/recon/<target>/subdomains/
+#   all_subdomains.txt   — all discovered subdomains
+#   alive-domains.txt    — DNS-resolved, HTTP-alive domains
+#   https-subs.txt       — full HTTPS URLs (for crawl/nuclei)
+#   live_domains.txt     — httpx output (status, title, tech)
 
-# Step 2: Resolve + live hosts
-cat /tmp/subs.txt | dnsx -silent | httpx -silent -status-code -title -tech-detect -o /tmp/live.txt
+# Step 2: URL collection from live hosts
+cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/TARGET/subdomains/https-subs.txt \
+  | katana -d 3 -jc -kf all -silent \
+  | anew runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/TARGET/urls.txt
+echo TARGET | waybackurls | anew runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/TARGET/urls.txt
 
-# Step 3: URL collection
-cat /tmp/live.txt | awk '{print $1}' | katana -d 3 -silent | anew /tmp/urls.txt
-echo TARGET | waybackurls | anew /tmp/urls.txt
-gau TARGET | anew /tmp/urls.txt
+# Step 3: Nuclei scan
+nuclei -l runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/TARGET/subdomains/https-subs.txt \
+  -severity critical,high,medium -o runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/TARGET/nuclei.txt
 
-# Step 4: Nuclei scan
-nuclei -l /tmp/live.txt -severity critical,high,medium -silent -o /tmp/nuclei.txt
+# Step 4: JS secrets
+cat runtime/engagements/${ENGAGEMENT_ID:-rea-group-bb-001}/recon/TARGET/urls.txt | grep "\.js$" | sort -u > /tmp/jsfiles.txt
 
-# Step 5: JS secrets
-cat /tmp/urls.txt | grep "\.js$" | sort -u > /tmp/jsfiles.txt
-# Run SecretFinder on each JS file
-
-# Step 6: GitHub dorking (if target has public repos)
+# Step 5: GitHub dorking (if target has public repos)
 # GitDorker -org TARGET_ORG -d dorks/alldorksv3
 ```
+
+## Phase 5: SURFACE (Mapping & Analysis)
+Load recon output, classify into functional groups (auth, api, admin, etc.), prioritize endpoints, save ranked deliverable.
+
+## Phase 6: HUNT
+Per-class vulnerability testing using `hunt-*` agents. Group-based testing: 1-2 reps per functional group.
+- Ralph Wiggum loop: every endpoint must be covered before gate
+- (parallel) credential-attack → wordlist-gen → breach-check → osint-employees → spray
+
+## Phase 7: DEEPTHINK (conditional)
+Gap analysis when HUNT yields zero. Research disclosed reports, try different attack classes.
+
+## Phase 8: EXPLOIT
+Deepen confirmed findings, multi-auth-context probing, chain analysis, WAF bypass.
+- Exhaustive exploitation gate: no finding skipped
+
+## Phase 9: SEARCH (conditional)
+Research payloads, CVEs, WAF bypass techniques when EXPLOIT stalls.
+
+## Phase 10: CAPTURE
+Sanitized evidence collection — screenshots, raw HTTP requests, redaction.
+
+## Phase 11: VALIDATE
+Re-validate PoCs, run 7-Question Gate, assign verdict.
+
+## Phase 12: REPORT
+Coverage check, generate final report, platform-specific formatting.
+
+---
 
 ## Cloud Asset Enumeration
 ```bash
@@ -324,6 +371,7 @@ curl -s "https://hackerone.com/graphql" \
 - [ ] GraphQL introspection enabled
 - [ ] Spring actuators (`/actuator/env`, `/actuator/heapdump`)
 - [ ] Firebase open read (`https://TARGET.firebaseio.com/.json`)
+- [ ] **WAF fingerprint** — `curl -sI https://TARGET/ | grep -i "server:\|cf-ray\|x-sucuri\|x-iinfo\|x-mod-security\|x-waf"` then run `identify_waf()`
 
 ## Technology Fingerprinting
 
@@ -1543,7 +1591,7 @@ Then in OpenCode, this agent loads automatically when you ask about bug bounty, 
 
 ## Related Skills & Chains
 
-- **`bb-methodology`** — When a hunting session starts and the user is "lost about what to do next." Workflow primitive: this skill is the orchestrator; `bb-methodology` is the 5-phase workflow it routes to. Load `bb-methodology` FIRST, then this skill names the topic-matched hunt-* skills.
+- **`bb-methodology`** — When a hunting session starts and the user is "lost about what to do next." Workflow primitive: this skill is the orchestrator; `bb-methodology` provides the 12-phase pipeline it routes to. Load `bb-methodology` FIRST, then this skill names the topic-matched hunt-* skills.
 - **`hunt-dispatch`** — When PART 0 mode (red team / WAPT) has been confirmed. Workflow primitive: this skill's "what should I do" routing hands off to `hunt-dispatch` for the platform fingerprint + skill-set load.
 - **`web2-recon`** + **`offensive-osint`** — When Phase 1 (recon) starts. Workflow primitive: this skill's "Standard Recon Pipeline" section delegates the live execution to `web2-recon` and the operational arsenal (probes / wordlists / regexes) to `offensive-osint`.
 - **`triage-validation`** + **`report-writing`** — When a finding completes Phase 4. Workflow primitive: this skill routes to `triage-validation` (7Q gate) → only if all 7 pass, hand off to `report-writing` for the platform-specific body.
@@ -1592,7 +1640,7 @@ Use the scaffold from the start. Half-organized engagements lose findings — a 
 
 ### Related Skills
 
-- **`bb-methodology`** — The 5-phase non-linear workflow that this orchestrator runs against. Use when you need the full hunting methodology (developer psychology, session discipline, tool routing by phase).
+- **`bb-methodology`** — The 12-phase pipeline that this orchestrator runs against. Use when you need the full hunting methodology (developer psychology, session discipline, tool routing by phase).
 - **`credential-attack`** — Parallel pipeline to web vuln hunting. Password spray methodology for targets with discoverable login endpoints and permissive program policies.
 - **`triage-validation`** — 7-Question Gate + kill signals. Run before writing any report.
 - **`web2-recon`** — Recon sub-pipeline (subdomain enum → HTTP probing → tech detect).

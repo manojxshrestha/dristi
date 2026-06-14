@@ -37,7 +37,7 @@ Dristi is an LLM-powered security toolkit that provides the complete OWASP Web S
 
 Four layers stack:
 
-- **Methodology + agents** — *how to think.* 5-phase non-linear hunting workflow, critical-thinking framework, developer-psychology heuristics, anomaly detection patterns, and the red-team operator-discipline corrections (when scope is "external red team" not "bug hunting / WAPT"). Available as auto-loading OpenCode agents.
+- **Methodology + agents** — *how to think.* 12-phase pipeline (scope→auth→intel→recon→surface→hunt→deepthink→exploit→search→capture→validate→report), critical-thinking framework, developer-psychology heuristics, anomaly detection patterns, and the red-team operator-discipline corrections (when scope is "external red team" not "bug hunting / WAPT"). Available as auto-loading OpenCode agents.
 - **54 `@hunt-*` agents** — *what to look for in webapps.* Per-class detection patterns, payloads, bypass tables, and chain templates — curated from OWASP WSTG v4.2 methodology across 25 vulnerability classes, plus 20+ framework/surface skills (Next.js, Spring Boot, Laravel, Kubernetes, CI/CD, WebSocket, deserialization, ...).
 - **Credential-attack pipeline** — *password spray as a parallel branch to web vuln hunting.* 4-stage pipeline: company-specific wordlist generation (cewler + hashcat rules) → HIBP k-anonymity breach ranking → OSINT employee discovery (theHarvester + username-anarchy) → low-rate spray (http-form / oauth / o365 / okta). Legal guardrails, lockout math, and spray → authenticated hunt chain template.
 - **Enterprise platform attack chains** — *what to look for on the perimeter.* M365/Entra ID, Okta, cloud IAM, VMware vCenter, enterprise VPN, SharePoint, ASP.NET, NTLM, APK red-team pipeline, supply-chain recon — current CVE chains, AADSTS error references, version-fingerprint matrices, and post-credential escalation paths.
@@ -105,18 +105,20 @@ graph TB
     classDef validate fill:#FFB591,stroke:#DA7756,stroke-width:2px,color:#080705
     classDef report fill:#23201C,stroke:#DA7756,stroke-width:2px,color:#FFE4D1
 
-    subgraph PIPELINE ["10 Pipeline Agents"]
+    subgraph PIPELINE ["12 Pipeline Agents"]
         direction LR
         P0["@autopilot<br/>Fully autonomous"]:::pipeline
         P1["@consult<br/>Interactive mode"]:::pipeline
-        P2["@scope"]:::pipeline
-        P3["@recon"]:::pipeline
-        P4["@surface"]:::pipeline
-        P5["@hunt"]:::pipeline
-        P5a["@exploit<br/>Phase 8"]:::pipeline
-        P6["@capture"]:::pipeline
-        P7["@validate"]:::pipeline
-        P8["@report"]:::pipeline
+        P2["@scope<br/>Phase 1"]:::pipeline
+        P3["@recon<br/>Phase 4"]:::pipeline
+        P4["@surface<br/>Phase 5"]:::pipeline
+        P5["@hunt<br/>Phase 6"]:::pipeline
+        P5a["@deepthink<br/>Phase 7"]:::pipeline
+        P5b["@exploit<br/>Phase 8"]:::pipeline
+        P5c["@search<br/>Phase 9"]:::pipeline
+        P6["@capture<br/>Phase 10"]:::pipeline
+        P7["@validate<br/>Phase 11"]:::pipeline
+        P8["@report<br/>Phase 12"]:::pipeline
     end
 
     subgraph RECON ["Recon & OSINT (3)"]
@@ -265,8 +267,8 @@ Dristi agents are flat `.md` files invoked via `@agent-name`. **12 pipeline agen
 
 | How to invoke | What happens |
 |---|---|---|
-| `@autopilot` | Full P1–P8 autonomous — just provide target + scope |
-| `@consult` | Same P1–P8, interactive — asks at every phase transition |
+| `@autopilot` | Full P1–P12 autonomous — just provide target + scope |
+| `@consult` | Same P1–P12, interactive — asks at every phase transition |
 | `@scope` → `@recon` → `@surface` → `@hunt` → ... | Step-by-step guided pipeline, prompts at each transition |
 | `@exploit` | Phase 8 — deep-research exploitation of all findings with WAF bypass |
 | `@hunt-xss` (or any `@hunt-*`) | Directly jump to a specific bug class |
@@ -287,7 +289,7 @@ Dristi agents are flat `.md` files invoked via `@agent-name`. **12 pipeline agen
 dristi/
 ├── .opencode/
 │   ├── agents/                    # 85 flat .md OpenCode agents
-│   │   ├── autopilot.md               # fully autonomous P1–P8 pipeline
+│   │   ├── autopilot.md               # fully autonomous P1–P12 pipeline
 │   │   ├── scope.md                   # engagement scaffold/program rules
 │   │   ├── recon.md                   # recon orchestration
 │   │   ├── surface.md                 # attack surface ranking

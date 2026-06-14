@@ -44,39 +44,17 @@ ENGAGEMENT_ID="${ENGAGEMENT_ID:-rea-group-bb-001}"
 # ── Global timeout: 20 minutes per module ────────────────────────────
 MODULE_TIMEOUT=${MODULE_TIMEOUT:-1200}
 
-# ── Ensure gum is available (installed by install.sh) ────────────────
-_ensure_gum() {
-    if ! command -v gum &>/dev/null; then
-        log_warn "gum not available — run scripts/install.sh or: go install github.com/charmbracelet/gum@latest"
-        return 1
+# ── Run a command with timeout ────────────────────────────────────────
+_run_with_timeout() {
+    local logfile="$1"
+    shift
+    timeout "$MODULE_TIMEOUT" bash -c "$* > '$logfile' 2>/dev/null"
+    local rc=$?
+    if [ $rc -eq 124 ]; then
+        log_warn "Timed out after ${MODULE_TIMEOUT}s"
+        return 124
     fi
-    return 0
-}
-
-# ── Run a command with timeout + gum spin progress bar ───────────────
-_run_with_spinner() {
-    local label="$1"
-    local logfile="$2"
-    shift 2
-
-    if _ensure_gum; then
-        gum spin --title "$label" --timeout "${MODULE_TIMEOUT}s" -- \
-            bash -c "$* > '$logfile' 2>/dev/null"
-        local rc=$?
-        if [ $rc -eq 124 ]; then
-            log_warn "$label timed out after ${MODULE_TIMEOUT}s"
-            return 124
-        fi
-        return $rc
-    else
-        timeout "$MODULE_TIMEOUT" bash -c "$* > '$logfile' 2>/dev/null"
-        local rc=$?
-        if [ $rc -eq 124 ]; then
-            log_warn "$label timed out after ${MODULE_TIMEOUT}s"
-            return 124
-        fi
-        return $rc
-    fi
+    return $rc
 }
 
 # ── Install dependencies ─────────────────────────────────────────────
@@ -201,7 +179,7 @@ run_domain_info() {
     log_step "domain_info — WHOIS, M365/Azure tenant, Scopify"
 
     check_tool whois || return 0
-    _run_with_spinner "WHOIS lookup for $TARGET" "$INTEL_DIR/domain_info_general.txt" \
+    _run_with_timeout "$INTEL_DIR/domain_info_general.txt" \
         "whois '$TARGET' 2>/dev/null" || true
     if [ -s "$INTEL_DIR/domain_info_general.txt" ]; then
         log_ok "WHOIS data saved"
@@ -216,7 +194,7 @@ run_domain_info() {
         if [ -x "$msftrecon_venv" ]; then
             local msftrecon_out
             msftrecon_out=$(mktemp)
-            if _run_with_spinner "msftrecon — $TARGET" "$msftrecon_out" \
+            if _run_with_timeout "$msftrecon_out" \
                 "'$msftrecon_venv' '$TOOLS_DIR/msftrecon/msftrecon/msftrecon.py' -d '$TARGET'"; then
                 if [ -s "$msftrecon_out" ]; then
                     cat "$msftrecon_out" >> "$INTEL_DIR/domain_info_general.txt"
@@ -237,7 +215,7 @@ run_domain_info() {
         if [ -x "$scopify_venv" ] && command -v unfurl &>/dev/null; then
             local company_name
             company_name=$(unfurl format %r <<< "$TARGET" 2>/dev/null || echo "$TARGET" | awk -F. '{print $(NF-1)}')
-            _run_with_spinner "Scopify — $company_name" "$INTEL_DIR/scopify.txt" \
+            _run_with_timeout "$INTEL_DIR/scopify.txt" \
                 "'$scopify_venv' '$TOOLS_DIR/Scopify/scopify.py' -c '$company_name'" \
                 && log_ok "Scopify scope analysis saved" || log_warn "Scopify failed"
         else
@@ -256,17 +234,17 @@ run_third_party_misconfigs() {
     misconfig_dir="$(command -v misconfig-mapper 2>/dev/null | xargs dirname 2>/dev/null)/misconfig-mapper"
 
     if [ -d "$misconfig_dir" ]; then
-        _run_with_spinner "Updating misconfig-mapper templates" "/dev/null" \
+        _run_with_timeout "/dev/null" \
             "timeout 120 misconfig-mapper -update-templates" || true
     fi
 
     local company_name
     company_name=$(unfurl format %r <<< "$TARGET" 2>/dev/null || echo "$TARGET" | awk -F. '{print $(NF-1)}')
 
-    _run_with_spinner "misconfig-mapper — domain $TARGET" "$INTEL_DIR/3rdparts_misconfigurations.txt" \
+    _run_with_timeout "$INTEL_DIR/3rdparts_misconfigurations.txt" \
         "timeout $MODULE_TIMEOUT misconfig-mapper -target '$TARGET' -as-domain true -permutations false -skip-ssl -service '*' -verbose 0 | anew -q '$INTEL_DIR/3rdparts_misconfigurations.txt'" || true
 
-    _run_with_spinner "misconfig-mapper — company $company_name" "/dev/null" \
+    _run_with_timeout "/dev/null" \
         "timeout $MODULE_TIMEOUT misconfig-mapper -target '$company_name' -skip-ssl -verbose 0 -service '*' 2>/dev/null | anew -q '$INTEL_DIR/3rdparts_misconfigurations.txt'" || true
 
     if [ -s "$INTEL_DIR/3rdparts_misconfigurations.txt" ]; then
@@ -286,7 +264,7 @@ run_spoof() {
     local spoofy_script="$TOOLS_DIR/Spoofy/spoofy.py"
 
     if [ -x "$spoofy_venv" ] && [ -f "$spoofy_script" ]; then
-        _run_with_spinner "Spoofy — $TARGET" "$INTEL_DIR/spoof.txt" \
+        _run_with_timeout "$INTEL_DIR/spoof.txt" \
             "cd '$TOOLS_DIR/Spoofy' && '$spoofy_venv' '$spoofy_script' -d '$TARGET'" || true
         if [ -s "$INTEL_DIR/spoof.txt" ]; then
             log_ok "Spoof report saved"
@@ -317,7 +295,7 @@ run_cloud_enum() {
             brute="$cloud_enum_script"
         fi
 
-        _run_with_spinner "cloud_enum — $company_name" "$INTEL_DIR/cloud_enum.txt" \
+        _run_with_timeout "$INTEL_DIR/cloud_enum.txt" \
             "env PYTHONWARNINGS=ignore '$cloud_enum_venv' '$cloud_enum_script' \
                 -k '$company_name' \
                 -k '$TARGET' \

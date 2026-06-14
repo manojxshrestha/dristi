@@ -135,16 +135,10 @@ sep
 # ── Subdomain enumeration ─────────────────────────────────────────────────────
 log "Enumerating subdomains..."
 
-if [ "$(check_tool subfinder)" = true ]; then
-    subfinder -d "$TARGET" -silent -o "$OUT/subdomains/subfinder.txt" 2>/dev/null
-    ok "Subfinder: $(wc -l < $OUT/subdomains/subfinder.txt) subdomains"
+if bash "$SCRIPT_DIR/tools/subdomain_enum.sh" "$TARGET" 2>/dev/null; then
+    ok "Subdomain enumeration complete"
 else
-    warn "subfinder not found — skipping"
-fi
-
-if [ "$(check_tool amass)" = true ] && [ "$QUICK" = false ]; then
-    amass enum -passive -d "$TARGET" -o "$OUT/subdomains/amass.txt" 2>/dev/null
-    ok "Amass: $(wc -l < $OUT/subdomains/amass.txt 2>/dev/null || echo 0) subdomains"
+    warn "Subdomain enumeration encountered issues"
 fi
 
 # crt.sh query

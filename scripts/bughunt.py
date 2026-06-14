@@ -173,11 +173,17 @@ def recon_subdomains_via_crtsh(target: str) -> set[str]:
     return subs
 
 
-def recon_subdomains_via_subfinder(target: str) -> set[str]:
-    if not has_cmd("subfinder"):
+def recon_subdomains_via_subdomain_enum(target: str) -> set[str]:
+    """Run subdomain_enum.sh and read results from its output directory."""
+    script = str(REPO_ROOT / "scripts" / "tools" / "subdomain_enum.sh")
+    rc, _, _ = run_cmd(["bash", script, target], timeout=300)
+    if rc != 0:
         return set()
-    _, out, _ = run_cmd(["subfinder", "-d", target, "-silent"], timeout=60)
-    return {line.strip().lower() for line in out.splitlines() if line.strip()}
+    out_dir = REPO_ROOT / "runtime" / "engagements" / os.environ.get("ENGAGEMENT_ID", "rea-group-bb-001") / "recon" / target / "subdomains"
+    all_file = out_dir / "all_subdomains.txt"
+    if all_file.exists():
+        return {line.strip().lower() for line in all_file.read_text().splitlines() if line.strip()}
+    return set()
 
 
 def recon_resolve(host: str) -> list[str]:
@@ -247,13 +253,13 @@ def cmd_recon(args: argparse.Namespace) -> int:
     subs = set()
     subs |= recon_subdomains_via_crtsh(target)
     say(f"  crt.sh: {len(subs)} candidates")
-    sf = recon_subdomains_via_subfinder(target)
+    sf = recon_subdomains_via_subdomain_enum(target)
     if sf:
         before = len(subs)
         subs |= sf
-        say(f"  subfinder: {len(sf)} candidates (new: {len(subs) - before})")
+        say(f"  subdomain_enum.sh: {len(sf)} candidates (new: {len(subs) - before})")
     else:
-        say(f"  subfinder: {color('not installed', 'dim')}")
+        say(f"  subdomain_enum.sh: {color('no results', 'dim')}")
     if not subs:
         subs.add(target)
     subs.add(target)
