@@ -31,7 +31,7 @@ WORDLIST_DIR="$BASE_DIR/wordlists/dns"
 mkdir -p "$WORDLIST_DIR"
 
 SUB_LIST="$WORDLIST_DIR/subdomains-top1million-20000.txt"
-RESOLVERS="$WORDLIST_DIR/resolvers.txt"
+RESOLVERS="${RESOLVERS_FILE:-$WORDLIST_DIR/resolvers.txt}"
 
 if [ ! -f "$SUB_LIST" ]; then
   log_info "Downloading subdomain wordlist..."
@@ -41,8 +41,26 @@ fi
 
 if [ ! -f "$RESOLVERS" ]; then
   log_info "Downloading resolvers list..."
-  wget -q "https://raw.githubusercontent.com/manojxshrestha/wordlists/refs/heads/main/resolvers.txt" -O "$RESOLVERS"
-  log_ok "Downloaded $(wc -l < "$RESOLVERS" | tr -d ' ') resolvers"
+  wget -q "https://raw.githubusercontent.com/manojxshrestha/wordlists/refs/heads/main/resolvers.txt" -O "$RESOLVERS" 2>/dev/null || true
+  # fallback: public resolvers if download fails
+  if [ ! -s "$RESOLVERS" ]; then
+    log_warn "Download failed, using public fallback resolvers"
+    cat > "$RESOLVERS" << 'EOF'
+1.1.1.1
+8.8.8.8
+8.8.4.4
+9.9.9.9
+208.67.222.222
+208.67.220.220
+77.88.8.8
+74.82.42.42
+64.6.64.6
+185.228.168.9
+76.76.19.19
+76.223.122.150
+EOF
+  fi
+  log_ok "Resolvers: $(wc -l < "$RESOLVERS" | tr -d ' ') entries"
 fi
 
 USE_LIST="${WORDLIST:-$SUB_LIST}"
@@ -57,20 +75,32 @@ fi
 if ! command -v massdns &>/dev/null; then
   log_info "Compiling massdns..."
   TMPDIR=$(mktemp -d)
-  git clone --depth 1 https://github.com/blechschmidt/massdns.git "$TMPDIR/massdns" 2>/dev/null
-  make -C "$TMPDIR/massdns" -s 2>/dev/null
-  sudo cp "$TMPDIR/massdns/bin/massdns" /usr/local/bin/ 2>/dev/null
+  git clone --depth 1 https://github.com/blechschmidt/massdns.git "$TMPDIR/massdns" 2>/dev/null || true
+  make -C "$TMPDIR/massdns" -s 2>/dev/null || true
+  sudo cp "$TMPDIR/massdns/bin/massdns" /usr/local/bin/ 2>/dev/null || true
   rm -rf "$TMPDIR"
-  log_ok "massdns installed"
+  command -v massdns &>/dev/null && log_ok "massdns installed" || log_warn "massdns not available (puredns has internal resolver)"
+fi
+
+# ── Validate resolvers ──────────────────────────────────────────────
+VALID_RESOLVERS="${RESOLVERS%.txt}-valid.txt"
+if [ ! -f "$VALID_RESOLVERS" ] || [ ! -s "$VALID_RESOLVERS" ]; then
+  log_info "Validating resolvers (this weeds out dead/unreachable ones)..."
+  puredns validate-resolvers "$RESOLVERS" -o "$VALID_RESOLVERS" 2>/dev/null || true
+  if [ ! -s "$VALID_RESOLVERS" ]; then
+    log_warn "All resolvers failed validation — using fallback"
+    echo -e "1.1.1.1\n8.8.8.8\n8.8.4.4\n9.9.9.9" > "$VALID_RESOLVERS"
+  fi
+  log_ok "$(wc -l < "$VALID_RESOLVERS" | tr -d ' ') valid resolvers"
 fi
 
 # ── Run puredns bruteforce ──────────────────────────────────────────
 
 log_info "Running puredns bruteforce on $TARGET..."
 log_info "  Wordlist: $USE_LIST ($(wc -l < "$USE_LIST" | tr -d ' ') entries)"
-log_info "  Resolvers: $RESOLVERS ($(wc -l < "$RESOLVERS" | tr -d ' ') entries)"
+log_info "  Resolvers: $VALID_RESOLVERS ($(wc -l < "$VALID_RESOLVERS" | tr -d ' ') entries)"
 
-puredns bruteforce "$USE_LIST" "$TARGET" -r "$RESOLVERS" \
+puredns bruteforce "$USE_LIST" "$TARGET" -r "$VALID_RESOLVERS" \
   | tee "$OUT_DIR/dns_bruteforce.txt"
 
 COUNT=$(wc -l < "$OUT_DIR/dns_bruteforce.txt" | tr -d ' ')
