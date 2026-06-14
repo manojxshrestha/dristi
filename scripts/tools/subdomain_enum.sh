@@ -37,7 +37,7 @@ if [[ ":$PATH:" != *":$HOME/go/bin:"* ]]; then
 fi
 
 # ── Ensure tools are installed ──────────────────────────────────────
-for tool in subfinder assetfinder httpx dnsx; do
+for tool in subfinder assetfinder httpx dnsx jq; do
   if ! command -v "$tool" &>/dev/null; then
     log_info "Installing $tool ..."
     case "$tool" in
@@ -52,10 +52,14 @@ done
 
 if ! command -v findomain &>/dev/null; then
   log_info "Installing findomain ..."
+  command -v unzip &>/dev/null || { log_err "unzip required"; exit 1; }
   wget -q "https://github.com/Findomain/Findomain/releases/latest/download/findomain-linux.zip" -O /tmp/findomain-linux.zip
   unzip -q -o /tmp/findomain-linux.zip -d /tmp/findomain 2>/dev/null
   chmod +x /tmp/findomain/findomain
-  sudo mv /tmp/findomain/findomain /usr/bin/findomain
+  INSTALL_DIR="$HOME/.local/bin"
+  mkdir -p "$INSTALL_DIR"
+  mv /tmp/findomain/findomain "$INSTALL_DIR/findomain"
+  export PATH="$INSTALL_DIR:$PATH"
   rm -rf /tmp/findomain-linux.zip /tmp/findomain
   log_ok "findomain installed"
 fi
@@ -77,6 +81,8 @@ log_info "Running crt.sh ..."
 curl -s "https://crt.sh/?q=%25.$TARGET&output=json" 2>/dev/null \
   | jq -r '.[].name_value' 2>/dev/null \
   | sed 's/\*\.//g' \
+  | tr '\r' '\n' \
+  | grep -E "\.${TARGET}$" \
   | sort -u > "$TMP_DIR/crtsh.txt"
 log_ok "  crt.sh: $(wc -l < "$TMP_DIR/crtsh.txt" | tr -d ' ') subs"
 
@@ -120,18 +126,18 @@ log_ok "  Live hosts: $LIVE"
 NDOMAINS=0
 NURLS=0
 if [ "$LIVE" -gt 0 ]; then
+  # All live URLs (protocol + host)
+  awk '{print $1}' "$OUT_DIR/live_domains.txt" | sort -u \
+    > "$OUT_DIR/live_urls.txt"
+
   # Clean domain names (strip protocol, strip path)
-  awk '{print $1}' "$OUT_DIR/live_domains.txt" \
-    | sed 's|https\?://||' | sed 's|/.*||' | sort -u \
+  sed 's|https\?://||' "$OUT_DIR/live_urls.txt" \
+    | sed 's|/.*||' | sort -u \
     > "$OUT_DIR/alive-domains.txt"
 
-  # Full HTTPS URLs for crawl/nuclei
-  grep "^https" "$OUT_DIR/live_domains.txt" \
-    | awk '{print $1}' | sort -u \
+  # HTTPS-only URLs for tools that need it
+  grep "^https://" "$OUT_DIR/live_urls.txt" \
     > "$OUT_DIR/https-subs.txt"
-
-  # Plain URL list (for web_crawl.sh autodetect)
-  cat "$OUT_DIR/https-subs.txt" > "$OUT_DIR/live_urls.txt"
 
   NDOMAINS=$(wc -l < "$OUT_DIR/alive-domains.txt" | tr -d ' ')
   NURLS=$(wc -l < "$OUT_DIR/https-subs.txt" | tr -d ' ')
@@ -145,8 +151,9 @@ rm -rf "$TMP_DIR"
 log_ok "Done. Results in $OUT_DIR/"
 log_ok "  all_subdomains.txt — $TOTAL subs (raw)"
 if [ "$LIVE" -gt 0 ]; then
+  log_ok "  live_urls.txt      — $NURLS live URLs (protocol+host)"
   log_ok "  alive-domains.txt  — $NDOMAINS clean domains"
-  log_ok "  https-subs.txt     — $NURLS HTTPS URLs"
+  log_ok "  https-subs.txt     — HTTPS-only URLs"
   log_ok "  live_domains.txt   — $LIVE httpx output (tech + status)"
 else
   log_ok "  No live hosts found."
