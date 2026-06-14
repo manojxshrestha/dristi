@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+">
   <img src="https://img.shields.io/badge/license-Apache%202.0-green" alt="Apache 2.0">
   <img src="https://img.shields.io/badge/WSTG-v4.2-purple" alt="WSTG v4.2">
-  <img src="https://img.shields.io/badge/MCP%20tools-86-orange" alt="86 MCP Tools">
+  <img src="https://img.shields.io/badge/MCP%20tools-89-orange" alt="89 MCP Tools">
   <img src="https://img.shields.io/badge/H1%20reports-8.3k+-red" alt="8,300+ H1 Reports">
   <img src="https://img.shields.io/badge/agents-87-blueviolet" alt="87 Agents">
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs Welcome">
@@ -22,7 +22,7 @@
 
 <p align="center">
   Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for bug hunting,
-  external red-team work, and authorized pentests — <b>87 agents</b> · <b>86 MCP tools</b> ·
+  external red-team work, and authorized pentests — <b>87 agents</b> · <b>89 MCP tools</b> ·
   OWASP WSTG v4.2 methodology across 25 vulnerability classes ·
   enterprise identity + infrastructure attack matrices ·
   engagement management · Burp MCP integration ·
@@ -664,7 +664,7 @@ Each category has a dedicated prompt file (`prompts/<category>.md`) with test li
 
 ---
 
-## MCP Tools (86 total)
+## MCP Tools (89 total)
 
 ### Knowledge Base (5)
 - `list_wstg_categories` — list all 12 WSTG categories

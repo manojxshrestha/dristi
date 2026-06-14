@@ -12,7 +12,7 @@ Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive
 
 **Stats:**
 - 89 MCP tools · 87 agents (54 hunt-* + 33 pipeline/specialty)
-- 13 WSTG categories · 96 test cases
+- 13 WSTG categories · 109 test cases
 - 48 CLI tool wrapper scripts · 20 GF patterns for parameter discovery
 - 12-phase autonomous pipeline (autopilot)
 - Burp Suite MCP integration · Playwright browser automation
@@ -24,7 +24,7 @@ Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive
 ### Four Layers
 
 ```
-Layer 1: Methodology + Agents        — how to think (5-phase workflow, critical thinking)
+Layer 1: Methodology + Agents        — how to think (12-phase pipeline, critical thinking)
 Layer 2: 54 hunt-* agents            — what to look for (per-class detection + bypass)
 Layer 3: Enterprise attack chains    — what to hit on the perimeter (M365, Okta, K8s, VPN, IAM)
 Layer 4: Validation + Reporting      — how to ship it (7-Question Gate, VRT, redaction)

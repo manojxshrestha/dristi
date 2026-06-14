@@ -59,7 +59,7 @@ Then describe what you want to do:
 > *I'm practicing on OWASP Juice Shop running on localhost:3000. This is a deliberately vulnerable training app, no authorization concerns. Walk me through finding my first bug — start with recon.*
 
 **What happens next:**
-- The `bb-methodology` agent loads (the 12-phase workflow)
+- The `bb-methodology` skill loads (the 12-phase workflow)
 - The agent walks you through Phase 1 (Scope) and asks: *"Is this practice mode?"*
 - The `web2-recon` or `offensive-osint` agent loads and gives you concrete commands to run
 - You follow along, paste results back, and the LLM spots vulnerable patterns
@@ -85,9 +85,9 @@ The stack maps to a 12-phase engagement workflow. Agents compose left-to-right t
 
 | Phase | What you're doing | Primary agents |
 |---|---|---|
-| **1. Scope** | Reading program rules, deciding what's in/out, scaffolding the engagement folder | `bug-bounty`, `bb-methodology`, `osint-methodology` |
-| **2. Recon** | Asset discovery, subdomain enum, endpoint mapping, secret hunting | `offensive-osint`, `web2-recon`, `bb-local-toolkit`, `search` |
-| **3. Hunt** | Active testing for bugs in specific vuln classes | 54 `hunt-*` agents + 7 enterprise-platform agents + `security-arsenal` |
+| **1. Scope** | Reading program rules, deciding what's in/out, scaffolding the engagement folder | `bug-bounty`, `bb-methodology` (skill), `osint-methodology` |
+| **2. Recon** | Asset discovery, subdomain enum, endpoint mapping, secret hunting | `offensive-osint`, `web2-recon`, `bb-local-toolkit` (skill) |
+| **3. Hunt** | Active testing for bugs in specific vuln classes | 54 `hunt-*` agents + 7 enterprise-platform agents + `web2-vuln-classes` |
 | **3.5. Deep-think** | (conditional) First-principles gap analysis when hunt yields zero | `deepthink` |
 | **4. Exploit** | Deepen confirmed findings, attempt WAF bypass | 54 `hunt-*` agents + `web2-vuln-classes` |
 | **4.5. Search-agent** | (conditional) 13-resource retrieval when exploit stalls | `search` |
@@ -115,9 +115,9 @@ Beyond the agents themselves, the stack enforces three habits that separate prod
 
 Start OpenCode in the project directory and describe your target:
 
-> *"Starting Dristi engagement on [target] — enterprise bug bounty program with web, API, mobile, and cloud in scope. Run scope intake with bb-methodology, register assets via MCP."*
+> *"Starting Dristi engagement on [target] — enterprise bug bounty program with web, API, mobile, and cloud in scope. Run scope intake, register assets via MCP."*
 
-The `bb-methodology` agent loads and walks through the program rules, identifying in-scope assets, OOS items, focus areas, and bounty bands. Use MCP's `register_scope()` to log domains.
+The `bug-bounty` agent loads and walks through the program rules, identifying in-scope assets, OOS items, focus areas, and bounty bands. Use MCP's `register_scope()` to log domains.
 
 ### Step 2 — Recon
 
@@ -150,15 +150,15 @@ As you encounter different attack surfaces, describe what you see. The matching 
 | **NoSQL/MongoDB in stack** | *"NoSQLi on the JSON login endpoint — testing operator injection."* | `hunt-nosqli` | MongoDB operator payloads, blind extraction, BSON injection |
 | **LDAP in stack** | *"LDAP injection on the search endpoint — testing filter bypass."* | `hunt-ldap` | Filter injection, blind extraction, AD-specific queries |
 | **Open redirect in URL param** | *"Open redirect in the ?next= parameter — testing for whitelist bypass."* | `hunt-open-redirect` | Protocol confusion, @-userinfo tricks, path-traversal in redirect |
-| **HTTP/2 support** | *"H2C smuggling on the HTTP/2 endpoint — testing protocol downgrade."* | `hunt-h2clobber` | H2C smuggling, connection upgrade, backend confusion |
+| **HTTP/2 support** | *"H2C smuggling on the HTTP/2 endpoint — testing protocol downgrade."* | `hunt-http-smuggling` | H2C smuggling, connection upgrade, backend confusion |
 | **Deserialization in cookie/POST** | *"Deserialization in the session cookie — testing Java/Python/PHP gadget chains."* | `hunt-deserialization` | Language-specific gadget chains, ysoserial payloads, detection patterns |
-| **Subdomain takeover CNAME** | *"Subdomain takeover — CNAME points to unclaimed cloud service."* | `hunt-subdomain-takeover` | Cloud provider takeover procedures, validation commands |
-| **Email/spoofing/SPF** | *"Email security audit — SPF, DMARC, DKIM, and phishing feasibility."* | `hunt-email` | DNS record analysis, spoofing vectors, DMARC reporting |
+| **Subdomain takeover CNAME** | *"Subdomain takeover — CNAME points to unclaimed cloud service."* | `hunt-subdomain` | Cloud provider takeover procedures, validation commands |
+| **Email/spoofing/SPF** | *"Email security audit — SPF, DMARC, DKIM, and phishing feasibility."* | `offensive-osint` | DNS record analysis, spoofing vectors, DMARC reporting |
 | **Cloud IAM (AWS/Azure/GCP)** | *"Cloud IAM review — S3 bucket policies, IAM role chaining, privilege escalation paths."* | `cloud-iam-deep` | AWS/Azure/GCP IAM analysis, privilege escalation, misconfiguration scanning |
 | **M365/Entra ID** | *"M365 tenant audit — Entra ID config, federation trust, app permissions, SharePoint enum."* | `m365-entra-attack` | Tenant fingerprint, federated domain risk, delegated permission abuse |
-| **Android APK** | *"Android APK analysis — decompile, extract endpoints, hardcoded secrets, manifest review."* | `android-analysis` | APK decompilation, secret regex scanning, manifest permission analysis |
-| **iOS IPA** | *"iOS app analysis — Mach-O binary, plist review, URL schemes, hardcoded tokens."* | `mobile-analysis` | Binary analysis, entitlement review, insecure data storage patterns |
-| **Smart contract** | *"Smart contract audit — Solidity reentrancy, access control, oracle manipulation."* | `web3-audit` | Vulnerability patterns (reentrancy, flash loan, oracle, access control), gas optimizations |
+| **Android APK** | *"Android APK analysis — decompile, extract endpoints, hardcoded secrets, manifest review."* | `apk-redteam-pipeline` | APK decompilation, secret regex scanning, manifest permission analysis |
+| **iOS IPA** | *"iOS app analysis — Mach-O binary, plist review, URL schemes, hardcoded tokens."* | `apk-redteam-pipeline` | Binary analysis, entitlement review, insecure data storage patterns |
+| **Smart contract** | *"Smart contract audit — Solidity reentrancy, access control, oracle manipulation."* | `meme-coin-audit` (token) / `cloud-iam-deep` (wallet) | Reentrancy, flash loan, oracle, access control patterns |
 | **Meme coin / token** | *"Token audit — honeypot detection, liquidity locks, ownership renounce, sell taxes."* | `meme-coin-audit` | Rug-pull patterns, authority retention, liquidity analysis, transfer restrictions |
 
 ### Step 4 — Validate before drafting
@@ -225,13 +225,13 @@ Dristi's WSTG MCP server provides 89 tools for methodology, tracking, and engage
 
 | Task / question | Agent(s) |
 |---|---|
-| "I want to start a new engagement" | Start OpenCode, describe target → `bb-methodology` loads |
-| "How should I plan this hunt?" | `bb-methodology` + `osint-methodology` |
+| "I want to start a new engagement" | Start OpenCode, describe target → `bug-bounty` loads |
+| "How should I plan this hunt?" | `bug-bounty` + `osint-methodology` |
 | "Find subdomains / endpoints / leaked secrets" | `offensive-osint` + `web2-recon` |
-| "Which tool from my local stack does X?" | `bb-local-toolkit` |
+| "Which tool from my local stack does X?" | `bb-local-toolkit` (skill) |
 | "I'm hunting [vuln class]" | `hunt-<class>` (auto-triggers on class mention) |
-| "What's the payload that bypasses [filter]?" | `security-arsenal` |
-| "Smart-contract audit for [protocol]" | `web3-audit` (or `meme-coin-audit` for tokens) |
+| "What's the payload that bypasses [filter]?" | `web2-vuln-classes` |
+| "Smart-contract audit for [protocol]" | `meme-coin-audit` (for tokens) |
 | "I think I found a bug — should I report it?" | `/triage` (decides PASS / KILL / DOWNGRADE / CHAIN-REQUIRED) |
 | "About to take a screenshot of my PoC" | Read `evidence-hygiene` first (cookie + PII redaction) |
 | "Need to sanitize a HAR file before attaching" | `evidence-hygiene` (jq filter guidance) |

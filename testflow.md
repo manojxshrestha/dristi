@@ -171,6 +171,8 @@ Invoke `@exploit` to systematically validate and escalate findings:
 
 ---
 
+### P10: CAPTURE — Evidence Collection
+
 | Step | Action | What Happens |
 |------|--------|--------------|
 | 1 | Describe what you're about to screenshot | `@evidence-hygiene` loads |
@@ -179,7 +181,7 @@ Invoke `@exploit` to systematically validate and escalate findings:
 
 ---
 
-### P6: VALIDATE — 7-Question Gate
+### P11: VALIDATE — 7-Question Gate
 
 | Step | Action | What Happens |
 |------|--------|--------------|
@@ -204,7 +206,7 @@ Q7: Is this NOT on the never-submit list?
 
 ---
 
-### P7: REPORT — Draft and Submit
+### P12: REPORT — Draft and Submit
 
 | Step | Action | What Happens |
 |------|--------|--------------|
@@ -224,7 +226,7 @@ Q7: Is this NOT on the never-submit list?
 @autopilot
 ```
 
-Runs the entire P1–P8 pipeline **autonomously** — no prompts at each step. Only stops at the end to show you the report + PoC evidence for submission.
+Runs the entire P1–P12 pipeline **autonomously** — no prompts at each step. Only stops at the end to show you the report + PoC evidence for submission.
 
 **What it does:**
 1. Asks for target + platform + scope (once at the start)
@@ -308,15 +310,17 @@ Every OWASP-classified bug class: XSS (reflected/stored/DOM/mXSS/CSP bypass), SQ
 
 ```
 [ ] P1: Scope — platform, in-scope, OOS, credentials registered
-[ ] P2: Recon — subdomains, endpoints, secrets, classified
-[ ] P3: Surface — P1/P2/P3 ranked + Kill List
-[ ] P4: Hunt — relevant @hunt-* agents against findings
-[ ] P4: Findings logged via log_finding()
-[ ] P4: WSTG tests tracked via track_test()
+[ ] P2: Auth — credentials tested, WAF fingerprinted, deliverable saved
+[ ] P3: Intel — WHOIS, M365, third-party misconfig, spoof, cloud enum
+[ ] P4: Recon — subdomains, endpoints, secrets, classified
+[ ] P5: Surface — Tier 0/1/2 ranked + functional groups
+[ ] P6: Hunt — all bug classes tested, findings logged
+[ ] P6: Findings logged via log_finding()
+[ ] P6: WSTG tests tracked via track_test()
 [ ] P8: Exploit — deep-research, WAF bypass, chain findings
-[ ] P5: Evidence captured with hygiene
-[ ] P6: Every finding validated via @validate
-[ ] P7: Report drafted via @report
-[ ] P7: Coverage checked via get_coverage()
-[ ] P7: Report generated via generate_report()
+[ ] P10: Evidence captured with hygiene
+[ ] P11: Every finding validated via @validate
+[ ] P12: Report drafted via @report
+[ ] P12: Coverage checked via get_coverage()
+[ ] P12: Report generated via generate_report()
 ```

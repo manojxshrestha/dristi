@@ -14,13 +14,12 @@ Dristi is a dual-interface security testing platform: an **MCP server** (89 tool
 │  Server (89 tools)│    │                         │
 │  ──────────────── │    │  ──────────────────────  │
 │  • WSTG v4.2     │    │  • hunt-xss, hunt-sqli   │
- │  • WSTG v4.2     │    │  • bb-methodology        │
 │  • WAF bypass    │    │  • triage-validation     │
 │  • Findings DB    │    │  • offensive-osint       │
 │  • Engagement     │    │  • m365-entra-attack     │
-│    management     │    │  • ... 64 more           │
+│    management     │    │  • ... 80 more           │
 │  • Phase gates    │    │  • deepthink            │
-│  • Reporting      │    │  • search          │
+│  • Reporting      │    │  • search               │
 │  • Knowledge      │    └──────────┬───────────────┘
 │    graph          │               │ triggers
 └────────┬──────────┘               ▼
@@ -71,14 +70,14 @@ Agents auto-load when you describe what you're testing. Each is a `SKILL.md` fil
 
 | Domain | Count | Agent names |
 |--------|-------|-------------|
-| Pipeline & Dispatch | 10 | `autopilot`, `consult`, `scope`, `pintel`, `recon`, `surface`, `hunt`, `capture`, `validate`, `report` |
-| Recon & OSINT | 5 | `offensive-osint`, `web2-recon`, `osint-methodology`, `bb-local-toolkit`, `search` |
-| Web App Hunting | 49 | `hunt-xss`, `hunt-sqli`, `hunt-idor`, `hunt-ssrf`, `hunt-rce`, `hunt-file-upload`, `hunt-graphql`, `hunt-xxe`, `hunt-ssti`, `hunt-csrf`, `hunt-oauth`, `hunt-saml`, `hunt-ato`, `hunt-mfa-bypass`, `hunt-auth-bypass`, `hunt-brute-force`, `hunt-cors`, `hunt-deserialization`, `hunt-dom`, `hunt-host-header`, `hunt-http-smuggling`, `hunt-ldap`, `hunt-lfi`, `hunt-nosqli`, `hunt-open-redirect`, `hunt-session`, `hunt-source-leak`, `hunt-subdomain`, `hunt-tls-network`, `hunt-websocket`, `hunt-api-misconfig`, `hunt-cache-poison`, `hunt-cloud-misconfig`, `hunt-business-logic`, `hunt-cicd`, `hunt-grpc`, `hunt-k8s`, `hunt-laravel`, `hunt-nextjs`, `hunt-nodejs`, `hunt-springboot`, `hunt-aspnet`, `hunt-sharepoint`, `hunt-ntlm-info`, `hunt-misc`, `hunt-race-condition`, `hunt-llm-ai`, `hunt-dispatch`, `web2-vuln-classes` |
-| Enterprise Platform | 7 | `m365-entra-attack`, `okta-attack`, `cloud-iam-deep`, `vmware-vcenter-attack`, `enterprise-vpn-attack`, `apk-redteam-pipeline`, `supply-chain-attack-recon` |
-| Red Team Tradecraft | 2 | `redteam-mindset`, `mid-engagement-ir-detection` |
-| Workflow & Validation | 6 | `bb-methodology`, `bug-bounty`, `deepthink`, `triage-validation`, `security-arsenal`, `hunt-dispatch` |
+| Pipeline & Dispatch | 14 | `autopilot`, `consult`, `scope`, `auth`, `pintel`, `recon`, `surface`, `hunt`, `deepthink`, `exploit`, `search`, `capture`, `validate`, `report` |
+| Recon & OSINT | 4 | `offensive-osint`, `web2-recon`, `osint-methodology`, `osint` |
+| Web App Hunting | 54 | `hunt-xss`, `hunt-sqli`, `hunt-idor`, `hunt-ssrf`, `hunt-rce`, `hunt-file-upload`, `hunt-graphql`, `hunt-xxe`, `hunt-ssti`, `hunt-csrf`, `hunt-oauth`, `hunt-saml`, `hunt-ato`, `hunt-mfa-bypass`, `hunt-auth-bypass`, `hunt-brute-force`, `hunt-clickjacking`, `hunt-cors`, `hunt-crlf`, `hunt-deserialization`, `hunt-dependency-confusion`, `hunt-dom`, `hunt-host-header`, `hunt-http-param-pollution`, `hunt-http-smuggling`, `hunt-jwt-confusion`, `hunt-ldap`, `hunt-lfi`, `hunt-nosqli`, `hunt-open-redirect`, `hunt-session`, `hunt-source-leak`, `hunt-subdomain`, `hunt-tls-network`, `hunt-websocket`, `hunt-api-misconfig`, `hunt-cache-poison`, `hunt-cloud-misconfig`, `hunt-business-logic`, `hunt-cicd`, `hunt-k8s`, `hunt-laravel`, `hunt-nextjs`, `hunt-nodejs`, `hunt-springboot`, `hunt-aspnet`, `hunt-sharepoint`, `hunt-ntlm-info`, `hunt-misc`, `hunt-race-condition`, `hunt-llm-ai`, `hunt-dispatch`, `hunt-mass-assignment`, `hunt-prototype-pollution` |
+| Enterprise Platform | 6 | `m365-entra-attack`, `okta-attack`, `cloud-iam-deep`, `enterprise-vpn-attack`, `apk-redteam-pipeline`, `supply-chain-attack-recon` |
+| Red Team Tradecraft | 1 | `redteam-mindset` |
+| Workflow & Validation | 2 | `bug-bounty`, `triage-validation` |
 | Reporting & Hygiene | 4 | `report-writing`, `bugcrowd-reporting`, `evidence-hygiene`, `redteam-report-template` |
-| Specialized | 2 | `web3-audit`, `meme-coin-audit` |
+| Specialized | 2 | `meme-coin-audit`, `web2-vuln-classes` |
 
 ### 3. Commands (14)
 
@@ -93,7 +92,7 @@ Slash commands in `.opencode/commands/` that route to specific agents:
 | `/report` | report-writing + bugcrowd-reporting | Draft report |
 | `/chain` | chain-building agents | Build exploit chain |
 | `/autopilot <target>` | multiple agents | Autonomous hunt loop |
-| `/scope <asset>` | bb-methodology | Check asset scope |
+| `/scope <asset>` | `scope` | Check asset scope |
 | `/surface <target>` | offensive-osint | Ranked attack surface |
 | `/intel <target>` | intel engine | CVE/disclosed-report intel |
 | `/pickup <target>` | multiple agents | Resume previous hunt |
