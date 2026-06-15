@@ -186,6 +186,14 @@ if ! $QUICK; then
     "github.com/projectdiscovery/notify/cmd/notify@latest"
     # Uncover
     "github.com/projectdiscovery/uncover/cmd/uncover@latest"
+    # Crawlers
+    "github.com/jaeles-project/gospider@latest"
+    "github.com/edoardottt/cariddi/cmd/cariddi@latest"
+    # Takeover / bypass
+    "github.com/haccer/subjack@latest"
+    "github.com/lobuhi/byp4xx@latest"
+    # SaaS misconfiguration scanner
+    "github.com/intigriti/misconfig-mapper/cmd/misconfig-mapper@latest"
   )
 
   for tool in "${GO_TOOLS[@]}"; do
@@ -304,21 +312,69 @@ if ! $QUICK; then
 fi # end if ! $QUICK
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# PHASE 5e: Python reconnaissance tools (Spoofy, cloud_enum, msftrecon, Scopify)
+# PHASE 5e: Python reconnaissance tools (Spoofy, cloud_enum, msftrecon, Scopify, waymore)
 # ═══════════════════════════════════════════════════════════════════════════════
 if ! $QUICK; then
-  header "Phase 5e: Python recon tools (Spoofy, cloud_enum, msftrecon, Scopify)"
+  header "Phase 5e: Python recon tools"
 
-  INTEL_SCRIPT="$REPO_DIR/scripts/tools/phase-intel.sh"
-  if [ -f "$INTEL_SCRIPT" ]; then
-    if command -v uv &>/dev/null && command -v git &>/dev/null; then
-      info "Installing intel tools via phase-intel.sh..."
-      bash "$INTEL_SCRIPT" --install 2>&1 || warn "Some intel tools failed to install (see log)"
-    else
-      warn "uv or git missing — skip intel tool install"
+  TOOLS_DIR="$HOME/.local/bin"
+  mkdir -p "$TOOLS_DIR"
+
+  install_intel_repo() {
+    local repo="$1"
+    local github_path="$2"
+    local target_dir="$TOOLS_DIR/$repo"
+
+    if [ -d "$target_dir/.git" ]; then
+      ok "$repo — already installed"
+      return 0
     fi
+
+    info "Installing $repo..."
+    git clone --filter="blob:none" "https://github.com/$github_path" "$target_dir" 2>/dev/null || {
+      warn "Failed to clone $repo"
+      return 1
+    }
+
+    if [ -f "$target_dir/requirements.txt" ] || [ -f "$target_dir/pyproject.toml" ]; then
+      uv venv "$target_dir/venv" &>/dev/null || true
+      uv pip install --python "$target_dir/venv/bin/python" \
+        -r "${target_dir}/requirements.txt" 2>/dev/null || \
+      uv pip install --python "$target_dir/venv/bin/python" \
+        dnspython requests requests-futures 2>/dev/null || true
+    fi
+
+    ok "$repo installed"
+  }
+
+  install_intel_repo "msftrecon" "Arcanum-Sec/msftrecon"
+  install_intel_repo "Scopify" "Arcanum-Sec/Scopify"
+  install_intel_repo "Spoofy" "MattKeeley/Spoofy"
+  install_intel_repo "cloud_enum" "initstring/cloud_enum"
+
+  # waymore (Python archive URL collector)
+  WAYMORE_DIR="$REPO_DIR/tools/waymore"
+  if [ -f "$WAYMORE_DIR/venv/bin/waymore" ]; then
+    ok "waymore — already installed"
   else
-    warn "phase-intel.sh not found at $INTEL_SCRIPT"
+    info "Installing waymore..."
+    mkdir -p "$WAYMORE_DIR"
+    git clone --depth 1 https://github.com/xnl-h4ck3r/waymore.git "$WAYMORE_DIR" 2>/dev/null || true
+    python3 -m venv "$WAYMORE_DIR/venv" 2>/dev/null || true
+    "$WAYMORE_DIR/venv/bin/pip" install -q -r "$WAYMORE_DIR/requirements.txt" 2>/dev/null || true
+    if [ -f "$WAYMORE_DIR/venv/bin/waymore" ]; then
+      ok "waymore installed"
+    else
+      warn "waymore install failed (manual: cd $WAYMORE_DIR && python3 -m venv venv && pip install -r requirements.txt)"
+    fi
+  fi
+
+  # uro (URL deduplication — used by waymore/gospider)
+  if command -v uro &>/dev/null; then
+    ok "uro — already installed"
+  else
+    info "Installing uro..."
+    uv pip install --system uro 2>/dev/null && ok "uro installed" || warn "uro install failed"
   fi
 fi
 

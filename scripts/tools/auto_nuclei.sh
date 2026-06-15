@@ -36,14 +36,9 @@ LOG_FILE="$OUT_DIR/nuclei.log"
 
 trap 'log_warn "Interrupted"; exit 130' INT
 
-# ensure nuclei
 if ! command -v nuclei &>/dev/null; then
-    log_info "Installing nuclei..."
-    if ! go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest 2>&1; then
-        log_err "nuclei install failed"
-        exit 1
-    fi
-    log_ok "nuclei installed"
+    log_err "nuclei not found — install via: go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest"
+    exit 1
 fi
 
 log_info "Updating templates..."

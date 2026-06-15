@@ -27,11 +27,9 @@ mkdir -p "$OUT_DIR"
 
 export PATH="$HOME/go/bin:/usr/local/bin:$PATH"
 
-# ── Ensure dalfox is installed ──────────────────────────────────────
 if ! command -v dalfox &>/dev/null; then
-  log_info "Installing dalfox ..."
-  go install github.com/hahwul/dalfox/v2@latest 2>/dev/null
-  log_ok "dalfox installed"
+  log_err "dalfox not found — install via: go install github.com/hahwul/dalfox/v2@latest"
+  exit 1
 fi
 
 # ── Check input ─────────────────────────────────────────────────────

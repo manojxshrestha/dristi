@@ -38,33 +38,13 @@ if [[ ":$PATH:" != *":$HOME/go/bin:"* ]]; then
   export PATH="$PATH:$HOME/go/bin"
 fi
 
-# ── Ensure tools are installed ──────────────────────────────────────
-for tool in subfinder assetfinder httpx dnsx jq; do
+# ── Verify tools ────────────────────────────────────────────────────
+for tool in subfinder assetfinder httpx dnsx jq findomain; do
   if ! command -v "$tool" &>/dev/null; then
-    log_info "Installing $tool ..."
-    case "$tool" in
-      subfinder)  GO111MODULE=on go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest ;;
-      assetfinder) GO111MODULE=on go install github.com/tomnomnom/assetfinder@latest ;;
-      httpx)      GO111MODULE=on go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest ;;
-      dnsx)       GO111MODULE=on go install -v github.com/projectdiscovery/dnsx/cmd/dnsx@latest ;;
-    esac
-    log_ok "$tool installed"
+    log_err "$tool not found — install required tool"
+    exit 1
   fi
 done
-
-if ! command -v findomain &>/dev/null; then
-  log_info "Installing findomain ..."
-  command -v unzip &>/dev/null || { log_err "unzip required"; exit 1; }
-  wget -q "https://github.com/Findomain/Findomain/releases/latest/download/findomain-linux.zip" -O /tmp/findomain-linux.zip
-  unzip -q -o /tmp/findomain-linux.zip -d /tmp/findomain 2>/dev/null
-  chmod +x /tmp/findomain/findomain
-  INSTALL_DIR="$HOME/.local/bin"
-  mkdir -p "$INSTALL_DIR"
-  mv /tmp/findomain/findomain "$INSTALL_DIR/findomain"
-  export PATH="$INSTALL_DIR:$PATH"
-  rm -rf /tmp/findomain-linux.zip /tmp/findomain
-  log_ok "findomain installed"
-fi
 
 # ── Step 1: Passive subdomain enumeration ───────────────────────────
 log_info "Running subfinder ..."

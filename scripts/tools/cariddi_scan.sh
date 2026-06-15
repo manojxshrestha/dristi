@@ -54,11 +54,9 @@ if [ ! -f "$ALIVE_FILE" ] || [ ! -s "$ALIVE_FILE" ]; then
   exit 1
 fi
 
-# ── Ensure cariddi is installed ─────────────────────────────────────
 if ! command -v cariddi &>/dev/null; then
-  log_info "Installing cariddi ..."
-  go install github.com/edoardottt/cariddi/cmd/cariddi@latest 2>/dev/null
-  log_ok "cariddi installed"
+  log_err "cariddi not found — install via: go install github.com/edoardottt/cariddi/cmd/cariddi@latest"
+  exit 1
 fi
 
 # ── Clean previous run ──────────────────────────────────────────────

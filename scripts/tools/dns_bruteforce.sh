@@ -71,21 +71,9 @@ log_ok "Resolvers: $(wc -l < "$RESOLVERS" | tr -d ' ') entries"
 
 USE_LIST="${WORDLIST:-$SUB_LIST}"
 
-# ── Ensure tools are installed ──────────────────────────────────────
-
 if ! command -v puredns &>/dev/null; then
-  log_info "Installing puredns..."
-  go install github.com/d3mondev/puredns/v2@latest 2>/dev/null
-fi
-
-if ! command -v massdns &>/dev/null; then
-  log_info "Compiling massdns..."
-  TMPDIR=$(mktemp -d)
-  git clone --depth 1 https://github.com/blechschmidt/massdns.git "$TMPDIR/massdns" 2>/dev/null || true
-  make -C "$TMPDIR/massdns" -s 2>/dev/null || true
-  sudo cp "$TMPDIR/massdns/bin/massdns" /usr/local/bin/ 2>/dev/null || true
-  rm -rf "$TMPDIR"
-  command -v massdns &>/dev/null && log_ok "massdns installed" || log_warn "massdns not available (puredns has internal resolver)"
+  log_err "puredns not found — install via: go install github.com/d3mondev/puredns/v2@latest"
+  exit 1
 fi
 
 # ── Run puredns bruteforce ──────────────────────────────────────────

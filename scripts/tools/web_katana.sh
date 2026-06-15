@@ -30,8 +30,8 @@ NTOTAL=$(wc -l < "$OUT_DIR/https-subs.txt" | tr -d ' ')
 log_info "Loaded $NTOTAL live HTTPS URLs"
 
 if ! command -v katana &>/dev/null; then
-  log_info "Installing katana ..."
-  go install github.com/projectdiscovery/katana/cmd/katana@latest 2>/dev/null
+  log_err "katana not found — install via: go install github.com/projectdiscovery/katana/cmd/katana@latest"
+  exit 1
 fi
 
 log_info "Running katana ..."

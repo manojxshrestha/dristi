@@ -52,11 +52,9 @@ grep "?" "$CRAWLED" | sort -u > "$OUT_DIR/paramurls.txt"
 NPARAM=$(wc -l < "$OUT_DIR/paramurls.txt" | tr -d ' ')
 log_ok "paramurls.txt: $NPARAM URLs with parameters"
 
-# ── Step 2: Ensure gf is installed ──────────────────────────────────
 if ! command -v gf &>/dev/null; then
-  log_info "Installing gf ..."
-  go install github.com/tomnomnom/gf@latest 2>/dev/null
-  log_ok "gf installed"
+  log_err "gf not found — install via: go install github.com/tomnomnom/gf@latest"
+  exit 1
 fi
 
 # ── Step 3: Setup gf patterns from wordlists ────────────────────────

@@ -32,12 +32,8 @@ NTOTAL=$(wc -l < "$OUT_DIR/https-subs.txt" | tr -d ' ')
 log_info "Loaded $NTOTAL live HTTPS URLs"
 
 if ! command -v gospider &>/dev/null; then
-  log_info "Installing gospider ..."
-  go install github.com/jaeles-project/gospider@latest 2>/dev/null
-fi
-if ! command -v httpx &>/dev/null; then
-  log_info "Installing httpx ..."
-  go install github.com/projectdiscovery/httpx/cmd/httpx@latest 2>/dev/null
+  log_err "gospider not found — install via: go install github.com/jaeles-project/gospider@latest"
+  exit 1
 fi
 
 GO_OUT="$OUT_DIR/gooutput"

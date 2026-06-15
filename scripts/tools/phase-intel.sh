@@ -58,92 +58,11 @@ _run_with_timeout() {
     return $rc
 }
 
-# ── Install dependencies ─────────────────────────────────────────────
-_setup_venv() {
-    local target_dir="$1"
-    local req_file="$2"
-
-    # Recreate venv if broken (missing pip or no venv at all)
-    if [ ! -d "$target_dir/venv" ] || [ ! -f "$target_dir/venv/bin/python3" ] || ! "$target_dir/venv/bin/python3" -m pip --version &>/dev/null 2>&1; then
-        log_info "Creating/recreating venv for $(basename "$target_dir")..."
-        rm -rf "$target_dir/venv"
-        uv venv "$target_dir/venv" &>/dev/null || return 1
-    fi
-
-    if [ -n "$req_file" ] && [ -f "$req_file" ]; then
-        uv pip install --python "$target_dir/venv/bin/python" -r "$req_file" &>/dev/null || return 1
-    elif [ -f "$target_dir/pyproject.toml" ]; then
-        # Install deps from pyproject.toml (no requirements.txt)
-        uv pip install --python "$target_dir/venv/bin/python" \
-            dnspython requests requests-futures &>/dev/null || return 1
-    fi
-
-    return 0
-}
-
-install_repo() {
-    local repo="$1"
-    local github_path="$2"
-    local target_dir="$TOOLS_DIR/$repo"
-
-    if [ -d "$target_dir/.git" ]; then
-        log_info "$repo already installed at $target_dir"
-        # Ensure venv is healthy even if repo exists
-        if [ -d "$target_dir/venv" ]; then
-            if ! "$target_dir/venv/bin/python3" -m pip --version &>/dev/null 2>&1; then
-                log_info "Recreating broken venv for $repo..."
-                _setup_venv "$target_dir" "$target_dir/requirements.txt" \
-                    && log_ok "$repo venv recreated" \
-                    || log_warn "$repo venv recreation failed"
-            fi
-        else
-            log_info "Creating venv for $repo..."
-            _setup_venv "$target_dir" "$target_dir/requirements.txt" \
-                && log_ok "$repo venv ready" \
-                || log_warn "$repo venv setup failed"
-        fi
-        return 0
-    fi
-
-    log_info "Cloning $repo..."
-    mkdir -p "$TOOLS_DIR"
-    git clone --filter="blob:none" "https://github.com/$github_path" "$target_dir" 2>/dev/null || {
-        log_warn "Failed to clone $repo"
-        return 1
-    }
-
-    if [ -f "$target_dir/requirements.txt" ] || [ -f "$target_dir/pyproject.toml" ]; then
-        log_info "Setting up Python venv for $repo..."
-        _setup_venv "$target_dir" "$target_dir/requirements.txt" \
-            && log_ok "$repo venv ready" \
-            || log_warn "$repo venv setup failed"
-    fi
-
-    log_ok "$repo installed"
-}
-
-do_install() {
-    log_step "Installing Intel tools"
-
-    if ! command -v git &>/dev/null; then log_err "git required"; return 1; fi
-    if ! command -v uv &>/dev/null; then log_err "uv required (curl -LsSf https://astral.sh/uv/install.sh)"; return 1; fi
-
-    install_repo "msftrecon" "Arcanum-Sec/msftrecon"
-    install_repo "Scopify" "Arcanum-Sec/Scopify"
-    install_repo "Spoofy" "MattKeeley/Spoofy"
-    install_repo "cloud_enum" "initstring/cloud_enum"
-
-    echo ""
-    log_ok "Install complete"
-    log_info "Installed: msftrecon, Scopify, Spoofy, cloud_enum"
-    echo ""
-    return 0
-}
-
-# ── Handle --install flag ────────────────────────────────────────────
+# ── Handle --install flag (removed — tools are prerequisites) ────────
 if [ "${1:-}" = "--install" ]; then
-    do_install
-    exit $?
+    log_err "Auto-install removed — install tools via setup/install.sh"
+    log_err "Required: msftrecon, Scopify, Spoofy, cloud_enum at ~/.local/bin/"
+    exit 1
 fi
 
 # ── Argument parsing ────────────────────────────────────────────────
@@ -324,7 +243,7 @@ _run_module() {
     local func_name="$2"
     # Export all helper functions + vars for subshell
     local funcs
-    funcs="$(declare -f log_ok log_err log_warn log_info log_step check_tool check_repo_tool _run_with_timeout _setup_venv install_repo do_install run_domain_info run_third_party_misconfigs run_spoof run_cloud_enum)"
+    funcs="$(declare -f log_ok log_err log_warn log_info log_step check_tool check_repo_tool _run_with_timeout run_domain_info run_third_party_misconfigs run_spoof run_cloud_enum)"
     export TARGET INTEL_DIR TOOLS_DIR MODULE_TIMEOUT GREEN RED YELLOW CYAN NC HOME PATH
     timeout "$MODULE_TIMEOUT" bash -c "$funcs; $func_name" 2>&1
     local rc=$?

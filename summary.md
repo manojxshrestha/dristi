@@ -7,8 +7,8 @@ Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for offensive
 **Goal:** Turn an LLM into an autonomous, methodical, reference-informed bug hunter that can run a full penetration test from scope to report — discovering subdomains, crawling endpoints, fingerprinting WAFs, dispatching per-class exploit agents, validating PoCs, capturing redacted evidence, and generating a submission-ready report — without human intervention between phases. The pipeline is modeled on real bug bounty workflows: triage by attack surface, read disclosed reports for technique guidance, bypass WAFs before exploiting, and run every finding through a 7-Question Gate before drafting.
 
 **Two operational modes:**
-- **`@autopilot`** — fully autonomous: dispatches phases 2-12 via `task()` sub-agents, auto-checks phase gates, auto-checkpoints, ends with a full report. Best for unattended full engagements.
-- **`@consult`** — interactive: same pipeline but pauses at every phase transition to present findings, suggest next steps, and ask for confirmation before proceeding. Best for learning or guided testing.
+- **`@autopilot`** — fully autonomous: runs all 12 phases via `pipeline.sh` (bash scripts) + dispatches AI analysis agents via `task()`. Best for unattended full engagements.
+- **`@consult`** — interactive: same pipeline but pauses at every phase transition with approval, calls `pipeline.sh` per-phase, dispatches AI analysis. Best for learning or guided testing.
 
 **Stats:**
 - 87 MCP tools · 87 agents (54 hunt-* + 33 pipeline/specialty)
