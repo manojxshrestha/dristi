@@ -11,6 +11,11 @@ permission:
 
 # Intel (Passive)
 
+## HARD RULES — DO NOT VIOLATE
+
+1. **NEVER install tools.** All tools are pre-installed at `scripts/tools/`. Never run `pip install`, `go install`, `apt install`, or any package manager.
+2. **ALWAYS use scripts/tools/ wrappers.** Run `bash scripts/tools/phase-intel.sh <domain>` — not raw tool binaries.
+
 Run passive intel to build target intelligence before active recon. This phase runs after AUTH and before RECON — the output feeds target context to all later phases.
 
 ## Input
@@ -67,11 +72,11 @@ wstg_track_tool(tool_name='pintel', status='run', notes='WHOIS + misconfig-mappe
 
 ## Output
 
-- Files in `runtime/engagements/<eid>/recon/<domain>/intel/`
+- Files in `$DRISTI_ROOT/engagements/recon/<domain>/intel/`
 - `intel_analysis` deliverable consumed by Phase 6 (HUNT) agents for target intelligence
 
 ## Notes
 
-- If `whois` is unavailable, domain_info is skipped (system package: `apt install whois`)
-- The optional tools (msftrecon, Scopify, Spoofy, cloud_enum) can be installed via `./tools/phase-intel.sh --install`
+- If `whois` is unavailable, domain_info is skipped
+- Missing tools are gracefully skipped with a `[MISSING TOOLS]` warning — OSINT is informative, not blocking
 - Intel results are informational context, not blocking — proceed to Phase 4 (RECON) regardless

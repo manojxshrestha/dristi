@@ -15,6 +15,8 @@
 
 set -euo pipefail
 
+source "$(dirname "$0")/_env.sh"
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 . "$SCRIPT_DIR/external_arsenal.sh"
 
@@ -55,7 +57,7 @@ if [ -z "$KEYWORD" ] && [ -n "$DOMAIN" ]; then
 fi
 
 BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
-TARGET_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/${DOMAIN:-$KEYWORD}"
+TARGET_DIR="${RECON_BASE}/${DOMAIN:-$KEYWORD}"
 OUT_DIR="${CLOUD_OUT_DIR:-$TARGET_DIR/cloud}"
 mkdir -p "$OUT_DIR"
 

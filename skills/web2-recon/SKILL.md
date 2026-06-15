@@ -57,7 +57,7 @@ TARGET="target.com"
 
 # Or run individual phases:
 ./scripts/tools/subdomain_enum.sh $TARGET    # Phase 0: passive subdomain enum
-./scripts/tools/web_crawl.sh $TARGET         # Phase 1: multi-engine crawl
+./scripts/tools/auto_recon.sh $TARGET         # Phase 1: multi-engine crawl (or run individually: web_waymore.sh, web_gospider.sh, web_katana.sh)
 ./scripts/tools/param_extract.sh $TARGET     # Phase 2: param URLs + GF filters
 ./scripts/tools/cariddi_scan.sh $TARGET      # Phase 3: secrets + info disclosure
 
@@ -105,7 +105,7 @@ runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/
 | 0 | `dns_bruteforce.sh` | puredns + massdns | DNS-resolved subs |
 | 0 | `zone_transfer.sh` | dig | AXFR test |
 | 0 | `github_dork.sh` | gh CLI | secret leaks |
-| 1 | `web_crawl.sh` | hakrawler + katana + waymore + gau → filter.sh | live crawled URLs |
+| 1 | `auto_recon.sh` | waymore + gospider + katana → uro | live crawled URLs |
 | 1 | `dir_bruteforce.sh` | ffuf | hidden directories |
 | 1 | `vhost_fuzz.sh` | ffuf | virtual hosts |
 | 2 | `param_extract.sh` | gf (20 patterns) | param URLs + classified vuln candidates |
@@ -118,7 +118,7 @@ runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/
 ### Automated GF Classification (preferred)
 
 ```bash
-# Run param_extract.sh after web_crawl.sh — does all of this automatically:
+# Run param_extract.sh after auto_recon.sh — does all of this automatically:
 ./scripts/tools/param_extract.sh $TARGET
 
 # Output: runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/params/

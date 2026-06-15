@@ -11,6 +11,8 @@
 
 set -euo pipefail
 
+source "$(dirname "$0")/_env.sh"
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
@@ -34,7 +36,7 @@ if ! gh auth status 2>/dev/null | grep -q "Logged in"; then
   exit 0
 fi
 
-OUT_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/github_dorks"
+OUT_DIR="${RECON_BASE}/$TARGET/github_dorks"
 mkdir -p "$OUT_DIR"
 RESULTS="$OUT_DIR/findings.txt"
 

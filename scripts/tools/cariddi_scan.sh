@@ -14,6 +14,8 @@
 
 set -euo pipefail
 
+source "$(dirname "$0")/_env.sh"
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
@@ -38,17 +40,17 @@ if [[ "$TARGET_RAW" == */* ]]; then
   [ -z "$TARGET" ] && TARGET="target"
 else
   TARGET="$TARGET_RAW"
-  [ -z "$ALIVE_FILE" ] && ALIVE_FILE="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/subdomains/alive-domains.txt"
+  [ -z "$ALIVE_FILE" ] && ALIVE_FILE="${RECON_BASE}/$TARGET/subdomains/alive-domains.txt"
 fi
 
-OUT_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/cariddi"
+OUT_DIR="${RECON_BASE}/$TARGET/cariddi"
 mkdir -p "$OUT_DIR"
 
 export PATH="$HOME/go/bin:/usr/local/bin:$PATH"
 
 if [ ! -f "$ALIVE_FILE" ] || [ ! -s "$ALIVE_FILE" ]; then
   log_err "alive-domains.txt not found: $ALIVE_FILE"
-  log_info "Run web_crawl.sh first or provide --alive <file>"
+  log_info "Run auto_recon.sh first or provide --alive <file>"
   exit 1
 fi
 

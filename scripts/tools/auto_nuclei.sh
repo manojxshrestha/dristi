@@ -3,6 +3,8 @@
 
 set -euo pipefail
 
+source "$(dirname "$0")/_env.sh"
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
@@ -25,10 +27,10 @@ if [[ "$1" == */* ]]; then
     [ -z "$TARGET" ] && TARGET="unknown"
 else
     TARGET="$1"
-    LIVE_FILE="${2:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/subdomains/https-subs.txt}"
+    LIVE_FILE="${2:-${RECON_BASE}/$TARGET/subdomains/https-subs.txt}"
 fi
 
-OUT_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/nuclei"
+OUT_DIR="${RECON_BASE}/$TARGET/nuclei"
 mkdir -p "$OUT_DIR"
 LOG_FILE="$OUT_DIR/nuclei.log"
 
@@ -49,7 +51,7 @@ nuclei -update-templates 2>>"$LOG_FILE" || log_warn "template update failed"
 
 if [ ! -f "$LIVE_FILE" ] || [ ! -s "$LIVE_FILE" ]; then
     log_warn "No live URLs: $LIVE_FILE"
-    log_info "Run subdomain_enum.sh and web_crawl.sh first"
+    log_info "Run subdomain_enum.sh and auto_recon.sh first"
     exit 0
 fi
 

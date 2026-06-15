@@ -22,6 +22,7 @@
 #   strict   alphanum-only, max 14 chars, drops random-looking 10+ char tokens.
 #            Designed for API-heavy sites (Twilio, Stripe) where docs leak
 #            example tokens / CSS selectors / URL slugs as raw "words".
+source "$(dirname "$0")/_env.sh"
 #   loose    only length + printable-ASCII filter (cewler's raw output minus
 #            obvious garbage).
 # =============================================================================
@@ -98,8 +99,8 @@ if [ ! -f "$RULE_FILE" ]; then
     exit 1
 fi
 
-# Output layout — fits existing recon/<target>/ convention
-OUT_DIR="runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/${TARGET}/wordlists"
+# Output layout
+OUT_DIR="$RECON_BASE/$TARGET/wordlists"
 mkdir -p "$OUT_DIR"
 RAW="$OUT_DIR/from-website.txt"
 CLEAN="$OUT_DIR/cleaned.txt"

@@ -30,6 +30,7 @@ log_ok()    { echo -e "${GREEN}[$(ts)] [+]${NC} $1"; }
 log_err()   { echo -e "${RED}[$(ts)] [-]${NC} $1"; }
 log_warn()  { echo -e "${YELLOW}[$(ts)] [!]${NC} $1"; }
 log_info()  { echo -e "${CYAN}[$(ts)] [*]${NC} $1"; }
+source "$(dirname "$0")/_env.sh"
 log_step()  { echo -e "    ${CYAN}[$(ts)] [>]${NC} $1"; }
 log_done()  { echo -e "    ${GREEN}[$(ts)] [✓]${NC} $1"; }
 log_vuln()  { echo -e "    ${RED}${BOLD}[$(ts)] [VULN]${NC} $1"; }

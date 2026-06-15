@@ -86,7 +86,9 @@ bash scripts/tools/auto_recon.sh $TARGET
 # Or individual phases:
 bash scripts/tools/subdomain_enum.sh $TARGET      # subfinder + assetfinder + findomain → dnsx → httpx
 bash scripts/tools/dns_bruteforce.sh $TARGET       # DNS brute-force via puredns
-bash scripts/tools/web_crawl.sh $TARGET            # multi-engine crawl (hakrawler + katana + waymore + gau → filter.sh)
+bash scripts/tools/web_waymore.sh $TARGET           # passive URLs (waymore)
+bash scripts/tools/web_gospider.sh $TARGET          # active crawl (gospider)
+bash scripts/tools/web_katana.sh $TARGET            # active crawl (katana)
 bash scripts/tools/param_extract.sh $TARGET        # param URLs + GF pattern classification
 bash scripts/tools/cariddi_scan.sh $TARGET         # secrets + info disclosure
 # nuclei skipped — too slow on live hosts. Run: bash scripts/tools/auto_nuclei.sh $TARGET

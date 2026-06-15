@@ -7,6 +7,8 @@
 
 set -euo pipefail
 
+source "$(dirname "$0")/_env.sh"
+
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
@@ -41,7 +43,7 @@ if [ -f "$TARGET" ] && [ -r "$TARGET" ]; then
     TARGET="${TARGET%.*}"
 fi
 
-RECON_DIR="${RECON_OUT_DIR:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET}"
+RECON_DIR="${RECON_OUT_DIR:-${RECON_BASE}/$TARGET}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 THREADS=20
 RATE_LIMIT=50  # requests per second

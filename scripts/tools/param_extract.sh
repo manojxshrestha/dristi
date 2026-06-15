@@ -12,6 +12,8 @@
 
 set -euo pipefail
 
+source "$(dirname "$0")/_env.sh"
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
@@ -31,16 +33,16 @@ while [ "$#" -gt 0 ]; do
 done
 
 [ -z "$TARGET" ] && { echo "Usage: $0 <domain> [--crawled <file>]" >&2; exit 1; }
-[ -z "$CRAWLED" ] && CRAWLED="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/crawl/crawledurls.txt"
+[ -z "$CRAWLED" ] && CRAWLED="${RECON_BASE}/$TARGET/crawl/crawledurls.txt"
 
-OUT_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/params"
+OUT_DIR="${RECON_BASE}/$TARGET/params"
 mkdir -p "$OUT_DIR"
 
 export PATH="$HOME/go/bin:/usr/local/bin:$PATH"
 
 if [ ! -f "$CRAWLED" ] || [ ! -s "$CRAWLED" ]; then
   log_err "crawledurls.txt not found: $CRAWLED"
-  log_info "Run web_crawl.sh first or provide --crawled <file>"
+  log_info "Run auto_recon.sh (or web_waymore.sh + web_gospider.sh + web_katana.sh) first or provide --crawled <file>"
   exit 1
 fi
 

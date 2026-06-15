@@ -8,13 +8,15 @@
 #   alive-domains.txt  — clean domain names (resolved + alive)
 #   https-subs.txt     — full HTTPS URLs for downstream tools
 #   live_domains.txt   — httpx raw output (status, tech, title, server)
-#   live_urls.txt      — HTTPS URLs (for web_crawl.sh autodetect)
+#   live_urls.txt      — HTTPS URLs (for auto_recon.sh autodetect)
 #
 # Usage:
 #   ./tools/subdomain_enum.sh <domain>
 # =============================================================================
 
 set -euo pipefail
+
+source "$(dirname "$0")/_env.sh"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -27,7 +29,7 @@ log_info() { echo -e "${CYAN}[*]${NC} $1"; }
 
 TARGET="${1:?Usage: $0 <domain>}"
 
-OUT_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/subdomains"
+OUT_DIR="${RECON_BASE}/$TARGET/subdomains"
 TMP_DIR="$OUT_DIR/.tmp"
 mkdir -p "$TMP_DIR" "$OUT_DIR"
 
@@ -77,17 +79,8 @@ log_info "Running findomain ..."
 findomain -t "$TARGET" -q 2>/dev/null | sort -u > "$TMP_DIR/findomain.txt"
 log_ok "  findomain: $(wc -l < "$TMP_DIR/findomain.txt" | tr -d ' ') subs"
 
-log_info "Running crt.sh ..."
-curl -s "https://crt.sh/?q=%25.$TARGET&output=json" 2>/dev/null \
-  | jq -r '.[].name_value' 2>/dev/null \
-  | sed 's/\*\.//g' \
-  | tr '\r' '\n' \
-  | grep -E "\.${TARGET}$" \
-  | sort -u > "$TMP_DIR/crtsh.txt"
-log_ok "  crt.sh: $(wc -l < "$TMP_DIR/crtsh.txt" | tr -d ' ') subs"
-
 # ── Step 2: Merge ───────────────────────────────────────────────────
-cat "$TMP_DIR/subfinder.txt" "$TMP_DIR/assetfinder.txt" "$TMP_DIR/findomain.txt" "$TMP_DIR/crtsh.txt" \
+cat "$TMP_DIR/subfinder.txt" "$TMP_DIR/assetfinder.txt" "$TMP_DIR/findomain.txt" \
   | sort -u > "$OUT_DIR/all_subdomains.txt"
 TOTAL=$(wc -l < "$OUT_DIR/all_subdomains.txt" | tr -d ' ')
 log_ok "Total unique subdomains: $TOTAL"

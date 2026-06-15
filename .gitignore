@@ -70,3 +70,6 @@ got-issue.md
 /flatmates-staging-page/
 /developersites-page/
 /server/testsearchquery123/
+
+# Root-level recon output (should be in runtime/engagements/*/recon/)
+/recon/

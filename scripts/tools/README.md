@@ -27,7 +27,6 @@ graph TD
     subgraph T["scripts/tools/"]
         T1["auto_recon.sh"]
         T2["subdomain_enum.sh"]
-        T3["web_crawl.sh"]
         T4["param_extract.sh"]
         T5["cariddi_scan.sh"]
         T6["xss_payloads.txt"]
@@ -65,7 +64,7 @@ graph TD
 
 | Script | Purpose | When | Input → Output |
 |--------|---------|------|----------------|
-| `dns_bruteforce.sh` | DNS brute-force via puredns | Subdomain discovery | `domain` → `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/dns/` |
+| `dns_bruteforce.sh` | DNS brute-force via puredns | Subdomain discovery | `domain` → `engagements/recon/<domain>/dns/` |
 | `subdomain_enum.sh` | Passive subdomain enum (subfinder + assetfinder + findomain → httpx) | Always run first | `domain` → `subdomains/all_subdomains.txt`, `live_domains.txt`, `live_urls.txt` |
 | `zone_transfer.sh` | AXFR check against NS servers | Subdomain discovery | `domain` → zone transfer results |
 | `github_dork.sh` | GitHub code search via `gh` | Subdomain discovery | `domain` → dork results (skipped if `gh` not logged in) |
@@ -78,11 +77,14 @@ graph TD
 
 | Script | Purpose | When | Input → Output |
 |--------|---------|------|----------------|
-| `web_crawl.sh` | Multi-engine crawl (hakrawler + katana + waymore + gau → merge → filter) | After subdomain enum | `live_urls.txt` → `crawl/crawledurls.txt`, `alive-domains.txt` |
+| `auto_recon.sh` (crawl phase) | Waymore + gospider + katana → uro merge | After subdomain enum | `live_urls.txt` → `crawl/crawledurls.txt`, `merged-crawl.txt` |
+| `web_waymore.sh` | Passive URLs (Wayback, CommonCrawl, AlienVault, URLScan) | Standalone or via auto_recon | `waygauurls.txt` |
+| `web_gospider.sh` | Active crawl via gospider + URL extract | Standalone or via auto_recon | `alivesubsurls.txt` |
+| `web_katana.sh` | Active crawl via katana | Standalone or via auto_recon | `cleansubskatanaurls.txt` |
 | `dir_bruteforce.sh` | ffuf directory brute + robots/sitemap | After crawl | `alive-domains.txt` → `dir/` results |
 | `vhost_fuzz.sh` | ffuf vhost fuzzing with baseline Content-Length | After crawl | `alive-domains.txt` → `vhost/` results |
 
-**Order:** `web_crawl.sh` → `dir_bruteforce.sh` → `vhost_fuzz.sh`
+**Order:** `auto_recon.sh` → `dir_bruteforce.sh` → `vhost_fuzz.sh`
 
 ---
 
@@ -128,17 +130,17 @@ High-value paths probed: `.env`, `.git/config`, `config.json`, `wp-config.php`, 
 |--------|---------|-----------|----------------|
 | `auto_xss.sh` | dalfox + manual payload test | `param_extract.sh` | `gf_xss.txt` → `xss/dalfox_results.txt`, `manual_xss_found.txt` |
 | `auto_sqli.sh` | sqlmap batch scan | `param_extract.sh` | `gf_sqli.txt` → `sqli/sqlmap_output/` |
-| `auto_nuclei.sh` | nuclei templates (c/high + med + tech) | `web_crawl.sh` | `https-subs.txt` → `nuclei/` |
+| `auto_nuclei.sh` | nuclei templates (c/high + med + tech) | `auto_recon.sh` | `https-subs.txt` → `nuclei/` |
 | `auto_secrets.sh` | validate cariddi findings via curl | `cariddi_scan.sh` | `cariddi.txt` → `secrets/accessible.txt`, `high_value_confirmed.txt` |
 
 ## Phase 5: Full Automation
 
 | Command | Purpose |
 |---------|---------|
-| `./tools/auto_recon.sh <domain>` | Runs recon phases 0–3 in sequence |
-| `./tools/auto_hunt.sh <domain>` | Runs recon + hunt phases 0–7 in sequence |
-| `./tools/auto_recon.sh <domain> --skip dns,github` | Skip slow/optional steps |
-| `./tools/auto_hunt.sh <domain> --skip xss,nuclei` | Skip specific hunt phases |
+| `./auto_recon.sh <domain>` | Runs recon phases 0–3 in sequence |
+| `./auto_hunt.sh <domain>` | Runs recon + hunt phases 0–7 in sequence |
+| `./auto_recon.sh <domain> --skip dns,github` | Skip slow/optional steps |
+| `./auto_hunt.sh <domain> --skip xss,nuclei` | Skip specific hunt phases |
 
 ---
 
@@ -184,7 +186,7 @@ When testing endpoints from `gf_xss.txt`, use payloads from `scripts/xss_payload
 |--------|-----------|----------|
 | `dns_bruteforce.sh` | domain | `dns/resolved.txt` |
 | `subdomain_enum.sh` | domain | `subdomains/all_subdomains.txt`, `live_domains.txt`, `live_urls.txt` |
-| `web_crawl.sh` | `live_urls.txt` | `crawl/https-subs.txt` (full https:// URLs), `alive-domains.txt` (domains only), `crawledurls.txt` (filtered crawled URLs) |
+| `auto_recon.sh` (crawl phase) | `live_urls.txt` | `crawl/https-subs.txt` (full https:// URLs), `crawl/crawledurls.txt`, `crawl/merged-crawl.txt` |
 | `param_extract.sh` | `crawledurls.txt` | `params/paramurls.txt`, `gf_*.txt` |
 | `cariddi_scan.sh` | `alive-domains.txt` | `cariddi/cariddi.txt`, `cariddi.html` |
 | `dir_bruteforce.sh` | `alive-domains.txt`, wordlists | `dir/` output |
@@ -201,7 +203,7 @@ When testing endpoints from `gf_xss.txt`, use payloads from `scripts/xss_payload
 ## Output Structure
 
 ```
-runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/
+engagements/recon/<domain>/
 ├── intel/                    # phase-intel.sh — passive intelligence
 │   ├── domain_info_general.txt       # WHOIS + msftrecon + Scopify
 │   ├── azure_tenant_domains.txt      # M365/Azure tenant discovery
@@ -218,7 +220,7 @@ runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/
 ├── crawl/
 │   ├── https-subs.txt       # live https:// URLs — each line: https://sub.domain.com (from httpx -probe)
 │   ├── alive-domains.txt    # unique domains only — each line: sub.domain.com (extracted from https-subs)
-│   └── crawledurls.txt      # filtered live URLs from crawlers (hakrawler+katana+waymore+gau → filter.sh)
+│   └── merged-crawl.txt / crawledurls.txt  # filtered live URLs from crawlers (waymore+gospider+katana → uro)
 ├── params/
 │   ├── paramurls.txt        # URLs with parameters
 │   └── gf_*.txt             # gf-pattern-filtered candidates

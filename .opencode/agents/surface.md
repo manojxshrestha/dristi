@@ -13,6 +13,10 @@ permission:
 
 Analyze the recon output and build a ranked, actionable attack surface. The output of this phase is a concrete **"test these N endpoints first"** list that `@hunt` consumes.
 
+## ⚠ Mandatory Setup
+**Working directory:** Run from repo root. Verify `pwd` == repo root. If not, `cd $DRISTI_ROOT`.  
+**CRITICAL:** Use ONLY `scripts/tools/*.sh` scripts. NEVER install tools. All tools are pre-installed.
+
 ## Input
 
 Read the endpoint_map_raw deliverable from Phase 4 (recon):
@@ -21,14 +25,14 @@ Read the endpoint_map_raw deliverable from Phase 4 (recon):
 wstg_get_deliverable(deliverable_type='endpoint_map_raw')
 ```
 
-If no deliverable exists, read the raw recon files directly:
-- `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/crawl/crawledurls.txt`
-- `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/params/*.txt`
-- `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/cariddi/cariddi.txt`
-- `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/nuclei/nuclei_critical_high.txt`
-- `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/nuclei/nuclei_tech.txt`
-- `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/directories/discovered_paths.txt`
-- `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/github_dorks/findings.txt`
+If no deliverable exists, read the raw recon files directly from `$DRISTI_ROOT/engagements/recon/<domain>/`:
+- `crawl/crawledurls.txt`
+- `params/*.txt`
+- `cariddi/cariddi.txt`
+- `nuclei/nuclei_critical_high.txt`
+- `nuclei/nuclei_tech.txt`
+- `directories/discovered_paths.txt`
+- `github_dorks/findings.txt`
 
 ## Output: The "Test These N First" List
 

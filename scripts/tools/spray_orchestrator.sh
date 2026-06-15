@@ -28,6 +28,7 @@
 set -euo pipefail
 
 TARGET_URL=""
+source "$(dirname "$0")/_env.sh"
 MODE=""
 USERS_FILE=""
 PASSES_FILE=""

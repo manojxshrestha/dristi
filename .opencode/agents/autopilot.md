@@ -40,6 +40,10 @@ Phase 12 (REPORT)    → task(subagent_type="report", ...)
 6. **Checkpoint.** `wstg_save_checkpoint()` after every passing phase gate.
 7. **Track.** `wstg_track_tool()` for `task()` dispatch calls.
 8. **Recover on failure.** If a sub-agent fails or a gate fails, retry or apply recovery procedures below.
+9. **Working directory.** All commands run from repo root. First action: verify `pwd` == repo root. If not, `cd $DRISTI_ROOT`.
+10. **NEVER install tools.** All tools are pre-installed at `scripts/tools/`. Never run `pip install`, `go install`, `apt install`, `npm install`, or any other package manager to install tools. Run `bash scripts/tools/<name>.sh <target>` — not raw tool binaries.
+11. **ALWAYS use scripts/tools/ wrappers.** Never invoke tool binaries directly (gospider, katana, nuclei, httpx, etc.). Every tool has a wrapper script in `scripts/tools/` with correct flags and output paths.
+12. **Phase gates are mandatory.** Complete each phase fully. Verify the gate passes before proceeding. Never skip phases or jump ahead.
 
 ## Phase 1: SCOPE
 
@@ -99,7 +103,7 @@ The script runs 4 modules. Track each individually:
 4. **cloud_enum_scan** — Cloud storage bucket enumeration (AWS S3, Azure Blob, GCP, DO Spaces)
    - `wstg_track_tool(tool_name='cloud_enum', status='run', target='<domain>', notes='Cloud storage bucket enumeration')`
 
-Output lands in `runtime/engagements/<eid>/recon/<domain>/intel/`:
+Output lands in `$DRISTI_ROOT/engagements/recon/<domain>/intel/`:
 - `domain_info_general.txt` — WHOIS data
 - `azure_tenant_domains.txt` — M365/Azure tenant info
 - `scopify.txt` — Scope analysis
@@ -116,9 +120,7 @@ wstg_save_deliverable(
 )
 ```
 
-If tools are not installed: `bash scripts/tools/phase-intel.sh --install`
-
-If tools still missing after install attempt, log `[MISSING TOOLS]` and proceed — Intel is informative, not blocking.
+All tools are pre-installed at `scripts/tools/`. The script gracefully skips any missing tools with a warning. Intel is informative, not blocking.
 
 Proceed to Phase 4.
 
@@ -129,7 +131,10 @@ Call `task()` to launch the recon sub-agent following its full 9-step workflow:
 ```
 task(
   description="Phase 4 Recon for <domain>",
-  prompt="Target: <domain>. Run the complete Phase 4 recon workflow following the RECON agent's 9-step pipeline:
+  prompt="Target: <domain>. Run the complete Phase 4 recon workflow following the RECON agent's 9-step pipeline.
+
+CRITICAL: Use ONLY scripts/tools/*.sh scripts. NEVER install tools. All tools are pre-installed.
+
 1. Subdomain enumeration + DNS bruteforce — wstg_track_tool()
 2. Web crawling + parameter extraction — wstg_track_tool()
 3. Cariddi + nuclei + directory bruteforce — wstg_track_tool()
@@ -160,7 +165,7 @@ task(
   description="Phase 5 Surface for <domain>",
   prompt="Target: <domain>. Run Phase 5 surface analysis:
 1. Load endpoint_map_raw deliverable via wstg_get_deliverable()
-2. Read raw recon outputs from runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/
+2. Read raw recon outputs from $DRISTI_ROOT/engagements/recon/<domain>/
 3. Build Tier 0 (public+input), Tier 1 (auth-gated), Tier 2 (infra) lists
 4. Classify endpoints into functional groups (auth, profile, api, admin, search, file, payment, infra) by path prefix
 5. Call wstg_prioritize_endpoints() with endpoint data + group membership
@@ -222,9 +227,9 @@ task(
   prompt="Target: <domain>. Run Phase 7 gap analysis:
 1. Load engagement findings via wstg_get_findings()
 2. Check for dead-ends, missing tools, script failures, knowledge gaps
-3. Load deepthink state from engagements/<eid>/deepthink-state.json
+3. Load deepthink state from $DRISTI_ROOT/engagements/<eid>/deepthink-state.json
 4. Perform first-principles analysis for each gap
-5. Create issue.md files in engagements/<eid>/issues/ for persistent gaps
+5. Create issue.md files in $DRISTI_ROOT/engagements/<eid>/issues/ for persistent gaps
 6. Save updated deepthink state
 
 Return: issues found, chains discovered, recommended actions.",
@@ -282,8 +287,8 @@ task(
 2. Identify stale or missing data: WAF bypass failures, missing CVEs, missing technique guides
 3. Research current CVEs, bypass techniques, disclosed reports for each gap
 4. If research succeeds, update local knowledge or return payload
-5. If research fails, create issue.md in engagements/<eid>/issues/ for persistent gaps
-6. Save search state to engagements/<eid>/search-state.json
+5. If research fails, create issue.md in $DRISTI_ROOT/engagements/<eid>/issues/ for persistent gaps
+6. Save search state to $DRISTI_ROOT/engagements/<eid>/search-state.json
 
 Return: research results, payloads found, gaps documented as issues.",
   subagent_type="search"
@@ -304,7 +309,7 @@ task(
 2. Load @evidence-hygiene for redaction protocol
 3. For each finding: capture raw HTTP, screenshot (if DOM/visual), check collaborator (if OOB)
 4. Apply redaction (cookies, PII, tokens)
-5. Save sanitized evidence files to runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/evidence/<finding-id>/
+5. Save sanitized evidence files to $DRISTI_ROOT/engagements/recon/<domain>/evidence/<finding-id>/
 6. Call wstg_phase_gate_check(phase_completed=4)
 7. Call wstg_save_checkpoint()
 
@@ -397,9 +402,9 @@ Present this exact summary:
 ║ Domains tested: <N> core                                    ║
 ║ Bug classes tested: <N>                                      ║
 ║                                                              ║
-║ Full report: runtime/engagements/<eid>/report.md                     ║
-║ Structured data: runtime/engagements/<eid>/findings.json             ║
-║ PoC evidence: scripts/recon/*/evidence/                      ║
+║ Full report: $DRISTI_ROOT/engagements/report.md                      ║
+║ Structured data: $DRISTI_ROOT/engagements/findings.json              ║
+║ PoC evidence: $DRISTI_ROOT/engagements/recon/*/evidence/             ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
 

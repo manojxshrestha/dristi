@@ -25,6 +25,8 @@
 
 set -euo pipefail
 
+source "$(dirname "$0")/_env.sh"
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 TOOLS_DIR="$HOME/.local/bin"
@@ -38,8 +40,7 @@ log_step() { echo -e "\n${CYAN}════════════════�
 
 export PATH="$HOME/go/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
 
-# ── Default output: runtime/engagements/<ENGAGEMENT_ID>/recon/<domain>/ ──
-ENGAGEMENT_ID="${ENGAGEMENT_ID:-default-engagement}"
+# ── Default output: engagements/recon/<domain>/ ─────
 
 # ── Global timeout: 20 minutes per module ────────────────────────────
 MODULE_TIMEOUT=${MODULE_TIMEOUT:-1200}
@@ -147,7 +148,7 @@ fi
 
 # ── Argument parsing ────────────────────────────────────────────────
 TARGET="${1:?Usage: $0 <domain> [output_dir]  or  $0 --install}"
-OUT_DIR="${2:-$BASE_DIR/runtime/engagements/$ENGAGEMENT_ID/recon/$TARGET}"
+OUT_DIR="${2:-${RECON_BASE}/$TARGET}"
 INTEL_DIR="$OUT_DIR/intel"
 mkdir -p "$INTEL_DIR"
 
@@ -224,28 +225,28 @@ run_domain_info() {
     fi
 }
 
-# ── 2. third_party_misconfigs — misconfig-mapper ─────────────────────
+# ── 2. third_party_misconfigs — SaaS misconfiguration scan ───────────
 run_third_party_misconfigs() {
     log_step "third_party_misconfigs — SaaS misconfiguration scan"
 
     check_tool misconfig-mapper || return 0
 
-    local misconfig_dir
-    misconfig_dir="$(command -v misconfig-mapper 2>/dev/null | xargs dirname 2>/dev/null)/misconfig-mapper"
+    local templates_dir="$TOOLS_DIR/misconfig-mapper/templates"
+    mkdir -p "$templates_dir"
 
-    if [ -d "$misconfig_dir" ]; then
-        _run_with_timeout "/dev/null" \
-            "timeout 120 misconfig-mapper -update-templates" || true
-    fi
+    log_info "Updating misconfig-mapper templates..."
+    misconfig-mapper -update-templates -templates "$templates_dir" 2>/dev/null || true
 
     local company_name
     company_name=$(unfurl format %r <<< "$TARGET" 2>/dev/null || echo "$TARGET" | awk -F. '{print $(NF-1)}')
 
-    _run_with_timeout "$INTEL_DIR/3rdparts_misconfigurations.txt" \
-        "timeout $MODULE_TIMEOUT misconfig-mapper -target '$TARGET' -as-domain true -permutations false -skip-ssl -service '*' -verbose 0 | anew -q '$INTEL_DIR/3rdparts_misconfigurations.txt'" || true
+    log_info "Scanning domain: $TARGET"
+    timeout "$MODULE_TIMEOUT" misconfig-mapper -target "$TARGET" -as-domain true -permutations false -skip-ssl -service '*' -verbose 0 -templates "$templates_dir" 2>/dev/null \
+        | anew -q "$INTEL_DIR/3rdparts_misconfigurations.txt" || true
 
-    _run_with_timeout "/dev/null" \
-        "timeout $MODULE_TIMEOUT misconfig-mapper -target '$company_name' -skip-ssl -verbose 0 -service '*' 2>/dev/null | anew -q '$INTEL_DIR/3rdparts_misconfigurations.txt'" || true
+    log_info "Scanning company: $company_name"
+    timeout "$MODULE_TIMEOUT" misconfig-mapper -target "$company_name" -skip-ssl -verbose 0 -service '*' -templates "$templates_dir" 2>/dev/null \
+        | anew -q "$INTEL_DIR/3rdparts_misconfigurations.txt" || true
 
     if [ -s "$INTEL_DIR/3rdparts_misconfigurations.txt" ]; then
         log_ok "$(wc -l < "$INTEL_DIR/3rdparts_misconfigurations.txt") misconfigurations found"
@@ -319,21 +320,18 @@ log_info "Modules: domain_info, third_party_misconfigs, spoof, cloud_enum_scan"
 log_warn "Skipped: ip_info (requires WHOISXML_API key)"
 
 _run_module() {
-    local name="$1"
-    shift
-    # Pass all function definitions + needed variables to subshell (timeout + bash -c)
+    local display_name="$1"
+    local func_name="$2"
+    # Export all helper functions + vars for subshell
     local funcs
-    funcs="$(declare -f)"
-    local vars
-    vars="TARGET='$TARGET'; INTEL_DIR='$INTEL_DIR'; TOOLS_DIR='$TOOLS_DIR'; MODULE_TIMEOUT=$MODULE_TIMEOUT;"
-    vars="$vars GREEN='$GREEN'; RED='$RED'; YELLOW='$YELLOW'; CYAN='$CYAN'; NC='$NC';"
-    vars="$vars HOME='$HOME'; PATH='$PATH';"
-    timeout "$MODULE_TIMEOUT" bash -c "$funcs; $vars; $*" 2>&1
+    funcs="$(declare -f log_ok log_err log_warn log_info log_step check_tool check_repo_tool _run_with_timeout _setup_venv install_repo do_install run_domain_info run_third_party_misconfigs run_spoof run_cloud_enum)"
+    export TARGET INTEL_DIR TOOLS_DIR MODULE_TIMEOUT GREEN RED YELLOW CYAN NC HOME PATH
+    timeout "$MODULE_TIMEOUT" bash -c "$funcs; $func_name" 2>&1
     local rc=$?
     if [ $rc -eq 124 ]; then
-        log_warn "${name} timed out after ${MODULE_TIMEOUT}s"
+        log_warn "${display_name} timed out after ${MODULE_TIMEOUT}s"
     elif [ $rc -ne 0 ]; then
-        log_err "${name} failed (exit $rc)"
+        log_err "${display_name} failed (exit $rc)"
     fi
     return $rc
 }

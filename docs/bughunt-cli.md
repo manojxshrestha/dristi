@@ -32,7 +32,7 @@ The two interfaces consume the same content (`skills/` + `docs/disclosed-reports
 
 Full reconnaissance pipeline: subdomain enumeration → live host probing → port scanning → technology fingerprinting → endpoint crawling.
 
-- Output: `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<target>/`
+- Output: `$DRISTI_ROOT/engagements/recon/<target>/`
 - Supports `--passive` (no direct touch), `--active` (full probe), `--quick` (top 20 subdomains only)
 
 ### `bughunt hunt [target] [--class <vuln-class>]`

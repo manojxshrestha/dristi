@@ -26,6 +26,10 @@ You are about to map infrastructure. **Without an authenticated session, you wil
 
 If you proceed without auth, label every finding `[UNAUTHENTICATED]`.
 
+## ⚠ Mandatory Setup
+**Working directory:** Run from repo root. Verify `pwd` == repo root. If not, `cd $DRISTI_ROOT`.  
+**CRITICAL:** Use ONLY `scripts/tools/*.sh` scripts. NEVER install tools. All tools are pre-installed. Never invoke tool binaries directly.
+
 ## The Goal: Answer 3 Questions
 
 Every tool you run during recon must help answer these questions. Everything else (CSP headers, cookie flags, server banners) is nice-to-know but doesn't find exploits.
@@ -79,7 +83,10 @@ bash scripts/tools/dns_bruteforce.sh <target>
 ### Step 2: Web Crawling + Parameter Extraction
 
 ```bash
-bash scripts/tools/web_crawl.sh <target>
+bash scripts/tools/auto_recon.sh <target>       # or run steps individually:
+bash scripts/tools/web_waymore.sh <target>     # passive URLs (waymore)
+bash scripts/tools/web_gospider.sh <target>    # active crawl (gospider)
+bash scripts/tools/web_katana.sh <target>      # active crawl (katana)
 bash scripts/tools/param_extract.sh <target>
 bash scripts/tools/param_discovery.sh <target>
 ```
@@ -149,7 +156,7 @@ Runs cloud_enum on subdomains + s3scanner + trufflehog:
 
 **For each cloud bucket:** `[PUBLIC_BUCKET]`, `[AUTH_BUCKET]`, `[OPEN_UPLOAD]`, `[LEAKED_SECRET]`
 
-If `cloud_enum` not installed: `bash scripts/tools/phase-intel.sh --install`
+All tools are pre-installed in `scripts/tools/`. Scripts handle missing tools gracefully.
 
 ### Step 7: Answer 3 Triage Questions Per Endpoint
 

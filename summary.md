@@ -300,7 +300,7 @@ Constants: CATEGORIES (WSTG categories), TOOL_REGISTRY (CLI tool metadata), WITN
 
 Located in `scripts/tools/`: wrappers for subdomain enum, DNS bruteforce, web crawling, parameter extraction, directory bruteforce, vhost fuzzing, zone transfer, takeover scanning, cloud recon, CVE scanning, secret discovery, nuclei scanning, cariddi scanning, bypass 403, OSINT (whois, misconfig-mapper, Spoofy, cloud_enum), S3/cloud bucket scanning (cloud_enum + s3scanner + trufflehog), and more.
 
-All domain-mode: accept domain as $1, auto-discover recon output, output to runtime/engagements/<id>/recon/.
+All domain-mode: accept domain as $1, auto-discover recon output, output to `$DRISTI_ROOT/engagements/recon/<domain>/`. ENGAGEMENT_ID is now optional.
 
 ---
 
@@ -333,7 +333,7 @@ All domain-mode: accept domain as $1, auto-discover recon output, output to runt
 3. **Auth**: Test credentials, detect WAF, capture tokens
 4. **OSINT**: WHOIS, M365/Azure tenant, third-party misconfigs, spoof check, cloud bucket enum
 5. **Recon**: Enumerate subdomains, crawl, discover endpoints
-5. **Surface**: Prioritize endpoints by risk score
+6. **Surface**: Prioritize endpoints by risk score
 6. **Hunt**: Test all applicable bug classes with per-class agents
 7. **Capture**: Collect evidence with redaction
 8. **Validate**: Re-verify PoCs, 7-Question Gate
@@ -345,7 +345,9 @@ All domain-mode: accept domain as $1, auto-discover recon output, output to runt
 
 - **Autopilot as orchestrator, not monolith**: 248-line dispatcher; phases 2-12 via task()
 - **Nuclei as optional tier-2**: PAT curl test.sh is tier-1 (fast)
-- **Output to runtime/engagements/<id>/**: Consistent directory structure
+- **Output to $DRISTI_ROOT/engagements/recon/<domain>/**: Flat recon directory, no default-engagement layer, ENGAGEMENT_ID optional
+- **Never install tools**: All tools pre-installed at `scripts/tools/`. Agents have explicit HARD RULES prohibiting `pip install`/`go install`/`apt install` — use wrapper scripts only
+- **No raw tool binaries**: Every tool accessed via `bash scripts/tools/<name>.sh <target>`, never invoked directly
 - **WAF as JSON at runtime**: 144 vendors loaded from JSON, avoids Python syntax issues
 - **Skills drive per-agent methodology**: Load relevant skill via `skill()` MCP tool for each vulnerability class
 - **Browser close after every op**: playwright_browser_close() mandate
@@ -355,6 +357,7 @@ All domain-mode: accept domain as $1, auto-discover recon output, output to runt
 - **deepthink + search added**: Conditional intelligence fallback phases (7, 9)
 - **pipeline updated**: Re-exploitation loop after search finds new payloads
 - **Deliverable-based data flow**: auth_analysis → Phase 6, endpoint_map_raw → Phase 5 → endpoint_map_ranked → Phase 6
+- **Agent hardening**: All pipeline agents (autopilot, consult, recon, surface, hunt, pintel) now include HARD RULES: no tool installation, no raw binary invocations, phase gates mandatory. Fixes third-party models skipping steps or running `pip install`/`go install`/`apt install` instead of using `scripts/tools/` wrappers.
 
 ---
 
@@ -424,11 +427,9 @@ All domain-mode: accept domain as $1, auto-discover recon output, output to runt
 
 ---
 
-## Untested
+## Known Issues
 
-- `/autopilot` has never been run end-to-end against a live target
-- Sub-agent task() dispatch chain is untested
-- Many thin hunt-* agents lack real payloads
+- Third-party models (GPT-4, Claude, etc.) previously skipped pipeline steps and installed tools instead of using `scripts/tools/`. **Mitigated**: All agents now have hardcoded HARD RULES at the top prohibiting installation and enforcing phase order.
 
 ---
 

@@ -12,6 +12,8 @@
 
 set -euo pipefail
 
+source "$(dirname "$0")/_env.sh"
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 . "$SCRIPT_DIR/external_arsenal.sh"
 
@@ -41,13 +43,13 @@ done
 # Resolve domain → list mode: auto-discover crawl output
 BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 if [ -n "$DOMAIN" ]; then
-  RECON_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$DOMAIN"
+  RECON_DIR="${RECON_BASE}/$DOMAIN"
   CRAWL_FILE="$RECON_DIR/crawl/crawledurls.txt"
   if [ -f "$CRAWL_FILE" ] && [ -s "$CRAWL_FILE" ]; then
     LIST="$CRAWL_FILE"
     log "domain mode: using $CRAWL_FILE ($(wc -l < "$CRAWL_FILE" | tr -d ' ') URLs)"
   else
-    err "no crawl output for '$DOMAIN' at $CRAWL_FILE — run web_crawl.sh first"
+    err "no crawl output for '$DOMAIN' at $CRAWL_FILE — run auto_recon.sh first"
     exit 2
   fi
 fi
@@ -59,7 +61,7 @@ fi
 if [ -n "$DOMAIN" ]; then
   OUT_DIR="${PARAM_OUT_DIR:-$RECON_DIR/params}"
 else
-  OUT_DIR="${PARAM_OUT_DIR:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$(echo "${URL:-$(head -1 "$LIST")}" | sed 's|https\?://||;s|/.*||')/params}"
+  OUT_DIR="${PARAM_OUT_DIR:-${RECON_BASE}/$(echo "${URL:-$(head -1 "$LIST")}" | sed 's|https\?://||;s|/.*||')/params}"
 fi
 mkdir -p "$OUT_DIR"
 

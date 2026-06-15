@@ -17,6 +17,8 @@
 
 set -euo pipefail
 
+source "$(dirname "$0")/_env.sh"
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 . "$SCRIPT_DIR/external_arsenal.sh"
 
@@ -49,7 +51,7 @@ done
 
 # Domain mode: auto-discover live URLs from recon path
 if [ -n "$DOMAIN" ]; then
-  RECON_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$DOMAIN"
+  RECON_DIR="${RECON_BASE}/$DOMAIN"
   LIVE_FILE="$RECON_DIR/subdomains/https-subs.txt"
   [ -f "$LIVE_FILE" ] && [ -s "$LIVE_FILE" ] && TARGET="$LIVE_FILE"
   # Fallback: try crawl output
@@ -62,9 +64,9 @@ fi
 [ -z "$TARGET" ] && { err "target, domain, or file required"; exit 2; }
 
 if [ -n "$DOMAIN" ]; then
-  OUT_DIR="${CVE_OUT_DIR:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$DOMAIN/cve}"
+  OUT_DIR="${CVE_OUT_DIR:-${RECON_BASE}/$DOMAIN/cve}"
 else
-  OUT_DIR="${CVE_OUT_DIR:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/default/cve}"
+  OUT_DIR="${CVE_OUT_DIR:-${RECON_BASE}/default/cve}"
 fi
 mkdir -p "$OUT_DIR"
 

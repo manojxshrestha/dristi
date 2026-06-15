@@ -124,7 +124,7 @@ cmd.exe /c "cd /d C:\ && $PYTHON_WIN_RAW $PROXY_DST_RAW" > /dev/null 2>&1 &
 
 ### Layer 2: MCP stdio Bridge (`burp-mcp-bridge.py`)
 
-**File:** `/home/pwn/dristi/scripts/burp-mcp-bridge.py`
+**File:** `${HOME}/dristi/scripts/burp-mcp-bridge.py`
 
 Fixes the **protocol mismatch**. OpenCode uses `"type": "local"` (stdio transport), and this script translates:
 
@@ -253,7 +253,7 @@ The fix: the verification step (Step 4) catches this — if the SSE stream retur
   "mcp": {
     "burp": {
       "type": "local",
-      "command": ["python3", "/home/pwn/dristi/scripts/burp-mcp-bridge.py"]
+      "command": ["python3", "${HOME}/dristi/scripts/burp-mcp-bridge.py"]
     }
   }
 }
@@ -314,7 +314,7 @@ OpenCode ↔ burp-mcp-bridge → Windows Proxy (172.17.x.x:9872) → Burp MCP (1
 
 # Layer 2 — Bridge test (standalone)
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \
-  | python3 /home/pwn/dristi/scripts/burp-mcp-bridge.py
+  | python3 ${HOME}/dristi/scripts/burp-mcp-bridge.py
 
 # Direct SSE test against proxy
 curl -s -N -H "Accept: text/event-stream" http://172.17.160.1:9872/

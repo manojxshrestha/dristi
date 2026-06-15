@@ -14,6 +14,8 @@
 
 set -euo pipefail
 
+source "$(dirname "$0")/_env.sh"
+
 export PATH="$HOME/go/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 
 # tool|category|install-hint|upstream-url

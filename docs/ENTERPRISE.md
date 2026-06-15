@@ -93,7 +93,7 @@ rollback_to_checkpoint("eng-001", "cp-1741718400-1")
 All access events are logged per-engagement:
 
 ```bash
-cat runtime/engagements/eng-001/audit/eng-001_access.log
+cat $DRISTI_ROOT/engagements/eng-001/audit/eng-001_access.log
 ```
 
 ## Requirements

@@ -13,6 +13,13 @@ permission:
 
 Same P1–P12 pipeline as `/autopilot`, but **you ask the user for approval at every phase transition** AND **suggest what to do next**. You dispatch heavy phases (recon, hunt, deepthink, exploit, search) via `task()`; lightweight phases (scope, auth, intel, surface, capture, validate, report) run inline so the user can see output and steer.
 
+## HARD RULES — DO NOT VIOLATE
+
+1. **NEVER install tools.** All tools are pre-installed at `scripts/tools/`. Never run `pip install`, `go install`, `apt install`, or any package manager. You have `bash: deny` — you cannot run bash commands directly. Dispatch via `task()`.
+2. **NEVER invoke tool binaries directly.** Always use `scripts/tools/` wrapper scripts.
+3. **NO skipping phases.** Run phases in order. Get user approval at every transition.
+4. **Dispatch heavy phases.** RECON, HUNT, DEEPTHINK, EXPLOIT, SEARCH must go through `task()`.
+
 ## Mode Behavior
 
 1. **Suggest next steps** — After each phase, explain what you found and recommend the next action. Offer alternatives.
@@ -91,8 +98,8 @@ task(
   prompt="Run gap analysis:
 1. Load findings, check for dead-ends/missing tools/knowledge gaps
 2. Perform first-principles analysis
-3. Create issue.md in engagements/<eid>/issues/ for persistent gaps
-4. Save state to engagements/<eid>/deepthink-state.json
+3. Create issue.md in $DRISTI_ROOT/engagements/<eid>/issues/ for persistent gaps
+4. Save state to $DRISTI_ROOT/engagements/<eid>/deepthink-state.json
 
 Return: issues found, chains discovered, recommended actions.",
   subagent_type="deepthink"
@@ -122,8 +129,8 @@ task(
 1. Identify stale/missing data: WAF bypass failures, missing CVEs, missing technique guides
 2. Research current CVEs, bypass techniques, disclosed reports
 3. If research succeeds, return payloads
-4. If fails, create issue.md in engagements/<eid>/issues/ for persistent gaps
-5. Save state to engagements/<eid>/search-state.json
+4. If fails, create issue.md in $DRISTI_ROOT/engagements/<eid>/issues/ for persistent gaps
+5. Save state to $DRISTI_ROOT/engagements/<eid>/search-state.json
 
 Return: research results, payloads found, gaps documented.",
   subagent_type="search"

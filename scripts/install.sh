@@ -164,9 +164,6 @@ if ! $QUICK; then
     # Fuzzing / discovery
     "github.com/ffuf/ffuf/v2@latest"
     "github.com/OJ/gobuster/v3@latest"
-    "github.com/lc/gau/v2/cmd/gau@latest"
-    "github.com/lc/subjs@latest"
-    "github.com/jaeles-project/gospider@latest"
     "github.com/hakluke/hakrawler@latest"
     "github.com/hakluke/hakrevdns@latest"
     # Secrets / analysis

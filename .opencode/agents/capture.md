@@ -13,6 +13,10 @@ permission:
 
 Collect sanitized evidence for each confirmed finding. Each finding gets its own evidence directory.
 
+## ⚠ Mandatory Setup
+**Working directory:** Run from repo root. Verify `pwd` == repo root. If not, `cd $DRISTI_ROOT`.  
+**Engagement ID:** Use `default-engagement` unless user explicitly specifies otherwise. Never invent custom IDs.
+
 ## Browser Hygiene (Mandatory)
 
 Every browser operation leaks a page unless explicitly closed. Always:

@@ -9,6 +9,8 @@
 
 set -euo pipefail
 
+source "$(dirname "$0")/_env.sh"
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
@@ -21,7 +23,7 @@ log_info() { echo -e "${CYAN}[*]${NC} $1"; }
 TARGET="${1:?Usage: $0 <domain> [--wordlist <file>]}"
 WORDLIST="${3:-}"
 
-OUT_DIR="${RECON_OUT_DIR:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET}"
+OUT_DIR="${RECON_OUT_DIR:-${RECON_BASE}/$TARGET}"
 mkdir -p "$OUT_DIR"
 
 export PATH="$HOME/go/bin:/usr/local/bin:$PATH"
@@ -33,35 +35,38 @@ mkdir -p "$WORDLIST_DIR"
 SUB_LIST="$WORDLIST_DIR/subdomains-top1million-20000.txt"
 RESOLVERS="${RESOLVERS_FILE:-$WORDLIST_DIR/resolvers.txt}"
 
+# Use local wordlists (pre-downloaded to wordlists/dns/)
 if [ ! -f "$SUB_LIST" ]; then
-  log_info "Downloading subdomain wordlist..."
-  wget -q "https://raw.githubusercontent.com/manojxshrestha/wordlists/refs/heads/main/subdomains-top1million-20000.txt" -O "$SUB_LIST"
-  log_ok "Downloaded $(wc -l < "$SUB_LIST" | tr -d ' ') subdomains"
+  log_err "Subdomain wordlist not found: $SUB_LIST"
+  log_err "Run: wget -O \"$SUB_LIST\" https://raw.githubusercontent.com/manojxshrestha/wordlists/refs/heads/main/subdomains-top1million-20000.txt"
+  exit 1
 fi
+log_ok "Subdomain wordlist: $(wc -l < "$SUB_LIST" | tr -d ' ') entries"
 
-if [ ! -f "$RESOLVERS" ]; then
-  log_info "Downloading resolvers list..."
-  wget -q "https://raw.githubusercontent.com/manojxshrestha/wordlists/refs/heads/main/resolvers.txt" -O "$RESOLVERS" 2>/dev/null || true
-  # fallback: public resolvers if download fails
-  if [ ! -s "$RESOLVERS" ]; then
-    log_warn "Download failed, using public fallback resolvers"
-    cat > "$RESOLVERS" << 'EOF'
-1.1.1.1
+# Default resolvers (major public DNS - reliable)
+DEFAULT_RESOLVERS="1.1.1.1
 8.8.8.8
 8.8.4.4
 9.9.9.9
+149.112.112.112
 208.67.222.222
 208.67.220.220
 77.88.8.8
 74.82.42.42
 64.6.64.6
 185.228.168.9
-76.76.19.19
-76.223.122.150
-EOF
-  fi
-  log_ok "Resolvers: $(wc -l < "$RESOLVERS" | tr -d ' ') entries"
+76.76.19.19"
+
+if [ ! -f "$RESOLVERS" ]; then
+  log_err "Resolvers list not found: $RESOLVERS"
+  log_err "Run: wget -O \"$RESOLVERS\" https://raw.githubusercontent.com/blechschmidt/massdns/refs/heads/master/lists/resolvers.txt"
+  exit 1
 fi
+log_ok "Resolvers: $(wc -l < "$RESOLVERS" | tr -d ' ') entries"
+
+# Merge with DEFAULT_RESOLVERS to ensure we have reliable ones
+cat "$RESOLVERS" <(echo "$DEFAULT_RESOLVERS") | sort -u > "${RESOLVERS}.merged"
+mv "${RESOLVERS}.merged" "$RESOLVERS"
 
 USE_LIST="${WORDLIST:-$SUB_LIST}"
 
@@ -82,25 +87,13 @@ if ! command -v massdns &>/dev/null; then
   command -v massdns &>/dev/null && log_ok "massdns installed" || log_warn "massdns not available (puredns has internal resolver)"
 fi
 
-# ── Validate resolvers ──────────────────────────────────────────────
-VALID_RESOLVERS="${RESOLVERS%.txt}-valid.txt"
-if [ ! -f "$VALID_RESOLVERS" ] || [ ! -s "$VALID_RESOLVERS" ]; then
-  log_info "Validating resolvers (this weeds out dead/unreachable ones)..."
-  puredns validate-resolvers "$RESOLVERS" -o "$VALID_RESOLVERS" 2>/dev/null || true
-  if [ ! -s "$VALID_RESOLVERS" ]; then
-    log_warn "All resolvers failed validation — using fallback"
-    echo -e "1.1.1.1\n8.8.8.8\n8.8.4.4\n9.9.9.9" > "$VALID_RESOLVERS"
-  fi
-  log_ok "$(wc -l < "$VALID_RESOLVERS" | tr -d ' ') valid resolvers"
-fi
-
 # ── Run puredns bruteforce ──────────────────────────────────────────
 
 log_info "Running puredns bruteforce on $TARGET..."
 log_info "  Wordlist: $USE_LIST ($(wc -l < "$USE_LIST" | tr -d ' ') entries)"
-log_info "  Resolvers: $VALID_RESOLVERS ($(wc -l < "$VALID_RESOLVERS" | tr -d ' ') entries)"
+log_info "  Resolvers: $RESOLVERS ($(wc -l < "$RESOLVERS" | tr -d ' ') entries)"
 
-puredns bruteforce "$USE_LIST" "$TARGET" -r "$VALID_RESOLVERS" \
+puredns bruteforce "$USE_LIST" "$TARGET" -r "$RESOLVERS" \
   | tee "$OUT_DIR/dns_bruteforce.txt"
 
 COUNT=$(wc -l < "$OUT_DIR/dns_bruteforce.txt" | tr -d ' ')

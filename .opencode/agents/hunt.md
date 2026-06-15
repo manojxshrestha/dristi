@@ -11,12 +11,19 @@ permission:
 
 # HUNT
 
+## HARD RULES — DO NOT VIOLATE
+
+1. **NEVER install tools.** All tools are pre-installed at `scripts/tools/`. Never run `pip install`, `go install`, `apt install`, or any package manager.
+2. **ALWAYS use scripts/tools/ wrappers.** Never invoke tool binaries directly (arjun, ffuf, nuclei, etc.). Use `bash scripts/tools/<name>.sh <target>` instead.
+3. **NO independent recon.** Do not re-run subdomain enum, crawl, or nuclei. Use the `endpoint_map_ranked` deliverable from Phase 5.
+4. **NEVER install wordlists.** `/usr/share/seclists/` or similar may not exist. Use scripts/tools/ which handle wordlist paths correctly.
+
 Coordinate specialized `@hunt-*` subagents based on surface findings.
 
 ## Browser Hygiene (Mandatory)
 
 If you use the Playwright browser for any test (CF-challenged domains, DOM inspection, PoC screenshots):
-1. Use the operation — **always pass `filename`** to `playwright_browser_take_screenshot()`, e.g. `filename=runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/evidence/<finding-id>/screenshot.png`
+1. Use the operation — **always pass `filename`** to `playwright_browser_take_screenshot()`, e.g. `filename=$DRISTI_ROOT/engagements/recon/<domain>/evidence/<finding-id>/screenshot.png`
 2. `playwright_browser_close()` — immediately after, every time
 
 **⚠ ALWAYS specify `filename`** — omitting it saves to the repo root and creates messy artifact dirs.
@@ -70,8 +77,7 @@ curl -sv https://<target>/api/user/profile -b "session=<cookie>" 2>&1
 - Label all findings as `[AUTHENTICATED]` or `[UNAUTHENTICATED]`
 
 ### 2. API Fuzzing (Hidden Params)
-- Run `arjun` on every API endpoint
-- Run `ffuf` with a parameter wordlist: `ffuf -u <endpoint>?FUZZ=test -w /usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt`
+- Run `bash scripts/tools/param_extract.sh <target>` and `bash scripts/tools/param_discovery.sh <target>` to discover hidden params
 - Look for: `admin`, `role`, `is_admin`, `is_public`, `user_id`, `debug`, `bypass`, `override`, `test`
 
 ### 3. HTTP Method Override
@@ -145,7 +151,7 @@ Before loading any `@hunt-*` agent, you MUST run the deep testing sequence on ev
 
 ### Minimum deep testing per endpoint:
 
-1. **Parameter fuzzing** — `arjun -u <endpoint>` to find hidden params
+1. **Parameter fuzzing** — `bash scripts/tools/param_extract.sh <target>` and `bash scripts/tools/param_discovery.sh <target>` to find hidden params
 2. **HTTP method mutation** — test all verbs (GET/POST/PUT/PATCH/DELETE/OPTIONS) + override headers
 3. **Content-Type switching** — JSON endpoints tested as XML, form, and multipart
 4. **IDOR probes** — numeric enumeration + UUID manipulation + cross-account ID swap

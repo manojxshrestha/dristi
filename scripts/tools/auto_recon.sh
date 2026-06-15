@@ -4,7 +4,7 @@
 #
 # Runs the entire reconnaissance pipeline in sequence:
 #   1. Subdomain enumeration (passive)  → subdomain_enum.sh
-#   2. Web crawling                     → web_crawl.sh
+#   2. Web crawling                     → web_waymore.sh + web_gospider.sh + web_katana.sh
 #   3. Parameter extraction + GF        → param_extract.sh
 #   4. Cariddi secrets/info scan        → cariddi_scan.sh
 #   5. DNS brute-force                  → dns_bruteforce.sh
@@ -19,6 +19,9 @@
 # =============================================================================
 
 set -euo pipefail
+
+source "$(dirname "$0")/_env.sh"
+source "$(dirname "$0")/validate-env.sh"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -62,7 +65,16 @@ fi
 # ── 3. Web Crawling ─────────────────────────────────────────────────
 if ! skip "crawl"; then
   log_info "=== Phase 3: Web Crawling ==="
-  timeout "$PHASE_TIMEOUT" bash "$SCRIPT_DIR/web_crawl.sh" "$TARGET" || log_warn "Phase 3 (crawl) timed out after ${PHASE_TIMEOUT}s"
+  timeout "$PHASE_TIMEOUT" bash "$SCRIPT_DIR/web_waymore.sh" "$TARGET" || log_warn "Phase 3a (waymore) timed out"
+  timeout "$PHASE_TIMEOUT" bash "$SCRIPT_DIR/web_gospider.sh" "$TARGET" || log_warn "Phase 3b (gospider) timed out"
+  timeout "$PHASE_TIMEOUT" bash "$SCRIPT_DIR/web_katana.sh" "$TARGET" || log_warn "Phase 3c (katana) timed out"
+  OUT_DIR="${RECON_BASE}/$TARGET/crawl"
+  if [ -f "$OUT_DIR/waygauurls.txt" ] || [ -f "$OUT_DIR/cleansubskatanaurls.txt" ] || [ -f "$OUT_DIR/alivesubsurls.txt" ]; then
+    cat "$OUT_DIR/waygauurls.txt" "$OUT_DIR/cleansubskatanaurls.txt" "$OUT_DIR/alivesubsurls.txt" 2>/dev/null | uro 2>/dev/null | sort -u > "$OUT_DIR/merged-crawl.txt"
+    cp "$OUT_DIR/merged-crawl.txt" "$OUT_DIR/crawledurls.txt"
+    N=$(wc -l < "$OUT_DIR/merged-crawl.txt" | tr -d ' ')
+    log_ok "merged-crawl.txt: $N unique URLs"
+  fi
   echo ""
 fi
 
@@ -121,5 +133,5 @@ MINS=$((ELAPSED / 60))
 SECS=$((ELAPSED % 60))
 
 log_ok "=== Auto Recon Complete ==="
-log_ok "Results in: $BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/"
+log_ok "Results in: ${RECON_BASE}/$TARGET/"
 log_ok "Elapsed: ${MINS}m ${SECS}s"

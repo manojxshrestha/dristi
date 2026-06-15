@@ -28,6 +28,7 @@ WITH_SOCIAL=false
 EMAIL_FORMAT='{first}.{last}'
 
 while [[ $# -gt 0 ]]; do
+source "$(dirname "$0")/_env.sh"
     case "$1" in
         --company)              COMPANY="$2"; shift 2 ;;
         --sources)              SOURCES="$2"; shift 2 ;;
@@ -76,7 +77,7 @@ if [ ${#MISSING[@]} -gt 0 ]; then
     exit 1
 fi
 
-OUT_DIR="runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/${TARGET}/osint"
+OUT_DIR="$RECON_BASE/$TARGET/osint"
 mkdir -p "$OUT_DIR"
 HARVESTER_OUT="$OUT_DIR/theharvester"
 EMAILS="$OUT_DIR/emails.txt"
@@ -203,5 +204,5 @@ echo "  Next steps:"
 echo "    - Manually review $NAMES — drop obvious false positives"
 echo "    - Combine with /wordlist-gen output for spray (PR #5):"
 echo "        cat $USERNAMES > users.txt"
-echo "        cat runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/${TARGET}/wordlists/ranked.txt $PERSONAL_PW > passes.txt"
+echo "        cat $RECON_BASE/$TARGET/wordlists/ranked.txt $PERSONAL_PW > passes.txt"
 echo "============================================="

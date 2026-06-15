@@ -9,6 +9,8 @@
 
 set -euo pipefail
 
+source "$(dirname "$0")/_env.sh"
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
@@ -19,8 +21,8 @@ log_info() { echo -e "${CYAN}[*]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 
 TARGET="${1:?Usage: $0 <domain> [--gf-sqli <file>]}"
-GF_SQLI="${3:-$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/params/gf_sqli.txt}"
-OUT_DIR="$BASE_DIR/runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/sqli"
+GF_SQLI="${3:-${RECON_BASE}/$TARGET/params/gf_sqli.txt}"
+OUT_DIR="${RECON_BASE}/$TARGET/sqli"
 mkdir -p "$OUT_DIR"
 
 export PATH="$HOME/go/bin:/usr/local/bin:$PATH"

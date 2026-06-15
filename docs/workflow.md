@@ -170,7 +170,9 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 
 **Note:** `ip_info` module (reverse IP, IP WHOIS, geolocation) is skipped — requires `WHOISXML_API` key.
 
-**Output:** Intel data to `runtime/engagements/<id>/recon/<domain>/intel/` — consumed by RECON for target context and by HUNT agents for WAF/cloud/third-party awareness.
+**Output:** Intel data to `$DRISTI_ROOT/engagements/recon/<domain>/intel/` — consumed by RECON for target context and by HUNT agents for WAF/cloud/third-party awareness.
+
+**CRITICAL:** Run `bash scripts/tools/phase-intel.sh <domain>` — never install tools or invoke binaries directly. All tools pre-installed.
 
 ---
 
@@ -191,6 +193,8 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 | 9 | Gate check | `phase_gate_check(phase_completed=1)` |
 
 **MCP tools used:** `track_tool`, `parse_tool_output`, `ingest_tool_file`, `verify_tool_result`
+
+**CRITICAL:** Run all recon via `bash scripts/tools/<name>.sh <target>` — never invoke tool binaries directly or install tools. All tools are pre-installed.
 
 **Output:** `endpoint_map_raw` deliverable with all discovered endpoints and triage answers.
 
@@ -221,7 +225,7 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 | Step | Action | MCP Tools |
 |------|--------|-----------|
 | 1 | Load endpoint_map_ranked + auth_analysis | `get_deliverable()` |
-| 2 | Run deep testing (API fuzzing, method override, content-type switch, GraphQL probing, race conditions, UUID analysis, JWT manipulation) | — |
+| 2 | Run deep testing (API fuzzing via `scripts/tools/param_extract.sh`/`param_discovery.sh`, method override, content-type switch, GraphQL probing, race conditions, UUID analysis, JWT manipulation) | — |
 | 3 | **WAF handling:** If WAF detected in Phase 2, apply vendor-specific bypasses | `identify_waf()`, `get_waf_bypass()`, `knowledge/waf/` |
 | 4 | **Group-based testing:** Endpoints are pre-classified into functional groups (auth, profile, api, admin, search, file, payment, infra). Pick 1-2 reps per group and test ALL applicable bug classes. If clean, skip the group for that class. | `get_wstg_test()`, `get_technique_guide()`, `get_test_payloads()`, `get_witness_payloads()` |
 | 5 | **Parallel: credential-attack** — if login endpoint found and program permits password testing, run wordlist-gen → breach-check → osint-employees → spray pipeline | `scripts/tools/wordlist_engine.sh`, `breach_checker.py`, `osint_employees.sh`, `spray_orchestrator.sh` |
@@ -319,7 +323,7 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 | 3 | For each finding: capture raw HTTP, screenshot (if DOM/visual), check collaborator (if OOB) | `validate_poc()` |
 | 4 | **WAF evidence:** Capture blocked vs. bypassed request pairs, note evasion technique used | — |
 | 5 | Apply redaction (cookies, PII, tokens) | — |
-| 6 | Save sanitized evidence | `runtime/engagements/${ENGAGEMENT_ID}/recon/<domain>/evidence/<finding-id>/` |
+| 6 | Save sanitized evidence | `$DRISTI_ROOT/engagements/recon/<domain>/evidence/<finding-id>/` |
 **Browser rules:** Use Playwright for screenshots. Call `playwright_browser_close()` after every operation. Never call `browser.newContext()` — default context already routes through Burp via `--proxy-server`.
 
 **Output:** Sanitized evidence pack for each finding.
@@ -380,7 +384,7 @@ Q7: Is this NOT on the never-submit list?
 - `@redteam-report-template` — Client-facing DOCX
 - `@redteam-mindset` — Red-team ops posture
 
-**Output:** `runtime/engagements/<eid>/report.md` — full pentest report.
+**Output:** `$DRISTI_ROOT/engagements/report.md` — full pentest report.
 
 ---
 
