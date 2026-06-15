@@ -18,16 +18,20 @@ Together they turn an LLM into a methodical bug hunter: the pipeline tells it *w
 ```mermaid
 graph TB
     Pipeline["`**pipeline.sh** runs phases in order
-    (script-driven — AI never decides "what's next")`"]
+    (script-driven — AI never decides what's next)`"]
+
     Phase["`**Phase scripts** 
     scripts/tools/phase-*.sh
     each scripts runs its automated tools`"]
+
     AI["`**AI Agent** called for analysis
     @pintel / @recon / @surface / @hunt
     analyzes output, guides next actions`"]
+
     Burp["`**Burp Suite MCP Server**
     executes HTTP requests
     sends payloads, parses responses`"]
+
     MCP["`**WSTG MCP Server**
     get_wstg_test · identify_waf
     log_finding · track_test`"]
@@ -345,35 +349,12 @@ Q7: Not on never-submit list?
 
 ```mermaid
 graph TB
-    Pipeline["`**pipeline.sh** (or manual phase-*.sh)
-    runs automated tools per phase`"]
-
-    Agent["`**OpenCode Agent** (called after script runs)
-    1. Reads script output
-    2. Loads per-class tradecraft
-    3. Guides AI on what to test
-    4. Reads reference libraries`"]
-
-    User["`**User** reviews results,
-    calls appropriate agent:
-    @pintel / @recon / @surface / @hunt`"]
-
-    MCP["`**MCP Server**
-    1. get_wstg_test(WSTG-ATHZ-01)
-    2. get_technique_guide(IDOR)
-    3. identify_waf() if blocked
-    4. log_finding(...)
-    5. track_test(...)
-    6. get_coverage()`"]
-
-    Burp["`**Burp MCP Server**
-    Sends HTTP requests
-    Returns responses`"]
-
-    Refs["`**Reference Libraries**
-    1. skills/hunt-*/ (technique guidance)
-    2. knowledge/waf/ (144 vendor fingerprints)
-    3. knowledge/payloads/ (64 categories)`"]
+    Pipeline["pipeline.sh (or manual phase-*.sh)"]
+    Agent["OpenCode Agent - reads script output, loads tradecraft"]
+    User["User reviews results, calls agent: @pintel / @recon / @hunt"]
+    MCP["MCP Server - get_wstg_test, log_finding, track_test"]
+    Burp["Burp Suite MCP Server - sends HTTP requests"]
+    Refs["Reference Libraries - skills/, knowledge/waf/, payloads/"]
 
     Pipeline --> User
     User --> Agent
