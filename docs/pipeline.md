@@ -1,13 +1,15 @@
-# Workflow — How Dristi Works
+# Pipeline — How Dristi Runs
 
 ## What Dristi Is
 
-Dristi is a security testing platform with two interfaces that work together:
+Dristi is a **script-driven** security testing pipeline. Bash scripts run each phase in strict order. The AI (LLM) is called **only for analysis** within each phase — it never decides what phase to run next.
 
-1. **MCP Server** (89 tools) — provides the OWASP WSTG methodology, engagement management, findings database, phase gates, WAF identification/evasion, and reporting as callable tools
-2. **OpenCode Agents** (87 agents) — provides per-class bug hunting tradecraft, enterprise platform attack chains, and engagement lifecycle management via `@agent-name`
+Two interfaces work together:
 
-Together they turn an LLM into a methodical bug hunter: the agents tell it *what to look for and how*, the MCP server gives it the *structured methodology and tracking*, and Burp Suite provides *HTTP request execution*.
+1. **Pipeline Scripts** (`scripts/pipeline.sh` + `scripts/tools/phase-*.sh`) — automate the 12-phase pipeline: scope → auth → intel → recon → surface → hunt → exploit → validate → report
+2. **OpenCode Agents** — provide per-class bug hunting tradecraft, enterprise platform attack chains, and analysis *within* each phase via `@agent-name`
+
+Together they turn an LLM into a methodical bug hunter: the pipeline tells it *what order to do things in*, the agents tell it *what to look for and how*, and Burp Suite provides *HTTP request execution*.
 
 ---
 
@@ -15,46 +17,35 @@ Together they turn an LLM into a methodical bug hunter: the agents tell it *what
 
 ```mermaid
 graph TB
-    User["`**User describes target** in plain English`"]
-    Matcher["`**OpenCode Agent Matcher**
-    scans agent descriptions
-    loads matching agents`"]
-    MCP["`**MCP Server - 89 tools**
-    • register scope / log finding
-    • track coverage / identify WAF
-    • get bypass payloads
-    • generate report`"]
-    Agent["`**Agent SKILL content**
-    guides LLM on what to test,
-    what payloads to use,
-    how to chain & bypass,
-    which references to fetch`"]
+    Pipeline["`**pipeline.sh** runs phases in order
+    (script-driven — AI never decides "what's next")`"]
+    Phase["`**Phase scripts** 
+    scripts/tools/phase-*.sh
+    each scripts runs its automated tools`"]
+    AI["`**AI Agent** called for analysis
+    @pintel / @recon / @surface / @hunt
+    analyzes output, guides next actions`"]
     Burp["`**Burp Suite MCP Server**
     executes HTTP requests
     sends payloads, parses responses`"]
-    Refs["`**Reference Libraries**
-    • hackerone-reports (14,682)
-    • facebook writeups (399)
-    • google vrp writeups (273)
-    • knowledge/waf (144 vendors)
-    • knowledge/payloads (64 cats)`"]
+    MCP["`**WSTG MCP Server**
+    get_wstg_test · identify_waf
+    log_finding · track_test`"]
 
-    User --> Matcher
-    Matcher --> MCP
-    Matcher --> Agent
-    Matcher --> Refs
-    MCP --> Burp
-    Agent --> Burp
+    Pipeline --> Phase
+    Phase --> AI
+    AI --> MCP
+    AI --> Burp
 ```
 
-The loop: **describe → agent loads → MCP tracks → references guide → Burp executes → analyze → log finding → validate → report**
+The loop: **pipeline.sh → phase script runs tools → AI analyzes results → log finding → next phase**
 
-All agents are invoked via `@agent-name`. 14 pipeline agents: `@autopilot` → `@consult` → `@scope` → `@pintel` → `@recon` → `@surface` → `@hunt` → `@deepthink` → `@exploit` → `@search` → `@capture` → `@validate` → `@report`. 54 specialized `@hunt-*` agents + 19 non-hunt specialty agents (87 total).
+Each phase has its own script at `scripts/tools/phase-<name>.sh`. Run them individually or use `pipeline.sh` to run them in order.
 
 **Two modes:**
-- **`@autopilot`** — runs fully autonomous, dispatches phases 2-12 via `task()` to sub-agents, ends with report
-- **`@consult`** — same pipeline, interactive at every phase transition with suggestions
-- **Manual** — `@scope` → `@recon` → ... step-by-step
+- **Automatic** — `bash scripts/pipeline.sh target.com` runs all 12 phases in strict order
+- **Selective** — `bash scripts/pipeline.sh target.com 3-6` runs phases 3 through 6
+- **Manual** — `bash scripts/tools/phase-recon.sh target.com` runs a single phase
 
 ---
 
@@ -114,295 +105,258 @@ flowchart LR
 
 ### Phase 1: SCOPE
 
-**Goal:** Understand the target, define what's in/out, scaffold the engagement.
+| Step | Action | Script |
+|------|--------|--------|
+| 1 | Register target domain | `scripts/tools/phase-scope.sh <domain>` |
+| 2 | Scaffold output directories | auto creates `$RECON_BASE/<domain>/{scope,intel,recon,...}` |
+| 3 | Check target reachability | curl connectivity test |
+| 4 | Write target metadata | `scope/target.txt`, `scope/started.txt` |
+| 5 | Gate check | `scripts/tools/phase_gate.sh 1 <domain>` |
 
-| Step | Action | MCP Tools |
-|------|--------|-----------|
-| 1 | Ask user for target domain(s) and credentials | — |
-| 2 | Parse scope table if provided | `parse_scope_table()` |
-| 3 | Load engagement config | `load_engagement_config()` |
-| 4 | Register all domains with types | `register_scope()` / `register_scope_batch()` |
-| 5 | Create engagement in database | `findings_init()` |
-| 6 | Create phase tracking tree | `create_task_tree()` |
-| 7 | Gate check | `phase_gate_check(phase_completed=0)` |
-
-**Output:** Registered engagement with scope boundaries, task tree created.
+**Output:** `$RECON_BASE/<domain>/scope/` — scaffolded engagement.
 
 ---
 
 ### Phase 2: AUTH
 
-**Goal:** Obtain authentication credentials and detect WAF before testing.
+| Step | Action | Script |
+|------|--------|--------|
+| 1 | Provide credentials / session tokens | manual (no script can guess these) |
+| 2 | WAF fingerprint check | `scripts/tools/phase-auth.sh <domain>` |
+| 3 | Save auth context | output in `$RECON_BASE/<domain>/auth/waf_detection.txt` |
+| 4 | Gate check | `scripts/tools/phase_gate.sh 2 <domain>` |
 
-| Step | Action | MCP Tools |
-|------|--------|-----------|
-| 1 | Check for existing credentials | `get_engagement_config()` |
-| 2 | Sign up or provide API key | — |
-| 3 | Test auth works | `curl -sv <target>/api/me` |
-| 4 | **WAF fingerprint check** | `identify_waf()` with response headers + body |
-| 5 | If Cloudflare detected | Redirect 80% effort to API subdomain; use Playwright stealth for CF pages |
-| 6 | Look up vendor fingerprints | `knowledge/waf/waf-knowledge-base/02-waf-fingerprints/<vendor>.md` |
-| 7 | Save auth context with real tokens | `save_deliverable('auth_analysis', ...)` |
+**CRITICAL:** If Cloudflare detected, redirect 80% effort to API subdomain; use Playwright stealth for CF pages. Check WAF fingerprints at `knowledge/waf/`.
 
-**WAF Detection:**
-```bash
-curl -sI https://<domain>/ 2>&1 | grep -i "server:\|cf-ray\|x-sucuri\|x-iinfo\|x-mod-security\|x-waf"
-```
-Pass headers + body through `identify_waf()` MCP tool. If identified, check vendor-specific fingerprints and known bypasses at `knowledge/waf/`.
-
-**Output:** `auth_analysis` deliverable with tokens, WAF vendor info.
+**Output:** `$RECON_BASE/<domain>/auth/` — WAF info + auth notes.
 
 ---
 
 ### Phase 3: Intel (passive)
 
-**Goal:** Passive intelligence gathering — WHOIS, cloud footprint, third-party exposure, email spoofability.
+| Step | Action | Script |
+|------|--------|--------|
+| 1 | WHOIS lookup, M365/Azure tenant discovery | `scripts/tools/phase-intel.sh <domain>` |
+| 2 | SPF/DMARC spoofability check | auto (Spoofy) |
+| 3 | Third-party SaaS misconfiguration scan | auto (misconfig-mapper) |
+| 4 | Cloud storage bucket enumeration | auto (cloud_enum) |
+| 5 | Gate check | `scripts/tools/phase_gate.sh 3 <domain>` |
 
-| Step | Action | Tool |
-|------|--------|------|
-| 1 | WHOIS lookup, M365/Azure tenant discovery | `whois`, `msftrecon` |
-| 2 | Scope analysis from registered domain | `Scopify` |
-| 3 | Third-party SaaS misconfiguration scan (Slack, Jira, GitHub, etc.) | `misconfig-mapper` |
-| 4 | SPF/DMARC spoofability check | `Spoofy` |
-| 5 | Cloud storage bucket enumeration (AWS S3, Azure Blob, GCP, DO Spaces) | `cloud_enum` |
+**Script:** `bash scripts/tools/phase-intel.sh <domain>`
 
-**Script:** `scripts/tools/phase-intel.sh`
-
-**Note:** `ip_info` module (reverse IP, IP WHOIS, geolocation) is skipped — requires `WHOISXML_API` key.
-
-**Output:** Intel data to `$DRISTI_ROOT/engagements/recon/<domain>/intel/` — consumed by RECON for target context and by HUNT agents for WAF/cloud/third-party awareness.
-
-**CRITICAL:** Run `bash scripts/tools/phase-intel.sh <domain>` — never install tools or invoke binaries directly. All tools pre-installed.
+**Output:** `$RECON_BASE/<domain>/intel/` — WHOIS, cloud, spoof, third-party data.
 
 ---
 
-## Phase 4: RECON
+### Phase 4: RECON
 
-**Goal:** Discover attack surface — subdomains, endpoints, technologies, secrets.
+| Step | Action | Script |
+|------|--------|--------|
+| 1 | Subdomain enumeration | `scripts/tools/subdomain_enum.sh <domain>` |
+| 2 | Web crawling (passive) | `scripts/tools/web_waymore.sh <domain>` |
+| 3 | Web crawling (active) | `scripts/tools/web_gospider.sh <domain>` |
+| 4 | Web crawling (katana) | `scripts/tools/web_katana.sh <domain>` |
+| 5 | URL merge + dedup | auto (uro) → `crawl/merged-crawl.txt` |
+| 6 | Parameter extraction | `scripts/tools/param_extract.sh <domain>` |
+| 7 | Nuclei scan | `scripts/tools/auto_nuclei.sh <domain>` |
+| 8 | Cariddi secrets/info scan | `scripts/tools/cariddi_scan.sh <domain>` |
+| 9 | DNS bruteforce | `scripts/tools/dns_bruteforce.sh <domain>` |
+| 10 | Vhost fuzzing | `scripts/tools/vhost_fuzz.sh <domain>` |
+| 11 | Directory bruteforce | `scripts/tools/dir_bruteforce.sh <domain>` |
+| 12 | Zone transfer check | `scripts/tools/zone_transfer.sh <domain>` |
+| 13 | Secrets discovery | `scripts/tools/secrets_hunter.sh <domain>` |
+| 14 | Cloud recon | `scripts/tools/cloud_recon.sh <domain>` |
+| 15 | Takeover scanner | `scripts/tools/takeover_scanner.sh <domain>` |
+| 16 | Gate check | `scripts/tools/phase_gate.sh 4 <domain>` |
 
-| Step | Action | MCP Tools |
-|------|--------|-----------|
-| 1 | Subdomain enumeration + DNS bruteforce | `track_tool()` |
-| 2 | Web crawling, parameter extraction | `track_tool()` |
-| 3 | Cariddi, nuclei, directory bruteforce | `track_tool()` |
-| 4 | 403 bypass, vhost fuzzing | `track_tool()` |
-| 5 | Zone transfer, takeover scanner | `track_tool()` |
-| 6 | Cloud recon, CVE scan, secrets discovery | `track_tool()` |
-| 7 | Answer 3 triage questions per endpoint | — |
-| 8 | Save endpoint map deliverable | `save_deliverable('endpoint_map_raw', ...)` |
-| 9 | Gate check | `phase_gate_check(phase_completed=1)` |
+**Script (all-in-one):** `bash scripts/tools/auto_recon.sh <domain>` or `bash scripts/tools/phase-recon.sh <domain>`
 
-**MCP tools used:** `track_tool`, `parse_tool_output`, `ingest_tool_file`, `verify_tool_result`
+**CRITICAL:** Never invoke tool binaries directly or install tools. All tools pre-installed.
 
-**CRITICAL:** Run all recon via `bash scripts/tools/<name>.sh <target>` — never invoke tool binaries directly or install tools. All tools are pre-installed.
-
-**Output:** `endpoint_map_raw` deliverable with all discovered endpoints and triage answers.
+**Output:** `$RECON_BASE/<domain>/` — subdomains/, crawl/, nuclei/, params/, secrets/, directories/, vhost/
 
 ---
 
 ### Phase 5: SURFACE
 
-**Goal:** Convert raw recon output into a prioritized "test these first" list.
+| Step | Action | Script |
+|------|--------|--------|
+| 1 | Collect all discovered URLs | `scripts/tools/phase-surface.sh <domain>` |
+| 2 | Classify into Tiers | Tier 0 (public+input), Tier 1 (auth+input), Tier 2 (infra) |
+| 3 | Count endpoints per tier | auto |
+| 4 | Save ranked endpoint map | `surface/endpoint_map_ranked.txt` |
+| 5 | Gate check | `scripts/tools/phase_gate.sh 5 <domain>` |
 
-| Step | Action | MCP Tools |
-|------|--------|-----------|
-| 1 | Load endpoint_map_raw deliverable | `get_deliverable('endpoint_map_raw')` |
-| 2 | Check skills for relevant hunt-class tradecraft | skills/ |
-| 3 | Classify into Tiers | Tier 0 (public+input) / Tier 1 (auth+input) / Tier 2 (infra) |
-| 4 | **Classify into functional groups** (auth, profile, api, admin, search, file, payment, infra) by path prefix | — |
-| 5 | Risk-score each endpoint | `prioritize_endpoints()` |
-| 6 | Save ranked deliverable with group membership | `save_deliverable('endpoint_map_ranked', ...)` |
-| 7 | Gate check | `phase_gate_check(phase_completed=2)` |
+**Script:** `bash scripts/tools/phase-surface.sh <domain>`
 
-**Output:** `endpoint_map_ranked` deliverable consumed by Phase 6.
+**Output:** `$RECON_BASE/<domain>/surface/endpoint_map_ranked.txt`
 
 ---
 
 ### Phase 6: HUNT
 
-**Goal:** Test for specific vulnerability classes using per-class tradecraft and reference libraries. Run credential-attack in parallel if the target has a login surface.
+| Step | Action | Script |
+|------|--------|--------|
+| 1 | Nuclei scan | `scripts/tools/auto_nuclei.sh <domain>` |
+| 2 | Parameter extraction + fuzzing | `scripts/tools/param_extract.sh`, `param_discovery.sh` |
+| 3 | Secrets hunting | `scripts/tools/secrets_hunter.sh <domain>` |
+| 4 | SQLi automation | `scripts/tools/auto_sqli.sh <domain>` |
+| 5 | XSS automation | `scripts/tools/auto_xss.sh <domain>` |
+| 6 | Directory bruteforce | `scripts/tools/dir_bruteforce.sh <domain>` |
+| 7 | VHost fuzzing | `scripts/tools/vhost_fuzz.sh <domain>` |
+| 8 | 403 bypass checks | `scripts/tools/bypass_403.sh <domain> --quick` |
+| 9 | **AI-led testing** — call `@hunt` agent | analyzes results, guides per-class testing |
+| 10 | Gate check | `scripts/tools/phase_gate.sh 6 <domain>` |
 
-| Step | Action | MCP Tools |
-|------|--------|-----------|
-| 1 | Load endpoint_map_ranked + auth_analysis | `get_deliverable()` |
-| 2 | Run deep testing (API fuzzing via `scripts/tools/param_extract.sh`/`param_discovery.sh`, method override, content-type switch, GraphQL probing, race conditions, UUID analysis, JWT manipulation) | — |
-| 3 | **WAF handling:** If WAF detected in Phase 2, apply vendor-specific bypasses | `identify_waf()`, `get_waf_bypass()`, `knowledge/waf/` |
-| 4 | **Group-based testing:** Endpoints are pre-classified into functional groups (auth, profile, api, admin, search, file, payment, infra). Pick 1-2 reps per group and test ALL applicable bug classes. If clean, skip the group for that class. | `get_wstg_test()`, `get_technique_guide()`, `get_test_payloads()`, `get_witness_payloads()` |
-| 5 | **Parallel: credential-attack** — if login endpoint found and program permits password testing, run wordlist-gen → breach-check → osint-employees → spray pipeline | `scripts/tools/wordlist_engine.sh`, `breach_checker.py`, `osint_employees.sh`, `spray_orchestrator.sh` |
-| 6 | For each confirmed finding: validate PoC, log, track test, check chaining | `validate_poc()`, `log_finding()`, `track_test()`, `find_chains()` |
-| 7 | **Ralph Wiggum loop — exhaustive coverage gate:** Every endpoint in the ranked deliverable must be covered by at least one `track_test()`. Cross-reference endpoints_tested against the endpoint list. If any endpoint is untested, re-dispatch before passing the gate. | `get_deliverable('endpoint_map_ranked')`, `track_test()` |
-| 8 | Gate check | `phase_gate_check(phase_completed=3)` |
+**Script:** `bash scripts/tools/phase-hunt.sh <domain>` (runs steps 1-8 automatically)
 
-**Agent auto-loading examples:**
+**For AI-driven analysis (step 9):** Call `@hunt` agent with the surface map. It loads the per-class tradecraft automatically:
 
-| You say… | Agent loads |
-|----------|-------------|
-| "XSS on the search field — reflected, stored, DOM contexts" | `@hunt-xss` |
-| "URL param accepts http:// URLs — testing SSRF" | `@hunt-ssrf` |
-| "SQLi on the login — testing error, blind, time-based" | `@hunt-sqli` |
-| "SSTI on template param — Jinja2/Twig/Freemarker" | `@hunt-ssti` |
-| "CMDI on ping param — testing blind and OOB" | `@hunt-rce` |
-| "IDOR in /api/users/{id} — cross-tenant access" | `@hunt-idor` |
-| "Auth bypass on admin panel — path traversal" | `@hunt-auth-bypass` |
-| "ATO on session — JWT manipulation, 2FA bypass" | `@hunt-ato` |
-| "GraphQL at /graphql — introspection, mutations" | `@hunt-graphql` |
-| "File upload on /profile/avatar — RCE via upload" | `@hunt-file-upload` |
-| "Race condition on coupon — concurrent redemption" | `@hunt-race-condition` |
-| "OAuth login — CSRF, redirect_uri, state bypass" | `@hunt-oauth` |
-| "CORS misconfiguration — credentialed cross-origin" | `@hunt-cors` |
-| "XXE in XML upload — OOB entity exfiltration" | `@hunt-xxe` |
-| "CSRF on email-change endpoint" | `@hunt-csrf` |
-| "NoSQLi on JSON login endpoint" | `@hunt-nosqli` |
-| "LDAP injection on search endpoint" | `@hunt-ldap` |
-| "Open redirect in ?next= parameter" | `@hunt-open-redirect` |
-| "H2C smuggling on HTTP/2 endpoint" | `@hunt-http-smuggling` |
-| "Deserialization in session cookie" | `@hunt-deserialization` |
-| "Subdomain takeover — CNAME unclaimed" | `@hunt-subdomain` |
-| "Cloud IAM — AWS/Azure/GCP privilege escalation" | `@cloud-iam-deep` |
-| "M365 tenant — Entra ID, federation, SharePoint" | `@m365-entra-attack` |
-| "Android APK — decompile, secrets, endpoints" | `@apk-redteam-pipeline` |
-| "Token audit — honeypot, liquidity, rug-pull" | `@meme-coin-audit` |
-| "Smart contract audit — Solidity reentrancy" | `web3-audit` (skill — load via `skill("web3-audit")`) |
-| "K8s pod escape" | `@hunt-k8s` |
-| "Next.js API route without auth" | `@hunt-nextjs` |
-| "Password spray on login — wordlist gen, breach check, OSINT employees" | `credential-attack` (skill — load via `skill("credential-attack")`) |
+| Class | Load with… |
+|-------|-----------|
+| XSS | `@hunt-xss` |
+| SQLi | `@hunt-sqli` |
+| SSRF | `@hunt-ssrf` |
+| IDOR | `@hunt-idor` |
+| SSTI | `@hunt-ssti` |
+| CMDI/RCE | `@hunt-rce` |
+| Auth bypass | `@hunt-auth-bypass` |
+| ATO | `@hunt-ato` |
+| GraphQL | `@hunt-graphql` |
+| File upload | `@hunt-file-upload` |
+| Race condition | `@hunt-race-condition` |
+| OAuth | `@hunt-oauth` |
+| CORS | `@hunt-cors` |
+| XXE | `@hunt-xxe` |
+| CSRF | `@hunt-csrf` |
+| NoSQLi | `@hunt-nosqli` |
+| LDAP | `@hunt-ldap` |
+| Open redirect | `@hunt-open-redirect` |
+| HTTP smuggling | `@hunt-http-smuggling` |
+| Deserialization | `@hunt-deserialization` |
+| Subdomain takeover | `@hunt-subdomain` |
+| Cloud IAM | `@cloud-iam-deep` |
+| M365/Entra | `@m365-entra-attack` |
+| Android APK | `@apk-redteam-pipeline` |
+| Smart contract | `web3-audit` (skill) |
+| K8s | `@hunt-k8s` |
+| Next.js | `@hunt-nextjs` |
 
-**Reference Libraries** (available to every hunt agent during testing):
+**If WAF detected in Phase 2:** Pass to AI agent which applies vendor-specific bypasses from `knowledge/waf/`.
 
-| Resource | Path | Contents |
-|----------|------|----------|
-| WAF Fingerprints | `knowledge/waf/waf-knowledge-base/02-waf-fingerprints/` | 144 vendor fingerprints |
-| WAF Bypasses | `knowledge/waf/waf-knowledge-base/04-known-bypasses/` | 24 vendor bypass files |
-| WAF Evasion | `knowledge/waf/waf-knowledge-base/03-evasion-techniques/` | 21 evasion categories |
-| WAF Skills | `skills/waf-*/` | 15 WAF skills (loadable via `skill()`) |
-| Payloads | `knowledge/payloads/` | 64 PAT categories, 12 with test.sh |
-
-**MCP tools used:** `get_wstg_test`, `get_test_payloads`, `get_technique_guide`, `get_witness_payloads`, `get_evidence_checklist`, `get_slot_types`, `log_finding`, `create_exploitation_queue`, `validate_exploitation_queue`, `get_exploitation_queue`, `get_waf_bypass`, `identify_waf`, `track_test`, `add_graph_node`, `add_graph_edge`, `find_chains`, `validate_poc`
-
-**Output:** Confirmed findings logged to engagement database, exploitation queues created.
+**Output:** `$RECON_BASE/<domain>/` — nuclei/, params/, secrets/, sqli/, xss/, directories/, vhost/
 
 ---
 
 ### Phase 7: DEEPTHINK (conditional)
 
-**Goal:** First-principles gap analysis when HUNT yields zero findings or hits dead-ends. See `.opencode/agents/deepthink.md`.
+| Step | Action | Script |
+|------|--------|--------|
+| 1 | Prepare gap analysis context | `scripts/tools/phase-deepthink.sh <domain>` |
+| 2 | Call `@deepthink` agent | AI performs first-principles gap analysis |
+| 3 | Gate check | `scripts/tools/phase_gate.sh 7 <domain>` |
+
+**Script:** `bash scripts/tools/phase-deepthink.sh <domain>`
+**Agent:** `@deepthink` — reads gap context, identifies blind spots
 
 ---
 
 ### Phase 8: EXPLOIT
 
-**Goal:** Deepen confirmed findings — chain them, escalate impact, and attempt PoC exploitation.
+| Step | Action | Script |
+|------|--------|--------|
+| 1 | Compile all findings | `scripts/tools/phase-exploit.sh <domain>` |
+| 2 | Call `@exploit` agent | AI deepens findings, chains, escalates |
+| 3 | Multi-auth-context probing | AI replays findings with all sessions |
+| 4 | Exploitation gate | Every finding must have PoC or bypass exhaustion |
+| 5 | Gate check | `scripts/tools/phase_gate.sh 8 <domain>` |
 
-| Step | Action | MCP Tools |
-|------|--------|-----------|
-| 1 | Load all confirmed findings | `findings_list_vulns()` |
-| 2 | Classify each finding to a vulnerability class (XSS, SQLi, SSRF, etc.) | `get_technique_guide()` |
-| 3 | **Multi-auth-context probing:** For each finding, replay with ALL available sessions (anonymous, user-1, user-2, admin) to surface privilege-dependent exploitation paths and session-isolation gaps | `get_engagement_config()`, session headers |
-| 4 | Attempt PoC exploitation with class-specific payloads | `validate_poc()` |
-| 5 | If blocked — apply WAF bypasses | `get_waf_bypass()` |
-| 6 | Run chaining analysis across findings | `find_chains()`, `findings_add_chain()` |
-| 7 | **Exhaustive exploitation gate:** Every finding must have either a validated PoC or documented bypass exhaustion — no skipped findings | `validate_poc()` |
-**Output:** Findings with PoC evidence attached or bypass exhaustion documented.
+**Script:** `bash scripts/tools/phase-exploit.sh <domain>`
+**Agent:** `@exploit` — loads compiled findings, attempts PoC exploitation
 
 ---
 
 ### Phase 9: SEARCH (conditional)
 
-**Goal:** Research stale payloads, missing CVEs, and WAF bypass techniques when EXPLOIT stalls. See `.opencode/agents/search.md`.
+| Step | Action | Script |
+|------|--------|--------|
+| 1 | Prepare research context | `scripts/tools/phase-search.sh <domain>` |
+| 2 | Call `@search` agent | AI researches payloads, CVEs, bypasses |
+| 3 | Feed results back to EXPLOIT | Findings from research → new exploit attempts |
+
+**Script:** `bash scripts/tools/phase-search.sh <domain>`
+**Agent:** `@search` — researches stale payloads, missing CVEs, WAF bypasses
 
 ---
 
 ### Phase 10: CAPTURE
 
-**Goal:** Capture evidence with proper hygiene — redact cookies, PII, sanitize.
+| Step | Action | Script |
+|------|--------|--------|
+| 1 | Prepare evidence structure | `scripts/tools/phase-capture.sh <domain>` |
+| 2 | Call `@capture` + `@evidence-hygiene` | AI captures screenshots, redacts PII |
+| 3 | Save sanitized evidence | `$RECON_BASE/<domain>/evidence/<finding-id>/` |
 
-| Step | Action | MCP Tools |
-|------|--------|-----------|
-| 1 | Load confirmed findings | `get_findings()` |
-| 2 | Load evidence-hygiene for redaction protocol | `@evidence-hygiene` |
-| 3 | For each finding: capture raw HTTP, screenshot (if DOM/visual), check collaborator (if OOB) | `validate_poc()` |
-| 4 | **WAF evidence:** Capture blocked vs. bypassed request pairs, note evasion technique used | — |
-| 5 | Apply redaction (cookies, PII, tokens) | — |
-| 6 | Save sanitized evidence | `$DRISTI_ROOT/engagements/recon/<domain>/evidence/<finding-id>/` |
-**Browser rules:** Use Playwright for screenshots. Call `playwright_browser_close()` after every operation. Never call `browser.newContext()` — default context already routes through Burp via `--proxy-server`.
-
-**Output:** Sanitized evidence pack for each finding.
+**Script:** `bash scripts/tools/phase-capture.sh <domain>`
+**Browser rules:** Use Playwright for screenshots. Call `playwright_browser_close()` after every operation.
 
 ---
 
 ### Phase 11: VALIDATE
 
-**Goal:** Decide whether a finding is reportable before writing anything.
+| Step | Action | Script |
+|------|--------|--------|
+| 1 | Prepare findings for validation | `scripts/tools/phase-validate.sh <domain>` |
+| 2 | Call `@validate` + `@triage-validation` | AI runs 7-Question Gate on each finding |
+| 3 | Assign verdict | PASS / KILL / DOWNGRADE / CHAIN REQUIRED |
 
-| Step | Action | MCP Tools |
-|------|--------|-----------|
-| 1 | Load findings | `get_findings()` |
-| 2 | Re-validate each PoC | `validate_poc()` |
-| 3 | Cross-reference severity against MCP technique guides | `get_technique_guide()` |
-| 4 | Run the 7-Question Gate | `@triage-validation` |
-| 5 | Assign verdict | `update_finding()` |
+**Script:** `bash scripts/tools/phase-validate.sh <domain>`
 
-**The 7-Question Gate:**
+**The 7-Question Gate** (run by AI agent):
 ```
-Q1: Can an attacker use this RIGHT NOW with a real HTTP request?
-Q2: Is the impact on the program's accepted-impact list?
-Q3: Is the vulnerable asset in scope?
-Q4: Does it work without privileged access an attacker can't get?
-Q5: Is this not already known or documented behavior?
-Q6: Can impact be proved beyond "technically possible"?
-Q7: Is this NOT on the never-submit list?
+Q1: Real HTTP request?
+Q2: Accepted impact?
+Q3: In scope?
+Q4: Without privileged access?
+Q5: Not known behavior?
+Q6: Provable impact?
+Q7: Not on never-submit list?
 ```
-
-**Outcomes:**
-- **PASS** — all 7 ✓ → proceed to Report
-- **DOWNGRADE** — Q2 or Q5 fails → lower severity, still report
-- **CHAIN REQUIRED** — needs another primitive → go back to Hunt
-- **KILL** — any other failure → discard, do not draft
 
 **Never-submit list:** Missing headers, introspection alone, clickjacking alone, self-XSS, open redirect alone, SSRF DNS-only, logout CSRF, rate limits on non-critical forms, cookie flags alone.
-
-**Output:** Verdict for each finding (PASS / KILL / DOWNGRADE / CHAIN REQUIRED).
 
 ---
 
 ### Phase 12: REPORT
 
-**Goal:** Generate a submission-ready report with coverage validation.
+| Step | Action | Script |
+|------|--------|--------|
+| 1 | Compile report context | `scripts/tools/phase-report.sh <domain>` |
+| 2 | Call `@report-writing` agent | AI generates submission-ready report |
+| 3 | Choose platform | HackerOne (`@report-writing`) / Bugcrowd (`@bugcrowd-reporting`) / Client (`@redteam-report-template`) |
+| 4 | Final gate | `scripts/tools/phase_gate.sh 12 <domain>` |
 
-| Step | Action | MCP Tools |
-|------|--------|-----------|
-| 1 | Check WSTG coverage | `get_coverage()` |
-| 2 | Check tool coverage | `get_tool_coverage()` |
-| 3 | Final gate check | `phase_gate_check(phase_completed=5)` |
-| 4 | Generate full report | `generate_report()` |
-| 5 | Present report summary | — |
-| 6 | Ask which platform (H1/Bugcrowd/Client) | — |
-
-**Platform-specific reporters:**
-- `@report-writing` — HackerOne/generic format
-- `@bugcrowd-reporting` — Bugcrowd VRT mapping
-- `@redteam-report-template` — Client-facing DOCX
-- `@redteam-mindset` — Red-team ops posture
-
-**Output:** `$DRISTI_ROOT/engagements/report.md` — full pentest report.
+**Script:** `bash scripts/tools/phase-report.sh <domain>`
+**Output:** `$RECON_BASE/<domain>/report/report_context.txt` → AI generates final report.
 
 ---
 
-## How MCP Server and Agents Interact
+## How Pipeline Scripts + Agents Interact
 
 ```mermaid
 graph TB
-    User["`**User Input**
-    *Test /api/users for IDOR with two accounts*`"]
+    Pipeline["`**pipeline.sh** (or manual phase-*.sh)
+    runs automated tools per phase`"]
 
-    Agent["`**OpenCode Agent**
-    1. hunt-idor loads
-    2. Provides detection patterns,
-       payloads, bypass table,
-       chain opportunities
-    3. Reads H1 IDOR reports for
-       real-world technique guidance
-    4. Guides LLM on what to say`"]
+    Agent["`**OpenCode Agent** (called after script runs)
+    1. Reads script output
+    2. Loads per-class tradecraft
+    3. Guides AI on what to test
+    4. Reads reference libraries`"]
+
+    User["`**User** reviews results,
+    calls appropriate agent:
+    @pintel / @recon / @surface / @hunt`"]
 
     MCP["`**MCP Server**
     1. get_wstg_test(WSTG-ATHZ-01)
@@ -412,61 +366,60 @@ graph TB
     5. track_test(...)
     6. get_coverage()`"]
 
-    Refs["`**Reference Libraries**
-    1. skills/hunt-idor/ (technique guidance)
-    2. knowledge/waf/ (144 vendor fingerprints)
-    3. knowledge/payloads/Insecure Direct Object References/`"]
-
     Burp["`**Burp MCP Server**
     Sends HTTP requests
     Returns responses`"]
 
+    Refs["`**Reference Libraries**
+    1. skills/hunt-*/ (technique guidance)
+    2. knowledge/waf/ (144 vendor fingerprints)
+    3. knowledge/payloads/ (64 categories)`"]
+
+    Pipeline --> User
     User --> Agent
-    User --> MCP
     Agent --> Refs
     Agent --> Burp
-    MCP --> Burp
+    Agent --> MCP
 ```
 
 **At every phase, the pattern is the same:**
 
-1. You describe what you're doing → agent loads with relevant tradecraft
-2. Agent reads its reference library (H1 reports, WAF KB, PAT) for technique guidance
-3. MCP server provides structured methodology (WSTG tests, technique guides) and tracking
-4. Burp MCP (or curl) executes the actual HTTP requests
-5. Findings are logged via MCP, tracked via MCP, reported via MCP
+1. Run the phase script: `bash scripts/tools/phase-<name>.sh <domain>`
+2. Script runs automated tools, saves output
+3. Call the appropriate AI agent: `@pintel`, `@recon`, `@surface`, `@hunt`, etc.
+4. Agent reads the output, loads tradecraft from reference libraries
+5. Agent guides further testing via Burp MCP
+6. Findings are logged via MCP server
 
 ---
 
-## Mode Comparison
+## Quickstart
 
-| Feature | `@autopilot` | `@consult` | Manual |
-|---------|-------------|------------|--------|
-| Phases | 1–12 autonomous + conditional | 1–12 interactive | Step-by-step |
-| Sub-agent dispatch | `task()` for phases 4-12 | `task()` for phases 4-12 | Direct agent invocation |
-| Group-based testing | Auto: endpoints grouped by function, 1-2 reps per group | Suggests grouping before HUNT | Manual |
-| Multi-auth probing | Auto: all auth contexts per finding | Suggests context rotation before EXPLOIT | Manual |
-| Ralph Wiggum loop | Auto: validates every endpoint covered before gate | Suggests coverage check before gate | Manual |
-| Exhaustive exploit gate | Auto: verifies every finding exploited | Suggests exploit completeness check | Manual |
-| Phase gates | Automatic check + checkpoint | Ask before each gate | Manual |
-| WAF handling | Automatic detection in Phase 2 | Detected + suggested bypasses | Manual |
-| Reference fetching | Automatic pre-hunt reading | Suggested before testing | On-demand |
-| Intelligence fallback | Auto-activates deepthink/search | Asks user before activating | Manual |
-| Recovery | Auto-retry on gate failure | Suggests recovery options | Manual |
-| Best for | Full engagement, no interruptions | Learning, guided testing | Targeted single-class testing |
+```bash
+# Run all 12 phases in order
+bash scripts/pipeline.sh target.com
+
+# Run phases 3-6 only
+bash scripts/pipeline.sh target.com 3-6
+
+# Run a single phase
+bash scripts/tools/phase-recon.sh target.com
+
+# Call AI agent to analyze results
+# In OpenCode: @recon analyze the recon output for target.com
+```
 
 ---
 
 ## Key Design Principles
 
-1. **Validate before drafting** — the 7-Question Gate prevents wasted effort on N/A findings
-2. **Agents auto-load by topic** — you don't need to know agent names, just describe what you see
-3. **MCP tracks everything** — findings, tests, tools, coverage — nothing gets lost
-4. **Evidence hygiene by default** — redact before capture, not after
-5. **Phase gates ensure quality** — don't skip to reporting without coverage validation
-6. **Burp is optional** — curl + browser works fine for most testing
-7. **References guide technique** — real H1 reports, WAF KBs, and payload libs inform every test
-8. **Browser close after every op** — `playwright_browser_close()` mandate to prevent context leaks
-9. **Group before hunt** — classify endpoints into functional groups and test by group, not individually, to reduce redundant probes without losing coverage
-10. **Probe every auth context** — the same exploit may succeed or fail depending on session; rotate through all available sessions before calling a finding dead
-11. **Ralph Wiggum loop** — no endpoint passes the gate untested; cross-reference coverage before every phase transition
+1. **Script-driven, not agent-driven** — `pipeline.sh` runs phases in order; the AI never decides "what's next"
+2. **AI for analysis only** — agents analyze results and guide testing, they don't orchestrate phases
+3. **Phase gates enforce ordering** — `phase_gate.sh` tracks completed phases and warns on skips
+4. **Each phase has one script** — `scripts/tools/phase-<name>.sh` — run it or call it via pipeline.sh
+5. **Validate before drafting** — the 7-Question Gate prevents wasted effort on N/A findings
+6. **MCP tracks everything** — findings, tests, tools, coverage — nothing gets lost
+7. **Evidence hygiene by default** — redact before capture, not after
+8. **Burp is optional** — curl + browser works fine for most testing
+9. **References guide technique** — real H1 reports, WAF KBs, and payload libs inform every test
+10. **Browser close after every op** — `playwright_browser_close()` mandate to prevent context leaks

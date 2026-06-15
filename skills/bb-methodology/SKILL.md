@@ -123,7 +123,7 @@ Before touching any tool:
 
 ## PART 2: WORKFLOW (What to Do)
 
-### The 12-Phase Pipeline (aligned with Dristi workflow.md)
+### The 12-Phase Pipeline (aligned with Dristi pipeline.md)
 
 ```
 Phase 1:   SCOPE       → register domains, load config, create task tree

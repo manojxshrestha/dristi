@@ -61,7 +61,7 @@ Layer 4: Validation + Reporting      — how to ship it (7-Question Gate, VRT, r
 │   ├── wordlists/              Wordlists + 20 GF patterns
 │   └── portswigger/            (future)
 ├── docs/
-│   ├── workflow.md             Pipeline workflow documentation
+│   ├── pipeline.md             12-phase pipeline reference
 │   ├── testflow.md             Test triage flow documentation
 │   ├── (reports moved to ~/dristi-reports/)
 │   ├── verification/           Verification artifacts
@@ -69,7 +69,8 @@ Layer 4: Validation + Reporting      — how to ship it (7-Question Gate, VRT, r
 │   └── ...                     USAGE, ENGAGEMENTS, deep-testing, agent-reference
 ├── scripts/
 │   ├── payloads/               PAT test harnesses (deploy, lib, hunt, 12 test.sh)
-│   └── tools/                  48 CLI tool wrapper scripts
+│   ├── pipeline.sh             12-phase pipeline orchestrator
+│   └── tools/                  60 CLI tool wrapper scripts (+12 phase-*.sh)
 ├── prompts/                    13 per-category prompt templates
 ├── templates/                  Report templates, quality gates, guides
 ├── skills/                     70+ Dristi tradecraft skills

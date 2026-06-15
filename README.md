@@ -862,7 +862,7 @@ The per-class `@hunt-*` agents address gap-zero (*"what should I look for in web
 |---|---|
 | [`README.md`](README.md) | This file — capability map, structure, quick start |
 | [`docs/architecture.md`](docs/architecture.md) | 12-phase architecture · skill-to-phase mapping · engagement composition |
-| [`docs/workflow.md`](docs/workflow.md) | Working principle · 12-phase workflow · Mermaid diagrams · WSTG walkthrough |
+| [`docs/pipeline.md`](docs/pipeline.md) | 12-phase pipeline · script-driven · Mermaid diagrams · WSTG walkthrough |
 | [`docs/USAGE.md`](docs/USAGE.md) | Full engagement walkthrough · hunt class table · Dristi-specific prompts |
 | [`SECURITY.md`](SECURITY.md) | Authorized-use posture · responsible disclosure · what's excluded |
 

@@ -50,7 +50,7 @@ Full pipeline: Recon -> Learn -> Hunt -> Validate -> Report. One skill for every
 16. **TWO-EYE APPROACH** -- combine systematic testing (checklist) with anomaly detection (watch for unexpected behavior)
 17. **T-SHAPED KNOWLEDGE** -- go DEEP in one area and BROAD across everything else
 
-> **For the full hunting methodology** — 12-phase pipeline, developer psychology framework, session discipline, tool routing by phase, and Wide/Deep route selection — see **`docs/workflow.md`**.
+> **For the full hunting methodology** — 12-phase pipeline, developer psychology framework, session discipline, tool routing by phase, and Wide/Deep route selection — see **`docs/pipeline.md`**.
 
 ---
 
