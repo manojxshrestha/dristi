@@ -446,22 +446,43 @@ if [ -s "$NVM_DIR/nvm.sh" ]; then
 fi
 
 python3 << 'PYEOF'
-import json, os, shutil
+import json, os, shutil, sys
 
 repo = os.environ['REPO_DIR']
 home = os.path.expanduser("~")
 config_path = os.path.join(home, ".config", "opencode", "opencode.json")
 
+# ── Platform detection ─────────────────────────────────────────────────────
+is_wsl = os.path.exists("/proc/sys/fs/binfmt_misc/WSLInterop") or bool(os.environ.get("WSL_DISTRO_NAME"))
+distro_id = ""
+if os.path.exists("/etc/os-release"):
+    with open("/etc/os-release") as f:
+        for line in f:
+            if line.startswith("ID="):
+                distro_id = line.split("=", 1)[1].strip().strip('"')
+                break
+
 mcp = {}
 
-# Burp Suite MCP (remote — requires Burp + MCP Server extension running)
-mcp["burp"] = {
-    "type": "remote",
-    "url": "http://127.0.0.1:9876/",
-    "enabled": True
-}
+# ── Burp Suite MCP ─────────────────────────────────────────────────────────
+if is_wsl:
+    # WSL: Burp runs on Windows — use bridge script to auto-detect gateway IP
+    bridge_script = os.path.join(repo, "scripts", "burp-mcp-bridge.py")
+    mcp["burp"] = {
+        "type": "local",
+        "command": ["bash", "-c", f"python3 {bridge_script}"]
+    }
+    sys.stderr.write("[install] WSL detected → Burp MCP via bridge script\n")
+else:
+    # Native Linux / macOS: Burp runs on localhost
+    mcp["burp"] = {
+        "type": "remote",
+        "url": "http://127.0.0.1:9876/",
+        "enabled": True
+    }
+    sys.stderr.write("[install] Native Linux/macOS → Burp MCP remote :9876\n")
 
-# WSTG server
+# ── WSTG server ────────────────────────────────────────────────────────────
 mcp["wstg"] = {
     "type": "local",
     "prompt": "You are a Dristi WSTG penetration testing MCP server.",
@@ -472,22 +493,24 @@ mcp["wstg"] = {
     ]
 }
 
-# Playwright MCP
-playwright_bin = shutil.which("playwright-mcp")
-if playwright_bin:
-    real = os.path.realpath(playwright_bin)
-    node_bin = shutil.which("node") or shutil.which("nodejs") or "/usr/bin/node"
-    playwright_args = [node_bin, real]
-elif shutil.which("npx"):
-    playwright_args = [shutil.which("npx"), "-y", "@playwright/mcp"]
+# ── Playwright MCP ─────────────────────────────────────────────────────────
+# Prefer playwright-mcp.sh wrapper (auto-detects Burp proxy per platform)
+playwright_sh = os.path.join(repo, "scripts", "playwright-mcp.sh")
+if os.path.exists(playwright_sh):
+    playwright_args = ["bash", playwright_sh]
 else:
-    playwright_args = ["npx", "-y", "@playwright/mcp"]
+    # Fallback: raw @playwright/mcp CLI
+    if shutil.which("npx"):
+        playwright_args = [shutil.which("npx"), "-y", "@playwright/mcp"]
+    else:
+        playwright_args = ["npx", "-y", "@playwright/mcp"]
 
 mcp["playwright"] = {
     "type": "local",
     "command": playwright_args
 }
 
+# ── Write config ───────────────────────────────────────────────────────────
 config = {
     "$schema": "https://opencode.ai/config.json",
     "mcp": mcp
@@ -497,7 +520,6 @@ os.makedirs(os.path.dirname(config_path), exist_ok=True)
 with open(config_path, "w") as f:
     json.dump(config, f, indent=2)
 
-print("[+] Burp MCP configured (SSE :9876)")
 print("[+] WSTG MCP server configured")
 print("[+] Playwright MCP server configured")
 PYEOF

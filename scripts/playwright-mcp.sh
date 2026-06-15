@@ -22,17 +22,14 @@ WIN_IP=""
 
 if [ -n "${PLAYWRIGHT_BURP_DISABLE:-}" ]; then
   : # explicitly disabled, WIN_IP stays empty
-elif command -v ip &>/dev/null && ip route 2>/dev/null | grep -q default; then
-  # WSL2 / Linux: default gateway is the host
-  WIN_IP=$(ip route | grep default | awk '{print $3}')
 elif [ -f /proc/sys/fs/binfmt_misc/WSLInterop ] || [ -n "${WSL_DISTRO_NAME:-}" ]; then
-  # WSL fallback (ip route failed)
-  WIN_IP="172.17.160.1"
+  # WSL2: default gateway IS the Windows host — resolve it
+  WIN_IP=$(ip route 2>/dev/null | grep default | awk '{print $3}')
+  [ -z "$WIN_IP" ] && WIN_IP="172.17.160.1"
 elif [ "$(uname)" = "Darwin" ]; then
-  # macOS: Burp typically runs on localhost
   WIN_IP="127.0.0.1"
 else
-  # Native Linux fallback
+  # Native Linux (Kali, Ubuntu, etc.): Burp runs on localhost
   WIN_IP="127.0.0.1"
 fi
 

@@ -2,15 +2,15 @@
 
 ## Problem
 
-OpenCode in WSL2 could not connect to Burp Suite's MCP Server running on Windows. Two distinct failures occurred:
+OpenCode needs to connect to Burp Suite's MCP Server across different platforms. Two distinct failures occurred on WSL, plus there is no equivalent setup for native Linux.
 
-### 1. Source IP Block (403 Forbidden)
+### WSL: Source IP Block (403 Forbidden)
 
 Burp MCP Server binds to `127.0.0.1:9876` and rejects connections from non-localhost source IPs. In WSL2, the Windows `127.0.0.1` is not reachable from Linux — WSL2 gets its own virtual network interface with a separate IP (e.g. `172.17.x.x`).
 
 A `netsh interface portproxy` forwards `0.0.0.0:9876` → `127.0.0.1:9876`, but the portproxy **preserves the original source IP**. So Burp still sees the WSL VM IP and returns 403.
 
-### 2. Protocol Mismatch (SSE vs Streamable HTTP)
+### Protocol Mismatch (SSE vs Streamable HTTP)
 
 Burp MCP Server uses the **SSE transport** (older MCP transport):
 - `GET /` with `Accept: text/event-stream` establishes a persistent SSE connection
@@ -23,7 +23,7 @@ OpenCode uses the **Streamable HTTP transport** (newer MCP transport) for `"type
 - Responses are expected in the POST response body, not streamed via SSE
 - Sends `Origin` header which Burp MCP rejects with 403
 
-### 3. Failed Workarounds
+### Failed Workarounds (WSL)
 
 | Attempt | Result |
 |---------|--------|
@@ -32,9 +32,26 @@ OpenCode uses the **Streamable HTTP transport** (newer MCP transport) for `"type
 | `Start-Process` TCP proxy on Windows | 403 Forbidden (source IP preserved) |
 | `"type": "remote"` in OpenCode config | 403 + protocol mismatch |
 
+### Native Linux Gap (Kali / Parrot / Ubuntu)
+
+The original `connect-burp.sh` had a WSL-only guard — on native Linux it just printed instructions and exited. The `burp-mcp-bridge.py` hardcoded `get_windows_ip()` which would resolve to the router IP on native Linux, causing connection failures.
+
 ---
 
-## Solution: 2-Layer Proxy Chain (Current Architecture)
+## Solution: Auto-Detecting Cross-Platform Architecture
+
+### Platform Detection Layer
+
+Every script now auto-detects the platform at startup — this is the **first thing** that happens:
+
+| Script | Detection Method | Variables Exported |
+|--------|-----------------|-------------------|
+| `_env.sh` | `/proc/sys/fs/binfmt_misc/WSLInterop`, `/etc/os-release` | `IS_WSL`, `IS_KALI`, `IS_PARROT`, `IS_DEBIAN`, `IS_MACOS`, `DISTRO_ID` |
+| `burp-mcp-bridge.py` | WSLInterop check | internal `is_wsl()` |
+| `connect-burp.sh` | WSLInterop check | `IS_WSL` |
+| `install.sh` (Python) | WSLInterop check, `/etc/os-release` | `is_wsl`, `distro_id` |
+
+### WSL Architecture (2-Layer Proxy Chain)
 
 ```
  OpenCode         WSL (Linux)                      Windows
@@ -46,7 +63,19 @@ OpenCode uses the **Streamable HTTP transport** (newer MCP transport) for `"type
 └──────────┘    └──────────────────┘    └───────────────────────┘    └──────────────┘
 ```
 
-This is the **simplified architecture** (2 layers instead of original 3). The WSL forwarder was removed — the bridge connects directly to the Windows proxy IP.
+### Native Linux Architecture (Direct, No Proxy)
+
+```
+ OpenCode                              Kali / Parrot
+┌──────────┐    ┌──────────────────┐    ┌──────────────┐
+│ "type":  │    │ burp-mcp-bridge  │    │ Burp MCP     │
+│ "local"  │◄──►│ (stdio ↔ HTTP)   │◄──►│ 127.0.0.1    │
+│ stdio    │    │ connects directly│    │ :9876        │
+│ MCP      │    │ to localhost:9876│    │              │
+└──────────┘    └──────────────────┘    └──────────────┘
+```
+
+On native Linux, the bridge connects **directly** to `127.0.0.1:9876` — no `burp_proxy.py` needed because Burp runs on the same machine and there's no source-IP block issue.
 
 ### Layer 1: Windows Python TCP Proxy (`burp_proxy.py` on Windows)
 
@@ -122,6 +151,27 @@ cmd.exe /c "cd /d C:\ && $PYTHON_WIN_RAW $PROXY_DST_RAW" > /dev/null 2>&1 &
 
 **`resolve_python()`** handles Python discovery because `where python` on Windows returns the Microsoft Store redirector stub (`%USERPROFILE%\AppData\Local\Microsoft\WindowsApps\python.exe`), a 0-byte stub that silently opens the Store instead of running the script.
 
+### Platform Detection in `burp-mcp-bridge.py`
+
+The bridge auto-detects WSL vs native Linux at startup:
+
+```python
+def is_wsl():
+    return (
+        os.path.exists("/proc/sys/fs/binfmt_misc/WSLInterop")
+        or bool(os.environ.get("WSL_DISTRO_NAME"))
+    )
+
+def main():
+    if is_wsl():
+        win_ip = get_windows_ip()
+        burp_url = f"http://{win_ip}:9872/"   # via burp_proxy.py on Windows
+    else:
+        burp_url = "http://127.0.0.1:9876/"   # direct — same machine
+```
+
+On WSL, `get_windows_ip()` reads the default gateway from `ip route` (e.g. `172.17.160.1`) and connects to `burp_proxy.py` on port 9872. On native Linux, it connects directly to `127.0.0.1:9876`.
+
 ### Layer 2: MCP stdio Bridge (`burp-mcp-bridge.py`)
 
 **File:** `${HOME}/dristi/scripts/burp-mcp-bridge.py`
@@ -172,7 +222,40 @@ This means:
 
 **File:** `scripts/connect-burp.sh` (renamed from `reconnect-burp.sh`)
 
-Automates proxy deployment, verification, and config toggling:
+Auto-detects the platform and follows the appropriate path:
+
+### Native Linux Path (Kali / Parrot / Ubuntu / macOS)
+
+```
+Step 1: Detect platform → IS_WSL=false
+Step 2: Check Burp MCP on 127.0.0.1:9876 (via ss/netstat/devtcp)
+Step 3: Toggle OpenCode config (forces reconnect)
+Step 4: Start Dristi WSTG server
+```
+
+The native Linux path is simple — Burp runs on the same machine, so no proxy bridge is needed. The script just verifies Burp MCP is listening, toggles the OpenCode config, and starts the WSTG server.
+
+```bash
+if ! $IS_WSL; then
+  print_banner
+  info "Native Linux detected — connecting to local Burp MCP..."
+
+  if command -v ss &>/dev/null; then
+    MCP_CHECK=$(ss -tlnp 2>/dev/null | grep ":9876" || true)
+  elif command -v netstat &>/dev/null; then
+    MCP_CHECK=$(netstat -tlnp 2>/dev/null | grep ":9876" || true)
+  else
+    MCP_CHECK=$(timeout 2 bash -c "echo >/dev/tcp/127.0.0.1/9876" 2>&1 || true)
+  fi
+
+  toggle_opencode_burp
+  start_wstg_server
+  print_done
+  exit 0
+fi
+```
+
+### WSL Path (Windows Proxy Bridge)
 
 ```
 Step 1: Clean up stale bridge processes
@@ -183,7 +266,7 @@ Step 5: Toggle OpenCode config (forces reconnect)
 Step 6: Restart Dristi WSTG server
 ```
 
-### Windows Path Auto-Detection
+### Windows Path Auto-Detection (WSL only)
 
 No hardcoded usernames or IPs:
 - Windows user profile: `cmd.exe /c "echo %USERPROFILE%"`
@@ -246,20 +329,57 @@ The fix: the verification step (Step 4) catches this — if the SSE stream retur
 
 ## OpenCode Config
 
-**File:** `~/.config/opencode/opencode.json`
+**File:** `~/.config/opencode/opencode.json` (generated by `install.sh`)
 
+### Platform-Aware Configuration
+
+The config is generated by `install.sh` based on auto-detected platform:
+
+**WSL:** Uses `burp-mcp-bridge.py` as a local MCP server (the bridge auto-detects WSL and connects through the Windows proxy):
 ```json
 {
   "mcp": {
     "burp": {
       "type": "local",
-      "command": ["python3", "${HOME}/dristi/scripts/burp-mcp-bridge.py"]
+      "command": ["bash", "-c", "python3 ${HOME}/dristi/scripts/burp-mcp-bridge.py"]
     }
   }
 }
 ```
 
-`"type": "local"` is critical — OpenCode spawns the bridge as a child process and communicates via stdio (JSON-RPC lines). `"type": "remote"` (Streamable HTTP) cannot handle Burp's SSE transport.
+**Native Linux:** Uses direct remote URL (Burp runs on same machine):
+```json
+{
+  "mcp": {
+    "burp": {
+      "type": "remote",
+      "url": "http://127.0.0.1:9876/",
+      "enabled": true
+    }
+  }
+}
+```
+
+### Playwright MCP
+
+On all platforms, Playwright uses `playwright-mcp.sh` which auto-detects the Burp proxy:
+
+```json
+{
+  "mcp": {
+    "playwright": {
+      "type": "local",
+      "command": ["bash", "${HOME}/dristi/scripts/playwright-mcp.sh"]
+    }
+  }
+}
+```
+
+`playwright-mcp.sh` checks WSLInterop first — on WSL it routes through the Windows host IP (`:8080`), on native Linux it uses `127.0.0.1:8080`.
+
+### Why `"type": "local"` for the Bridge
+
+`"type": "local"` is critical for the bridge because OpenCode spawns it as a child process and communicates via stdio (JSON-RPC lines). `"type": "remote"` (Streamable HTTP) cannot handle Burp's SSE transport — the bridge translates between the two protocols.
 
 ---
 
@@ -292,11 +412,19 @@ The WSL forwarder (`burp-proxy-run.sh`) was a simple TCP passthrough that gave O
 - One less layer = less latency and fewer failure points
 - `burp-proxy-run.sh` was purely a TCP forwarder with no logic
 
-### Current (2-Layer)
+### Current (WSL — 2-Layer)
 
 ```
 OpenCode ↔ burp-mcp-bridge → Windows Proxy (172.17.x.x:9872) → Burp MCP (127.0.0.1:9876)
 ```
+
+### Current (Native Linux — Direct)
+
+```
+OpenCode ↔ burp-mcp-bridge → 127.0.0.1:9876 (Burp MCP)
+```
+
+On native Linux (Kali/Parrot/Ubuntu/macOS), Burp runs on the same machine — no proxy layer needed.
 
 ### Removed Files
 - `scripts/burp-proxy-run.sh` — WSL TCP forwarder (obsolete)
@@ -318,6 +446,20 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \
 
 # Direct SSE test against proxy
 curl -s -N -H "Accept: text/event-stream" http://172.17.160.1:9872/
+```
+
+### Native Linux Check:
+
+```bash
+# Check if Burp MCP is running
+ss -tlnp | grep 9876
+
+# Bridge test (standalone)
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \
+  | python3 ${HOME}/dristi/scripts/burp-mcp-bridge.py
+
+# Playwright proxy check
+bash scripts/playwright-mcp.sh --help 2>&1 | head -5
 ```
 
 ### Connection:
@@ -346,6 +488,9 @@ Then restart Burp Suite and enable MCP Server extension.
 | TCP-level proxy on Windows (not HTTP) | Simpler, handles SSE streaming without buffering issues |
 | Infinite retry in bridge | Burp may be restarted during testing; bridge self-heals without manual reconnect |
 | `cp` instead of SCP for Windows deployment | Windows drive is mounted at `/mnt/c/` in WSL2 — direct filesystem copy |
+| Cross-platform detection first | Every script detects WSL/Kali/Parrot/macOS before anything else — avoids platform-specific bugs |
+| `playwright-mcp.sh` wrapper instead of raw CLI | Auto-detects Burp proxy per platform; applies stealth init script; sets realistic User-Agent |
+| Bridge script on native Linux skips proxy | Burp runs on same machine — no `burp_proxy.py` needed (different from WSL where Windows is a separate host) |
 
 ---
 
@@ -368,3 +513,8 @@ Then restart Burp Suite and enable MCP Server extension.
 15. **Fixed WSTG server env**: Removed `UV_PROJECT_ENVIRONMENT=venv` override that prevented `uv run` from finding `.venv`
 16. **Fixed Windows Store Python stub**: `where python` returned `WindowsApps\python.exe` (Store redirector, 0 bytes). Added `resolve_python()` that tries `py -3`, App Execution Aliases (`python3.11`), `where python` results, WindowsApps subfolder scan, then MSI fallback — each validated with `--version`.
 17. **Fixed `start /b` triple failure**: `start /b` can't resolve App Execution Aliases; UNC CWD concatenates quoted paths with `C:\Windows\System32`. Replaced `start /b` with `cd /d C:\ && python3.11 <unquoted_path>` in background `&`.
+18. **Cross-platform auto-detection**: Added platform detection to `_env.sh` (`IS_WSL`, `IS_KALI`, `IS_PARROT`, `IS_DEBIAN`, `IS_MACOS`, `DISTRO_ID`) — available to all 36 tool scripts.
+19. **`burp-mcp-bridge.py` platform detection**: Added `is_wsl()` that checks WSLInterop; on WSL connects via `burp_proxy.py` (`:9872`), on native Linux connects directly to `127.0.0.1:9876`.
+20. **`connect-burp.sh` native Linux path**: Replaced WSL-only guard with platform branch — native Linux checks local Burp MCP on `:9876`, toggles config, starts WSTG server. No proxy bridge needed.
+21. **`install.sh` platform-aware config**: Config generator now detects WSL vs native Linux — on WSL uses `burp-mcp-bridge.py` as local command; on native Linux uses direct remote URL. Playwright always uses `playwright-mcp.sh` wrapper.
+22. **`playwright-mcp.sh` proxy detection**: Auto-detects WSL (Windows host IP via `ip route` → `:8080`), macOS (`127.0.0.1:8080`), native Linux (`127.0.0.1:8080`). Includes stealth init script to patch Cloudflare/WAF fingerprints.

@@ -7,6 +7,30 @@
 DRISTI_ROOT="${DRISTI_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
 cd "$DRISTI_ROOT" 2>/dev/null || true
 
+# ── Platform detection (WSL / Kali / Parrot / Debian / macOS) ──────────────
+PLATFORM_OS="$(uname -s)"
+PLATFORM_ARCH="$(uname -m)"
+IS_LINUX=false; IS_MACOS=false
+IS_WSL=false; IS_KALI=false; IS_PARROT=false; IS_DEBIAN=false
+DISTRO_ID=""; DISTRO_VERSION=""
+
+if [ "$PLATFORM_OS" = "Linux" ]; then
+    IS_LINUX=true
+    if [ -f /proc/sys/fs/binfmt_misc/WSLInterop ] || [ -n "${WSL_DISTRO_NAME:-}" ]; then
+        IS_WSL=true
+    fi
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        DISTRO_ID="${ID:-}"
+        DISTRO_VERSION="${VERSION_ID:-}"
+        [ "$ID" = "kali"   ] && IS_KALI=true
+        [ "$ID" = "parrot" ] && IS_PARROT=true
+        case "$ID" in debian|ubuntu|kali|parrot|linuxmint) IS_DEBIAN=true ;; esac
+    fi
+elif [ "$PLATFORM_OS" = "Darwin" ]; then
+    IS_MACOS=true
+fi
+
 # Engagement ID (optional — no longer used in path construction)
 ENGAGEMENT_ID="${ENGAGEMENT_ID:-}"
 

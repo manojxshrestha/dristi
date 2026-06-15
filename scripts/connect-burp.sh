@@ -1,16 +1,102 @@
 #!/usr/bin/env bash
-# connect-burp.sh — Burp MCP connection helper
+# connect-burp.sh — Burp MCP connection helper (WSL / Kali / Parrot / macOS)
 #
-# 1. Check Burp MCP on Windows (port 9876) — user must have Burp running
-# 2. Deploy & start Windows Python proxy (port 9872) — rewrites Host + strips Origin
-# 3. Verify the proxy chain works
-# 4. Toggle OpenCode config to force reconnection
+# Auto-detects the platform then:
+#   WSL2        → Deploys burp_proxy.py on Windows, bridges Burp MCP through 9872
+#   Native Linux → Connects directly to Burp MCP on 127.0.0.1:9876
+#
+# Always toggles OpenCode config + starts WSTG MCP server.
 #
 # Usage: bash scripts/connect-burp.sh
 # ═══════════════════════════════════════════════════════════════════════════════
 
 DST="$(cd "$(dirname "$0")/.." && pwd)"
 CONFIG="$HOME/.config/opencode/opencode.json"
+
+# ── Platform detection ───────────────────────────────────────────────────────
+IS_WSL=false
+if [ -f /proc/sys/fs/binfmt_misc/WSLInterop ] || [ -n "${WSL_DISTRO_NAME:-}" ]; then
+  IS_WSL=true
+fi
+
+# ── Toggle OpenCode config helper ────────────────────────────────────────────
+toggle_opencode_burp() {
+  python3 <<PYEOF
+import json, os
+cp = os.path.expanduser("~/.config/opencode/opencode.json")
+with open(cp) as f:
+    cfg = json.load(f)
+burp = cfg.get("mcp", {}).get("burp")
+if burp:
+    del cfg["mcp"]["burp"]
+    with open(cp, "w") as f:
+        json.dump(cfg, f, indent=2)
+    cfg["mcp"]["burp"] = burp
+    with open(cp, "w") as f:
+        json.dump(cfg, f, indent=2)
+    print("[+] Burp MCP entry toggled — restart OpenCode")
+else:
+    print("[-] No burp entry in MCP config")
+PYEOF
+}
+
+# ── Start WSTG server helper ─────────────────────────────────────────────────
+start_wstg_server() {
+  info "Starting Dristi WSTG MCP server (background)..."
+  nohup bash -c "cd '$DST/server' && exec uv run server.py" \
+    > "$HOME/.dristi/server.log" 2>&1 &
+  sleep 2
+  if kill -0 $! 2>/dev/null; then
+    ok "WSTG server started (PID $!)"
+  else
+    warn "WSTG server failed — check: cat ~/.dristi/server.log"
+  fi
+}
+
+# ── Print done banner ────────────────────────────────────────────────────────
+print_done() {
+  echo ""
+  echo -e "${BOLD}${G}╔══════════════════════════════════════╗${N}"
+  echo -e "${BOLD}${G}║     Connection Complete                 ║${N}"
+  echo -e "${BOLD}${G}╚══════════════════════════════════════╝${N}"
+  echo "  Restart OpenCode for changes to take effect."
+  echo ""
+}
+
+# ═════════════════════════════════════════════════════════════════════════════
+# NATIVE LINUX PATH (Kali / Parrot / Ubuntu / macOS)
+# ═════════════════════════════════════════════════════════════════════════════
+if ! $IS_WSL; then
+  print_banner
+  info "Native Linux detected — connecting to local Burp MCP..."
+
+  # Check if Burp MCP is running on localhost:9876
+  if command -v ss &>/dev/null; then
+    MCP_CHECK=$(ss -tlnp 2>/dev/null | grep ":9876" || true)
+  elif command -v netstat &>/dev/null; then
+    MCP_CHECK=$(netstat -tlnp 2>/dev/null | grep ":9876" || true)
+  else
+    MCP_CHECK=$(timeout 2 bash -c "echo >/dev/tcp/127.0.0.1/9876" 2>&1 || true)
+  fi
+
+  if [ -z "$MCP_CHECK" ]; then
+    warn "Nothing listening on 127.0.0.1:9876"
+    echo ""
+    echo "  To connect Burp MCP on native Linux:"
+    echo "    1. Start Burp Suite"
+    echo "    2. Extensions → MCP Server → Enable (defaults to port 9876)"
+    echo "    3. Ensure Burp proxy listener is on 127.0.0.1:8080"
+    echo "    4. Run this script again"
+    echo ""
+  else
+    ok "Burp MCP is listening on 127.0.0.1:9876"
+  fi
+
+  toggle_opencode_burp
+  start_wstg_server
+  print_done
+  exit 0
+fi
 
 R='\033[0;31m'; G='\033[0;32m'; Y='\033[1;33m'; B='\033[0;34m'; C='\033[0;36m'; N='\033[0m'; BOLD='\033[1m'
 ok(){   echo -e "${G}[✓]${N} $*"; }
