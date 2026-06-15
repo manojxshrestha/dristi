@@ -33,7 +33,7 @@ WORDLIST_DIR="$BASE_DIR/wordlists/dns"
 mkdir -p "$WORDLIST_DIR"
 
 SUB_LIST="$WORDLIST_DIR/subdomains-top1million-20000.txt"
-RESOLVERS="${RESOLVERS_FILE:-$WORDLIST_DIR/resolvers.txt}"
+RESOLVER_FILE="${RESOLVERS_FILE:-$WORDLIST_DIR/resolvers.txt}"
 
 # Use local wordlists (pre-downloaded to wordlists/dns/)
 if [ ! -f "$SUB_LIST" ]; then
@@ -43,30 +43,31 @@ if [ ! -f "$SUB_LIST" ]; then
 fi
 log_ok "Subdomain wordlist: $(wc -l < "$SUB_LIST" | tr -d ' ') entries"
 
-# Default resolvers (major public DNS - reliable)
-DEFAULT_RESOLVERS="1.1.1.1
-8.8.8.8
-8.8.4.4
-9.9.9.9
-149.112.112.112
-208.67.222.222
-208.67.220.220
-77.88.8.8
-74.82.42.42
-64.6.64.6
-185.228.168.9
-76.76.19.19"
+# Build resolver list: known-good defaults always first, then file-based supplement
+build_resolvers() {
+  tmp=$(mktemp)
+  {
+    echo "1.1.1.1"; echo "1.0.0.1"
+    echo "8.8.8.8"; echo "8.8.4.4"
+    echo "9.9.9.9"; echo "149.112.112.112"
+    echo "208.67.222.222"; echo "208.67.220.220"
+    echo "77.88.8.8"; echo "74.82.42.42"
+    echo "64.6.64.6"; echo "185.228.168.9"
+    echo "76.76.19.19"
+    [ -f "$RESOLVER_FILE" ] && cat "$RESOLVER_FILE"
+  } | sort -u > "$tmp"
+  echo "$tmp"
+}
 
-if [ ! -f "$RESOLVERS" ]; then
-  log_err "Resolvers list not found: $RESOLVERS"
-  log_err "Run: wget -O \"$RESOLVERS\" https://raw.githubusercontent.com/blechschmidt/massdns/refs/heads/master/lists/resolvers.txt"
-  exit 1
+if [ ! -f "$RESOLVER_FILE" ]; then
+  log_warn "Resolvers file not found: $RESOLVER_FILE"
+  log_warn "Using built-in defaults only (13 reliable resolvers)"
+  log_warn "Download: wget -O \"$RESOLVER_FILE\" https://raw.githubusercontent.com/manojxshrestha/wordlists/refs/heads/main/resolvers.txt"
 fi
-log_ok "Resolvers: $(wc -l < "$RESOLVERS" | tr -d ' ') entries"
 
-# Merge with DEFAULT_RESOLVERS to ensure we have reliable ones
-cat "$RESOLVERS" <(echo "$DEFAULT_RESOLVERS") | sort -u > "${RESOLVERS}.merged"
-mv "${RESOLVERS}.merged" "$RESOLVERS"
+RESOLVERS=$(build_resolvers)
+trap 'rm -f "$RESOLVERS"' EXIT
+log_ok "Resolvers: $(wc -l < "$RESOLVERS" | tr -d ' ') entries"
 
 USE_LIST="${WORDLIST:-$SUB_LIST}"
 
