@@ -2957,10 +2957,7 @@ def _get_phase_brainstorming(
     skipped_tests = {tid: e for tid, e in tracked_tests.items() if e["status"] == "skipped"}
 
     if phase == 0:
-        suggestions.append(
-            "SCOPE done. Did you check for SSO/OIDC/SAML redirects to a different domain? "
-            "If the login redirects to auth.example.com, register it with register_scope()."
-        )
+        suggestions.append("SCOPE done. Did you check for SSO/OIDC/SAML redirects to a different domain? " "If the login redirects to auth.example.com, register it with register_scope().")
         suggestions.append("Did the user provide credentials? If not, label everything [UNAUTHENTICATED] " "and note blind spots for the AUTH phase.")
         suggestions.append("If Cloudflare detected, route 80% of curl testing to api.<target> " "and use Playwright for CF-protected pages.")
         suggestions.append("Check if there are API subdomains (api.*) or different auth domains " "that should be in scope.")
@@ -6125,10 +6122,6 @@ def validate_finding_poc(
     )
 
 
-
-
-
-
 _SHELL_UNSAFE = re.compile(r"[\"';$`|&><(){}!\\]")
 _SHELL_UNSAFE_PATHS = re.compile(r"\.\.")
 
@@ -6346,6 +6339,7 @@ def main():
     transport = os.environ.get("WSTG_TRANSPORT", "stdio")  # "stdio", "sse", or "streamable-http"
     if transport == "sse":
         import uvicorn
+
         starlette_app = mcp.sse_app()
         uvicorn.run(starlette_app, host=mcp.settings.host, port=mcp.settings.port, log_level=mcp.settings.log_level.lower())
     else:

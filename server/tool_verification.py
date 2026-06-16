@@ -67,7 +67,6 @@ def _check_nmap(command: str, raw: str) -> tuple[bool, list[str], list[str]]:
     return True, [], []
 
 
-
 def _check_sqlmap(command: str, raw: str) -> tuple[bool, list[str], list[str]]:
     """Validate sqlmap output."""
     issues = []

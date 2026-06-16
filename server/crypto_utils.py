@@ -17,10 +17,7 @@ except ImportError:
     Fernet = None  # type: ignore[assignment]
     InvalidToken = Exception
     HAS_CRYPTO = False
-    raise ImportError(
-        "cryptography package is required. "
-        "Install with: pip install dristi-server[encrypt] or pip install cryptography"
-    ) from None
+    raise ImportError("cryptography package is required. " "Install with: pip install dristi-server[encrypt] or pip install cryptography") from None
 
 
 def _get_key_path() -> Path:
