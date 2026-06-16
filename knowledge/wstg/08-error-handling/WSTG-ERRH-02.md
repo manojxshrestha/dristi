@@ -170,7 +170,7 @@ Use `curl` with patterns to find stack traces already captured:
 - Pattern: `Fatal error:.*in /` (PHP stack traces)
 - Pattern: `Error:.*at Object\.` (Node.js stack traces)
 
-Use `nuclei` to check if Burp Scanner has already identified any stack trace disclosures.
+check if Burp Scanner has already identified any stack trace disclosures.
 
 ### Step 6: Analyze Disclosed Information
 

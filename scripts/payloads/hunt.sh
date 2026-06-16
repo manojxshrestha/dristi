@@ -1,14 +1,12 @@
 #!/bin/bash
 # hunt.sh — Master payload-based vulnerability hunting pipeline
-# Usage: ./hunt.sh <engagement-id> [--quick|--deep] [--nuclei]
+# Usage: ./hunt.sh <engagement-id> [--quick|--deep]
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"; BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
-ENGAGEMENT="${1:?Usage: $0 <engagement-id> [--quick|--deep] [--nuclei]}"
+ENGAGEMENT="${1:?Usage: $0 <engagement-id> [--quick|--deep]}"
 MODE="${2:-quick}"
-RUN_NUCLEI=false
-[ "${3:-}" = "--nuclei" ] || [ "${2:-}" = "--nuclei" ] && RUN_NUCLEI=true
-[ "${2:-}" = "--nuclei" ] && MODE=quick
+true  # placeholder
 
 RECON_DIR="$BASE_DIR/runtime/engagements/$ENGAGEMENT/recon"
 URLS_DIR="$RECON_DIR/urls"
@@ -99,21 +97,7 @@ for class in "${!PAYLOAD_CLASSES[@]}"; do
     TOTAL_HITS=$((TOTAL_HITS + HITS))
     log "$class: $HITS hit(s)"
 
-    # Phase 3: If hits and --nuclei flag, run targeted nuclei scan
-    if $RUN_NUCLEI; then
-      info "  Launching nuclei $class scan..."
-      hits_file="$HITS_DIR/$class"
-      if [ -d "$hits_file" ] && [ "$(ls -A "$hits_file" 2>/dev/null | wc -l)" -gt 0 ]; then
-        hit_urls=$(mktemp)
-        for hf in "$hits_file"/*.txt; do
-          param=$(basename "$hf" | sed 's/^[^_]*_//;s/\.txt$//')
-          # Reconstruct URL from saved hits (last hit URL is the one that triggered)
-          echo "$LIVE_FILE" | xargs -I{} grep -l "$param" "$hf" 2>/dev/null || true
-        done > "$hit_urls" 2>/dev/null
-        bash "$SCRIPT_DIR/nuclei.sh" "$ENGAGEMENT" "$class" "$hit_urls" 2>/dev/null || true
-        rm -f "$hit_urls"
-      fi
-    fi
+    true  # nuclei scan removed
   else
     info "  $class: no hits"
   fi
@@ -141,5 +125,4 @@ echo ""
 info "Hits saved to: $RECON_DIR/hits/<class>/"
 info "To verify manually:"
 info "  cat $RECON_DIR/hits/<class>/*.txt"
-info "Run nuclei per-category:"
-info "  bash $SCRIPT_DIR/nuclei.sh $ENGAGEMENT <class>"
+info "Next: review hits and test manually"

@@ -253,7 +253,7 @@ Administrative interfaces provide privileged access to manage applications, serv
    - The interface is directly accessible without authentication (critical)
    - The login page reveals the admin panel software and version
    - The interface returns 403 only based on IP (can potentially be bypassed)
-3. Use `nuclei` to check for any admin interface findings from Burp's scanner
+3. check for any admin interface findings from Burp's scanner
 
 ## Payloads
 

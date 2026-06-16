@@ -244,7 +244,7 @@ Web servers and applications often contain old, backup, or unreferenced files th
    GET /deploy.sh HTTP/1.1
    Host: target.com
    ``
-2. Use `nuclei` to check for any backup or unreferenced file findings from Burp's scanner
+2. check for any backup or unreferenced file findings from Burp's scanner
 
 ### Step 6: Mine Proxy History for Clues
 

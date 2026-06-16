@@ -224,7 +224,7 @@ window.location = getParam('next');
 document.location.href = urlParams.get('redirect');
 ```
 
-Use `nuclei` to check if Burp has identified any open redirect findings.
+check if Burp has identified any open redirect findings.
 
 ## Payloads
 

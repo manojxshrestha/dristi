@@ -170,7 +170,7 @@ Session replay attacks occur when an attacker captures a valid session token and
    X-Forwarded-For: 5.6.7.8
    ``
 3. Check if the application detects concurrent usage from different apparent clients and invalidates the session or raises an alert
-4. Use `nuclei` to check if Burp has identified any session management issues
+4. check if Burp has identified any session management issues
 
 ### Step 8: Test Token Replay Across Application Instances
 

@@ -130,7 +130,7 @@ def run_cmd(cmd, cwd=None, timeout=600):
 
 def check_tools():
     """Check which tools are installed."""
-    tools = ["subfinder", "httpx", "nuclei", "ffuf", "nmap", "amass", "dalfox", "subjack"]
+    tools = ["subfinder", "httpx", "ffuf", "nmap", "amass", "dalfox", "subjack"]
     installed = []
     missing = []
 

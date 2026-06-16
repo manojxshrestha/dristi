@@ -77,7 +77,7 @@ EXTRACT_OUT() {
 log_info "Pass 1: Full intensive scan ..."
 (
   cd "$OUT_DIR" || exit 1
-  cat "$ALIVE_FILE" | cariddi -intensive -s -info -e -err -ext 1 -c 30 -d 1 \
+  cat "$ALIVE_FILE" | cariddi -intensive -s -info -e -err -ext 1 -c 30 -d 1 -plain \
     -oh "pass1" -ot "pass1" 2>/dev/null
 )
 EXTRACT_OUT "pass1" "cariddi.txt"
@@ -105,7 +105,7 @@ EOF
 
 (
   cd "$OUT_DIR" || exit 1
-  cat "$ALIVE_FILE" | cariddi -intensive -e -ef "high-value-paths.txt" -c 30 -d 1 \
+  cat "$ALIVE_FILE" | cariddi -intensive -e -ef "high-value-paths.txt" -c 30 -d 1 -plain \
     -ot "pass2" 2>/dev/null
 )
 

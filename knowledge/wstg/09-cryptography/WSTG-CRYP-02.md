@@ -100,7 +100,7 @@ If these produce consistently different responses from random modifications, the
 If the oracle is confirmed:
 
 1. Use `curl` to test if decrypted plaintext controls application behavior (e.g., user identity, permissions)
-2. Use `nuclei` to check if Burp Scanner has flagged related issues
+2. check if Burp Scanner has flagged related issues
 3. Document the encrypted parameter, the oracle behavior, and the potential for full decryption or ciphertext forgery
 
 ## Payloads

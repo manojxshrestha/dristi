@@ -444,7 +444,6 @@ RECON_PHASES = [
     ("config_expose",  "Config exposure"),
     ("param_discover", "Parameter discovery"),
     ("cicd_scan",      "CI/CD scan"),
-    ("nuclei",         "Nuclei sweep"),
     ("takeover",       "Takeover check"),
 ]
 
@@ -459,8 +458,7 @@ RECON_PHASE_BY_NUM = {
     "6a":  "config_expose",
     "7":   "param_discover",
     "8":   "cicd_scan",
-    "9":   "nuclei",
-    "10":  "takeover",
+    "9":   "takeover",
 }
 
 # Vuln scanner phases.

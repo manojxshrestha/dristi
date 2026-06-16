@@ -21,12 +21,6 @@
 - [momenbasel/KeyFinder](https://github.com/momenbasel/KeyFinder) - is a tool that let you find keys while surfing the web.
 - [streaak/keyhacks](https://github.com/streaak/keyhacks) - is a repository which shows quick ways in which API keys leaked by a bug bounty program can be checked to see if they're valid.
 - [trufflesecurity/truffleHog](https://github.com/trufflesecurity/truffleHog) - Find credentials all over the place.
-- [projectdiscovery/nuclei-templates](https://github.com/projectdiscovery/nuclei-templates) - Use these templates to test an API token against many API service endpoints.
-
-    ```powershell
-    nuclei -t token-spray/ -var token=token_list.txt
-    ```
-
 ## Methodology
 
 - **API Keys**: Unique identifiers used to authenticate requests associated with your project or application.

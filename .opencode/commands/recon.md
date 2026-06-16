@@ -1,6 +1,6 @@
 ---
 name: recon
-description: Subdomain enum, live host discovery, URL crawl, nuclei scan, and attack surface classification
+description: Subdomain enum, live host discovery, URL crawl, and attack surface classification
 ---
 
 # /recon
@@ -13,8 +13,7 @@ Run the full recon pipeline on a target and produce a prioritized attack surface
 2. Resolves DNS and finds live hosts (dnsx + httpx with status/title/tech)
 3. Crawls URLs (katana deep crawl + waybackurls historical)
 4. Classifies URLs by bug class (gf patterns)
-5. Runs nuclei for known CVEs and misconfigs
-6. Outputs prioritized attack surface summary
+5. Outputs prioritized attack surface summary
 
 ## Usage
 
@@ -138,39 +137,7 @@ echo "[+] Auth endpoints:     $(wc -l < $RECON_DIR/auth-endpoints.txt)"
 echo "[+] Admin panels found: $(wc -l < $RECON_DIR/admin-panels.txt)"
 ```
 
-### Step 5: Nuclei Scan
-
-```bash
-# Full severity scan
-nuclei -l $RECON_DIR/live-hosts.txt \
-  -t ~/nuclei-templates/ \
-  -severity critical,high,medium \
-  -o $RECON_DIR/nuclei.txt
-
-# Focused CVE scan (critical/high CVEs only)
-nuclei -l $RECON_DIR/live-hosts.txt \
-  -t ~/nuclei-templates/cves/ \
-  -severity critical,high \
-  -o $RECON_DIR/nuclei-cves.txt
-
-# Misconfiguration scan
-nuclei -l $RECON_DIR/live-hosts.txt \
-  -t ~/nuclei-templates/misconfiguration/ \
-  -o $RECON_DIR/nuclei-misconfig.txt
-
-# Exposed panels/services
-nuclei -l $RECON_DIR/live-hosts.txt \
-  -t ~/nuclei-templates/exposed-panels/ \
-  -t ~/nuclei-templates/exposed-services/ \
-  -o $RECON_DIR/nuclei-exposed.txt
-
-echo "[+] Nuclei findings:      $(wc -l < $RECON_DIR/nuclei.txt)"
-echo "[+] CVE findings:         $(wc -l < $RECON_DIR/nuclei-cves.txt)"
-echo "[+] Misconfig findings:   $(wc -l < $RECON_DIR/nuclei-misconfig.txt)"
-echo "[+] Exposed panel/svc:    $(wc -l < $RECON_DIR/nuclei-exposed.txt)"
-```
-
-### Step 6: JS Secret Scan
+### Step 5: JS Secret Scan
 
 ```bash
 # Download and scan JS files for secrets
@@ -283,10 +250,6 @@ auth-endpoints.txt          # Login/OAuth/SSO endpoints
 admin-panels.txt            # Accessible admin panels
 
 # Automated findings:
-nuclei.txt                  # All nuclei findings
-nuclei-cves.txt             # CVE-specific findings
-nuclei-misconfig.txt        # Misconfiguration findings
-nuclei-exposed.txt          # Exposed panels/services
 js-secrets.txt              # Potential secrets in JS files
 trufflehog-js.txt           # trufflehog JS scan results
 secretfinder.txt            # SecretFinder scan results
@@ -296,10 +259,9 @@ subzy.txt                   # Subdomain takeover candidates
 ## What to Do Next
 
 1. Review `live-hosts.txt` — open interesting ones in browser
-2. Check `nuclei.txt` — any high/critical findings?
-3. Review `api-endpoints.txt` — start IDOR testing
-4. Check for admin panels: grep live-hosts for `/admin`, `/jenkins`, `/grafana`
-5. Run `/hunt target.com` to start active vulnerability testing
+2. Review `api-endpoints.txt` — start IDOR testing
+3. Check for admin panels: grep live-hosts for `/admin`, `/jenkins`, `/grafana`
+4. Run `/hunt target.com` to start active vulnerability testing
 
 ## 5-Minute Rule
 
@@ -307,6 +269,5 @@ If after running this pipeline:
 - All hosts return 403 or static pages
 - No API endpoints visible
 - No interesting parameters in URLs
-- nuclei returns 0 medium/high findings
 
 **→ Move on to a different target.**

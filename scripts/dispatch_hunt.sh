@@ -167,7 +167,7 @@ summary = f"""
   Dispatch list: {dispatch_file}
   Coverage:      {coverage_file}
 
-[DISPATCH INSTRUCTIONS]
+  [DISPATCH INSTRUCTIONS]
   You MUST dispatch EVERY agent in the dispatch list.
   Do NOT skip any agent. Dispatch ALL of them.
 
@@ -178,9 +178,13 @@ summary = f"""
     task(description="Phase 6: ID on TARGET", subagent_type="ID")
     where ID = agent id from the list and TARGET = {target}
 
-  After each agent completes, update coverage at {coverage_file}:
-    - Change status from 'pending' to 'complete'
-    - Record findings count in the findings column
+  After each agent completes, run:
+    1. Update coverage at {coverage_file}:
+       - Change status from 'pending' to 'complete'
+       - Record findings count in the findings column
+    2. Call WSTG tracking:
+       bash scripts/wstg_track_from_agent.sh <engagement_id> "{target}" "ID" "completed"
+       (where ID = agent id, engagement_id = target identifier like "intercom")
 
   When ALL agents show 'complete' status, the Phase 6 gate will pass.
 """

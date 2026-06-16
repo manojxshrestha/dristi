@@ -129,7 +129,7 @@ Before touching any tool:
 Phase 1:   SCOPE       → register domains, load config, create task tree
 Phase 2:   AUTH        → test credentials, detect WAF, save auth deliverable
 Phase 3:   INTEL       → passive OSINT: WHOIS, M365, cloud, spoof check
-Phase 4:   RECON       → subdomain enum, crawl, params, nuclei, secrets
+Phase 4:   RECON       → subdomain enum, crawl, params, secrets
 Phase 5:   SURFACE     → load recon, classify tiers + functional groups, prioritize endpoints
 Phase 6:   HUNT        → test all bug classes via 54 hunt-* sub-agents
                         ├── group-based testing (1-2 reps per functional group)
@@ -233,7 +233,7 @@ Pass headers + body through `identify_waf()` MCP tool. If identified, check vend
 |------|--------|-----------|
 | 1 | Subdomain enumeration | `bash scripts/tools/subdomain_enum.sh <domain>` |
 | 2 | Web crawling, parameter extraction | `track_tool()` |
-| 3 | Cariddi, nuclei, directory bruteforce | `track_tool()` |
+| 3 | Cariddi, directory bruteforce | `track_tool()` |
 | 4 | 403 bypass, vhost fuzzing | `track_tool()` |
 | 5 | Zone transfer, takeover scanner | `track_tool()` |
 | 6 | Cloud recon, CVE scan, secrets discovery | `track_tool()` |
@@ -664,7 +664,7 @@ Before pushing back with "I think we're done because X," do this:
 | Recon: URLs | `gau` + `waymore` -> `katana` -> `uro` | Archive (forgotten endpoints) -> active crawl (JS-rendered) -> deduplicate |
 | Recon: JS | `jsluice` + `mantra` + `trufflehog --only-verified` | Extract URLs/secrets -> find API keys -> verify keys actually work |
 | Recon: Ports | `naabu` (wide) -> `rustscan` (deep) | Fast top-1000 sweep -> full 65535 on interesting targets |
-| Recon: Scan | `nuclei -tags cve` -> `nuclei -tags takeover` | Known CVEs first -> then takeover (act immediately) |
+
 | Mapping: Params | `arjun` + `paramspider` + ParamMiner | Brute-force hidden params + mine archives + cache headers |
 | Mapping: JS code | Download -> `jsluice` -> VS Code/Cursor grep | Extract -> static analysis -> AI-assisted taint analysis |
 | Mapping: Dorks | Manual Google Dorks | Custom per-target queries find what automation misses |

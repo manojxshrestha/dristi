@@ -219,7 +219,7 @@ Content-Type: application/json
 {"query": "{ users(filter: \"{\\\"username\\\": {\\\"$regex\\\": \\\".*\\\"}}\") { id email } }"}
 ```
 
-Use `nuclei` to check for GraphQL-related findings.
+check for GraphQL-related findings.
 
 ## Payloads
 

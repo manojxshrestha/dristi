@@ -63,7 +63,7 @@ Kill signals:
 - All hosts return 403 or static pages
 - No API endpoints with ID parameters
 - No JavaScript bundles with interesting paths
-- nuclei returns 0 medium/high findings
+- tool scanning returns 0 medium/high findings
 
 ## 6. AUTOMATION = HIGHEST DUP RATE
 
@@ -71,7 +71,7 @@ Use automation for RECON only (subdomain enum, live hosts, URL crawl).
 Manual testing finds unique bugs. Automated scanners find duplicates.
 
 ```
-Automation: recon (subfinder, httpx, katana, nuclei)
+Automation: recon (subfinder, httpx, katana)
 Manual: IDOR testing, auth bypass, business logic, race conditions
 ```
 

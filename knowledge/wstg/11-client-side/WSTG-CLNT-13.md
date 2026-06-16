@@ -154,7 +154,7 @@ Cross-Origin-Opener-Policy: same-origin
 
 COOP provides browser-level protection against `window.opener` abuse by isolating the browsing context.
 
-Use `nuclei` to check for reverse tabnabbing findings.
+check for reverse tabnabbing findings.
 
 ## Payloads
 

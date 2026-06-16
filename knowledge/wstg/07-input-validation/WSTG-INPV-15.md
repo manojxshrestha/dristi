@@ -264,7 +264,7 @@ data=
 
 The next legitimate request from another user will be appended to the `data` parameter, potentially capturing their cookies and credentials.
 
-Use `nuclei` to check if Burp's scanner has detected any HTTP desync or smuggling issues.
+check if Burp's scanner has detected any HTTP desync or smuggling issues.
 
 ## Payloads
 

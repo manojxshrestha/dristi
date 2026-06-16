@@ -160,7 +160,7 @@ Cookie: session=<valid_session>
 
 Document what data is accessible: personal information, API keys, session tokens, financial data, etc.
 
-Use `nuclei` to check for CORS misconfiguration findings.
+check for CORS misconfiguration findings.
 
 ## Payloads
 

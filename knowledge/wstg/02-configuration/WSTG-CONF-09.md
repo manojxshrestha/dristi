@@ -174,7 +174,7 @@ File permissions on web servers control who can read, write, and execute files. 
 3. Use `curl` to search for permission-related error messages in previous responses:
    - Pattern: `(permission denied|access denied|forbidden|cannot read|cannot write)`
    - Pattern: `(/var/www|/home/|C:\\inetpub|/usr/local)`
-4. Use `nuclei` to check for any file permission or directory listing findings
+4. check for any file permission or directory listing findings
 
 ## Detection Criteria
 

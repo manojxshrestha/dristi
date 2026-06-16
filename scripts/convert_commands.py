@@ -10,7 +10,7 @@ OC_COMMANDS = HOME / "dristi/.opencode/commands"
 # Each command: (filename, description, agent, subtask)
 COMMANDS = [
     ("hunt", "Active vulnerability hunting dispatcher. Routes to correct agent based on target and mode (red team / WAPT / bug bounty). Usage: /hunt target.com", "hunt-dispatcher", True),
-    ("recon", "Full recon pipeline: subdomain enum, live host discovery, URL crawl, gf classification, nuclei scan, secret detection, subdomain takeover. Usage: /recon target.com", "web2-recon", True),
+    ("recon", "Full recon pipeline: subdomain enum, live host discovery, URL crawl, gf classification, secret detection, subdomain takeover. Usage: /recon target.com", "web2-recon", True),
     ("triage", "Quick 7-Question Gate triage — kill N/A findings before writing a report. Faster than /validate. Usage: /triage <describe finding>", "triage-validation", True),
     ("validate", "Full 4-gate validation: Reproduction, Scope, Impact, Severity. PASS/KILL/DOWNGRADE/CHAIN-REQUIRED verdicts. Usage: /validate", "triage-validation", True),
     ("report", "Generate HackerOne/Bugcrowd/Intigriti/Immunefi-ready report. Usage: /report", "report-writing", True),

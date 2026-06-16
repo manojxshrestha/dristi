@@ -297,7 +297,7 @@ SOAPAction: "http://target.com/GetUser"
 </GetUser>
 ```
 
-Use `nuclei` to check for SOAP/XML service findings.
+check for SOAP/XML service findings.
 
 ## Payloads
 

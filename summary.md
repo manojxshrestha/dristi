@@ -91,7 +91,7 @@ Layer 4: Validation + Reporting      — how to ship it (7-Question Gate, VRT, r
 | 1  SCOPE     | scope.md      | Register target, scope, credentials, task tree | phase_completed=0 |
 | 2  AUTH      | (inline)      | Auth flow test, WAF detection, token capture | — |
 | 3  INTEL     | phase-intel.sh | WHOIS, M365/Azure, third-party misconfigs, spoof check, cloud bucket enum | — |
-| 4  RECON     | recon.md      | Subdomain enum, DNS, crawl, params, nuclei, secrets | phase_completed=1 |
+| 4  RECON     | recon.md      | Subdomain enum, DNS, crawl, params, secrets | phase_completed=1 |
 | 5  SURFACE   | surface.md    | Prioritize endpoints, rank attack surface | phase_completed=2 |
 | 6  HUNT      | hunt.md       | Dispatch 54 hunt-* sub-agents, test all bug classes | phase_completed=3 |
 | 7  DEEPTHINK | deepthink.md | (conditional) First-principles gap analysis when HUNT yields zero | — |
@@ -247,7 +247,7 @@ Every hunt agent includes:
 - 12 extracted with test.sh wrappers in scripts/payloads/
 - ~25K total payloads
 - pat_ref() maps 30 agent class names to PAT README paths
-- 17 test.sh + 12 payloads.txt + lib.sh + hunt.sh + nuclei.sh + deploy.sh
+- 17 test.sh + 12 payloads.txt + lib.sh + hunt.sh + deploy.sh
 
 ### WAF Reference (knowledge/waf/)
 - 144 vendor fingerprints with detection methodology
@@ -287,7 +287,7 @@ SQLite-backed findings database with tables for:
 Risk-scoring algorithm based on: parameter count, tech risk, taint chains, tool convergence, auth requirements, HTTP method, injectable parameter names
 
 ### tool_parsers.py
-Parsers for: nmap, nuclei, sqlmap, ffuf, httpx, whatweb, testssl, nikto, dalfox, katana, gau, wapiti, commix, sstimap, crlfuzz, smuggler, corscanner, generics
+Parsers for: nmap, sqlmap, ffuf, httpx, whatweb, testssl, nikto, dalfox, katana, gau, wapiti, commix, sstimap, crlfuzz, smuggler, corscanner, generics
 
 ### context_compression.py
 Phase-level summarization for inter-agent handoff; combines findings, tools, tests, and WAF data into compressed phase context
@@ -299,7 +299,7 @@ Constants: CATEGORIES (WSTG categories), TOOL_REGISTRY (CLI tool metadata), WITN
 
 ## Scripts (48 CLI Tools)
 
-Located in `scripts/tools/`: wrappers for subdomain enum, DNS bruteforce, web crawling, parameter extraction, directory bruteforce, vhost fuzzing, zone transfer, takeover scanning, cloud recon, CVE scanning, secret discovery, nuclei scanning, cariddi scanning, bypass 403, OSINT (whois, misconfig-mapper, Spoofy, cloud_enum), S3/cloud bucket scanning (cloud_enum + s3scanner + trufflehog), and more.
+Located in `scripts/tools/`: wrappers for subdomain enum, DNS bruteforce, web crawling, parameter extraction, directory bruteforce, vhost fuzzing, zone transfer, takeover scanning, cloud recon, secret discovery, cariddi scanning, bypass 403, OSINT (whois, misconfig-mapper, Spoofy, cloud_enum), S3/cloud bucket scanning (cloud_enum + s3scanner + trufflehog), and more.
 
 All domain-mode: accept domain as $1, auto-discover recon output, output to `$DRISTI_ROOT/engagements/recon/<domain>/`. ENGAGEMENT_ID is now optional.
 
@@ -345,7 +345,6 @@ All domain-mode: accept domain as $1, auto-discover recon output, output to `$DR
 ## Key Design Decisions
 
 - **Autopilot as orchestrator, not monolith**: 248-line dispatcher; phases 2-12 via task()
-- **Nuclei as optional tier-2**: PAT curl test.sh is tier-1 (fast)
 - **Output to $DRISTI_ROOT/engagements/recon/<domain>/**: Flat recon directory, no default-engagement layer, ENGAGEMENT_ID optional
 - **Never install tools**: All tools pre-installed at `scripts/tools/`. Agents have explicit HARD RULES prohibiting `pip install`/`go install`/`apt install` — use wrapper scripts only
 - **No raw tool binaries**: Every tool accessed via `bash scripts/tools/<name>.sh <target>`, never invoked directly
@@ -406,7 +405,7 @@ All domain-mode: accept domain as $1, auto-discover recon output, output to `$DR
 `get_browser_profile` `call_graphql_introspect`
 
 ### Networking & HTTP (2)
-`burp_send_request` `execute_nuclei`
+`burp_send_request`
 
 ### Deliverables (3)
 `save_deliverable` `get_deliverable` `list_deliverables`

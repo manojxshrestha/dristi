@@ -164,7 +164,7 @@ Multi-factor authentication (MFA) adds a second verification layer beyond passwo
    reason=lost_device
    ``
 5. Check if security questions alone can bypass MFA during recovery
-6. Use `nuclei` to review any MFA-related findings
+6. review any MFA-related findings
 
 ### Step 6: Test Race Conditions
 

@@ -204,7 +204,7 @@ Modern web applications are deployed behind multiple layers of infrastructure in
 
 **CLI Actions:**
 1. Use `curl` to review all collected evidence
-2. Use `nuclei` to incorporate any infrastructure-related findings from Burp Scanner
+2. incorporate any infrastructure-related findings from Burp Scanner
 3. Use `base64 -d` and `python3 -c "import urllib.parse; ..."` on any encoded values in headers or cookies that may contain infrastructure information (e.g., F5 BIG-IP cookies encode backend server IP addresses)
 
 **Document the architecture in layers:**

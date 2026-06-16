@@ -58,10 +58,10 @@ searchsploit cve 2024-3400
 msfconsole -q -x "search cve:2024-3400; exit"
 ```
 
-**Bulk prioritization** (given a Nuclei scan output with N CVEs):
+**Bulk prioritization** (given a scan output with N CVEs):
 ```bash
-# Extract CVEs from nuclei JSON output
-jq -r '.info.classification.["cve-id"][]?' nuclei-results.json | sort -u > cves.txt
+# Extract CVEs from scan JSON output
+jq -r '.info.classification.["cve-id"][]?' results.json | sort -u > cves.txt
 
 # Annotate each with EPSS + KEV
 while IFS= read -r CVE; do

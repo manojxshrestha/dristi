@@ -227,7 +227,7 @@ Host: backend-service
 
 If the application returns different content for different Host values, it may be possible to access internal virtual hosts or backend services.
 
-Use `nuclei` to check if Burp has detected any host header injection issues.
+check if Burp has detected any host header injection issues.
 
 ## Payloads
 

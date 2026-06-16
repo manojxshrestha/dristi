@@ -29,7 +29,7 @@ log_info "Compiling report context..."
   echo ""
 
   echo "--- Findings Counts ---"
-  for dir in nuclei secrets sqli xss params directories; do
+  for dir in secrets sqli xss params directories; do
     count=$(find "$OUT_DIR/$dir" -name '*.txt' 2>/dev/null | xargs cat 2>/dev/null | grep -ci "finding\|vuln\|issue\|CVE-\|risk" 2>/dev/null || echo 0)
     echo "  $dir: $count"
   done

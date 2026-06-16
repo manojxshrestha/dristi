@@ -199,7 +199,7 @@ Content-Type: image/png
 ------Boundary--
 ```
 
-Use `nuclei` to check for file upload-related findings.
+check for file upload-related findings.
 
 ## Payloads
 

@@ -64,7 +64,7 @@ graph TD
 
 | Script | Purpose | When | Input → Output |
 |--------|---------|------|----------------|
-| `dns_bruteforce.sh` | DNS brute-force via puredns | Subdomain discovery | `domain` → `engagements/recon/<domain>/dns/` |
+| `dns_bruteforce.sh` | DNS brute-force (puredns — not auto-installed, uses dnsx if available) | Subdomain discovery | `domain` → `engagements/recon/<domain>/dns/` |
 | `subdomain_enum.sh` | Passive subdomain enum (subfinder + assetfinder + findomain → httpx) | Always run first | `domain` → `subdomains/all_subdomains.txt`, `live_domains.txt`, `live_urls.txt` |
 | `zone_transfer.sh` | AXFR check against NS servers | Subdomain discovery | `domain` → zone transfer results |
 | `github_dork.sh` | GitHub code search via `gh` | Subdomain discovery | `domain` → dork results (skipped if `gh` not logged in) |
@@ -128,9 +128,8 @@ High-value paths probed: `.env`, `.git/config`, `config.json`, `wp-config.php`, 
 
 | Script | Purpose | Depends on | Input → Output |
 |--------|---------|-----------|----------------|
-| `auto_xss.sh` | dalfox + manual payload test | `param_extract.sh` | `gf_xss.txt` → `xss/dalfox_results.txt`, `manual_xss_found.txt` |
+| `auto_xss.sh` | dalfox (not auto-installed) + manual payload test | `param_extract.sh` | `gf_xss.txt` → `xss/dalfox_results.txt`, `manual_xss_found.txt` |
 | `auto_sqli.sh` | sqlmap batch scan | `param_extract.sh` | `gf_sqli.txt` → `sqli/sqlmap_output/` |
-| `auto_nuclei.sh` | nuclei templates (c/high + med + tech) | `auto_recon.sh` | `https-subs.txt` → `nuclei/` |
 | `auto_secrets.sh` | validate cariddi findings via curl | `cariddi_scan.sh` | `cariddi.txt` → `secrets/accessible.txt`, `high_value_confirmed.txt` |
 
 ## Phase 5: Full Automation
@@ -140,7 +139,7 @@ High-value paths probed: `.env`, `.git/config`, `config.json`, `wp-config.php`, 
 | `./auto_recon.sh <domain>` | Runs recon phases 0–3 in sequence |
 | `./auto_hunt.sh <domain>` | Runs recon + hunt phases 0–7 in sequence |
 | `./auto_recon.sh <domain> --skip dns,github` | Skip slow/optional steps |
-| `./auto_hunt.sh <domain> --skip xss,nuclei` | Skip specific hunt phases |
+| `./auto_hunt.sh <domain> --skip xss,sqli` | Skip specific hunt phases |
 
 ---
 
@@ -193,9 +192,8 @@ When testing endpoints from `gf_xss.txt`, use payloads from `scripts/xss_payload
 | `vhost_fuzz.sh` | `alive-domains.txt` | `vhost/` output |
 | `zone_transfer.sh` | domain | zone transfer results |
 | `github_dork.sh` | domain | dork results |
-| `auto_xss.sh` | `gf_xss.txt` | `xss/` dalfox + manual XSS findings |
+| `auto_xss.sh` | gf-filtered XSS candidates | `xss/` dalfox results (not auto-installed) + manual XSS findings |
 | `auto_sqli.sh` | `gf_sqli.txt` | `sqli/` sqlmap output |
-| `auto_nuclei.sh` | `https-subs.txt` | `nuclei/` template findings |
 | `auto_secrets.sh` | `cariddi.txt` | `secrets/` validated findings |
 | `auto_recon.sh` | domain | runs all recon scripts |
 | `auto_hunt.sh` | domain | runs all recon + hunt scripts |
@@ -205,12 +203,12 @@ When testing endpoints from `gf_xss.txt`, use payloads from `scripts/xss_payload
 ```
 engagements/recon/<domain>/
 ├── intel/                    # phase-intel.sh — passive intelligence
-│   ├── domain_info_general.txt       # WHOIS + msftrecon + Scopify
+│   ├── domain_info_general.txt       # WHOIS (msftrecon not auto-installed) + Scopify
 │   ├── azure_tenant_domains.txt      # M365/Azure tenant discovery
 │   ├── scopify.txt                   # Scope analysis
 │   ├── 3rdparts_misconfigurations.txt # Exposed SaaS (Slack, Jira, GitHub, etc.)
 │   ├── spoof.txt                     # SPF/DMARC spoofability
-│   └── cloud_enum.txt                # Cloud storage buckets
+│   └── cloud_enum.txt                # Cloud storage buckets (not auto-installed)
 ├── subdomains/
 │   ├── all_subdomains.txt   # all discovered subs
 │   ├── live_domains.txt     # httpx-probed (domains only)
@@ -231,9 +229,8 @@ engagements/recon/<domain>/
 ├── dir/                     # dir_bruteforce.sh output
 ├── vhost/                   # vhost_fuzz.sh output
 ├── dorks/                   # github_dork.sh output
-├── xss/                     # auto_xss.sh (dalfox + manual)
+├── xss/                     # auto_xss.sh (dalfox — not auto-installed) + manual
 ├── sqli/                    # auto_sqli.sh (sqlmap output)
-├── nuclei/                  # auto_nuclei.sh (template findings)
 ├── secrets/                 # auto_secrets.sh (validated cariddi hits)
 ├── takeover/                # takeover_scanner.sh — subdomain takeover checks
 ├── bypass/                  # bypass_403.sh — 403 bypass attempts

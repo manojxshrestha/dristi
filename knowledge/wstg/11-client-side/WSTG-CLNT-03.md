@@ -146,7 +146,7 @@ Host: target.com
 
 If event handlers and script tags are stripped but other HTML renders, the finding remains an HTML injection (not XSS).
 
-Use `nuclei` to check for HTML injection and XSS findings.
+check for HTML injection and XSS findings.
 
 ## Payloads
 

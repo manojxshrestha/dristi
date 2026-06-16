@@ -58,7 +58,7 @@ These are common mistakes that reduce pentest quality. Flag any you see:
 
 ### Quality Checklist
 - [ ] Pre-flight connectivity check completed
-- [ ] All 10 Tier 1 tools launched (nmap, katana, ffuf, httpx, nuclei, whatweb, gau, nikto, feroxbuster, wapiti)
+- [ ] All 8 Tier 1 tools launched (nmap, katana, ffuf, httpx, whatweb, gau, nikto, wapiti)
 - [ ] track_tool() called for each launched tool
 - [ ] Homepage HTML parsed for links, forms, scripts, meta tags, comments
 - [ ] robots.txt, sitemap.xml, security.txt, crossdomain.xml checked
@@ -66,7 +66,7 @@ These are common mistakes that reduce pentest quality. Flag any you see:
 - [ ] JavaScript files analyzed for API endpoints
 - [ ] Tech stack identified from headers/cookies/error pages
 - [ ] Tech-specific wordlist loaded for ffuf
-- [ ] Tool results ingested (katana, ffuf, gau, httpx, whatweb, nuclei) — empty outputs investigated
+- [ ] Tool results ingested (katana, ffuf, gau, httpx, whatweb) — empty outputs investigated
 - [ ] **Tool output quality verified**: no tools with empty output counted as "run" without investigation
 - [ ] Complete endpoint map built and presented to user
 - [ ] **Endpoint map organized per domain** with server-side processing capability noted per domain
@@ -74,7 +74,7 @@ These are common mistakes that reduce pentest quality. Flag any you see:
 - [ ] If login redirects to external domain: cross-domain auth detected and documented
 - [ ] All in-scope domains registered with `register_scope()`
 - [ ] Cookie jar created and tested with valid session (if cross-domain auth)
-- [ ] **Discovery tools run against ALL in-scope domains** (not just primary) — at minimum: ffuf, nuclei per domain
+- [ ] **Discovery tools run against ALL in-scope domains** (not just primary) — at minimum: ffuf, httpx per domain
 
 ### Brainstorming Prompts
 - Are there any subdomains? Check DNS records, certificate transparency logs (crt.sh).
@@ -92,7 +92,7 @@ These are common mistakes that reduce pentest quality. Flag any you see:
 ### Quality Checklist
 - [ ] All 7 MUST INFO tests completed (01-07)
 - [ ] SHOULD tests tracked (completed, skipped, or N/A with reason)
-- [ ] nuclei results reviewed for prioritization
+- [ ] Tool results reviewed for prioritization
 - [ ] Search engine dorking attempted (site:, filetype:, inurl:)
 - [ ] Web server fingerprinted (type, version if possible)
 - [ ] All entry points identified and documented
@@ -310,7 +310,7 @@ These are common mistakes that reduce pentest quality. Flag any you see:
 
 ### Common Issues the Final Judge Catches
 1. **Auth failure cascade marked as N/A instead of skipped** — 15+ tests marked N/A because OAuth login failed, but unauthenticated endpoints were never tested for input validation
-2. **Tool output not ingested** — nuclei, sqlmap, or dalfox run in background but output files never read; findings_count stays at 0
+2. **Tool output not ingested** — sqlmap or dalfox run in background but output files never read; findings_count stays at 0
 3. **Severity inconsistency** — Missing HSTS on the main portal rated as Low, but the same issue on a subdomain rated as Medium
 4. **Endpoint map orphans** — Endpoints discovered during Phase 0 crawling that never appear in any test's endpoints_tested
 5. **Rubber-stamped tests** — Multiple tests with identical 10-word notes and no endpoints, suggesting they were tracked without actual testing

@@ -7,7 +7,7 @@
 # This runs:
 #   Phase 1: Passive Recon (subdomains, URLs, tech)
 #   Phase 2: Content Discovery (dirs, params, JS analysis)
-#   Phase 3: Vulnerability Scanning (nuclei, XSS, CORS)
+#   Phase 3: Vulnerability Scanning (XSS, CORS)
 #
 # Options:
 #   --quick       Skip slow scans (default: full)
@@ -96,7 +96,7 @@ mkdir -p "$OUT"/{subdomains,urls,content,js,params,vulns,reports}
 # ── Auth headers ──────────────────────────────────────────────────────────────
 # Build BBHUNT_AUTH_HEADERS (newline-separated) from --token / --cookie and
 # any pre-existing env value, then source _auth_helper.sh so BB_AUTH_ARGS is
-# splattable into curl/httpx/nuclei/katana/ffuf invocations below.
+# splattable into curl/httpx/katana/ffuf invocations below.
 _BB_HEADERS_TMP="${BBHUNT_AUTH_HEADERS:-}"
 [ -n "$TOKEN" ]  && _BB_HEADERS_TMP="${_BB_HEADERS_TMP:+$_BB_HEADERS_TMP$'\n'}Authorization: Bearer $TOKEN"
 [ -n "$COOKIE" ] && _BB_HEADERS_TMP="${_BB_HEADERS_TMP:+$_BB_HEADERS_TMP$'\n'}Cookie: $COOKIE"
@@ -268,28 +268,6 @@ echo ""
 log "PHASE 3: Vulnerability Scanning"
 sep
 
-# ── Nuclei scan ───────────────────────────────────────────────────────────────
-if [ "$(check_tool nuclei)" = true ]; then
-    log "Running Nuclei (critical + high)..."
-    nuclei -u "$TARGETURL" \
-        -severity critical,high \
-        -o "$OUT/vulns/nuclei_critical_high.txt" \
-        "${BB_AUTH_ARGS[@]}" \
-        -silent 2>/dev/null
-    ok "Nuclei critical/high: $(wc -l < $OUT/vulns/nuclei_critical_high.txt) findings"
-
-    if [ "$QUICK" = false ]; then
-        nuclei -u "$TARGETURL" \
-            -severity medium \
-            -o "$OUT/vulns/nuclei_medium.txt" \
-            "${BB_AUTH_ARGS[@]}" \
-            -silent 2>/dev/null
-        ok "Nuclei medium: $(wc -l < $OUT/vulns/nuclei_medium.txt) findings"
-    fi
-else
-    warn "nuclei not found — skipping automated vuln scan"
-fi
-
 # ── XSS scan ─────────────────────────────────────────────────────────────────
 if [ "$(check_tool dalfox)" = true ] && [ -s "$OUT/vulns/gf_xss.txt" ]; then
     log "Testing XSS candidates with dalfox..."
@@ -354,8 +332,6 @@ echo ""
     echo -e "${YELLOW}  Total URLs:         $(wc -l < $OUT/urls/all_urls.txt)${RESET}"
 [ -f "$OUT/js/js_endpoints.txt" ] && \
     echo -e "${YELLOW}  JS endpoints:       $(wc -l < $OUT/js/js_endpoints.txt)${RESET}"
-[ -f "$OUT/vulns/nuclei_critical_high.txt" ] && \
-    echo -e "${RED}  Nuclei critical/high: $(wc -l < $OUT/vulns/nuclei_critical_high.txt)${RESET}"
 [ -f "$OUT/vulns/xss_found.txt" ] && \
     echo -e "${RED}  XSS found:          $(wc -l < $OUT/vulns/xss_found.txt)${RESET}"
 

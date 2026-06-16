@@ -35,7 +35,7 @@ log_ok "Output base: $RECON_BASE"
 
 # 4. Required tools in PATH
 MISSING=0
-for tool in subfinder httpx dnsx nuclei curl jq git python3; do
+for tool in subfinder httpx dnsx curl jq git python3; do
     if ! command -v "$tool" &>/dev/null; then
         log_warn "Missing tool: $tool"
         MISSING=1

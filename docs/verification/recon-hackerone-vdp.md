@@ -8,7 +8,7 @@
 
 ## Toolchain reality check
 
-The skills cite a standard recon toolchain — `subfinder`, `dnsx`, `httpx`, `katana`, `nuclei` — backed by `offensive-osint/references/tooling-install.md`. Before running the recon, we install and probe each tool.
+The skills cite a standard recon toolchain — `subfinder`, `dnsx`, `httpx`, `katana` — backed by `offensive-osint/references/tooling-install.md`. Before running the recon, we install and probe each tool.
 
 | Tool | Brew install | Result on this Mac (Darwin 25.4 arm64) | Go install | Result |
 |---|---|---|---|---|

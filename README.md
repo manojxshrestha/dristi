@@ -84,7 +84,7 @@ If you're running an internal red team that includes domain-takeover chains via 
 | 1 | **SCOPE** | `@scope` | Register target, scope boundaries, credentials |
 | 2 | **AUTH** | (autopilot) | Get tokens/cookies, detect WAF |
 | 3 | **INTEL** | `@pintel` | Passive OSINT: WHOIS, M365, cloud, spoof |
-| 4 | **RECON** | `@recon` | Subdomains, crawl, params, nuclei, secrets |
+| 4 | **RECON** | `@recon` | Subdomains, crawl, params, secrets |
 | 5 | **SURFACE** | `@surface` | Classify endpoints, prioritize attack surface |
 | 6 | **HUNT** | `@hunt` | Test all 25 bug classes via 54 `@hunt-*` |
 | 7 | **DEEPTHINK** | `@deepthink` | *(conditional)* First-principles gap analysis |
@@ -883,7 +883,7 @@ Dristi is a collection of bug hunting and GenAI security research workflows buil
 
 **Tool inventory:**
 - [PortSwigger Burp Suite + MCP Server extension](https://portswigger.net/burp)
-- [ProjectDiscovery](https://github.com/projectdiscovery) — subfinder · dnsx · httpx · katana · nuclei
+- [ProjectDiscovery](https://github.com/projectdiscovery) — subfinder · dnsx · httpx · katana
 - [SecLists](https://github.com/danielmiessler/SecLists) · [Assetnote Wordlists](https://wordlists.assetnote.io/)
 
 **License:** Apache 2.0 — use freely, attribution appreciated.

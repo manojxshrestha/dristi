@@ -31,11 +31,11 @@ SCOPE(1) → AUTH(2) → INTEL(3) → RECON(4) → SURFACE(5) → HUNT(6) → [D
 - Save `auth_analysis` deliverable
 
 ### Phase P3: INTEL (passive)
-- WHOIS lookup, M365/Azure tenant discovery (`whois` + `msftrecon`)
+- WHOIS lookup, M365/Azure tenant discovery (`whois` — msftrecon not auto-installed)
 - Scopify scope analysis from registered domain
 - Third-party SaaS misconfiguration scan (`misconfig-mapper`)
-- SPF/DMARC spoofability check (`Spoofy`)
-- Cloud storage bucket enumeration (`cloud_enum` — AWS S3, Azure Blob, GCP, DO Spaces)
+- SPF/DMARC spoofability check (`Spoofy — not auto-installed)`
+- Cloud storage bucket enumeration (manual — not auto-installed)
 - Runs via `scripts/tools/phase-intel.sh <domain>`
 - Output to `runtime/engagements/<eid>/recon/<domain>/intel/`
 - Skipped: `ip_info` (requires `WHOISXML_API` key)
@@ -43,7 +43,7 @@ SCOPE(1) → AUTH(2) → INTEL(3) → RECON(4) → SURFACE(5) → HUNT(6) → [D
 ### Phase P4: RECON
 - Subdomain enumeration + DNS bruteforce
 - Web crawling, parameter extraction
-- Nuclei, directory bruteforce, 403 bypass, vhost fuzzing
+- Directory bruteforce, 403 bypass, vhost fuzzing
 - Zone transfer, takeover scanner, cloud recon
 - CVE scanning, secret discovery
 - Answer 3 triage questions per endpoint

@@ -154,7 +154,7 @@ Host: user2.target.com
 
 Note: If both subdomains are same-origin, they share localStorage. If different origins, they do not.
 
-Use `nuclei` to check for client-side storage findings.
+check for client-side storage findings.
 
 ## Payloads
 

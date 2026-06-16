@@ -166,7 +166,7 @@ Authentication bypass vulnerabilities allow attackers to gain access to protecte
    PATCH /admin/users HTTP/1.1
    Host: target.com
    ``
-5. Use `nuclei` to review any authentication bypass findings from Burp's scanner
+5. review any authentication bypass findings from Burp's scanner
 
 ### Step 6: Test Path Traversal Authentication Bypass
 

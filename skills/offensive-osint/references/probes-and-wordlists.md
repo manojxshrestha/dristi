@@ -146,7 +146,7 @@ For every alive webapp, audit response headers. Each missing header below = one 
 
 ### 16.5 Always-on HTTP checks — 15 paths
 
-Run these against every alive webapp regardless of Nuclei availability. Cheap; high signal.
+Run these against every alive webapp. Cheap; high signal.
 
 | Path | Finding | Severity | Match logic |
 |---|---|---|---|
@@ -833,13 +833,6 @@ grep -iE 'NetScaler|Citrix|version' /tmp/c1
 curl -sk -m 10 "$T/tmui/login.jsp" -o /tmp/c2 -w '%{http_code}\n'
 grep -iE 'BIG-IP|version' /tmp/c2
 # (etc — repeat per product)
-```
-
-**Auto-fingerprint with Nuclei:**
-
-```bash
-nuclei -u $T -t http/technologies/ -severity info,low,medium,high,critical
-nuclei -u $T -t http/cves/ -severity high,critical -etags fuzz
 ```
 
 ### 16.17 Cloud-Native Service Fingerprints

@@ -41,10 +41,6 @@ go install github.com/michenriksen/aquatone@latest
 ### 46.3 Vulnerability scanning
 
 ```bash
-# Nuclei (template scanner)
-go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
-nuclei -ut    # update templates
-
 # Naabu (port scan)
 go install github.com/projectdiscovery/naabu/v2/cmd/naabu@latest
 

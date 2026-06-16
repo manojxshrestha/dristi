@@ -135,7 +135,7 @@ Look for `integrity` attributes on script and link tags:
 
 If SRI is missing on externally loaded resources, those resources are vulnerable to supply chain attacks even without user-controlled URLs.
 
-Use `nuclei` to check for resource manipulation or missing SRI findings.
+check for resource manipulation or missing SRI findings.
 
 ## Payloads
 

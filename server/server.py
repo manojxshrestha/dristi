@@ -2130,7 +2130,7 @@ def track_tool(
 
     Args:
         engagement_id: The engagement identifier
-        tool_name: The tool name, e.g. nmap, nuclei, sqlmap, dalfox
+        tool_name: The tool name, e.g. nmap, sqlmap, dalfox
         status: One of: run, skipped, not_applicable
         notes: What was tested, why skipped, or summary of results
         target: URL or host the tool was run against (optional)
@@ -5683,7 +5683,7 @@ def parse_tool_output(tool_name: str, raw_output: str, verbosity: str = "summary
     Reduces token usage by 3-5x while preserving key findings, endpoints, and errors.
 
     Args:
-        tool_name: The tool name (e.g., nmap, nuclei, sqlmap, ffuf, httpx, whatweb,
+        tool_name: The tool name (e.g., nmap, sqlmap, ffuf, httpx, whatweb,
             testssl, nikto, dalfox, katana, gau, wapiti, commix, sstimap,
             crlfuzz, smuggler, corscanner)
         raw_output: The raw text output from the tool
@@ -5699,7 +5699,7 @@ def ingest_tool_file(engagement_id: str, tool_name: str, file_path: str, verbosi
 
     Args:
         engagement_id: The engagement identifier
-        tool_name: The tool name (e.g., nmap, nuclei, sqlmap, ffuf)
+        tool_name: The tool name (e.g., nmap, sqlmap, ffuf)
         file_path: Path to the tool output file
         verbosity: Level of detail: 'summary', 'detailed', 'full'
     """
@@ -6126,102 +6126,8 @@ def validate_finding_poc(
     )
 
 
-@mcp.tool()
-def execute_nuclei(
-    target: str,
-    templates: str = "",
-    severity: str = "",
-    rate_limit: int = 150,
-    timeout: int = 10,
-    output_jsonl: str = "",
-    extra_args: str = "",
-) -> str:
-    """Run nuclei against a target and return parsed results.
-    Use Burp MCP for interactive testing; use this for automated batch scanning.
 
-    Args:
-        target: URL, IP, or domain to scan (e.g. 'https://example.com' or '10.0.0.1')
-        templates: Template filter (e.g. 'cves,exposures,misconfiguration' or specific template path)
-        severity: Filter by severity (e.g. 'critical,high,medium')
-        rate_limit: Max requests per second (default 150)
-        timeout: Template timeout in seconds (default 10)
-        output_jsonl: Path to save JSONL output for later ingestion via ingest_tool_file()
-        extra_args: Additional nuclei CLI flags (e.g. '-headless -stats')
-    """
-    import shutil
 
-    if not shutil.which("nuclei"):
-        return "## execute_nuclei: FAIL\n\n**Error**: `nuclei` is not installed or not in PATH.\nInstall it from https://github.com/projectdiscovery/nuclei"
-
-    # Basic input validation — reject shell metacharacters
-    _validate_shell_arg(target, "target")
-    if templates:
-        _validate_shell_arg(templates, "templates")
-    if output_jsonl:
-        _validate_shell_arg(output_jsonl, "output_jsonl")
-
-    # Build command
-    cmd = ["nuclei", "-target", target, "-json", "-silent"]
-
-    if templates:
-        cmd.extend(["-t", templates])
-    if severity:
-        cmd.extend(["-s", severity])
-    if rate_limit:
-        cmd.extend(["-rl", str(rate_limit)])
-    if timeout:
-        cmd.extend(["-timeout", str(timeout)])
-    if output_jsonl:
-        cmd.extend(["-o", output_jsonl])
-    if extra_args:
-        cmd.extend(extra_args.split())
-
-    start_time = time.time()
-
-    try:
-        result = subprocess.run(  # nosec B603
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=300,
-        )
-        elapsed = time.time() - start_time
-    except subprocess.TimeoutExpired:
-        return (
-            f"## execute_nuclei: TIMEOUT\n\n"
-            f"**Command**: `{' '.join(cmd)}`\n\n"
-            f"Nuclei did not complete within 300 seconds. "
-            f"Try narrowing the scope (specific target, fewer templates, higher rate-limit)."
-        )
-    except Exception as e:
-        return f"## execute_nuclei: ERROR\n\n**Command**: `{' '.join(cmd)}`\n\n**Error**: {e}"
-
-    stdout = result.stdout or ""
-    stderr = result.stderr or ""
-
-    # Save to file if requested
-    if output_jsonl and stdout:
-        Path(output_jsonl).write_text(stdout, encoding="utf-8")
-
-    # Parse with the existing parser
-    from tool_parsers import parse_tool_output
-
-    severity_arg = "detailed" if severity else "summary"
-    parsed = parse_tool_output("nuclei", stdout, severity_arg)
-
-    # Count findings
-    finding_count = 0
-    for line in stdout.strip().split("\n"):
-        if line.strip():
-            finding_count += 1
-
-    return (
-        f"## execute_nuclei: COMPLETE ({elapsed:.1f}s)\n\n"
-        f"**Target**: {target}\n"
-        f"**Findings**: {finding_count}\n"
-        f"**Exit Code**: {result.returncode}\n\n"
-        f"{parsed}\n" + (f"\n### Stderr\n```\n{stderr[:1000]}\n```\n" if stderr else "") + (f"\n**JSONL saved to**: `{output_jsonl}`" if output_jsonl else "")
-    )
 
 
 _SHELL_UNSAFE = re.compile(r"[\"';$`|&><(){}!\\]")
@@ -6243,7 +6149,7 @@ def verify_tool_result(tool_name: str, command: str, raw_output: str) -> str:
     issues found, and corrected command suggestions.
 
     Args:
-        tool_name: The tool name (e.g., nmap, nuclei, sqlmap, ffuf, dalfox, katana)
+        tool_name: The tool name (e.g., nmap, sqlmap, ffuf, dalfox, katana)
         command: The exact command that was run
         raw_output: The raw output text from the tool
     """

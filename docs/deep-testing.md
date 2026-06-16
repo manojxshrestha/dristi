@@ -10,7 +10,7 @@ See also: [`browser-flow.md`](browser-flow.md) for client-side testing, [`burp-f
 
 Hidden parameters can override behavior, toggle debug modes, or bypass access controls. Run BEFORE class-specific tests.
 
-### arjun — URL-based parameter discovery
+### arjun — URL-based parameter discovery (not auto-installed)
 ```bash
 arjun -u https://target.com/api/endpoint -oJ results.json -t 20
 arjun -u https://target.com/api/endpoint -oJ results.json -t 20 --headers "Authorization: Bearer <token>"
@@ -491,7 +491,7 @@ curl -s https://target.com/app/
 Every `@hunt-*` agent should run these techniques in this order before class-specific testing:
 
 ```
-Step 1: Parameter fuzzing (arjun/x8)
+Step 1: Parameter fuzzing (arjun/x8 — not auto-installed)
 Step 2: HTTP method mutation (all verbs + override headers)
 Step 3: Content-Type switching (JSON/XML/form/multipart)
 Step 4: IDOR probes (numeric/UUID enumeration + swap IDs)

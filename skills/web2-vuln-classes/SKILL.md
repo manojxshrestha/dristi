@@ -558,7 +558,6 @@ URL path parameters, search queries reflected in results, HTTP headers reflected
 cat /tmp/subs.txt | dnsx -silent -cname -resp | grep "CNAME" | tee /tmp/cnames.txt
 
 # Automated detection
-nuclei -l /tmp/subs.txt -t ~/nuclei-templates/takeovers/ -o /tmp/takeovers.txt
 ```
 
 ### Quick-Kill Fingerprints

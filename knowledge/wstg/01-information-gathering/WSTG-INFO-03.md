@@ -174,7 +174,7 @@ Web servers host several metafiles that can disclose sensitive information about
    Host: target.com
    X-Original-URL: /admin/
    ``
-4. Use `nuclei` to check if Burp Scanner has already identified any information disclosure issues related to these metafiles
+4. check if Burp Scanner has already identified any information disclosure issues related to these metafiles
 
 ## Payloads
 

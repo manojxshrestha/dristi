@@ -14,7 +14,7 @@ log_err()  { echo -e "${RED}[-]${NC} $1" >&2; }
 log_info() { echo -e "${CYAN}[*]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 
-[ $# -eq 0 ] && { echo "Usage: $0 <domain> [--skip xss,sqli,nuclei,secrets]" >&2; exit 1; }
+[ $# -eq 0 ] && { echo "Usage: $0 <domain> [--skip xss,sqli,secrets]" >&2; exit 1; }
 TARGET="$1"
 SKIP_ARRAY=()
 shift
@@ -66,8 +66,7 @@ run_phase "Phase 0-3: Recon" "$SCRIPT_DIR/auto_recon.sh"
 
 skip xss || run_phase "Phase 4: XSS" "$SCRIPT_DIR/auto_xss.sh"
 skip sqli || run_phase "Phase 5: SQLi" "$SCRIPT_DIR/auto_sqli.sh"
-skip nuclei || run_phase "Phase 6: Nuclei" "$SCRIPT_DIR/auto_nuclei.sh"
-skip secrets || run_phase "Phase 7: Secrets" "$SCRIPT_DIR/auto_secrets.sh"
+skip secrets || run_phase "Phase 6: Secrets" "$SCRIPT_DIR/auto_secrets.sh"
 
 END_TS=$(date +%s)
 ELAPSED=$((END_TS - START_TS))

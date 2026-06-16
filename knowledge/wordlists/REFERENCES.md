@@ -2,7 +2,7 @@
 
 The lists in this directory are intentionally compact. For full hunts pull from the
 upstream collections below — they ship orders of magnitude more entries plus
-context-specific lists (graphql, cloud, mobile, etc.) you can swap into ffuf/nuclei.
+context-specific lists (graphql, cloud, mobile, etc.) you can swap into ffuf.
 
 ## Bigger wordlists
 
@@ -27,15 +27,6 @@ context-specific lists (graphql, cloud, mobile, etc.) you can swap into ffuf/nuc
 | `thegsoinfosec/BurpSuite_payloads` | Burp Intruder payloads ripped from PayloadsAllTheThings | `git clone https://github.com/thegsoinfosec/BurpSuite_payloads` |
 | `0xacb/recollapse` | Black-box regex fuzzer for normalisation/validation bypasses | `pipx install recollapse` |
 
-## Nuclei templates (vuln signatures)
-
-Nuclei ships its own community templates, but these add value:
-
-| Source | Why |
-|---|---|
-| `projectdiscovery/nuclei-templates` | Default community templates — auto-updated by `nuclei -update-templates` |
-| `0xKayala/NucleiFuzzer` | Wraps nuclei + ParamSpider for one-shot vuln fuzz |
-| `trickest/cve` | Updated CVE PoCs (often ahead of nuclei templates) |
 
 ## Suggested layout
 
@@ -45,7 +36,6 @@ $HOME/wordlists/
   OneListForAll/
   fuzz4bounty/
   PayloadsAllTheThings/
-nuclei-templates/    # `nuclei -update-templates` writes here by default
 ```
 
 Set `WORDLIST_BASE=$HOME/wordlists` and most hunting scripts will pick them up.

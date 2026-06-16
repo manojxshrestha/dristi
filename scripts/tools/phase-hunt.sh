@@ -19,13 +19,7 @@ mkdir -p "$HUNT_DIR"
 
 log_info "=== Phase 6: Vulnerability Hunting ==="
 
-# 1. Nuclei scan
-if [ -f "$SCRIPT_DIR/auto_nuclei.sh" ]; then
-  log_info "Running nuclei scan..."
-  bash "$SCRIPT_DIR/auto_nuclei.sh" "$TARGET" || log_warn "nuclei had issues"
-fi
-
-# 2. Parameter extraction + fuzzing
+# 1. Parameter extraction + fuzzing
 if [ -f "$SCRIPT_DIR/param_extract.sh" ]; then
   log_info "Parameter extraction..."
   bash "$SCRIPT_DIR/param_extract.sh" "$TARGET" || log_warn "param_extract had issues"
@@ -75,6 +69,6 @@ if [ -f "$SCRIPT_DIR/bypass_403.sh" ]; then
 fi
 
 log_ok "All automated hunt scripts completed"
-log_info "Review findings in: $OUT_DIR (subdirs: nuclei/, params/, secrets/, sqli/, xss/, directories/, vhost/)"
+log_info "Review findings in: $OUT_DIR (subdirs: params/, secrets/, sqli/, xss/, directories/, vhost/)"
 log_info "Then call @hunt agent for AI-driven analysis of results"
 log_ok "Phase 6 (hunt) complete"

@@ -14,7 +14,6 @@ from pathlib import Path
 
 SUPPORTED_TOOLS = {
     "nmap",
-    "nuclei",
     "sqlmap",
     "ffuf",
     "feroxbuster",
@@ -87,54 +86,6 @@ def _parse_nmap(raw: str, verbosity: str) -> str:
         sections.append("\n### Script Results")
         for s in scripts[: 30 if verbosity == "detailed" else len(scripts)]:
             sections.append(f"  {s}")
-
-    return "\n".join(sections)
-
-
-def _parse_nuclei(raw: str, verbosity: str) -> str:
-    """Parse nuclei JSONL output."""
-    findings = {"critical": [], "high": [], "medium": [], "low": [], "info": [], "unknown": []}
-    total = 0
-
-    for line in raw.strip().split("\n"):
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            entry = json.loads(line)
-            total += 1
-            severity = entry.get("info", {}).get("severity", "unknown").lower()
-            template_id = entry.get("template-id", "?")
-            matched_url = entry.get("matched-at", entry.get("host", "?"))
-            name = entry.get("info", {}).get("name", template_id)
-            bucket = severity if severity in findings else "unknown"
-            findings[bucket].append(f"{name} @ {matched_url}")
-        except json.JSONDecodeError:
-            # Try text format: [severity] [template-id] [protocol] host
-            match = re.match(r"\[(\w+)\]\s+\[([^\]]+)\].*?(https?://\S+)", line)
-            if match:
-                total += 1
-                sev = match.group(1).lower()
-                template = match.group(2)
-                url = match.group(3)
-                bucket = sev if sev in findings else "unknown"
-                findings[bucket].append(f"{template} @ {url}")
-
-    sections = ["## nuclei Results\n"]
-    sections.append(f"**Total findings**: {total}")
-
-    for sev in ["critical", "high", "medium", "low", "info"]:
-        items = findings[sev]
-        if items:
-            sections.append(f"\n### {sev.upper()} ({len(items)})")
-            limit = 5 if verbosity == "summary" else (20 if verbosity == "detailed" else len(items))
-            for item in items[:limit]:
-                sections.append(f"- {item}")
-            if len(items) > limit:
-                sections.append(f"- _...and {len(items) - limit} more_")
-
-    if total == 0:
-        sections.append("\n_No vulnerabilities detected._")
 
     return "\n".join(sections)
 
@@ -580,7 +531,6 @@ def _parse_generic(raw: str, verbosity: str, tool_name: str = "tool") -> str:
 
 _PARSER_MAP = {
     "nmap": _parse_nmap,
-    "nuclei": _parse_nuclei,
     "sqlmap": _parse_sqlmap,
     "ffuf": _parse_ffuf,
     "feroxbuster": _parse_ffuf,  # Similar JSON format
@@ -610,7 +560,7 @@ def parse_tool_output(tool_name: str, raw_output: str, verbosity: str = "summary
     Reduces token usage by 3-5x while preserving key findings.
 
     Args:
-        tool_name: The tool name (e.g., nmap, nuclei, sqlmap, ffuf, httpx, whatweb, testssl, nikto, dalfox, katana, gau, wapiti, commix, sstimap, crlfuzz, smuggler, corscanner)
+        tool_name: The tool name (e.g., nmap, sqlmap, ffuf, httpx, whatweb, testssl, nikto, dalfox, katana, gau, wapiti, commix, sstimap, crlfuzz, smuggler, corscanner)
         raw_output: The raw text output from the tool
         verbosity: Level of detail: 'summary' (~15 lines), 'detailed' (~50 lines), 'full' (complete parsed output)
     """
@@ -639,7 +589,7 @@ def ingest_tool_file(engagement_id: str, tool_name: str, file_path: str, verbosi
 
     Args:
         engagement_id: The engagement identifier
-        tool_name: The tool name (e.g., nmap, nuclei, sqlmap, ffuf)
+        tool_name: The tool name (e.g., nmap, sqlmap, ffuf)
         file_path: Path to the tool output file (local or inside Docker container)
         verbosity: Level of detail: 'summary', 'detailed', 'full'
     """

@@ -116,7 +116,7 @@ owasp_ref: https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Ap
    Host: target.com
    Cookie: remember_me=<captured_token_from_days_ago>
    ``
-5. Use `nuclei` to check for any cookie security findings
+5. check for any cookie security findings
 
 ### Step 6: Test for Credential Storage
 

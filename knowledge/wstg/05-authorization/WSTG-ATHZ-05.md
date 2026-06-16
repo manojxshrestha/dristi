@@ -154,7 +154,7 @@ OAuth 2.0 is widely used for delegated authorization, but implementation flaws c
    ``
    redirect_uri=https://target.com/redirect?url=https://evil.com
    ``
-4. Use `nuclei` to check if Burp has identified any open redirect issues on the target domain
+4. check if Burp has identified any open redirect issues on the target domain
 
 ### Step 8: Test Cross-Domain Token Leakage
 

@@ -197,7 +197,7 @@ Content-Type: application/json
 
 Server-side prototype pollution can lead to RCE in Node.js applications.
 
-Use `nuclei` to check for prototype pollution findings.
+check for prototype pollution findings.
 
 ## Payloads
 

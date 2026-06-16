@@ -107,7 +107,7 @@ This skill is a **lean operational index**. Most concrete data (wordlists, regex
 | `recon-techniques.md` | LinkedIn employee enumeration, job-posting tech-stack analysis, Slack/Discord/Telegram workspace discovery, package-registry leak hunting (npm/PyPI/Docker Hub/Quay/GHCR), sat imagery for physical recon | LinkedIn enumeration, job posting tech stack, Slack workspace discovery, Discord server discovery, npm token leak, PyPI token leak, Docker Hub leak, sat imagery physical recon |
 | `severity-matrix.md` | 80+ worked examples mapping observed conditions → finding severity (CRITICAL/HIGH/MEDIUM/LOW/INFO) | severity decision, finding severity, severity matrix |
 | `sector-notes.md` | Recon notes for healthcare (DICOM), finance (SWIFT), ICS/SCADA (Modbus/BACnet), IoT, government | sector specific recon, healthcare DICOM, finance SWIFT, ICS SCADA, Modbus, BACnet |
-| `tooling-install.md` | Quick-install one-liners for Subfinder, Amass, httpx, nuclei, gau, katana, gowitness, dnsx, mapcidr, naabu, sslyze, testssl.sh, etc. | tooling install, install subfinder, install nuclei, install httpx |
+| `tooling-install.md` | Quick-install one-liners for Subfinder, Amass, httpx, gau, katana, gowitness, dnsx, mapcidr, naabu, sslyze, testssl.sh, etc. | tooling install, install subfinder, install httpx |
 | `helpers-and-automation.md` | AI-assisted OSINT, archiving & evidence preservation, automation & workflow patterns, cross-module sidecar coordination, runnable secret_scan.py helper notes | AI-assisted OSINT, evidence preservation, automation, sidecar |
 
 
@@ -238,7 +238,7 @@ Drop these prompts into a fresh OpenCode session to verify the agent loads corre
 26. *"What's the EPSS score and KEV status for CVE-2024-3400?"* → §29.2.
 27. *"What modern AI API keys (Anthropic / OpenAI / HuggingFace / Cloudflare) match catalog patterns?"* → §17 rows 30–48.
 28. *"Severity matrix for `android:debuggable=true` on prod app?"* → §40.
-29. *"Install commands for the standard recon toolkit (subfinder/httpx/nuclei/etc.)?"* → §46.
+29. *"Install commands for the standard recon toolkit (subfinder/httpx/etc.)?"* → §46.
 30. *"For a healthcare engagement, what additional ports / protocols matter?"* → §47.1.
 31. *"Pull HudsonRock breach corpus for `target.com` via direct API (no UI)."* → §15.0.1.
 32. *"Run the full §16.14 email security audit from a Windows box (PowerShell)."* → §16.14 PowerShell parallel.

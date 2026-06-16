@@ -247,7 +247,7 @@ Web applications are built on frameworks and content management systems (CMS) th
    Host: target.com
    ``
 3. Use `curl` to trigger validation errors on known form endpoints
-4. Use `nuclei` to check for any framework-related findings already identified by Burp Scanner
+4. check for any framework-related findings already identified by Burp Scanner
 
 **Error Page Characteristics:**
 - Django: Yellow debug page with "You're seeing this error because you have `DEBUG = True`"

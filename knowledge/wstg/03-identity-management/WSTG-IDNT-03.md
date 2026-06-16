@@ -95,7 +95,7 @@ Account provisioning encompasses the full lifecycle of user accounts: creation, 
    Host: target.com
    Authorization: Bearer <suspended_account_token>
    ``
-5. Use `nuclei` to check for any session management findings related to deactivated accounts
+5. check for any session management findings related to deactivated accounts
 
 ### Step 4: Test Account Deletion Completeness
 

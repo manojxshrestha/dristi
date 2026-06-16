@@ -82,7 +82,7 @@ release_lock("eng-001", "alice")
 
 ```python
 # Create checkpoint before risky operations
-create_checkpoint("eng-001", "alice", "Before nuclei scan")
+create_checkpoint("eng-001", "alice", "Before phase-4 recon")
 
 # Rollback if something goes wrong
 rollback_to_checkpoint("eng-001", "cp-1741718400-1")

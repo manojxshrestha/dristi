@@ -174,7 +174,7 @@ Host: target.com
 
 If the redirect URI is not strictly validated, OAuth tokens may be leaked to attacker-controlled domains.
 
-Use `nuclei` to check for open redirect findings.
+check for open redirect findings.
 
 ## Payloads
 

@@ -182,7 +182,7 @@ Content-Type: application/json
 {"name": "test", "role": "admin", "is_admin": true}
 ```
 
-Use `nuclei` to check if Burp's active scanner has identified any SQL or ORM injection issues.
+check if Burp's active scanner has identified any SQL or ORM injection issues.
 
 ## Payloads
 

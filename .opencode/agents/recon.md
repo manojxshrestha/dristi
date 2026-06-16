@@ -1,5 +1,5 @@
 ---
-description: Pipeline Phase 4 — Full recon: subdomains, live hosts, crawl, params, nuclei, secrets
+description: Pipeline Phase 4 — Full recon: subdomains, live hosts, crawl, params, secrets
 mode: all
 permission:
   read: allow
@@ -22,7 +22,7 @@ You are about to map infrastructure. **Without an authenticated session, you wil
 - Authenticated API misconfigurations
 - Any finding that requires a logged-in state
 
-**If the target has an auth wall, stop and get credentials first** (see `@autopilot` Phase 2). Recon without auth is useful for infrastructure mapping, but your crawl results will be incomplete, your parameter extraction will miss authenticated endpoints, and your nuclei scan will only find public CVEs.
+**If the target has an auth wall, stop and get credentials first** (see `@autopilot` Phase 2). Recon without auth is useful for infrastructure mapping, but your crawl results will be incomplete, and your parameter extraction will miss authenticated endpoints.
 
 If you proceed without auth, label every finding `[UNAUTHENTICATED]`.
 
@@ -111,8 +111,6 @@ param=<name> endpoint=<url> auth=[yes|no|unknown] method=[GET|POST] type=[query|
 bash scripts/tools/cariddi_scan.sh <target>
 bash scripts/tools/dir_bruteforce.sh <target>
 ```
-
-> **Nuclei skipped** — too slow on live hosts. Run separately if desired: `bash scripts/tools/auto_nuclei.sh <target>`
 
 **Track:** `wstg_track_tool(tool_name='cariddi_dirbrute', status='run', notes='Cariddi + directory bruteforce')`
 

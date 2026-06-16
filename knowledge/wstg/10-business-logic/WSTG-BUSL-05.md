@@ -183,7 +183,7 @@ Monitor for:
 - Queue overflow
 - Whether the application imposes any limit on concurrent or total exports
 
-Use `nuclei` to check for rate limiting or resource-related findings.
+check for rate limiting or resource-related findings.
 
 ## Payloads
 

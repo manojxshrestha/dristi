@@ -137,7 +137,7 @@ Security questions are used as a secondary authentication mechanism, often for a
 
    username=targetuser&new_password=NewPass123!
    ``
-6. Use `nuclei` to check for any related findings
+6. check for any related findings
 
 ### Step 6: Test Self-Defined Questions
 

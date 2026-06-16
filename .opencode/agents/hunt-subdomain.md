@@ -94,10 +94,9 @@ Subdomain takeover is high-value because it allows an attacker to serve content 
    cat subdomains.txt | dnsx -a -cname -o resolved.txt
    ```
 
-4. **Cross-reference CNAMEs** against known vulnerable provider fingerprints using `nuclei` or `subjack`:
+4. **Cross-reference CNAMEs** against known vulnerable provider fingerprints using `subjack`:
    ```bash
    subjack -w subdomains.txt -t 100 -timeout 30 -ssl -c fingerprints.json
-   nuclei -l subdomains.txt -t takeovers/
    ```
 
 5. **Manual verification** for each flagged subdomain:
@@ -142,11 +141,6 @@ while read sub; do
     fi
   fi
 done < subdomains.txt
-```
-
-**Nuclei takeover scan:**
-```bash
-nuclei -l subdomains.txt -t ~/nuclei-templates/http/takeovers/ -severity medium,high,critical
 ```
 
 **subjack with SSL:**

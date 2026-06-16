@@ -153,7 +153,7 @@ When citing a source in your output, prefer durable references (CVE, vendor advi
 - DO NOT assume vendor labels are ground truth. Cross-label sanity: TRM, Chainalysis, Arkham can disagree. Treat every label as a hypothesis.
 - DO NOT assume 1:1 bridge flows. Bridges/mixers/wrappers introduce mint/burn semantics; validate with on-chain proofs.
 - DO NOT assert ownership from a single signal. Favicon-hash overlap, shared CT issuer, shared NS — each is a hypothesis. Need rule-of-three.
-- DO NOT run fuzzing, SYN scans, masscan, or `nuclei fuzzing/*` templates outside an explicit DEEP / `--aggressive` mode.
+- DO NOT run fuzzing or SYN scans or masscan outside an explicit DEEP / `--aggressive` mode.
 - DO NOT use a credential validator to do anything except read-only verification (no create/delete/send).
 - DO NOT mirror-image (assume the target thinks like you do). Separate capability from intent and sponsorship.
 - DO NOT confuse correlation with control.
@@ -188,7 +188,7 @@ Every probe leaves a footprint. Tag every operation in your notes with a detecta
 |---|---|
 | **Low** | Passive Shodan InternetDB; CT-log queries (crt.sh); Wayback CDX; passive DNS (SecurityTrails); Hunter.io email enrichment; HTTP HEAD on public buckets; `getuserrealm.srf`; Microsoft OIDC metadata fetch. |
 | **Medium** | Microsoft `GetCredentialType` user-enum; Okta `/api/v1/authn` user-enum; Postman API key validation; AWS `sts:GetCallerIdentity` (logs to CloudTrail); Slack `auth.test`; full-page screenshots; Swagger/GraphQL probes against a 28/13-path wordlist; targeted favicon-hash + JARM fingerprinting. |
-| **High** | Active port scans (naabu / masscan / nmap); Nuclei full template runs against production; subdomain brute-force at scale; APK download from third-party mirrors; deep-mode user enumeration past N attempts per tenant; SMTP `RCPT TO` enumeration; web fuzzing (ffuf/gobuster). |
+| **High** | Active port scans (naabu / masscan / nmap); Full template runs against production; subdomain brute-force at scale; APK download from third-party mirrors; deep-mode user enumeration past N attempts per tenant; SMTP `RCPT TO` enumeration; web fuzzing (ffuf/gobuster). |
 
 When working with a client, document the operations actually run and their detectability tag in the engagement report — clients appreciate knowing what their detection stack should have caught.
 
@@ -292,7 +292,7 @@ Add depth to the discovered assets.
 ### Stage 4 — Exposure Analysis
 Convert assets into findings.
 
-- Nuclei (15 always-on built-in checks + optional binary).
+- (15 always-on built-in checks + optional binary).
 - TLS deep audit (sslyze / testssl.sh).
 - Breach × identity correlation (HudsonRock Cavalier, HIBP, DeHashed, IntelX, local corpus → SSO_EXPOSURE findings).
 - Targeted misconfiguration probes (`.git/config`, `.env`, `phpinfo.php`, `/actuator/env`, `/actuator/heapdump`, `_cat/indices`, `/console`, `/manager/html`).
@@ -313,7 +313,7 @@ When budget is constrained, work in this order:
 
 1. **Breaches** — infostealer logs (HudsonRock Cavalier free tier) + HIBP + DeHashed. Highest ROI for red teams; often gives valid plaintext creds for corp SSO. Requires emails as input.
 2. **GitHub recon** — code-search dorks. Finds AWS keys, Slack tokens, JWT secrets, `.env` files. Fastest path to cloud pivot.
-3. **Nuclei misconfig sweep** — exposed admin panels, CVEs with public POCs.
+3. **Misconfig sweep** — exposed admin panels, CVEs with public POCs.
 4. **Cloud buckets** — permutate company name + subdomain stems. Listable bucket = CRITICAL.
 5. **Ports** — Shodan InternetDB first (free, keyless). VPN concentrators, RDP, Jenkins, GitLab-CE, Elasticsearch are the high-value pivot points.
 6. **Email OSINT** — feeds breaches; feeds phishing list.
@@ -1265,7 +1265,7 @@ When unsure, document the hypothesis in the asset attrs — don't claim origin d
 
 ## 28. Vulnerability Prioritization (CVE / EPSS / KEV)
 
-A Nuclei scan can return 100+ CVEs against a target. You can't validate all of them. Prioritize by exploitability.
+A scan can return 100+ CVEs against a target. You can't validate all of them. Prioritize by exploitability.
 
 ### 28.1 Data sources (companion skill §29.2 has the URLs)
 
@@ -1649,7 +1649,7 @@ Drop these prompts into a fresh OpenCode session to verify the agent loads and b
 16. *"50 subdomains, 12 webapps, 4 IPs, 23 emails — triage order?"* → §8.5 + §7.5.
 17. *"Probing a 50-employee SaaS company with M365 + GitHub + AWS. Where to focus?"* → §10.1 + §11.10 + §22.
 18. *"Target is fully behind Cloudflare. How do I find the origin?"* → §27.
-19. *"100 CVEs from a Nuclei scan. How do I prioritize?"* → §28.
+19. *"100 CVEs from a scan. How do I prioritize?"* → §28.
 20. *"My probes are getting 429s and a Cloudflare interstitial. What now?"* → §6.4.
 21. *"Authorized engagement asks for phishing-feasibility shortlist. Walk me through it."* → §29.
 22. *"Found unauth POST endpoint on a HackerOne target. Write me the report."* → §30.2.

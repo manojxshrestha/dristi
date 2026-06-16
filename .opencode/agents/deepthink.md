@@ -26,7 +26,7 @@ Pipeline signals that trigger deepthink:
 - Coverage matrix shows agents with `failed` status
 
 1. **Static knowledge gap** — The target technology or vulnerability class has no matching WSTG tests, payload libraries, or WAF fingerprints in `knowledge/`
-2. **Tool failure** — A required CLI tool (sqlmap, nmap, dalfox, nuclei, etc.) is not installed or errors on execution
+2. **Tool failure** — A required CLI tool (sqlmap, nmap, dalfox, etc.) is not installed or errors on execution
 3. **Script failure** — A `scripts/` payload or automation script fails or produces nonsensical output
 4. **Chain dead-end** — `wstg_find_chains()` returns no results but manual analysis suggests cross-class attack paths exist
 5. **Bypass exhaustion** — All WAF bypass payloads from `wstg_get_waf_bypass()` fail; need first-principles bypass construction

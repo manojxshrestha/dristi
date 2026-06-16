@@ -141,7 +141,7 @@ Weak or unenforced username policies allow attackers to predict, enumerate, or g
    username=webmaster
    username=operator
    ``
-4. Use `nuclei` to check for any default credential findings
+4. check for any default credential findings
 
 ### Step 6: Test Username Enumeration via Registration
 

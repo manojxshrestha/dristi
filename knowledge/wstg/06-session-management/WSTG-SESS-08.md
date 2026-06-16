@@ -148,7 +148,7 @@ Session puzzling (also known as session variable overloading) occurs when an app
    Host: target.com
    Cookie: session=<modified_encoded_session>
    ``
-5. Use `nuclei` to check if Burp has identified any session handling anomalies
+5. check if Burp has identified any session handling anomalies
 
 ## Payloads
 

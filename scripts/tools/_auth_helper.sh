@@ -8,10 +8,9 @@
 #   BB_AUTH_ARGS=(-H 'Name1: value1' -H 'Name2: value2' ...)    # bash array
 #   BB_AUTH_SESSION_ID="<12-char-hex>"                          # safe to log
 #
-# Callers splat the array into curl/httpx/katana/nuclei/ffuf invocations:
+# Callers splat the array into curl/httpx/katana/ffuf invocations:
 #
 #   curl -sk ${BB_AUTH_ARGS[@]+"${BB_AUTH_ARGS[@]}"} "$url"
-#   nuclei -l "$list" ${BB_AUTH_ARGS[@]+"${BB_AUTH_ARGS[@]}"} -o "$out"
 #
 # The verbose expansion is intentional: bash 3.2 on macOS aborts under set -u
 # when expanding an empty array as "${BB_AUTH_ARGS[@]}".

@@ -57,6 +57,6 @@ Every finding should include a curl command that reproduces the vulnerability:
 ## Anti-Patterns
 
 - "See sqlmap output" — NOT sufficient. Extract the specific finding with request/response.
-- "Nuclei detected CVE-XXXX" — Include the nuclei output AND a manual reproduction.
+- "Tool detected CVE-XXXX" — Include the tool output AND a manual reproduction.
 - "Dalfox confirmed XSS" — Include the specific payload and the response showing execution.
 - "Tool found vulnerability" — Always verify tool findings manually and include manual reproduction steps.

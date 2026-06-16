@@ -131,7 +131,7 @@ Evaluate the CSP for third-party restrictions:
 - Are third-party domains restricted to specific paths?
 - Is `strict-dynamic` used to limit script chain loading?
 
-Use `nuclei` to check for SRI, outdated library, and CSP findings.
+check for SRI, outdated library, and CSP findings.
 
 ## Payloads
 

@@ -141,7 +141,7 @@ Subdomain takeover occurs when a subdomain's DNS record (typically a CNAME) poin
    - Response from AWS infrastructure: `x-amz-*` headers
    - Response from Azure: `x-ms-*` headers
    - Response from Cloudflare: `cf-ray` header
-3. Use `nuclei` to check for any subdomain-related findings from Burp's scanner
+3. check for any subdomain-related findings from Burp's scanner
 
 ## Payloads
 

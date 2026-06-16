@@ -167,7 +167,7 @@ Test scenarios:
 - Exceeding maximum allowed quantities
 - Using expired promotions
 
-Use `nuclei` to check if Burp has identified parameter manipulation vulnerabilities.
+check if Burp has identified parameter manipulation vulnerabilities.
 
 ## Payloads
 

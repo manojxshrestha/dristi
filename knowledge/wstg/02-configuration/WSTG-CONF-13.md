@@ -207,7 +207,7 @@ Path confusion vulnerabilities arise from differences in how URL paths are inter
    GET /admin/dashboard#fragment HTTP/1.1
    Host: target.com
    ``
-4. Use `nuclei` to check for any path confusion or normalization findings from Burp's scanner
+4. check for any path confusion or normalization findings from Burp's scanner
 
 ## Payloads
 

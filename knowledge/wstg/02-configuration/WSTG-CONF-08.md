@@ -149,7 +149,7 @@ Rich Internet Application (RIA) cross-domain policy files (`crossdomain.xml` for
    - Pattern: `Access-Control-Allow-Origin`
    - Pattern: `Access-Control-Allow-Credentials`
 2. Use `curl` to review all API responses for CORS headers
-3. Use `nuclei` to check for any CORS or cross-domain policy findings from Burp's scanner
+3. check for any CORS or cross-domain policy findings from Burp's scanner
 
 ## Detection Criteria
 

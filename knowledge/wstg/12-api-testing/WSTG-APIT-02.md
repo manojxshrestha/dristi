@@ -249,7 +249,7 @@ Host: target.com
 
 Check for stack traces, database errors, internal paths, or framework details in error responses.
 
-Use `nuclei` to check for API-related findings.
+check for API-related findings.
 
 ## Payloads
 

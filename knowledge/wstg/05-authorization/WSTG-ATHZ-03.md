@@ -113,7 +113,7 @@ Privilege escalation occurs when an attacker gains elevated access to resources 
    Cookie: session=<regular_user_session>
    ``
 3. Test POST/PUT/DELETE methods on admin endpoints with regular user credentials
-4. Use `nuclei` to check if Burp's scanner has identified any access control issues
+4. check if Burp's scanner has identified any access control issues
 
 ### Step 7: Test Registration or Signup Privilege Escalation
 

@@ -163,7 +163,7 @@ Authorization: Bearer <token>
 {"session_state": "<state_from_instance_A>", "cart_id": "<cart_from_instance_B>"}
 ```
 
-Use `nuclei` to check for workflow-related findings.
+check for workflow-related findings.
 
 ## Payloads
 

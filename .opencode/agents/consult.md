@@ -37,7 +37,7 @@ For each phase N from 1 to 5:
 
 Phase 6 has TWO parts: bash tool scanning + AI agent dispatch. BOTH are mandatory.
 
-1. **Explain**: "Phase 6: Vulnerability hunting — nuclei, param fuzzing, SQLi, XSS scanners + ALL 53 hunting agents"
+1. **Explain**: "Phase 6: Vulnerability hunting — param fuzzing, SQLi, XSS scanners + ALL 54 hunting agents"
 2. **Ask approval**
 3. **Run tools**: `bash scripts/pipeline.sh <domain> 6`
 4. **Detect tech stack** from `$RECON_BASE/<domain>/surface/` output

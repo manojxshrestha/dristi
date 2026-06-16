@@ -18,7 +18,7 @@ mkdir -p "$EVIDENCE_DIR" "$OUT_DIR/screenshots"
 log_info "Preparing evidence capture structure..."
 
 # Create evidence placeholder per finding
-FINDINGS=$(find "$OUT_DIR/nuclei" "$OUT_DIR/secrets" "$OUT_DIR/sqli" "$OUT_DIR/xss" "$OUT_DIR/params" \
+FINDINGS=$(find "$OUT_DIR/secrets" "$OUT_DIR/sqli" "$OUT_DIR/xss" "$OUT_DIR/params" \
   -name '*.txt' 2>/dev/null | head -20 || echo "")
 
 if [ -n "$FINDINGS" ]; then

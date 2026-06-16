@@ -67,31 +67,6 @@ def _check_nmap(command: str, raw: str) -> tuple[bool, list[str], list[str]]:
     return True, [], []
 
 
-def _check_nuclei(command: str, raw: str) -> tuple[bool, list[str], list[str]]:
-    """Validate nuclei output."""
-    issues = []
-    corrections = []
-    lines = raw.strip().split("\n") if raw.strip() else []
-
-    if not lines:
-        issues.append("Empty output — nuclei produced no results")
-        corrections.append(_suggest_fix(command, add_flags="-severity critical,high,medium", reason="Broaden severity filter"))
-        return False, issues, corrections
-
-    has_match = any("[" in l and "]" in l for l in lines)
-    has_completed = any("completed" in l.lower() or "finished" in l.lower() for l in lines)
-
-    if not has_match and not has_completed:
-        issues.append("No template matches and no completion indicator — scan may have failed")
-        corrections.append(_suggest_fix(command, remove_proxy=True, reason="Proxy may be interfering"))
-        return False, issues, corrections
-
-    if not has_match and has_completed:
-        # Legitimate — no vulnerabilities found
-        return True, [], []
-
-    return True, [], []
-
 
 def _check_sqlmap(command: str, raw: str) -> tuple[bool, list[str], list[str]]:
     """Validate sqlmap output."""
@@ -354,7 +329,6 @@ def _suggest_fix(
 
 _VERIFICATION_RULES = {
     "nmap": _check_nmap,
-    "nuclei": _check_nuclei,
     "sqlmap": _check_sqlmap,
     "ffuf": _check_ffuf,
     "feroxbuster": _check_feroxbuster,
@@ -377,7 +351,7 @@ def verify_tool_result(tool_name: str, command: str, raw_output: str) -> str:
     issues found, and corrected command suggestions.
 
     Args:
-        tool_name: The tool name (e.g., nmap, nuclei, sqlmap, ffuf)
+        tool_name: The tool name (e.g., nmap, sqlmap, ffuf)
         command: The exact command that was run
         raw_output: The raw output text from the tool
     """

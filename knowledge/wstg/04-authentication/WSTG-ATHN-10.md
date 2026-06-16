@@ -59,7 +59,7 @@ Applications often expose multiple channels for user interaction: web applicatio
    GET /api/user/profile HTTP/1.1
    Host: legacy.target.com
    ``
-5. Use `nuclei` to check for any findings related to alternative endpoints
+5. check for any findings related to alternative endpoints
 
 ### Step 2: Compare Authentication Requirements
 

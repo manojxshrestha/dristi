@@ -249,12 +249,7 @@ fi
 # ── Check 2: SQL Injection ──────────────────────────────────────────────
 if ! skip_has sqli; then
     log_info "Check 2: SQL Injection"
-    # 2a. Nuclei
-    if tool_ok nuclei; then
-        log_step "nuclei SQLi templates..."
-        nuclei -l "$ORDERED_SCAN" -tags sqli -severity medium,high,critical -silent "${BB_AUTH_ARGS[@]}" -o "$FINDINGS_DIR/sqli/nuclei_sqli.txt" || true
-    fi
-    # 2b. Manual Linear-Scaling Probes
+    # 2a. Manual Linear-Scaling Probes
     if [ -s "$PARAMS_FILE" ]; then
         log_step "Advanced SQLi verification on top 10 parameterised URLs..."
         head -10 "$PARAMS_FILE" | while read -r url; do

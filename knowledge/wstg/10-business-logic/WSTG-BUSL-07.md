@@ -162,7 +162,7 @@ username=victim_user&password=§wrong§
 
 If accounts lock after N failures regardless of source IP, an attacker can deny service to any user by deliberately failing login attempts.
 
-Use `nuclei` to check for CAPTCHA and rate-limiting findings.
+check for CAPTCHA and rate-limiting findings.
 
 ## Payloads
 

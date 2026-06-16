@@ -245,7 +245,7 @@ Dristi's WSTG MCP server provides 89 tools for methodology, tracking, and engage
 
 - **`offensive-osint` is large**, even after refactor. The 15 reference files load on demand, but the SKILL.md still consumes context on every trigger.
 - **Per-class `hunt-*` agents overlap on borderline classes.** A finding that's both IDOR and business-logic may trigger two agents. Manageable, but worth knowing.
-- **Some `hunt-*` agents still rely on curl-only detection** — adding automated parameter fuzzing (arjun/x8) and request mutation to each is an ongoing effort. See [`docs/deep-testing.md`](deep-testing.md) for the manual workflow.
+- **Some `hunt-*` agents still rely on curl-only detection** — adding automated parameter fuzzing (arjun/x8 — not auto-installed) and request mutation to each is an ongoing effort. See [`docs/deep-testing.md`](deep-testing.md) for the manual workflow.
 - **No HackerOne MCP yet.** Burp MCP works; H1 MCP integration is a future addition.
 - **No engagement-coordinator agent.** Cross-finding tracking and submission ID management is currently manual. Future agent candidate.
 

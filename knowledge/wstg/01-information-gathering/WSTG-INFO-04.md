@@ -216,7 +216,7 @@ A web server may host multiple applications across different base URLs, virtual 
    - Response headers (especially `Server`, `X-Powered-By`, `Set-Cookie`)
    - Error page behavior (request a non-existent path on each)
    - TLS certificate details (different certificates may indicate different infrastructure)
-2. Use `nuclei` to check for any issues already identified across the discovered applications
+2. check for any issues already identified across the discovered applications
 3. Use `curl` to build a complete map of all discovered applications and their technology stacks
 
 ## Payloads

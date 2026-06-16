@@ -139,7 +139,7 @@ Network infrastructure configuration testing involves understanding the architec
 ### Step 6: Review Known Vulnerabilities
 
 **CLI Actions:**
-1. Use `nuclei` to check if Burp's scanner has detected any known infrastructure vulnerabilities
+1. check if Burp's scanner has detected any known infrastructure vulnerabilities
 2. Cross-reference the identified server software and versions against known CVE databases
 
 ## Detection Criteria

@@ -128,7 +128,7 @@ Host: target.com
 
 While modern browsers do not support CSS expressions, some legacy applications may still be accessed via older browsers.
 
-Use `nuclei` to check for CSS injection findings.
+check for CSS injection findings.
 
 ## Payloads
 

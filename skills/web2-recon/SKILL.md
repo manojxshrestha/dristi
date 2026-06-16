@@ -12,9 +12,6 @@ Full asset discovery from nothing to a prioritized URL list ready for hunting.
 ## SETUP (one-time)
 
 ```bash
-# 1. Update nuclei templates (run weekly)
-nuclei -update-templates
-
 # 3. Configure subfinder with API keys for more sources
 mkdir -p ~/.config/subfinder
 cat > ~/.config/subfinder/config.yaml << 'EOF'
@@ -27,7 +24,7 @@ shodan: [YOUR_SHODAN_KEY]
 EOF
 
 # 4. Verify all tools installed
-which subfinder httpx dnsx nuclei katana waybackurls gau dalfox ffuf anew gf interactsh-client
+which subfinder httpx dnsx katana waybackurls gau dalfox ffuf anew gf interactsh-client
 ```
 
 ---
@@ -40,7 +37,6 @@ which subfinder httpx dnsx nuclei katana waybackurls gau dalfox ffuf anew gf int
 - All subdomains return 403 or static marketing pages
 - No API endpoints visible in URLs
 - No JavaScript bundles with interesting endpoint paths
-- nuclei returns 0 medium/high findings
 - No forms, no authentication, no user data
 
 ---
@@ -94,7 +90,7 @@ runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/
 |-------|--------|------|-------|
 | 4 | `auto_xss.sh` | dalfox + curl | `params/gf_xss.txt` + `scripts/xss_payloads.txt` |
 | 5 | `auto_sqli.sh` | sqlmap | `params/gf_sqli.txt` |
-| 6 | `auto_nuclei.sh` (manual) | nuclei | `crawl/https-subs.txt` |
+
 | 7 | `auto_secrets.sh` | curl | `cariddi/cariddi.txt` |
 
 ### How auto_recon maps to phases
@@ -606,7 +602,6 @@ jq '.components.schemas' swagger.json > schemas.json   # mass-assignment field c
 - `sj` (Swagger Jacker) — purpose-built for Swagger spec exploitation.
 - `apidetector` (brinhosa) — Swagger-UI mass scanner.
 - `XSSwagger` (vavkamil) — detects vulnerable Swagger UI versions (CVE-2018-25031 family).
-- `nuclei -t http/exposures/apis/` — built-in templates for default spec paths.
 
 ### Anti-pattern reminder
 

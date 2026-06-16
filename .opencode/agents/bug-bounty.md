@@ -204,7 +204,6 @@ Client -> CDN -> Load Balancer -> App Server -> Database
 | subfinder | Passive subdomain enum |
 | httpx | Probe live hosts |
 | dnsx | DNS resolution |
-| nuclei | Template scanner |
 | katana | Crawl |
 | waybackurls | Archive URLs |
 | waymore | Deep archive URLs |
@@ -307,10 +306,7 @@ cat /tmp/live.txt | awk '{print $1}' | katana -d 3 -silent | anew /tmp/urls.txt
 echo TARGET | waybackurls | anew /tmp/urls.txt
 # gau removed — waymore covers Wayback Machine with better results; waymore config at ~/.gau.toml if needed manually
 
-# Step 4: Nuclei scan
-nuclei -l /tmp/live.txt -severity critical,high,medium -silent -o /tmp/nuclei.txt
-
-# Step 5: JS secrets
+# Step 4: JS secrets
 cat /tmp/urls.txt | grep "\.js$" | sort -u > /tmp/jsfiles.txt
 # Run SecretFinder on each JS file
 
@@ -1195,7 +1191,7 @@ cat /tmp/subs.txt | dnsx -silent -cname -resp | grep -i "CNAME" | tee /tmp/cname
 # Look for CNAMEs to: github.io, heroku.com, azurewebsites.net, netlify.app, s3.amazonaws.com
 
 # Automated takeover detection
-nuclei -l /tmp/subs.txt -t ~/nuclei-templates/takeovers/ -o /tmp/takeovers.txt
+# Subdomain takeover verification (manual — CNAME analysis)
 ```
 
 ### Quick-Kill Fingerprints
@@ -2097,7 +2093,7 @@ Before pushing back with "I think we're done because X," do this:
 | Recon: URLs | `waymore` -> `katana` -> `uro` | Archive (waymore: 340K+ URLs on test target, gau returned 0 — removed) -> active crawl (JS-rendered) -> deduplicate |
 | Recon: JS | `jsluice` + `mantra` + `trufflehog --only-verified` | Extract URLs/secrets -> find API keys -> verify keys actually work |
 | Recon: Ports | `naabu` (wide) -> `rustscan` (deep) | Fast top-1000 sweep -> full 65535 on interesting targets |
-| Recon: Scan | `nuclei -tags cve` -> `nuclei -tags takeover` | Known CVEs first -> then takeover (act immediately) |
+| Recon: Scan | Manual CVE fingerprinting -> `subzy` for takeover | Check CVEs manually (no automated scanner) -> takeover (act immediately) |
 | Mapping: Params | `arjun` + `paramspider` + ParamMiner | Brute-force hidden params + mine archives + cache headers |
 | Mapping: JS code | Download -> `jsluice` -> VS Code/Cursor grep | Extract -> static analysis -> AI-assisted taint analysis |
 | Mapping: Dorks | Manual Google Dorks | Custom per-target queries find what automation misses |

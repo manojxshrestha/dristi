@@ -141,8 +141,6 @@ ffuf -u https://$TARGET/api/verify-otp \
 hydra -l admin@target.com -P ~/wordlists/top-1000.txt $TARGET \
   http-post-form "/api/login:email=^USER^&password=^PASS^:Invalid"
 
-# nuclei brute/rate-limit templates
-nuclei -u https://$TARGET -t brute-force/ -severity medium,high,critical
 ```
 
 ---

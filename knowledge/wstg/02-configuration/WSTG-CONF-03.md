@@ -165,7 +165,7 @@ File extension handling determines how a web server processes different file typ
 2. Check that `.js` files are served with `application/javascript` (not `text/html`)
 3. Check that `.json` files are served with `application/json`
 4. Incorrect `Content-Type` headers can enable MIME-sniffing attacks if `X-Content-Type-Options: nosniff` is absent
-5. Use `nuclei` to review any MIME-type related findings from Burp's scanner
+5. review any MIME-type related findings from Burp's scanner
 
 ## Payloads
 

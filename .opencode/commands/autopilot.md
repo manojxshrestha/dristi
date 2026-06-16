@@ -37,7 +37,7 @@ each target switch to reload the correct context.
 
 ## Token Optimization
 
-Use `--quick` for faster, lower-cost scans (skips deep fuzzing and extended nuclei templates):
+Use `--quick` for faster, lower-cost scans (skips deep fuzzing):
 ```
 /autopilot target.com --quick    # ~40% fewer tokens, covers main attack surface
 /hunt target.com --vuln-class idor   # single bug class — lowest token use
@@ -54,7 +54,7 @@ Runs the full 12-phase autonomous pipeline without stopping for approval at each
 Phase 1:  SCOPE      → Register domains, load config, create task tree
 Phase 2:  AUTH       → Test credentials, detect WAF, save auth deliverable
 Phase 3:  INTEL      → Passive OSINT: WHOIS, M365, cloud, spoof check
-Phase 4:  RECON      → Subdomain enum, crawl, cariddi, nuclei, 403 bypass, vhost, zone transfer, cloud recon, CVE scan, secrets
+Phase 4:  RECON      → Subdomain enum, crawl, cariddi, 403 bypass, vhost, zone transfer, cloud recon, secrets
 Phase 5:  SURFACE    → Load recon, classify tiers + functional groups, prioritize endpoints
 Phase 6:  HUNT       → Test all bug classes via 54 hunt-* sub-agents (group-based + Ralph Wiggum loop + parallel credential-attack)
 Phase 7:  DEEPTHINK  → (conditional) Gap analysis when HUNT yields zero

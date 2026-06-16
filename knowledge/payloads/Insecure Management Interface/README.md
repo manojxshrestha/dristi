@@ -16,16 +16,7 @@ Insecure Management Interface vulnerabilities arise when administrative interfac
     * Interfaces accessible without requiring credentials.
     * Use of default or weak credentials (e.g., admin/admin).
 
-    ```ps1
-    nuclei -t http/default-logins -u https://example.com
-    ```
-
 * Exposure to the Public Internet
-
-    ```ps1
-    nuclei -t http/exposed-panels -u https://example.com
-    nuclei -t http/exposures -u https://example.com
-    ```
 
 * Sensitive data transmitted over plain HTTP or other unencrypted protocols
 

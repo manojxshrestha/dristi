@@ -127,7 +127,7 @@
 | Command | What it does |
 |---------|-------------|
 | `/recon` | Run recon pipeline (subdomain enum → crawl → params → cariddi) |
-| `/hunt` | Run hunt pipeline (XSS → SQLi → nuclei → secrets) |
+| `/hunt` | Run hunt pipeline (XSS → SQLi → secrets) |
 | `/surface` | Map attack surface from recon data |
 | `/intel` | Gather threat intelligence on target |
 | `/pickup` | Resume interrupted engagement |
@@ -156,5 +156,5 @@
 | `params/gf_xxe.txt` | `@hunt-xxe` |
 | `params/gf_lfi.txt` | `@hunt-lfi` |
 | `cariddi/cariddi.txt` | `@hunt-source-leak` |
-| `nuclei/` findings | All relevant hunt agents |
+| `secrets/` findings | All relevant hunt agents |
 | `crawl/crawledurls.txt` | `@hunt-api-misconfig`, `@hunt-graphql` |

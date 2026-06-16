@@ -168,7 +168,7 @@ Host: target.com
 
 Use `curl` to search for patterns where script elements are dynamically created.
 
-Use `nuclei` to check for JavaScript execution and XSS findings.
+check for JavaScript execution and XSS findings.
 
 ## Payloads
 

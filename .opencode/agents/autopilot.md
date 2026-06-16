@@ -82,7 +82,7 @@ Phase 6 has TWO mandatory parts: bash tool scanning + AI agent dispatch.
 ```bash
 bash scripts/pipeline.sh <domain> 6
 ```
-This runs nuclei, param extraction, secrets hunting, SQLi/XSS scanners, etc.
+This runs param extraction, secrets hunting, SQLi/XSS scanners, etc.
 
 **Part B — AI agent dispatch (after pipeline completes):**
 
@@ -128,7 +128,7 @@ Trigger Phase 7 when **ANY** of these are true:
 | Chains empty | `wstg_find_chains()` returns empty array |
 | WAF bypass exhausted | All payloads from `wstg_get_waf_bypass()` return 403/400/blocked |
 | Unclear findings | Findings don't map to known vulnerability classes |
-| Tool failures | pipeline.sh tools (nuclei, param extract, etc.) produced errors or empty output |
+| Tool failures | pipeline.sh tools (param extract, etc.) produced errors or empty output |
 
 If ANY trigger is true:
 1. Run `bash scripts/pipeline.sh <domain> 7` (prep gap context)

@@ -58,7 +58,7 @@ SCOPE(1) → AUTH(2) → INTEL(3) → RECON(4) → SURFACE(5) → HUNT(6) → DE
 
 | Step | Action | What Happens |
 |------|--------|--------------|
-| 1 | `@recon` | Interactive recon: subdomains → live → crawl → params → cariddi → nuclei → secrets → vhost → cloud → takeover → zone → dorks |
+| 1 | `@recon` | Interactive recon: subdomains → live → crawl → params → cariddi → secrets → vhost → cloud → takeover → zone → dorks |
 | 2 | Or quick combined recon | `bash scripts/tools/auto_recon.sh <target>` or `bash scripts/tools/recon_engine.sh <target>` |
 | 3 | Inspect results | Attack surface understood |
 | 4 | For deeper recon | `@web2-recon`, `@offensive-osint`, `@osint-methodology` |
@@ -231,7 +231,7 @@ Runs the entire P1–P12 pipeline **autonomously** — no prompts at each step. 
 **What it does:**
 1. Asks for target + platform + scope (once at the start)
 2. Gets credentials (Phase 2) and saves auth_analysis deliverable
-3. Runs full recon via scripts (batch_subdomain_enum, web_crawl, cariddi, nuclei, etc.)
+3. Runs full recon via scripts (batch_subdomain_enum, web_crawl, cariddi, etc.)
 4. Ranks attack surface (endpoint_map_raw → endpoint_map_ranked)
 5. Loads auth context, tests every bug class with candidates using `@hunt-*` tradecraft
 6. Exploits validated findings with deep-research techniques and WAF bypass (Phase 8)

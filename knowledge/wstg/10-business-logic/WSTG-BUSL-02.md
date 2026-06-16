@@ -161,7 +161,7 @@ Content-Type: application/x-www-form-urlencoded
 amount=100&to_account=attacker&csrf_token=
 ```
 
-Use `nuclei` to check if Burp has identified CSRF or parameter tampering issues.
+check if Burp has identified CSRF or parameter tampering issues.
 
 ## Payloads
 

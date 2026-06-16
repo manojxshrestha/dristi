@@ -59,7 +59,7 @@ Each phase has its own script at `scripts/tools/phase-<name>.sh`. Run them indiv
 Phase 1:   SCOPE       → register domains, load config, create task tree
 Phase 2:   AUTH        → test credentials, detect WAF, save auth deliverable
 Phase 3:   INTEL       → passive OSINT: WHOIS, M365, cloud, spoof check
-Phase 4:   RECON       → subdomain enum, crawl, params, nuclei, secrets
+Phase 4:   RECON       → subdomain enum, crawl, params, secrets
 Phase 5:   SURFACE     → load recon, classify tiers + functional groups, prioritize endpoints
 Phase 6:   HUNT        → test all bug classes via 54 hunt-* sub-agents
                         ├── group-based testing (1-2 reps per functional group)
@@ -141,9 +141,9 @@ flowchart LR
 | Step | Action | Script |
 |------|--------|--------|
 | 1 | WHOIS lookup, M365/Azure tenant discovery | `scripts/tools/phase-intel.sh <domain>` |
-| 2 | SPF/DMARC spoofability check | auto (Spoofy) |
+| 2 | SPF/DMARC spoofability check | auto (Spoofy — not auto-installed) |
 | 3 | Third-party SaaS misconfiguration scan | auto (misconfig-mapper) |
-| 4 | Cloud storage bucket enumeration | auto (cloud_enum) |
+| 4 | Cloud storage bucket enumeration | auto (manual — not auto-installed) |
 | 5 | Gate check | `scripts/tools/phase_gate.sh 3 <domain>` |
 
 **Script:** `bash scripts/tools/phase-intel.sh <domain>`
@@ -162,22 +162,21 @@ flowchart LR
 | 4 | Web crawling (katana) | `scripts/tools/web_katana.sh <domain>` |
 | 5 | URL merge + dedup | auto (uro) → `crawl/merged-crawl.txt` |
 | 6 | Parameter extraction | `scripts/tools/param_extract.sh <domain>` |
-| 7 | Nuclei scan | `scripts/tools/auto_nuclei.sh <domain>` |
-| 8 | Cariddi secrets/info scan | `scripts/tools/cariddi_scan.sh <domain>` |
-| 9 | DNS bruteforce | `scripts/tools/dns_bruteforce.sh <domain>` |
-| 10 | Vhost fuzzing | `scripts/tools/vhost_fuzz.sh <domain>` |
-| 11 | Directory bruteforce | `scripts/tools/dir_bruteforce.sh <domain>` |
-| 12 | Zone transfer check | `scripts/tools/zone_transfer.sh <domain>` |
-| 13 | Secrets discovery | `scripts/tools/secrets_hunter.sh <domain>` |
-| 14 | Cloud recon | `scripts/tools/cloud_recon.sh <domain>` |
-| 15 | Takeover scanner | `scripts/tools/takeover_scanner.sh <domain>` |
-| 16 | Gate check | `scripts/tools/phase_gate.sh 4 <domain>` |
+| 7 | Cariddi secrets/info scan | `scripts/tools/cariddi_scan.sh <domain>` |
+| 7 | DNS bruteforce | `scripts/tools/dns_bruteforce.sh <domain>` |
+| 8 | Vhost fuzzing | `scripts/tools/vhost_fuzz.sh <domain>` |
+| 9 | Directory bruteforce | `scripts/tools/dir_bruteforce.sh <domain>` |
+| 10 | Zone transfer check | `scripts/tools/zone_transfer.sh <domain>` |
+| 11 | Secrets discovery | `scripts/tools/secrets_hunter.sh <domain>` |
+| 12 | Cloud recon | `scripts/tools/cloud_recon.sh <domain>` |
+| 13 | Takeover scanner | `scripts/tools/takeover_scanner.sh <domain>` |
+| 14 | Gate check | `scripts/tools/phase_gate.sh 4 <domain>` |
 
 **Script (all-in-one):** `bash scripts/tools/auto_recon.sh <domain>` or `bash scripts/tools/phase-recon.sh <domain>`
 
 **CRITICAL:** Never invoke tool binaries directly or install tools. All tools pre-installed.
 
-**Output:** `$RECON_BASE/<domain>/` — subdomains/, crawl/, nuclei/, params/, secrets/, directories/, vhost/
+**Output:** `$RECON_BASE/<domain>/` — subdomains/, crawl/, params/, secrets/, directories/, vhost/
 
 ---
 
@@ -201,20 +200,19 @@ flowchart LR
 
 | Step | Action | Script |
 |------|--------|--------|
-| 1 | Nuclei scan | `scripts/tools/auto_nuclei.sh <domain>` |
-| 2 | Parameter extraction + fuzzing | `scripts/tools/param_extract.sh`, `param_discovery.sh` |
-| 3 | Secrets hunting | `scripts/tools/secrets_hunter.sh <domain>` |
-| 4 | SQLi automation | `scripts/tools/auto_sqli.sh <domain>` |
-| 5 | XSS automation | `scripts/tools/auto_xss.sh <domain>` |
-| 6 | Directory bruteforce | `scripts/tools/dir_bruteforce.sh <domain>` |
-| 7 | VHost fuzzing | `scripts/tools/vhost_fuzz.sh <domain>` |
-| 8 | 403 bypass checks | `scripts/tools/bypass_403.sh <domain> --quick` |
-| 9 | **AI-led testing** — call `@hunt` agent | analyzes results, guides per-class testing |
-| 10 | Gate check | `scripts/tools/phase_gate.sh 6 <domain>` |
+| 1 | Parameter extraction + fuzzing | `scripts/tools/param_extract.sh`, `param_discovery.sh` |
+| 2 | Secrets hunting | `scripts/tools/secrets_hunter.sh <domain>` |
+| 3 | SQLi automation | `scripts/tools/auto_sqli.sh <domain>` |
+| 4 | XSS automation | `scripts/tools/auto_xss.sh <domain>` |
+| 5 | Directory bruteforce | `scripts/tools/dir_bruteforce.sh <domain>` |
+| 6 | VHost fuzzing | `scripts/tools/vhost_fuzz.sh <domain>` |
+| 7 | 403 bypass checks | `scripts/tools/bypass_403.sh <domain> --quick` |
+| 8 | **AI-led testing** — call `@hunt` agent | analyzes results, guides per-class testing |
+| 9 | Gate check | `scripts/tools/phase_gate.sh 6 <domain>` |
 
-**Script:** `bash scripts/tools/phase-hunt.sh <domain>` (runs steps 1-8 automatically)
+**Script:** `bash scripts/tools/phase-hunt.sh <domain>` (runs steps 1-7 automatically)
 
-**For AI-driven analysis (step 9):** Call `@hunt` agent with the surface map. It loads the per-class tradecraft automatically:
+**For AI-driven analysis (step 8):** Call `@hunt` agent with the surface map. It loads the per-class tradecraft automatically:
 
 | Class | Load with… |
 |-------|-----------|
@@ -248,7 +246,7 @@ flowchart LR
 
 **If WAF detected in Phase 2:** Pass to AI agent which applies vendor-specific bypasses from `knowledge/waf/`.
 
-**Output:** `$RECON_BASE/<domain>/` — nuclei/, params/, secrets/, sqli/, xss/, directories/, vhost/
+**Output:** `$RECON_BASE/<domain>/` — params/, secrets/, sqli/, xss/, directories/, vhost/
 
 ---
 

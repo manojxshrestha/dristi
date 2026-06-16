@@ -150,7 +150,7 @@ Use `curl` to check for `ws://` (unencrypted) vs. `wss://` (encrypted) connectio
 
 Unencrypted WebSocket traffic can be intercepted and modified by network attackers.
 
-Use `nuclei` to check for WebSocket-related findings.
+check for WebSocket-related findings.
 
 ## Payloads
 

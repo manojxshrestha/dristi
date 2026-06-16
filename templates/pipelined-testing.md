@@ -96,7 +96,7 @@ This eliminates the bottleneck where fast analysis agents wait for slow ones.
 
 ### Pipeline 3: SSRF + SSTI + Path Traversal (Analysis → Exploit)
 **WSTG Tests**: INPV-18 (SSTI), INPV-19 (SSRF), INPV-04 (Path Traversal)
-**Tools**: sstimap, ssrfmap, arjun
+**Tools**: sstimap, ssrfmap
 **Deliverables**: `save_deliverable(eid, 'ssrf_ssti_analysis', report)`
 **Queues**: Three separate queues (ssrf, ssti, path_traversal)
 

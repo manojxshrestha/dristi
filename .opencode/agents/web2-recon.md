@@ -42,10 +42,7 @@ Full asset discovery from nothing to a prioritized URL list ready for hunting.
 ## SETUP (one-time)
 
 ```bash
-# 1. Update nuclei templates (run weekly)
-nuclei -update-templates
-
-# 3. Configure subfinder with API keys for more sources
+# 1. Configure subfinder with API keys for more sources
 mkdir -p ~/.config/subfinder
 cat > ~/.config/subfinder/config.yaml << 'EOF'
 # Get free keys at: virustotal.com, securitytrails.com, censys.io, shodan.io
@@ -57,7 +54,7 @@ shodan: [YOUR_SHODAN_KEY]
 EOF
 
 # 4. Verify all tools installed
-which subfinder httpx dnsx nuclei katana waybackurls dalfox ffuf anew gf interactsh-client
+which subfinder httpx dnsx katana waybackurls dalfox ffuf anew gf interactsh-client
 ```
 
 ---
@@ -70,14 +67,13 @@ which subfinder httpx dnsx nuclei katana waybackurls dalfox ffuf anew gf interac
 - All subdomains return 403 or static marketing pages
 - No API endpoints visible in URLs
 - No JavaScript bundles with interesting endpoint paths
-- nuclei returns 0 medium/high findings
 - No forms, no authentication, no user data
 
 ---
 
 ## STANDARD RECON PIPELINE — USE EXISTING SCRIPTS
 
-**Do NOT run raw subfinder/amass/dnsx/httpx/katana/gau/nuclei commands.** Use the automation scripts:
+**Do NOT run raw subfinder/amass/dnsx/httpx/katana/gau commands.** Use the automation scripts:
 
 ```bash
 # Full recon (Phase 0-3): subdomains → crawl → params → cariddi
@@ -91,12 +87,11 @@ bash scripts/tools/web_gospider.sh $TARGET          # active crawl (gospider)
 bash scripts/tools/web_katana.sh $TARGET            # active crawl (katana)
 bash scripts/tools/param_extract.sh $TARGET        # param URLs + GF pattern classification
 bash scripts/tools/cariddi_scan.sh $TARGET         # secrets + info disclosure
-# nuclei skipped — too slow on live hosts. Run: bash scripts/tools/auto_nuclei.sh $TARGET
 ```
 
 Output goes to `runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/` — the scripts manage this automatically.
 
-See the **recon agent** (`.opencode/agents/recon.md`) for the full workflow with 9 steps covering subdomain enum → crawl → params → cariddi/nuclei/dirbrute → 403 bypass/vhost → zone/takeover → cloud/CVE/secrets → triage → deliverable.
+See the **recon agent** (`.opencode/agents/recon.md`) for the full workflow covering subdomain enum → crawl → params → cariddi/dirbrute → 403 bypass/vhost → zone/takeover → cloud/secrets → triage → deliverable.
 
 ---
 
@@ -583,7 +578,7 @@ jq '.components.schemas' swagger.json > schemas.json   # mass-assignment field c
 - `sj` (Swagger Jacker) — purpose-built for Swagger spec exploitation.
 - `apidetector` (brinhosa) — Swagger-UI mass scanner.
 - `XSSwagger` (vavkamil) — detects vulnerable Swagger UI versions (CVE-2018-25031 family).
-- `nuclei -t http/exposures/apis/` — built-in templates for default spec paths.
+- Use `curl` to probe common spec paths (`/openapi.json`, `/swagger.json`, `/api-docs`)
 
 ### Anti-pattern reminder
 

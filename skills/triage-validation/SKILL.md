@@ -136,7 +136,7 @@ These pass basic gut-check but consistently come back N/A. Each row has a **spec
 | SQLi — error message only | WAF filtered or error is cosmetic; no data exfiltrated | Got DB error string but no actual table rows returned |
 | CORS wildcard `*` | `*` blocks `withCredentials`; no PII actually exfiltrated | `Access-Control-Allow-Credentials: true` absent; credentialed request returns 403 |
 | Rate limit missing — non-sensitive endpoint | Program only pays for rate-limit on auth/payment/OTP surfaces | Endpoint handles search, contact form, or sits behind Cloudflare |
-| Nuclei `info` template match | Version detection, not exploitation | Template severity is `info`; no CVE PoC executed against live service |
+
 | MFA rate limit (no lockout) | Impact depends on OTP brute-force succeeding — it usually doesn't | 15 requests returned 200 but no OTP code was accepted |
 | Open redirect alone | Redirect is informational without token theft chain | No OAuth `redirect_uri` parameter; no auth code or token in the redirected URL |
 | Auth bypass — admin precondition | Requires compromised admin to trigger; attacker can't get there | "Admin can do X on behalf of user" — attacker must already be admin |

@@ -158,7 +158,7 @@ window.addEventListener('message', function(e) {
 
 Each DOM modification point is a potential vulnerability if origin validation is missing.
 
-Use `nuclei` to check for postMessage-related findings.
+check for postMessage-related findings.
 
 ## Payloads
 

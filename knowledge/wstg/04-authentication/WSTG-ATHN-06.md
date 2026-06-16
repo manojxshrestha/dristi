@@ -120,7 +120,7 @@ Browsers and intermediate proxies cache web content to improve performance. When
    Host: target.com
    Cookie: session=<different_user_session>
    ``
-4. Use `nuclei` to check for any cacheable response findings from Burp's scanner
+4. check for any cacheable response findings from Burp's scanner
 
 ### Step 6: Test HTTPS vs HTTP Cache Differences
 

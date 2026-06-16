@@ -30,7 +30,6 @@ TOOL_REGISTRY: dict[str, dict[str, Any]] = {
     "katana": {"phase": 0, "tier": "mandatory", "condition": None},
     "ffuf": {"phase": 0, "tier": "mandatory", "condition": None},
     "httpx": {"phase": 0, "tier": "mandatory", "condition": None},
-    "nuclei": {"phase": 0, "tier": "mandatory", "condition": None},
     "whatweb": {"phase": 0, "tier": "mandatory", "condition": None},
     "gau": {"phase": 0, "tier": "mandatory", "condition": None},
     "nikto": {"phase": 0, "tier": "mandatory", "condition": None},
@@ -390,7 +389,7 @@ DELIVERABLE_TYPES = {
 # ── Phase Configuration ─────────────────────────────────────────────
 PHASE_NAMES = {
     0: "SCOPE — Domain Registration & Config",
-    1: "RECON — Subdomain Enum, Crawl, Params, Nuclei, Secrets",
+    1: "RECON — Subdomain Enum, Crawl, Params, Secrets",
     2: "SURFACE — Endpoint Prioritization & Attack Surface Ranking",
     3: "HUNT — 54 @hunt-* Sub-Agent Dispatch (all WSTG vuln classes)",
     4: "CAPTURE — Evidence Collection, Screenshots, Redaction",
@@ -466,7 +465,7 @@ PHASE_TOOL_REQUIREMENTS = {
         "conditional": [],
     },
     1: {
-        "mandatory": ["subfinder", "httpx", "katana", "nuclei", "gau"],
+        "mandatory": ["subfinder", "httpx", "katana", "gau"],
         "conditional": ["ffuf", "whatweb", "nikto", "nmap", "feroxbuster", "wapiti", "arjun"],
     },
     2: {"mandatory": [], "conditional": []},

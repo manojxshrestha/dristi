@@ -605,47 +605,7 @@ else
 fi
 
 # ============================================================
-# Phase 9: Nuclei vulnerability sweep (optional, gated on installed binary)
-# ============================================================
-echo ""
-log_info "Phase 9: Nuclei Vulnerability Sweep"
-
-if command -v nuclei &>/dev/null && [ -s "$RECON_DIR/live/urls.txt" ]; then
-    NUCLEI_OUT="$RECON_DIR/nuclei"
-    mkdir -p "$NUCLEI_OUT"
-    NUC_LIMIT=$([ "$QUICK_MODE" = "--quick" ] && echo 50 || echo 200)
-    NUC_SEV=$([ "$QUICK_MODE" = "--quick" ] && echo "high,critical" || echo "medium,high,critical")
-    NUC_TIMEOUT=$([ "$QUICK_MODE" = "--quick" ] && echo 600 || echo 1800)
-
-    head -"$NUC_LIMIT" "$RECON_DIR/live/urls.txt" > "$NUCLEI_OUT/targets.txt"
-    log_step "nuclei on $(wc -l < "$NUCLEI_OUT/targets.txt" | tr -d ' ') hosts (severity=$NUC_SEV, timeout=${NUC_TIMEOUT}s)..."
-
-    timeout "$NUC_TIMEOUT" nuclei \
-        -l "$NUCLEI_OUT/targets.txt" \
-        -severity "$NUC_SEV" \
-        -silent \
-        -stats \
-        "${BB_AUTH_ARGS[@]}" \
-        -jsonl \
-        -o "$NUCLEI_OUT/findings.jsonl" 2>/dev/null || true
-
-    if [ -s "$NUCLEI_OUT/findings.jsonl" ]; then
-        # Severity buckets for human review
-        for sev in critical high medium low info; do
-            grep -F "\"severity\":\"$sev\"" "$NUCLEI_OUT/findings.jsonl" \
-                > "$NUCLEI_OUT/${sev}.jsonl" 2>/dev/null || true
-            n=$(wc -l < "$NUCLEI_OUT/${sev}.jsonl" 2>/dev/null | tr -d ' ')
-            [ "$n" -gt 0 ] && log_done "nuclei $sev: $n"
-        done
-    else
-        log_done "nuclei: no findings"
-    fi
-else
-    [ -z "$(command -v nuclei)" ] && log_warn "nuclei not installed — see ./tools/external_arsenal.sh --install-hint nuclei"
-fi
-
-# ============================================================
-# Phase 10: Subdomain takeover quick-check (CNAME fingerprint grep)
+# Phase 9: Subdomain takeover quick-check (CNAME fingerprint grep)
 # ============================================================
 echo ""
 log_info "Phase 10: Subdomain Takeover Quick-Check"
@@ -711,8 +671,6 @@ echo "  Unique params:     $(wc -l < "$RECON_DIR/params/unique_params.txt" 2>/de
 [ -d "$RECON_DIR/cicd" ] && \
 echo "  CI/CD findings:   $(find "$RECON_DIR/cicd" -name 'scan_results.txt' -exec grep -cP '\.github/workflows/' {} + 2>/dev/null | awk -F: '{s+=$NF} END {print s+0}')"
 
-[ -f "$RECON_DIR/nuclei/findings.jsonl" ] && \
-echo "  Nuclei hits:       $(wc -l < "$RECON_DIR/nuclei/findings.jsonl" | tr -d ' ')"
 [ -f "$RECON_DIR/takeover_candidates.txt" ] && \
 echo "  Takeover candidates: $(wc -l < "$RECON_DIR/takeover_candidates.txt" | tr -d ' ')"
 

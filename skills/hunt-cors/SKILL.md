@@ -116,9 +116,6 @@ grep -r "addEventListener.*message" runtime/engagements/${ENGAGEMENT_ID:-default
 pip3 install corsy
 corsy -u https://$TARGET -t 10 --headers "Cookie: $SESSION_COOKIE"
 
-# nuclei CORS templates
-nuclei -u https://$TARGET -t cors/
-
 # Manual bulk scan
 while read url; do
   result=$(curl -sI "$url" -H "Origin: https://evil.com" \

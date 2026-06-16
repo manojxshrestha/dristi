@@ -239,7 +239,7 @@ Beyond identifying the framework (WSTG-INFO-08), this test focuses on identifyin
 
 **CLI Actions:**
 1. Use `curl` to review all collected evidence
-2. Use `nuclei` to check if Burp Scanner has identified the application or its version
+2. check if Burp Scanner has identified the application or its version
 3. Cross-reference multiple version indicators to confirm accuracy:
    - HTML meta tags vs static asset versions vs API responses
    - If indicators conflict, the most specific indicator (API version endpoint, changelog) is most reliable

@@ -24,7 +24,7 @@ FINDINGS_FILE="$VALIDATE_DIR/findings_for_validation.txt"
   echo "Target: $TARGET"
   echo ""
 
-  for dir in nuclei secrets sqli xss params directories; do
+  for dir in secrets sqli xss params directories; do
     if [ -d "$OUT_DIR/$dir" ]; then
       for f in "$OUT_DIR/$dir"/*.txt; do
         [ -f "$f" ] && {

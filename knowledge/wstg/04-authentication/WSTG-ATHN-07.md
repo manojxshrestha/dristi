@@ -172,7 +172,7 @@ A weak password policy allows users to set passwords that are easily guessable, 
    - API password update: `/api/users/password`
 3. Use `curl` to submit a weak password (`a`) on each endpoint
 4. Compare results to determine if all endpoints enforce the same policy
-5. Use `nuclei` to check for any password policy findings
+5. check for any password policy findings
 
 ## Payloads
 

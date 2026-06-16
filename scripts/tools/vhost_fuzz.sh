@@ -15,7 +15,13 @@
 
 set -euo pipefail
 
-source "$(dirname "$0")/_env.sh"
+ENV_FILE="$(dirname "$0")/_env.sh"
+if [ -f "$ENV_FILE" ]; then
+  source "$ENV_FILE"
+else
+  echo "[-] _env.sh not found at $ENV_FILE" >&2
+  exit 1
+fi
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -26,8 +32,19 @@ log_err()  { echo -e "${RED}[-]${NC} $1" >&2; }
 log_warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 log_info() { echo -e "${CYAN}[*]${NC} $1"; }
 
-TARGET="${1:?Usage: $0 <domain> [--url <base-url>]}"
-BASE_URL="${3:-http://$TARGET}"
+if [ $# -lt 1 ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+  echo "Usage: $0 <domain> [--url <base-url>]"
+  exit 0
+fi
+
+TARGET="$1"
+BASE_URL="http://$TARGET"
+if [ "${2:-}" = "--url" ] && [ -n "${3:-}" ]; then
+  BASE_URL="$3"
+fi
+BASE_URL="${BASE_URL%/}"
+
+: "${RECON_BASE:?RECON_BASE not set}"
 
 OUT_DIR="${RECON_BASE}/$TARGET/vhost"
 mkdir -p "$OUT_DIR"
@@ -41,58 +58,48 @@ export PATH="$HOME/go/bin:/usr/local/bin:$PATH"
 WORDLIST="$WORDLIST_DIR/common.txt"
 if [ ! -f "$WORDLIST" ]; then
   log_info "Downloading vhost wordlist from manojxshrestha/wordlists..."
-  wget -q "https://raw.githubusercontent.com/manojxshrestha/wordlists/refs/heads/main/common.txt" -O "$WORDLIST"
+  wget -q "https://raw.githubusercontent.com/manojxshrestha/wordlists/main/common.txt" -O "$WORDLIST"
   log_ok "Downloaded $(wc -l < "$WORDLIST" | tr -d ' ') entries"
 fi
 
 # ── Ensure ffuf is installed ────────────────────────────────────────
 if ! command -v ffuf &>/dev/null; then
-  log_err "ffuf not found. Install: go install github.com/ffuf/ffuf/v2@latest"
-  exit 1
+  log_warn "ffuf not found — skipping vhost fuzzing (install: go install github.com/ffuf/ffuf/v2@latest)"
+  log_info "Use manual Host header testing instead"
+  exit 0
 fi
-
-# ── Get baseline Content-Length ─────────────────────────────────────
-INVALID="defnotvalid-$RANDOM.$TARGET"
-BASELINE=$(curl -s -I "$BASE_URL" -H "Host: $INVALID" 2>/dev/null \
-  | grep -i "Content-Length:" \
-  | awk '{print $2}' \
-  | tr -d '\r')
-
-if [ -z "$BASELINE" ]; then
-  log_warn "Could not determine baseline Content-Length. Using 0."
-  BASELINE=0
-fi
-log_info "Baseline Content-Length: $BASELINE (invalid vhost: $INVALID)"
 
 # ── Run ffuf vhost fuzzing ──────────────────────────────────────────
 log_info "Fuzzing vhosts on $TARGET via $BASE_URL..."
 log_info "  Wordlist: $WORDLIST ($(wc -l < "$WORDLIST" | tr -d ' ') entries)"
-log_info "  Filter: -fs $BASELINE -fc 403"
 
-ffuf -w "$WORDLIST:FUZZ" \
-     -u "$BASE_URL/" \
-     -H "Host: FUZZ.$TARGET" \
-     -fs "$BASELINE" \
-     -fc 403 \
-     -ac \
-     -o "$OUT_DIR/vhost_results.json" \
-     -of json \
-     -v 2>/dev/null
+ffuf \
+  -w "$WORDLIST:FUZZ" \
+  -u "$BASE_URL/" \
+  -H "Host: FUZZ.$TARGET" \
+  -ac \
+  -o "$OUT_DIR/vhost_results.json" \
+  -of json \
+  -v \
+  2>/dev/null || true
 
 # ── Parse results ───────────────────────────────────────────────────
 if [ -s "$OUT_DIR/vhost_results.json" ]; then
-  python3 -c "
+  python3 <<EOF
 import json
-with open('$OUT_DIR/vhost_results.json') as f:
+
+with open("$OUT_DIR/vhost_results.json") as f:
     data = json.load(f)
-results = data.get('results', [])
+
+results = data.get("results", [])
 if results:
-    print(f'Found {len(results)} vhosts:')
+    print(f"Found {len(results)} vhosts:")
     for r in results:
-        print(f\"  {r.get('input', {}).get('FUZZ', '?')}.$TARGET -> {r.get('status')} ({r.get('length')} bytes)\")
+        word = r.get("input", {}).get("FUZZ", "?")
+        print(f"  {word}.$TARGET -> {r.get('status')} ({r.get('length')} bytes)")
 else:
-    print('No vhosts found.')
-" | tee "$OUT_DIR/vhost_found.txt"
+    print("No vhosts found.")
+EOF
 else
   log_warn "No results from ffuf"
 fi

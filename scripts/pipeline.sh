@@ -53,7 +53,7 @@ PHASES=(
   "1:scope:Scope registration — register target, scaffold engagement"
   "2:auth:Auth & WAF detection — get credentials, identify WAF"
   "3:intel:Passive intel — WHOIS, cloud, spoof, third-party misconfigs"
-  "4:recon:Reconnaissance — subdomains, crawl, params, nuclei, secrets"
+  "4:recon:Reconnaissance — subdomains, crawl, params, secrets, cloud"
   "5:surface:Surface analysis — classify endpoints, prioritize attack surface"
   "6:hunt:Vulnerability hunting — test all bug classes"
   "7:deepthink:Deep analysis — (conditional) gap analysis when hunt yields zero"

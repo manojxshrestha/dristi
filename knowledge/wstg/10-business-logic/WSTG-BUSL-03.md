@@ -129,7 +129,7 @@ If HMAC is used, use `ffuf` to test common weak HMAC keys:
 2. For each candidate key, compute HMAC of the request data and compare with the expected HMAC
 3. Test keys like: `secret`, `password`, `key`, `hmac_key`, empty string
 
-Use `nuclei` to check for related findings from Burp Scanner.
+check for related findings from Burp Scanner.
 
 ### Step 7: Test Content-MD5 Header
 

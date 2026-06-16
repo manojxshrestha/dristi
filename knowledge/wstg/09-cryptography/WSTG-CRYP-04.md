@@ -125,7 +125,7 @@ Use `curl` to find evidence of weak crypto in application responses:
 - Pattern: `ECB` (ECB mode reference)
 - Pattern: `PKCS1v1.5` (vulnerable padding scheme)
 
-Use `nuclei` to check if Burp Scanner has identified weak cryptography issues.
+check if Burp Scanner has identified weak cryptography issues.
 
 ### Step 7: Test for Hardcoded or Exposed Keys
 

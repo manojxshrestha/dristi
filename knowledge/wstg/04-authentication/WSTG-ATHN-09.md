@@ -174,7 +174,7 @@ Password change and reset mechanisms are critical authentication functions. If i
    email=victim@test.com
    ``
 3. If the reset link is generated using the Host header, the token could be sent to the attacker's domain
-4. Use `nuclei` to check for any host header injection findings
+4. check for any host header injection findings
 
 ### Step 7: Test Session Invalidation After Password Reset
 

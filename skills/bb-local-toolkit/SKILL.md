@@ -174,7 +174,6 @@ Client -> CDN -> Load Balancer -> App Server -> Database
 | subfinder | Passive subdomain enum |
 | httpx | Probe live hosts |
 | dnsx | DNS resolution |
-| nuclei | Template scanner |
 | katana | Crawl |
 | waybackurls | Archive URLs |
 | gau | Known URLs |
@@ -276,9 +275,6 @@ cat /tmp/subs.txt | dnsx -silent | httpx -silent -status-code -title -tech-detec
 cat /tmp/live.txt | awk '{print $1}' | katana -d 3 -silent | anew /tmp/urls.txt
 echo TARGET | waybackurls | anew /tmp/urls.txt
 gau TARGET | anew /tmp/urls.txt
-
-# Step 4: Nuclei scan
-nuclei -l /tmp/live.txt -severity critical,high,medium -silent -o /tmp/nuclei.txt
 
 # Step 5: JS secrets
 cat /tmp/urls.txt | grep "\.js$" | sort -u > /tmp/jsfiles.txt
@@ -1165,7 +1161,6 @@ cat /tmp/subs.txt | dnsx -silent -cname -resp | grep -i "CNAME" | tee /tmp/cname
 # Look for CNAMEs to: github.io, heroku.com, azurewebsites.net, netlify.app, s3.amazonaws.com
 
 # Automated takeover detection
-nuclei -l /tmp/subs.txt -t ~/nuclei-templates/takeovers/ -o /tmp/takeovers.txt
 ```
 
 ### Quick-Kill Fingerprints

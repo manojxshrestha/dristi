@@ -267,7 +267,7 @@ Content-Type: application/xml
 
 The error message may contain the contents of `/etc/passwd` as part of the invalid file path.
 
-Use `nuclei` to check if Burp's scanner has identified any XXE findings.
+check if Burp's scanner has identified any XXE findings.
 
 ## Payloads
 

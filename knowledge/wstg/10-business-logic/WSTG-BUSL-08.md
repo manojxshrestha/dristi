@@ -180,7 +180,7 @@ Host: target.com
 
 Check response headers for execution indicators (e.g., PHP output vs. raw PHP source code).
 
-Use `nuclei` to check if Burp Scanner identified file upload vulnerabilities.
+check if Burp Scanner identified file upload vulnerabilities.
 
 ## Payloads
 

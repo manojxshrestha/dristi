@@ -211,7 +211,7 @@ Content-Type: text/xml
 1. After injection, wait for the expected trigger condition (admin review, report generation, log rotation)
 2. If you have access to the admin interface, use `curl` to access the admin views that display the stored data
 3. Use `curl` to monitor for any outbound requests to collaborator domains
-4. Use `nuclei` to check for stored/blind XSS findings
+4. check for stored/blind XSS findings
 5. Document the time delay between injection and trigger
 
 ## Payloads

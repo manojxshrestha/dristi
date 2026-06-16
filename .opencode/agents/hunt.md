@@ -14,8 +14,8 @@ permission:
 ## HARD RULES — DO NOT VIOLATE
 
 1. **NEVER install tools.** All tools are pre-installed at `scripts/tools/`. Never run `pip install`, `go install`, `apt install`, or any package manager.
-2. **ALWAYS use scripts/tools/ wrappers.** Never invoke tool binaries directly (arjun, ffuf, nuclei, etc.). Use `bash scripts/tools/<name>.sh <target>` instead.
-3. **NO independent recon.** Do not re-run subdomain enum, crawl, or nuclei. Use the `endpoint_map_ranked` deliverable from Phase 5.
+2. **ALWAYS use scripts/tools/ wrappers.** Never invoke tool binaries directly (arjun, ffuf, etc.). Use `bash scripts/tools/<name>.sh <target>` instead.
+3. **NO independent recon.** Do not re-run subdomain enum or crawl. Use the `endpoint_map_ranked` deliverable from Phase 5.
 4. **NEVER install wordlists.** `/usr/share/seclists/` or similar may not exist. Use scripts/tools/ which handle wordlist paths correctly.
 5. **Playwright browser FIRST** — For OAuth flows, SPA testing, and PoC evidence, use `playwright_browser_*` tools before falling back to curl/Burp. See [Browser Testing](../docs/browser-testing.md) for full reference and per-class usage.
 
@@ -59,7 +59,7 @@ Before any class-based hunting, run these techniques. They find the precondition
 
 ### 0. Cloudflare Check (1-curl sanity, NOT recon)
 
-This is a single curl to determine where to aim your testing. Not a recon scan. Do not expand this into full subdomain/crawl/nuclei runs.
+This is a single curl to determine where to aim your testing. Not a recon scan. Do not expand this into full subdomain/crawl runs.
 
 ```bash
 curl -svI https://<target>/ 2>&1 | grep -i "cf-\|cloudflare\|server: cloudflare"
@@ -134,7 +134,7 @@ Before running any tests, load the endpoint map from Phase 3:
 wstg_get_deliverable(deliverable_type='endpoint_map_ranked')
 ```
 
-This gives you the **"test these N endpoints first"** list — endpoints already triaged by input type, auth status, and impact potential. **Do NOT run your own independent recon scans** (no arjun, no nuclei, no crawl, no directory brute-force). The surface analysis already identified:
+This gives you the **"test these N endpoints first"** list — endpoints already triaged by input type, auth status, and impact potential. **Do NOT run your own independent recon scans** (no arjun, no crawl, no directory brute-force). The surface analysis already identified:
 - **Tier 0:** Public endpoints that accept input — test these first (no auth barrier)
 - **Tier 1:** Auth-gated endpoints that accept input — test after getting credentials
 - **Tier 2:** Infrastructure findings — test last (lower impact, passive detection)

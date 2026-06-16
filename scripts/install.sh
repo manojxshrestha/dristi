@@ -5,12 +5,9 @@
 # A single script to install everything:
 #   - System dependencies (libpcap, build-essential, etc.)
 #   - OpenCode agents, rules, skills
-#   - Go CLI security tools (subfinder, nuclei, httpx, ffuf, gf, etc.)
-#   - Python tools (awscli, sslyze, etc.)
-#   - Cargo tools (feroxbuster)
+#   - Go CLI security tools (subfinder, httpx, ffuf, gf, gowitness, etc.)
 #   - GF patterns, SecLists wordlists
 #   - Playwright Chromium browser
-#   - pipx tools
 #   - Python virtual environment for the Dristi MCP server
 #   - Shell aliases
 #
@@ -148,51 +145,22 @@ if ! $QUICK; then
     "github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest"
     "github.com/projectdiscovery/dnsx/cmd/dnsx@latest"
     "github.com/projectdiscovery/httpx/cmd/httpx@latest"
-    "github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest"
-    "github.com/projectdiscovery/naabu/v2/cmd/naabu@latest"
     "github.com/projectdiscovery/katana/cmd/katana@latest"
     "github.com/projectdiscovery/pdtm/cmd/pdtm@latest"
-    "github.com/projectdiscovery/interactsh/cmd/interactsh-client@latest"
+    "github.com/projectdiscovery/notify/cmd/notify@latest"
     # Tomnomnom tools
     "github.com/tomnomnom/assetfinder@latest"
     "github.com/tomnomnom/waybackurls@latest"
     "github.com/tomnomnom/gf@latest"
     "github.com/tomnomnom/anew@latest"
-    "github.com/tomnomnom/meg@latest"
-    "github.com/tomnomnom/unfurl@latest"
-    "github.com/tomnomnom/qsreplace@latest"
     # Fuzzing / discovery
     "github.com/ffuf/ffuf/v2@latest"
-    "github.com/OJ/gobuster/v3@latest"
-    "github.com/hakluke/hakrawler@latest"
-    "github.com/hakluke/hakrevdns@latest"
-    # Secrets / analysis
-    "github.com/trufflesecurity/trufflehog@latest"
-    "github.com/zricethezav/gitleaks/v8@latest"
-    "github.com/JohnnyJTH/go-dork@latest"
     # Screenshots
     "github.com/sensepost/gowitness@latest"
-    "github.com/michenriksen/aquatone@latest"
-    # TLS / infra
-    "github.com/lanrat/certgraph@latest"
-    "github.com/d3mondev/puredns/v2@latest"
-    # OWASP
-    "github.com/owasp-amass/amass/v4/...@master"
-    # XSS scanner
-    "github.com/hahwul/dalfox/v2@latest"
-    # DNS
-    "github.com/projectdiscovery/shuffledns/cmd/shuffledns@latest"
-    # Notify
-    "github.com/projectdiscovery/notify/cmd/notify@latest"
-    # Uncover
-    "github.com/projectdiscovery/uncover/cmd/uncover@latest"
     # Crawlers
     "github.com/jaeles-project/gospider@latest"
     "github.com/edoardottt/cariddi/cmd/cariddi@latest"
-    # Takeover / bypass
-    "github.com/haccer/subjack@latest"
-    "github.com/lobuhi/byp4xx@latest"
-    # SaaS misconfiguration scanner
+    # SaaS misconfiguration scanner (manual use)
     "github.com/intigriti/misconfig-mapper/cmd/misconfig-mapper@latest"
   )
 
@@ -213,72 +181,12 @@ if ! $QUICK; then
   # ═══════════════════════════════════════════════════════════════════════════
   # PHASE 3: Python tools (pip)
   # ═══════════════════════════════════════════════════════════════════════════
-  header "PHASE 3: Python tools (pip)"
-
-  PIP_TOOLS=(
-    "awscli"
-    "s3scanner"
-    "sslyze"
-    "pyjarm"
-    "google-play-scraper"
-    "androguard"
-    "apkleaks"
-  )
-
-  for pkg in "${PIP_TOOLS[@]}"; do
-    if python3 -c "import importlib.metadata; importlib.metadata.version('$pkg')" 2>/dev/null; then
-      ok "$pkg — already installed"
-    else
-      info "Installing $pkg..."
-      if uv pip install --system "$pkg" 2>/dev/null; then
-        ok "$pkg installed"
-      else
-        warn "$pkg install failed"
-      fi
-    fi
-  done
+  header "PHASE 3: Python tools (pip) — none (removed, all replaced by agents)"
 
   # ═══════════════════════════════════════════════════════════════════════════
   # PHASE 4: pipx tools
   # ═══════════════════════════════════════════════════════════════════════════
-  header "PHASE 4: pipx tools"
-
-  if ! command -v pipx &>/dev/null; then
-    info "Installing pipx..."
-    uv tool install pipx 2>/dev/null && ok "pipx installed" || warn "pipx install failed"
-    export PATH="$HOME/.local/bin:$PATH"
-  fi
-
-  PIPX_TOOLS=(
-    "sqlmap"
-    "arjun"
-    "tldr"
-    "cve-search"
-  )
-
-  for pkg in "${PIPX_TOOLS[@]}"; do
-    if command -v "$pkg" &>/dev/null; then
-      ok "$pkg — already installed"
-    else
-      info "Installing $pkg via pipx..."
-      pipx install "$pkg" 2>/dev/null && ok "$pkg installed" || warn "$pkg install failed"
-    fi
-  done
-
-  # ═══════════════════════════════════════════════════════════════════════════
-  # PHASE 5: Cargo / specialized tools
-  # ═══════════════════════════════════════════════════════════════════════════
-  header "PHASE 5: Specialized tools"
-
-  # Feroxbuster (cargo or binary)
-  if command -v feroxbuster &>/dev/null; then
-    ok "feroxbuster — already installed"
-  elif $HAS_CARGO; then
-    info "Installing feroxbuster (cargo)..."
-    cargo install feroxbuster 2>/dev/null && ok "feroxbuster installed" || warn "feroxbuster install failed"
-  else
-    warn "cargo not available — install feroxbuster manually: cargo install feroxbuster"
-  fi
+  header "PHASE 4: pipx tools — none (removed, all replaced by agents)"
 
   # GF patterns
   header "Phase 5b: GF patterns"
@@ -628,7 +536,7 @@ header "PHASE 11: Verification"
 # Core tools
 if ! $QUICK; then
   info "Checking core tools..."
-  for tool in subfinder dnsx httpx nuclei ffuf gf gau katana anew trufflehog gitleaks jq feroxbuster; do
+  for tool in subfinder dnsx httpx ffuf gf gau katana anew jq gowitness; do
     if command -v "$tool" &>/dev/null; then
       ok "$tool — found"
     else
@@ -672,7 +580,7 @@ echo ""
 echo "  Commands:   dristi, dristi-server, dristi-update, dristi-recon"
 echo "  OpenCode:   opencode  (launches with Dristi pre-configured)"
   echo "  Agents:     87 OpenCode agents"
-echo "  Tools:      $($QUICK && echo 'skipped (re-run without --quick)' || echo '50+ security tools')"
+echo "  Tools:      $($QUICK && echo 'skipped (re-run without --quick)' || echo '15 essential tools')"
 echo ""
 echo "  Quick start:"
 echo "    1. opencode"

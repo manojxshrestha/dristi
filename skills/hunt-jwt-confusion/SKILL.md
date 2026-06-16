@@ -219,9 +219,6 @@ python3 jwt_tool.py <token> -t https://target.com/api/profile -rh "Authorization
 # All attacks at once
 python3 jwt_tool.py <token> -X a
 
-# Nuclei JWT templates
-nuclei -u https://target.com -t jwt/
-
 # hashcat weak secret
 hashcat -a 0 -m 16500 <jwt> wordlist.txt
 

@@ -159,7 +159,7 @@ Content-Type: application/json
 {"message": "%x.%x.%x.%x"}
 ```
 
-Use `nuclei` to check if Burp's scanner has flagged any format string issues.
+check if Burp's scanner has flagged any format string issues.
 
 ## Payloads
 

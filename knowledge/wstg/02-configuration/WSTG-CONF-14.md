@@ -185,7 +185,7 @@ HTTP security headers provide an additional layer of defense by instructing brow
    - Pattern: `Cross-Origin-Opener-Policy:`
    - Pattern: `Cache-Control:.*no-store`
 3. Identify pages that are missing headers compared to others (inconsistent implementation)
-4. Use `nuclei` to check for any security header findings from Burp's scanner
+4. check for any security header findings from Burp's scanner
 
 ## Detection Criteria
 

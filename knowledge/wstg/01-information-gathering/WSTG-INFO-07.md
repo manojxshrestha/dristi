@@ -143,7 +143,7 @@ Before testing an application for vulnerabilities, it is essential to understand
 
 **CLI Actions:**
 1. Use `curl` to retrieve the complete set of discovered endpoints
-2. Use `nuclei` to check for any findings that reveal additional paths or functionality
+2. check for any findings that reveal additional paths or functionality
 3. Compile the final application map organized by:
    - Static content paths
    - Dynamic application endpoints

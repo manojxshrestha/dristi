@@ -126,7 +126,7 @@ Use `curl` to identify state-changing actions that could be targeted:
 
 For each action, verify that the page serving it has proper framing protection.
 
-Use `nuclei` to check for clickjacking-related findings.
+check for clickjacking-related findings.
 
 ## Payloads
 

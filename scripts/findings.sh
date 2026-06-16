@@ -305,7 +305,7 @@ cmd_doctor() {
 
     local tools=(
         "nmap:nmap:Phase 0 - Recon"
-        "nuclei:nuclei:Phase 0 - Vuln Scan"
+        # nuclei removed from pipeline
         "ffuf:ffuf:Phase 0 - Fuzzing"
         "gobuster:gobuster:Phase 0 - Directory busting"
         "feroxbuster:feroxbuster:Phase 0 - Directory busting"

@@ -174,7 +174,6 @@ Client -> CDN -> Load Balancer -> App Server -> Database
 | subfinder | Passive subdomain enum |
 | httpx | Probe live hosts |
 | dnsx | DNS resolution |
-| nuclei | Template scanner |
 | katana | Crawl |
 | waybackurls | Archive URLs |
 | gau | Known URLs |
@@ -287,7 +286,7 @@ bash scripts/tools/subdomain_enum.sh TARGET
 # Output: runtime/engagements/<id>/recon/<target>/subdomains/
 #   all_subdomains.txt   — all discovered subdomains
 #   alive-domains.txt    — DNS-resolved, HTTP-alive domains
-#   https-subs.txt       — full HTTPS URLs (for crawl/nuclei)
+#   https-subs.txt       — full HTTPS URLs (for crawl)
 #   live_domains.txt     — httpx output (status, title, tech)
 
 # Step 2: URL collection from live hosts
@@ -295,10 +294,6 @@ cat runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/TARGET/subdom
   | katana -d 3 -jc -kf all -silent \
   | anew runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/TARGET/urls.txt
 echo TARGET | waybackurls | anew runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/TARGET/urls.txt
-
-# Step 3: Nuclei scan
-nuclei -l runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/TARGET/subdomains/https-subs.txt \
-  -severity critical,high,medium -o runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/TARGET/nuclei.txt
 
 # Step 4: JS secrets
 cat runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/TARGET/urls.txt | grep "\.js$" | sort -u > /tmp/jsfiles.txt
@@ -1214,7 +1209,6 @@ cat /tmp/subs.txt | dnsx -silent -cname -resp | grep -i "CNAME" | tee /tmp/cname
 # Look for CNAMEs to: github.io, heroku.com, azurewebsites.net, netlify.app, s3.amazonaws.com
 
 # Automated takeover detection
-nuclei -l /tmp/subs.txt -t ~/nuclei-templates/takeovers/ -o /tmp/takeovers.txt
 ```
 
 ### Quick-Kill Fingerprints

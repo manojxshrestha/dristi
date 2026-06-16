@@ -119,7 +119,7 @@ Role definitions determine what actions and resources each type of user can acce
    Host: target.com
    Cookie: session=<manager_session>
    ``
-3. Use `nuclei` to check for any access control findings Burp has identified automatically
+3. check for any access control findings Burp has identified automatically
 
 ## Payloads
 

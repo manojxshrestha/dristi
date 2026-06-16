@@ -150,7 +150,7 @@ Content-Type: application/json
 
 Compare response times - significant differences may indicate the application processes valid vs. invalid usernames differently (user enumeration via timing).
 
-Use `nuclei` to check for timing-related findings.
+check for timing-related findings.
 
 ## Payloads
 

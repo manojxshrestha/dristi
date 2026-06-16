@@ -213,7 +213,7 @@ Authorization: Bearer <token>
 
 Check if items or quantities can be changed after payment is completed.
 
-Use `nuclei` to check for payment-related findings.
+check for payment-related findings.
 
 ## Payloads
 

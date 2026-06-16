@@ -200,7 +200,7 @@ Once code injection is confirmed, use `curl` to demonstrate impact:
 3. Use `save to manual-review file` to save the proof-of-concept request
 4. Do NOT perform destructive actions
 
-Use `nuclei` to check if Burp has identified any code injection findings.
+check if Burp has identified any code injection findings.
 
 ## Payloads
 

@@ -177,7 +177,7 @@ Cloud storage services such as Amazon S3, Azure Blob Storage, and Google Cloud S
    - `.csv`, `.xlsx`, `.json` - Data exports
    - `.log` - Log files
    - `.zip`, `.tar.gz` - Archives
-2. Use `nuclei` to check for any cloud storage findings from Burp's scanner
+2. check for any cloud storage findings from Burp's scanner
 
 ## Payloads
 

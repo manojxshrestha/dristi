@@ -187,7 +187,7 @@ Content-Type: application/xml
 </search>
 ```
 
-Use `nuclei` to check if Burp's scanner has identified any XML-related vulnerabilities.
+check if Burp's scanner has identified any XML-related vulnerabilities.
 
 ## Payloads
 

@@ -116,7 +116,7 @@ HTTP Strict Transport Security (HSTS) is a security mechanism that instructs web
    Host: target.com
    ``
 2. Check for multiple `Strict-Transport-Security` headers in the response (conflicting headers may cause browser confusion)
-3. Use `nuclei` to check for any HSTS-related findings from Burp's scanner
+3. check for any HSTS-related findings from Burp's scanner
 
 ## Detection Criteria
 

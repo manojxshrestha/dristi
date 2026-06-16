@@ -214,9 +214,6 @@ aws ssm describe-parameters
 # SSRFire — automated SSRF scanner with cloud payloads
 python3 ssrfire.py -u "https://target.com/api/fetch?url=FUZZ"
 
-# Nuclei SSRF templates
-nuclei -u https://target.com -t ssrf/ -t cloud-metadata/
-
 # interactsh for OOB detection
 interactsh-client -v
 

@@ -54,7 +54,7 @@ PHASE_NAMES = {
 
 # Phase-to-tool mapping for filtering tool tracking
 PHASE_TOOLS = {
-    0: {"nmap", "katana", "ffuf", "httpx", "nuclei", "whatweb", "gau", "nikto", "feroxbuster", "wapiti", "subfinder", "arjun"},
+    0: {"nmap", "katana", "ffuf", "httpx", "whatweb", "gau", "nikto", "feroxbuster", "wapiti", "subfinder", "arjun"},
     2: {"corscanner", "dnsreaper"},
     3: {"hydra", "jwt_tool"},
     4: {"sqlmap", "dalfox", "commix", "sstimap", "ssrfmap", "nosqli", "crlfuzz", "smuggler"},

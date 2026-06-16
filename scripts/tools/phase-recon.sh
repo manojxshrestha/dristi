@@ -42,7 +42,7 @@ if ls "$CRAWL_DIR"/*.txt &>/dev/null 2>&1; then
   cp "$CRAWL_DIR/merged-crawl.txt" "$CRAWL_DIR/crawledurls.txt" 2>/dev/null || true
 fi
 
-# 4. Run full auto_recon.sh if it exists (handles the rest: params, nuclei, cariddi, dns, vhost, dirbust)
+# 4. Run full auto_recon.sh if it exists (handles the rest: params, cariddi, dns, vhost, dirbust)
 if [ -f "$SCRIPT_DIR/auto_recon.sh" ]; then
   log_info "Auto recon pipeline..."
   bash "$SCRIPT_DIR/auto_recon.sh" "$TARGET" --skip "" || log_warn "auto_recon had issues"

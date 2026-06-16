@@ -180,7 +180,7 @@ Application platform configuration testing evaluates whether the web server, app
    Host: target.com
    ``
 2. Check for Spring Boot Actuator endpoints that may expose configuration, environment variables, or heap dumps
-3. Use `nuclei` to check for any platform-related findings from Burp's active scanner
+3. check for any platform-related findings from Burp's active scanner
 
 ### Step 6: Review Platform Configuration Files
 

@@ -262,7 +262,7 @@ gh api "repos/$ORG/$REPO/releases" --jq '.[] | .assets[] | select(.name | test("
 gh api "repos/$ORG/$REPO/releases" --jq '.[] | .assets[] | select(.name | test("lock|deps"; "i")) | .browser_download_url'
 
 # Exact-version-pinned deps → known-CVE chaining
-# Compare versions to nuclei nvd templates or osv.dev for known vulns
+# Compare versions to nvd templates or osv.dev for known vulns
 curl -s "https://api.osv.dev/v1/query" -d '{"package": {"name": "lodash", "ecosystem": "npm"}, "version": "4.17.10"}'
 ```
 

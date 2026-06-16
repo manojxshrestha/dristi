@@ -117,7 +117,7 @@ Construct targeted search queries:
 | WAF bypass technique | Payload Playground / Forge | `Cloudflare WAF bypass XSS 2026 technique` |
 | Disclosed report precedent | HackerOne Hacktivity | `site:hackerone.com "account takeover" "$2000"` |
 | New payload technique | PortSwigger Academy | `portswigger.net <vuln-class> lab technique guide` |
-| Tool usage | ProjectDiscovery docs | `nuclei new templates 2026 graphql` |
+| Tool usage | ProjectDiscovery docs | `nuclei new templates 2026 graphql` — REMOVED from pipeline (bug bounty policy), use manual testing |
 
 ### Step 3: Execute Research
 

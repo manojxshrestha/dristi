@@ -12,7 +12,13 @@
 
 set -euo pipefail
 
-source "$(dirname "$0")/_env.sh"
+ENV_FILE="$(dirname "$0")/_env.sh"
+if [ -f "$ENV_FILE" ]; then
+  source "$ENV_FILE"
+else
+  echo "[-] _env.sh not found at $ENV_FILE" >&2
+  exit 1
+fi
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -23,8 +29,19 @@ log_err()  { echo -e "${RED}[-]${NC} $1" >&2; }
 log_warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 log_info() { echo -e "${CYAN}[*]${NC} $1"; }
 
-TARGET="${1:?Usage: $0 <domain> [--url <base-url>]}"
-BASE_URL="${3:-https://$TARGET}"
+if [ $# -lt 1 ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+  echo "Usage: $0 <domain> [--url <base-url>]"
+  exit 0
+fi
+
+TARGET="$1"
+BASE_URL="https://$TARGET"
+if [ "${2:-}" = "--url" ] && [ -n "${3:-}" ]; then
+  BASE_URL="$3"
+fi
+BASE_URL="${BASE_URL%/}"
+
+: "${RECON_BASE:?RECON_BASE not set}"
 
 OUT_DIR="${RECON_BASE}/$TARGET/directories"
 mkdir -p "$OUT_DIR"
@@ -38,14 +55,15 @@ export PATH="$HOME/go/bin:/usr/local/bin:$PATH"
 WORDLIST="$WORDLIST_DIR/raft-medium-directories.txt"
 if [ ! -f "$WORDLIST" ]; then
   log_info "Downloading directory wordlist from manojxshrestha/wordlists..."
-  wget -q "https://raw.githubusercontent.com/manojxshrestha/wordlists/refs/heads/main/Web-Content/raft-medium-directories.txt" -O "$WORDLIST"
+  wget -q "https://raw.githubusercontent.com/manojxshrestha/wordlists/main/Web-Content/raft-medium-directories.txt" -O "$WORDLIST"
   log_ok "Downloaded $(wc -l < "$WORDLIST" | tr -d ' ') entries"
 fi
 
 # ── Ensure ffuf is installed ────────────────────────────────────────
 if ! command -v ffuf &>/dev/null; then
-  log_err "ffuf not found. Install: go install github.com/ffuf/ffuf/v2@latest"
-  exit 1
+  log_warn "ffuf not found — skipping dir bruteforce (install: go install github.com/ffuf/ffuf/v2@latest)"
+  log_info "Use katana/gospider crawl output + hunt agents instead"
+  exit 0
 fi
 
 # ── Check robots.txt, sitemap.xml, etc. ─────────────────────────────
@@ -70,44 +88,36 @@ for path in "${COMMON_PATHS[@]}"; do
   fi
 done
 
-# ── Get baseline Content-Length for filtering ───────────────────────
-RAND_PATH="asdkfl3$RANDOM$RANDOM"
-BASELINE=$(curl -s -I "$BASE_URL/$RAND_PATH" 2>/dev/null \
-  | grep -i "Content-Length:" \
-  | awk '{print $2}' \
-  | tr -d '\r')
-
-BASELINE="${BASELINE:-0}"
-log_info "Baseline Content-Length: $BASELINE (non-existent path: /$RAND_PATH)"
-
 # ── Run ffuf directory bruteforce ───────────────────────────────────
 log_info "Directory bruteforcing $BASE_URL ..."
 log_info "  Wordlist: $WORDLIST ($(wc -l < "$WORDLIST" | tr -d ' ') entries)"
-log_info "  Filter: -fc 404,403 -fs 0,$BASELINE"
 
-ffuf -u "$BASE_URL/FUZZ" \
-     -w "$WORDLIST" \
-     -fc 404,403 \
-     -fs "0,$BASELINE" \
-     -ac \
-     -o "$OUT_DIR/ffuf_results.json" \
-     -of json \
-     -v 2>/dev/null
+ffuf \
+  -u "$BASE_URL/FUZZ" \
+  -w "$WORDLIST" \
+  -ac \
+  -o "$OUT_DIR/ffuf_results.json" \
+  -of json \
+  -v \
+  2>/dev/null || true
 
 # ── Parse results ───────────────────────────────────────────────────
 if [ -s "$OUT_DIR/ffuf_results.json" ]; then
-  python3 -c "
+  python3 <<EOF
 import json
-with open('$OUT_DIR/ffuf_results.json') as f:
+
+with open("$OUT_DIR/ffuf_results.json") as f:
     data = json.load(f)
-results = data.get('results', [])
+
+results = data.get("results", [])
 if results:
-    print(f'Found {len(results)} paths:')
-    for r in sorted(results, key=lambda x: x.get('status', 0)):
-        print(f\"  /{r.get('input', {}).get('FUZZ', '?')} -> {r.get('status')} ({r.get('length')} bytes)\")
+    print(f"Found {len(results)} paths:")
+    for r in sorted(results, key=lambda x: x.get("status", 0)):
+        word = r.get("input", {}).get("FUZZ", "?")
+        print(f"  /{word} -> {r.get('status')} ({r.get('length')} bytes)")
 else:
-    print('No paths discovered.')
-" | tee "$OUT_DIR/discovered_paths.txt"
+    print("No paths discovered.")
+EOF
 else
   log_warn "No results from ffuf"
 fi

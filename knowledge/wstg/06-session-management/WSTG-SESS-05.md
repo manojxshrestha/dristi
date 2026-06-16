@@ -132,7 +132,7 @@ Cross-Site Request Forgery (CSRF) attacks force an authenticated user to execute
    ``
    GET /api/delete-account?confirm=true HTTP/1.1
    ``
-4. Use `nuclei` to check if Burp's scanner has identified any CSRF vulnerabilities
+4. check if Burp's scanner has identified any CSRF vulnerabilities
 
 ## Payloads
 
