@@ -528,7 +528,7 @@ PHASE_TEST_REQUIREMENTS: dict[int, dict[str, Any]] = {
     },
 }
 
-PHASE_TOOL_REQUIREMENTS = {
+PHASE_TOOL_REQUIREMENTS: dict[int, dict[str, Any]] = {
     0: {
         "mandatory": [],
         "conditional": [],

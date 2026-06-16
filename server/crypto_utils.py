@@ -15,7 +15,7 @@ try:
     HAS_CRYPTO = True
 except ImportError:
     Fernet = None  # type: ignore[assignment]
-    InvalidToken = Exception
+    InvalidToken = Exception  # type: ignore[assignment,misc]
     HAS_CRYPTO = False
     raise ImportError("cryptography package is required. " "Install with: pip install dristi-server[encrypt] or pip install cryptography") from None
 

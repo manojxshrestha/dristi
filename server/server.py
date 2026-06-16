@@ -6343,7 +6343,7 @@ def main():
         starlette_app = mcp.sse_app()
         uvicorn.run(starlette_app, host=mcp.settings.host, port=mcp.settings.port, log_level=mcp.settings.log_level.lower())
     else:
-        mcp.run(transport=transport)
+        mcp.run(transport=transport)  # type: ignore[arg-type]
 
 
 if __name__ == "__main__":
