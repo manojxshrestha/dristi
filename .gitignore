@@ -41,3 +41,14 @@ venv/
 .wrangler/
 
 /recon/
+
+# Server test artifacts
+server/[0-9]*
+server/CANARY-REFLECTION
+server/E
+server/P
+server/EVILREFLECTMARKER123
+server/__NEXT_DATA__*
+server/import sys*
+server/"buildId"*
+server/csrf*
