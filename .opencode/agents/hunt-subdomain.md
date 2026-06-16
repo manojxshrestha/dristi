@@ -20,11 +20,12 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
 
 3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **Subdomain takeover technique**: Use `burp_create_repeater_tab()` to probe CNAME dangling DNS records. Use `burp_generate_collaborator_payload()` in NS delegation tests for DNS callback. Use `burp_send_to_intruder()` (Sniper) for subdomain brute with SecLists subdomain wordlists.
-4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
-5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-INFO-03")`
-6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-INFO-03", status="completed", notes=...)`
-7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
-8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
+4. **Playwright browser** — Use `playwright_browser_*` tools for active testing, SPA interaction, and PoC evidence. See [Browser Testing](../docs/browser-testing.md) for full reference.
+5. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
+6. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-INFO-03")`
+7. **Track coverage** → `track_test(engagement_id, test_id="WSTG-INFO-03", status="completed", notes=...)`
+8. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
+9. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
 ## Scope Notice
 
@@ -82,48 +83,48 @@ Subdomain takeover is high-value because it allows an attacker to serve content 
 
 ## Step-by-Step Hunting Methodology
 
-1. **Enumerate all subdomains** for the target using `subdomain_enum.sh`:
+2. **Enumerate all subdomains** for the target using `subdomain_enum.sh`:
    - `bash scripts/tools/subdomain_enum.sh target.com`
    - Also check Certificate transparency: `crt.sh/?q=%.target.com`
 
-2. **Resolve all subdomains** and flag those with:
+3. **Resolve all subdomains** and flag those with:
    - NXDOMAIN responses
    - CNAME pointing to a third-party provider
    ```bash
    cat subdomains.txt | dnsx -a -cname -o resolved.txt
    ```
 
-3. **Cross-reference CNAMEs** against known vulnerable provider fingerprints using `nuclei` or `subjack`:
+4. **Cross-reference CNAMEs** against known vulnerable provider fingerprints using `nuclei` or `subjack`:
    ```bash
    subjack -w subdomains.txt -t 100 -timeout 30 -ssl -c fingerprints.json
    nuclei -l subdomains.txt -t takeovers/
    ```
 
-4. **Manual verification** for each flagged subdomain:
+5. **Manual verification** for each flagged subdomain:
    - `dig CNAME subdomain.target.com` — confirm CNAME exists
    - `dig A <cname-target>` — confirm NXDOMAIN or no resolution
    - `curl -sk https://subdomain.target.com` — check for provider error string
 
-5. **Confirm claimability** — attempt to register the resource:
+6. **Confirm claimability** — attempt to register the resource:
    - GitHub Pages: check if `<username>.github.io/<repo>` or org page is unclaimed
    - GitLab Pages: check project namespace
    - S3: attempt `aws s3api create-bucket --bucket <bucketname>`
    - UserVoice/Zendesk/WordPress: visit registration URL
    - Fastly: check if origin hostname is unregistered
 
-6. **Claim the resource** (only enough to prove control — do NOT serve malicious content):
+7. **Claim the resource** (only enough to prove control — do NOT serve malicious content):
    - Create a minimal index page with your HackerOne username and a timestamp
    - Take screenshot showing your content served on `subdomain.target.com`
 
-7. **Document the chain**: CNAME record → provider target → unclaimed resource → your content
+8. **Document the chain**: CNAME record → provider target → unclaimed resource → your content
 
-8. **Assess impact escalation**:
+9. **Assess impact escalation**:
    - Does the subdomain appear in OAuth redirect allowlists?
    - Does it share cookies with parent domain (`domain=.target.com`)?
    - Is it referenced in the app's CSP?
    - Can it receive authenticated API calls?
 
-9. **Write report** before releasing the claim (some programs want to verify first)
+10. **Write report** before releasing the claim (some programs want to verify first)
 
 ---
 
@@ -186,19 +187,19 @@ dig CNAME sub.target.com
 
 ## Common Root Causes
 
-1. **Service offboarding without DNS cleanup** — Developer removes a Heroku app, UserVoice account, or WordPress site but never deletes the CNAME record. DNS lives forever; service does not.
+2. **Service offboarding without DNS cleanup** — Developer removes a Heroku app, UserVoice account, or WordPress site but never deletes the CNAME record. DNS lives forever; service does not.
 
-2. **Staging/preview infrastructure abandoned post-launch** — `course.`, `new.`, `preview.`, `beta.` subdomains provisioned for a product launch, pointed at a third-party, then forgotten when the campaign ends.
+3. **Staging/preview infrastructure abandoned post-launch** — `course.`, `new.`, `preview.`, `beta.` subdomains provisioned for a product launch, pointed at a third-party, then forgotten when the campaign ends.
 
-3. **Subdomain provisioned by a third-party team** — Marketing sets up a UserVoice or Zendesk subdomain via IT, product sunset kills it, but DNS is owned by engineering who doesn't know.
+4. **Subdomain provisioned by a third-party team** — Marketing sets up a UserVoice or Zendesk subdomain via IT, product sunset kills it, but DNS is owned by engineering who doesn't know.
 
-4. **CDN misconfiguration without origin validation** — Fastly and similar CDNs historically allowed any domain to "claim" a backend hostname by creating a service pointing to it. Unregistered origin hostnames become claimable.
+5. **CDN misconfiguration without origin validation** — Fastly and similar CDNs historically allowed any domain to "claim" a backend hostname by creating a service pointing to it. Unregistered origin hostnames become claimable.
 
-5. **GitHub/GitLab Pages namespace not reserved** — Organization renames, user accounts deleted, or repos made private/deleted while the Pages CNAME still points to the old namespace.
+6. **GitHub/GitLab Pages namespace not reserved** — Organization renames, user accounts deleted, or repos made private/deleted while the Pages CNAME still points to the old namespace.
 
-6. **Wildcard DNS entries** — `*.target.com` pointing to a cloud provider means *any* unclaimed subdomain potentially resolves to claimable infrastructure.
+7. **Wildcard DNS entries** — `*.target.com` pointing to a cloud provider means *any* unclaimed subdomain potentially resolves to claimable infrastructure.
 
-7. **Acquired/divested company DNS not cleaned** — Post-acquisition, former brand subdomains (like `oberlo.com` under Shopify) retain CNAMEs to services that are no longer paid for.
+8. **Acquired/divested company DNS not cleaned** — Post-acquisition, former brand subdomains (like `oberlo.com` under Shopify) retain CNAMEs to services that are no longer paid for.
 
 ---
 
@@ -229,13 +230,13 @@ dig CNAME sub.target.com
 
 ## Gate 0 Validation
 
-1. **What can the attacker DO right now?**
+2. **What can the attacker DO right now?**
    Can you register the unclaimed resource (GitHub repo, S3 bucket, Heroku app, UserVoice account) and serve arbitrary content — including phishing pages, credential harvesters, or malicious scripts — under the target's trusted domain name?
 
-2. **What does the victim LOSE?**
+3. **What does the victim LOSE?**
    Users lose trust and safety: they see a company-branded URL serving attacker content. The company loses brand integrity, potentially leaks session cookies if the subdomain is in `domain=.target.com` scope, and may have OAuth/SSO flows hijacked. Depending on CSP configuration, XSS against the main application may be possible.
 
-3. **Can it be reproduced in 10 minutes from scratch?**
+4. **Can it be reproduced in 10 minutes from scratch?**
    - `dig CNAME subdomain.target.com` → confirms CNAME to provider
    - `curl -sk https://subdomain.target.com` → confirms provider error string
    - Visit provider registration page → confirms namespace is available
@@ -262,25 +263,25 @@ An attacker finds `feedback.snapchat.com` CNAME pointing to a UserVoice subdomai
 
 The following real, verified bug-bounty / coordinated-disclosure cases extend this skill with **modern provider fingerprints** (Vercel/Azure cloudapp/Zendesk/Shopify era) and explicit ATO-chain examples.
 
-12. **Microsoft Azure DevOps — Two `cloudapp.azure.com` subdomains + wildcard `*.visualstudio.com` OAuth reply_to → 1-click ATO** ([Binary Security writeup](https://www.binarysecurity.no/posts/2022/11/azure-devops-takeover))
+13. **Microsoft Azure DevOps — Two `cloudapp.azure.com` subdomains + wildcard `*.visualstudio.com` OAuth reply_to → 1-click ATO** ([Binary Security writeup](https://www.binarysecurity.no/posts/2022/11/azure-devops-takeover))
     - Subclass: Azure `cloudapp.azure.com` regional-pool dangling CNAME — chained to ATO
     - ATO chain: **YES** — `app.vssps.visualstudio.com/_signin?reply_to=https://feedsprodwcus0dr.feeds.visualstudio.com/` whitelisted any `*.visualstudio.com`. Attacker claimed the dangling Azure VM hostnames, then crafted sign-in URLs that returned JWT + FedAuth tokens to attacker-controlled endpoints
     - Claim flow: identify dangling `cloudapp.azure.com` CNAME, deploy a free-tier VM in the same Azure region requesting the exact released hostname, Azure re-issues the name first-come-first-serve
     - Year: reported Feb 2021, disclosed Nov 2022 — MSRC explicitly out-of-scope (relied on subdomain takeover), $0
 
-13. **Anonymous H1 — `admin-support.xyz.com` → unclaimed Zendesk → email interception → ATO** ([Writeup by 0xprial](https://0xprial.com/the-art-of-zendesk-hijacking/))
+14. **Anonymous H1 — `admin-support.xyz.com` → unclaimed Zendesk → email interception → ATO** ([Writeup by 0xprial](https://0xprial.com/the-art-of-zendesk-hijacking/))
     - Subclass: Zendesk help-desk takeover via `xyzdocs.zendesk.com` host-mapping
     - ATO chain: **YES** — researcher configured email forwarding on the hijacked Zendesk instance, intercepted `support@xyz.com` tickets containing payment info + password-reset emails, then triggered password resets on customer accounts that delivered reset links into the attacker's Zendesk inbox
     - Claim flow: `dig CNAME` returns `xyzdocs.zendesk.com` (unregistered) → register free Zendesk trial → add `xyzdocs` as subdomain → enable host-mapping for `admin-support.xyz.com`
     - Year: 2023 — **$2,000** (Critical: $1,500 base + $500 chain bonus)
 
-14. **Sifchain — `proxies.sifchain.finance` → dead Vercel project** ([H1 #1487793](https://hackerone.com/reports/1487793))
+15. **Sifchain — `proxies.sifchain.finance` → dead Vercel project** ([H1 #1487793](https://hackerone.com/reports/1487793))
     - Subclass: Vercel dangling CNAME (`cname.vercel-dns.com`) after project deletion
     - Impact: crypto-DEX phishing — `proxies.` subdomain trusted for RPC proxy routing; attacker could serve malicious wallet-drain JS under a "trusted" subdomain
     - Claim flow: subdomain returns Vercel 404 `DEPLOYMENT_NOT_FOUND` → create free Vercel project → Settings → Domains → add `proxies.sifchain.finance` — Vercel verifies the existing CNAME and auto-issues TLS without out-of-band ownership proof
     - Year: 2022 — Sifchain treated as Critical (web3 phishing vector)
 
-15. **Anonymous H1 — `assets.target.com` → unclaimed Fastly service** ([Writeup](https://medium.com/@sohailahmed0x0/fastly-subdomain-takeover-leading-to-bounty-reward-5fff711d0518))
+16. **Anonymous H1 — `assets.target.com` → unclaimed Fastly service** ([Writeup](https://medium.com/@sohailahmed0x0/fastly-subdomain-takeover-leading-to-bounty-reward-5fff711d0518))
     - Subclass: Fastly CDN dangling origin/service hostname (modern 2025 confirmation)
     - Potential ATO chain: would chain to CSP-bypass + JS-injection if the parent domain trusts `assets.` for `script-src`
     - Claim flow: subdomain returns `Fastly error: unknown domain. Please check that this domain has been added to a service` → sign up for Fastly free trial → create new CDN service → attach `assets.target.com` as the service domain — Fastly accepts without out-of-band ownership proof
@@ -337,11 +338,11 @@ Subdomain takeover by itself is Low-Medium / Informational on most mature progra
 
 The five chains above are exhaustive in practice — virtually every senior-tier subdomain-takeover payout maps to one of them. Before reporting any takeover, run through the checklist:
 
-1. **OAuth `redirect_uri` allowlist** — does the taken-over host appear? → Chain 1, Critical.
-2. **Parent-domain cookies** — does the main app set `Domain=.target.com`? → Chain 2, High.
-3. **CSP `script-src`** — does the taken-over host appear in the allowlist? → Chain 3, Critical.
-4. **CORS allowlist** — does any regex match the taken-over host? → Chain 4, High.
-5. **Email DNS (DKIM selector / SPF include)** — does the taken-over host appear? → Chain 5, High.
+2. **OAuth `redirect_uri` allowlist** — does the taken-over host appear? → Chain 1, Critical.
+3. **Parent-domain cookies** — does the main app set `Domain=.target.com`? → Chain 2, High.
+4. **CSP `script-src`** — does the taken-over host appear in the allowlist? → Chain 3, Critical.
+5. **CORS allowlist** — does any regex match the taken-over host? → Chain 4, High.
+6. **Email DNS (DKIM selector / SPF include)** — does the taken-over host appear? → Chain 5, High.
 
 If none apply, file at Low/Informational. **Do not file at Critical without demonstrating one of these chains** — triagers downgrade fast otherwise.
 

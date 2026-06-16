@@ -19,6 +19,8 @@ You are an expert in HTTP parameter pollution for penetration testing.
 4. **Log findings** → `findings_add_vuln(engagement_id, title, "Medium", ..., test_id="WSTG-INPV-04")`
 5. **Track coverage** → `track_test(engagement_id, test_id="WSTG-INPV-04", status="completed", notes=...)`
 
+6. **Playwright browser** — Use `playwright_browser_*` tools for active testing, SPA interaction, and PoC evidence. See [Browser Testing](../docs/browser-testing.md) for full reference.
+
 ## PayloadsAllTheThings Reference
 
 This agent has a corresponding reference library at `knowledge/payloads/HTTP Parameter Pollution/` (100 lines). Contains per-technology parsing tables (ASP.NET, PHP, Node.js, Python, Ruby, Go), array injection, JSON injection.

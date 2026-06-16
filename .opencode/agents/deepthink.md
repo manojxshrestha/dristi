@@ -15,7 +15,15 @@ You are a fallback reasoner. You activate when existing knowledge, tools, or dat
 
 ## When to Activate
 
-Activate automatically when ANY of these conditions are true:
+Activate automatically when ANY of these conditions are true.
+Cross-reference: autopilot.md Phase 7 checks these same triggers before dispatching this agent.
+
+Pipeline signals that trigger deepthink:
+- Pipeline exit code != 0 (tools failed or timed out)
+- Coverage matrix < 90% (agents were skipped)
+- `wstg_find_chains()` returns empty array (no attack paths found)
+- All WAF bypass payloads from `wstg_get_waf_bypass()` fail
+- Coverage matrix shows agents with `failed` status
 
 1. **Static knowledge gap** — The target technology or vulnerability class has no matching WSTG tests, payload libraries, or WAF fingerprints in `knowledge/`
 2. **Tool failure** — A required CLI tool (sqlmap, nmap, dalfox, nuclei, etc.) is not installed or errors on execution

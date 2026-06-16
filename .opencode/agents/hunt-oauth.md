@@ -20,11 +20,13 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
 
 3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **OAuth technique**: Use `burp_send_to_intruder()` (Sniper) to manipulate `redirect_uri`, remove `state` parameter, and test open redirect chaining. Use `burp_generate_collaborator_payload()` for token capture via redirect URI pointing to collab. Use `burp_create_repeater_tab()` to manually test implicit flow token leakage via Referer.
-4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
-5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-ATHN-09")`
-6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-ATHN-09", status="completed", notes=...)`
-7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
-8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
+4. **Playwright browser — OAuth flow testing**: Use `playwright_browser_navigate` to the auth URL, then `playwright_browser_snapshot` to capture the redirect_uri, state param, and authorization code from the address bar. Use `playwright_browser_network_requests` to capture the token exchange. This is browser-only — curl cannot follow OAuth redirect chains. See [Browser Testing](../docs/browser-testing.md).
+
+5. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
+6. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-ATHN-09")`
+7. **Track coverage** → `track_test(engagement_id, test_id="WSTG-ATHN-09", status="completed", notes=...)`
+8. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
+9. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
 ## PayloadsAllTheThings Reference
 
@@ -115,50 +117,50 @@ intent://
 
 ## Step-by-Step Hunting Methodology
 
-1. **Enumerate all OAuth entry points**
+2. **Enumerate all OAuth entry points**
    - Spider the app for `/oauth`, `/connect`, `/auth`, `/login` paths
    - Check `.well-known/openid-configuration` and `.well-known/oauth-authorization-server`
    - Decompile mobile APKs: `apktool d app.apk` and grep for `redirect_uri`, `intent://`, deep link schemes
 
-2. **Map the full OAuth flow**
+3. **Map the full OAuth flow**
    - Capture the authorization request: note `client_id`, `redirect_uri`, `state`, `nonce`, `response_type`
    - Capture the callback: note where tokens/codes land, what validates state/nonce
 
-3. **Test `redirect_uri` validation (highest yield)**
+4. **Test `redirect_uri` validation (highest yield)**
    - Try exact host bypass: `redirect_uri=https://legit.com.evil.com`
    - Try path traversal: `redirect_uri=https://legit.com/callback/../../../evil`
    - Try open redirects on the legitimate domain first, then chain into OAuth
    - Try parameter pollution: `redirect_uri=https://legit.com&redirect_uri=https://evil.com`
    - Try encoded characters: `%2F`, `%40`, `%23` to confuse parsers
 
-4. **Test `state` parameter (CSRF)**
+5. **Test `state` parameter (CSRF)**
    - Remove `state` entirely — does the flow complete?
    - Reuse a fixed `state` value across sessions
    - Check if `state` is validated server-side or only client-side
 
-5. **Test `nonce` parameter (replay/bypass)**
+6. **Test `nonce` parameter (replay/bypass)**
    - Capture a nonce from one flow, attempt to replay it in another
    - Check if nonce is validated after token exchange
    - Test if nonce can be extracted via referrer leak (step 9)
 
-6. **Test authentication step completeness**
+7. **Test authentication step completeness**
    - For multi-step auth (e.g., email verification + OAuth): can you skip to `/oauth/token` directly?
    - Check if partial auth state (unverified email) is accepted by the token endpoint
 
-7. **Hunt referrer leakage**
+8. **Hunt referrer leakage**
    - After OAuth callback with tokens in URL fragment or query, check if any on-page resources (images, scripts, iframes) receive the full `Referer` header
    - Look specifically at language switchers, analytics calls, social share buttons triggered post-auth
 
-8. **Test mobile deep links**
+9. **Test mobile deep links**
    - For Android: craft malicious intent URIs that redirect the OAuth webview to attacker-controlled URLs
    - Check if deep link handlers validate the origin/host before loading
    - Test `push_notification_webview` patterns that accept arbitrary URLs
 
-9. **Test misconfigured client credentials**
+10. **Test misconfigured client credentials**
    - Check if `client_secret` appears in JS bundles or APK resources
    - Test if token endpoint accepts arbitrary `redirect_uri` values when combined with leaked `client_id`/`client_secret`
 
-10. **Verify and document**
+11. **Verify and document**
     - Confirm state is not validated → CSRF to account link
     - Confirm token lands on attacker domain → session theft
     - Confirm email verification skippable → auth bypass
@@ -256,21 +258,21 @@ curl https://target.com/.well-known/openid-configuration | python3 -m json.tool
 
 ## Common Root Causes
 
-1. **Weak `redirect_uri` validation** — developers whitelist by prefix (`startsWith`) rather than exact match, or whitelist an entire domain instead of specific paths. A sub-path open redirect on the same domain then becomes a full token theft primitive.
+2. **Weak `redirect_uri` validation** — developers whitelist by prefix (`startsWith`) rather than exact match, or whitelist an entire domain instead of specific paths. A sub-path open redirect on the same domain then becomes a full token theft primitive.
 
-2. **Missing or unvalidated `state` parameter** — developers implement OAuth by following basic tutorials that omit CSRF protection, or validate state client-side only in JavaScript (easily bypassed).
+3. **Missing or unvalidated `state` parameter** — developers implement OAuth by following basic tutorials that omit CSRF protection, or validate state client-side only in JavaScript (easily bypassed).
 
-3. **Nonce not validated post-exchange** — nonce is generated and sent in the request but never verified against the ID token after the code exchange, making replay attacks possible.
+4. **Nonce not validated post-exchange** — nonce is generated and sent in the request but never verified against the ID token after the code exchange, making replay attacks possible.
 
-4. **Authentication step ordering not enforced server-side** — teams implement multi-step auth (signup → email verify → OAuth grant) but don't enforce the sequence server-side. The token endpoint doesn't check completion of prerequisite steps.
+5. **Authentication step ordering not enforced server-side** — teams implement multi-step auth (signup → email verify → OAuth grant) but don't enforce the sequence server-side. The token endpoint doesn't check completion of prerequisite steps.
 
-5. **Token/code in URL with outbound requests on callback page** — developers land users on a callback page with tokens in the query string, then that page fires analytics, social share, or CDN requests that leak the full URL via `Referer` header.
+6. **Token/code in URL with outbound requests on callback page** — developers land users on a callback page with tokens in the query string, then that page fires analytics, social share, or CDN requests that leak the full URL via `Referer` header.
 
-6. **Mobile deep link handlers trust all input URLs** — Android/iOS developers build webview wrappers for push notification flows without validating that the loaded URL belongs to their own domain.
+7. **Mobile deep link handlers trust all input URLs** — Android/iOS developers build webview wrappers for push notification flows without validating that the loaded URL belongs to their own domain.
 
-7. **Misconfigured OAuth application registration** — developers register wildcard redirect URIs (`https://*.example.com/*`) or don't restrict them at all during development and forget to lock down for production.
+8. **Misconfigured OAuth application registration** — developers register wildcard redirect URIs (`https://*.example.com/*`) or don't restrict them at all during development and forget to lock down for production.
 
-8. **Client secrets embedded in mobile apps** — treating confidential client credentials as public, enabling an attacker with the secret to perform token requests with arbitrary redirect URIs.
+9. **Client secrets embedded in mobile apps** — treating confidential client credentials as public, enabling an attacker with the secret to perform token requests with arbitrary redirect URIs.
 
 ---
 
@@ -280,11 +282,11 @@ curl https://target.com/.well-known/openid-configuration | python3 -m json.tool
 
 If the server supports both PKCE and non-PKCE:
 
-1. Intercept authorization request that has `code_challenge` + `code_challenge_method`
-2. Remove both parameters from the request
-3. Proceed through auth flow
-4. At token exchange, omit `code_verifier`
-5. If token is issued → PKCE is optional → vulnerable
+2. Intercept authorization request that has `code_challenge` + `code_challenge_method`
+3. Remove both parameters from the request
+4. Proceed through auth flow
+5. At token exchange, omit `code_verifier`
+6. If token is issued → PKCE is optional → vulnerable
 
 ```bash
 # Original
@@ -406,61 +408,61 @@ The OAuth callback page for Facebook login lands users at a URL containing the `
 
 The following real, verified bug-bounty / coordinated-disclosure cases extend this skill beyond the original 10 internal references. Each is a distinct OAuth subclass with a working PoC documented in the cited writeup.
 
-11. **Semrush — IDN-homograph redirect_uri bypass** ([H1 #861940](https://hackerone.com/reports/861940))
+12. **Semrush — IDN-homograph redirect_uri bypass** ([H1 #861940](https://hackerone.com/reports/861940))
     - Subclass: `redirect_uri` bypass via Unicode-confusable host (homograph)
     - Payload: `redirect_uri=https://oauth.šemrush.com/cb` (punycode `xn--emrush-9jb.com`) — passed Latin-only string check on validator
     - Root cause: server validates `redirect_uri` host as ASCII-string equality but does not normalize Unicode → confusables → punycode before compare
     - Disclosure: 2020, public bounty (amount not disclosed); discoverer Yassine Aboukir
 
-12. **Bohemia Interactive — redirect_uri filter bypass (BiStudio)** ([H1 #405100](https://hackerone.com/reports/405100))
+13. **Bohemia Interactive — redirect_uri filter bypass (BiStudio)** ([H1 #405100](https://hackerone.com/reports/405100))
     - Subclass: `redirect_uri` validation bypass → OAuth token exfiltration
     - Payload: redirect_uri crafted to defeat the regex/prefix filter and land tokens on attacker host; reporter chained the bypass to a full token-leak PoC
     - Root cause: weak redirect_uri filter that accepted attacker-controlled host while still matching the intended pattern
     - Year: 2018-disclosed; remains a canonical example of regex-redirect_uri-bypass cited in subsequent reports
 
-13. **pixiv — path-traversal in OAuth `redirect_uri`** ([H1 #1861974](https://hackerone.com/reports/1861974))
+14. **pixiv — path-traversal in OAuth `redirect_uri`** ([H1 #1861974](https://hackerone.com/reports/1861974))
     - Subclass: path-traversal `redirect_uri` bypass → authorization-code leakage
     - Payload: `redirect_uri=https://legit.pixiv.host/legit/../../attacker/cb` — server normalized after validation
     - Root cause: validator inspected raw string; downstream HTTP/browser handled `../` traversal and emitted code to attacker path
     - Disclosure: 2023, **$2,000 bounty**, 244 upvotes — confirmed paid
 
-14. **Slack — OAuth2 redirect_uri bypass (domain-suffix)** ([H1 #2575](https://hackerone.com/reports/2575))
+15. **Slack — OAuth2 redirect_uri bypass (domain-suffix)** ([H1 #2575](https://hackerone.com/reports/2575))
     - Subclass: `redirect_uri` validation bypass via domain-suffix / subdomain confusion
     - Payload: redirect_uri using a domain that suffix-matched the registered host (e.g., `slack.com.attacker.com`) defeated the suffix-only check
     - Root cause: `endsWith()` / suffix-match instead of strict host equality
     - Disclosure: 2013 (foundational case still cited in modern OAuth training material) — Slack public bounty
 
-15. **Booking.com (Facebook social-login)** ([Salt Labs writeup](https://salt.security/blog/traveling-with-oauth-account-takeover-on-booking-com))
+16. **Booking.com (Facebook social-login)** ([Salt Labs writeup](https://salt.security/blog/traveling-with-oauth-account-takeover-on-booking-com))
     - Subclass: three-step chain — open-redirect on whitelisted domain + redirect_uri bypass + `response_type` swap → Facebook OAuth code/token theft → ATO
     - Payload: authorize URL with `redirect_uri=https://account.booking.com/<open-redirect>?next=https://attacker.tld/cb` and `response_type` toggled to leak tokens via fragment
     - Root cause: validator trusted any path under `account.booking.com`; open redirect on that host bounced the auth code to attacker
     - Disclosure: March 2023 — coordinated disclosure, no public bounty figure (~500M MAU exposure)
 
-16. **Expo.io (`expo-auth-session`) — CVE-2023-28131** ([Salt Labs writeup](https://salt.security/blog/a-new-oauth-vulnerability-that-may-impact-hundreds-of-online-services))
+17. **Expo.io (`expo-auth-session`) — CVE-2023-28131** ([Salt Labs writeup](https://salt.security/blog/a-new-oauth-vulnerability-that-may-impact-hundreds-of-online-services))
     - Subclass: scope-creep / unvalidated `returnUrl` parameter → cross-app OAuth-code theft (impacts every consumer of expo-auth-session social login)
     - Payload: attacker passes `returnUrl=https://attacker.tld` to the OAuth proxy → Expo blindly forwards Facebook/Google/Apple/Twitter code to attacker
     - Root cause: framework-level OAuth proxy did not validate `returnUrl` host before forwarding the social-IdP callback
     - Disclosure: May 2023; CVSS 9.6; fixed Feb 2023 hotfix + deprecated by Feb 26 2023
 
-17. **Microsoft Azure AD multi-tenant — "nOAuth"** ([Descope writeup](https://www.descope.com/blog/post/noauth))
+18. **Microsoft Azure AD multi-tenant — "nOAuth"** ([Descope writeup](https://www.descope.com/blog/post/noauth))
     - Subclass: cross-IdP account-takeover via unverified, mutable `email` claim ("Pass-The-Token" equivalent)
     - Payload: attacker sets Azure AD admin profile `mail` attribute to victim's address → clicks "Log in with Microsoft" on relying party that keys users by email claim → instant ATO
     - Root cause: Microsoft `email` claim is mutable + unverified; RPs treated it as primary identifier
     - Disclosure: April 11 2023 reported, fixed June 20 2023 (mitigations + new `xms_edov` claim)
 
-18. **Grammarly / Vidio / Bukalapak — "Pass-The-Token" social-login** ([Salt Labs writeup](https://salt.security/blog/oh-auth-abusing-oauth-to-take-over-millions-of-accounts))
+19. **Grammarly / Vidio / Bukalapak — "Pass-The-Token" social-login** ([Salt Labs writeup](https://salt.security/blog/oh-auth-abusing-oauth-to-take-over-millions-of-accounts))
     - Subclass: missing audience / `aud` validation on Facebook access_token → cross-client token replay → ATO
     - Payload: attacker obtains Facebook token issued for `attacker.app` → replays the token to Grammarly/Vidio/Bukalapak login API → server fetches FB user via `/me`, finds victim's email, issues victim session
     - Root cause: relying party calls Facebook `/me` with attacker-issued token but never validates the token's `app_id` belongs to the RP
     - Disclosure: October 2023 — coordinated, ~1B account exposure across the three sites
 
-19. **Zoom — OAuth "dirty dancing" chained ATO** ([Harel Security writeup](https://nokline.github.io/bugbounty/2024/06/07/Zoom-ATO.html))
+20. **Zoom — OAuth "dirty dancing" chained ATO** ([Harel Security writeup](https://nokline.github.io/bugbounty/2024/06/07/Zoom-ATO.html))
     - Subclass: `response_type=token` swap + lax `postMessage` origin check + cookie-tossing → authorization-code leak via web_message response mode → ATO + cam/mic hijack
     - Payload: attacker page opens Zoom OAuth with `response_type=code&response_mode=web_message`, intercepts the resulting `postMessage` because window listener accepts any `*.zoom.us` origin → exchanges code for session
     - Root cause: combination of weak postMessage origin check, missing CSRF binding on `state`, and `response_mode=web_message` returning code to a parent window without exact-origin enforcement
     - Disclosure: reported Oct 2023, fixed Jan 2024, **$15,000 bounty** (Sudi / BrunoZero / H4R3L)
 
-20. **Detectify Labs — "Dirty Dancing" multi-vendor OAuth token leakage** ([Detectify writeup, F. Rosén](https://labs.detectify.com/writeups/account-hijacking-using-dirty-dancing-in-sign-in-oauth-flows/))
+21. **Detectify Labs — "Dirty Dancing" multi-vendor OAuth token leakage** ([Detectify writeup, F. Rosén](https://labs.detectify.com/writeups/account-hijacking-using-dirty-dancing-in-sign-in-oauth-flows/))
     - Subclass: response-type switching + invalid-state quirks + 3rd-party JS gadget chains → OAuth code/token leakage with NO XSS required
     - Payload: attacker forces `response_type=token` on an endpoint that only validated `code`; combines with promiscuous postMessage listeners and URL-storage gadgets on the callback page to siphon tokens via cross-origin reads
     - Root cause: OAuth server tolerates response_type downgrade/swap; callback page leaks `window.location` via permissive postMessage receivers

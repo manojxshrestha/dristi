@@ -20,11 +20,12 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
 
 3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **SQLi technique**: Use `burp_send_to_intruder()` (Sniper) on params/cookies/headers with time-based (`SLEEP`, `pg_sleep`, `WAITFOR DELAY`), error-based, and UNION SELECT payloads. Use `burp_generate_collaborator_payload()` for blind OOB via `xp_dirtree('//COLLAB')` or `COPY ... FROM PROGRAM`. Use Hackvertor XML hex-encoding for WAF bypass.
-4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
-5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-INPV-05, WSTG-INPV-06")`
-6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-INPV-05, WSTG-INPV-06", status="completed", notes=...)`
-7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
-8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
+4. **Playwright browser** — Use `playwright_browser_*` tools for active testing, SPA interaction, and PoC evidence. See [Browser Testing](../docs/browser-testing.md) for full reference.
+5. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
+6. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-INPV-05, WSTG-INPV-06")`
+7. **Track coverage** → `track_test(engagement_id, test_id="WSTG-INPV-05, WSTG-INPV-06", status="completed", notes=...)`
+8. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
+9. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
 ## PayloadsAllTheThings Reference
 
@@ -110,40 +111,40 @@ axios.get('/report?from=' + startDate + '&to=' + endDate)
 
 ## Step-by-Step Hunting Methodology
 
-1. **Enumerate all input vectors** — Use Burp Suite passive scan during normal app usage. Capture every parameter: GET, POST, JSON body, HTTP headers (User-Agent, Referer, X-Forwarded-For), cookies, path segments.
+2. **Enumerate all input vectors** — Use Burp Suite passive scan during normal app usage. Capture every parameter: GET, POST, JSON body, HTTP headers (User-Agent, Referer, X-Forwarded-For), cookies, path segments.
 
-2. **Identify the tech stack** — Check response headers, error messages, job postings, Wappalyzer, BuiltWith. Determines which payloads to prioritize (MySQL vs PostgreSQL vs MongoDB).
+3. **Identify the tech stack** — Check response headers, error messages, job postings, Wappalyzer, BuiltWith. Determines which payloads to prioritize (MySQL vs PostgreSQL vs MongoDB).
 
-3. **Baseline the response** — Note normal response length, status code, and response time for a clean request. This is your diff baseline.
+4. **Baseline the response** — Note normal response length, status code, and response time for a clean request. This is your diff baseline.
 
-4. **Send error-based probes** — Inject single quote `'`, double quote `"`, backtick `` ` ``, and observe for:
+5. **Send error-based probes** — Inject single quote `'`, double quote `"`, backtick `` ` ``, and observe for:
    - Database error messages (immediate confirmation)
    - Response length change
    - HTTP 500 errors
 
-5. **Test boolean-based blind** — Send true/false conditions and compare responses:
+6. **Test boolean-based blind** — Send true/false conditions and compare responses:
    - `param=1 AND 1=1` vs `param=1 AND 1=2`
    - If responses differ → likely injectable
 
-6. **Test time-based blind** — When no visible difference exists:
+7. **Test time-based blind** — When no visible difference exists:
    - MySQL: `param=1 AND SLEEP(5)`
    - PostgreSQL: `param=1; SELECT pg_sleep(5)--`
    - MSSQL: `param=1; WAITFOR DELAY '0:0:5'--`
    - Measure response time delta > 5 seconds = confirmed
 
-7. **For NoSQL (MongoDB)** — Test object injection via JSON body and PHP-style array params:
+8. **For NoSQL (MongoDB)** — Test object injection via JSON body and PHP-style array params:
    - Replace string value with `{"$gt": ""}` in JSON
    - Try `param[$ne]=invalid` in query strings
 
-8. **Automate confirmation** — Run `sqlmap` on confirmed candidates with `--level=3 --risk=2` to enumerate databases without manual effort.
+9. **Automate confirmation** — Run `sqlmap` on confirmed candidates with `--level=3 --risk=2` to enumerate databases without manual effort.
 
-9. **Escalate impact** — Attempt:
+10. **Escalate impact** — Attempt:
    - `UNION`-based extraction (enumerate columns first)
    - `INFORMATION_SCHEMA` dump
    - File read/write (`LOAD_FILE`, `INTO OUTFILE`) if permissions allow
    - Stacked queries for RCE (MSSQL `xp_cmdshell`)
 
-10. **Document the full chain** — Capture Burp repeater request/response, sqlmap output, and proof of data extraction (non-sensitive fields only for report).
+11. **Document the full chain** — Capture Burp repeater request/response, sqlmap output, and proof of data extraction (non-sensitive fields only for report).
 
 ---
 
@@ -260,23 +261,23 @@ sqlmap -u "https://target.com/admin/report" --cookie="session=TOKEN" --dbs --bat
 
 ## Common Root Causes
 
-1. **String concatenation instead of parameterized queries** — The #1 root cause. Developers build SQL strings with user input directly: `"SELECT * FROM items WHERE id=" + userId`.
+2. **String concatenation instead of parameterized queries** — The #1 root cause. Developers build SQL strings with user input directly: `"SELECT * FROM items WHERE id=" + userId`.
 
-2. **ORMs bypassed for "performance"** — Developer switches from safe ORM to raw query for complex joins or reports: `db.query("SELECT " + userColumn + " FROM table")`.
+3. **ORMs bypassed for "performance"** — Developer switches from safe ORM to raw query for complex joins or reports: `db.query("SELECT " + userColumn + " FROM table")`.
 
-3. **Search/filter functionality** — Sorting and filtering logic is notoriously hard to parameterize (column names can't be bound), leading to allowlist bypasses or no protection at all.
+4. **Search/filter functionality** — Sorting and filtering logic is notoriously hard to parameterize (column names can't be bound), leading to allowlist bypasses or no protection at all.
 
-4. **Third-party plugin/library vulnerabilities** — Developers trust installed plugins (WordPress, Joomla extensions) without auditing their query logic (Uber's Huge IT Video Gallery case).
+5. **Third-party plugin/library vulnerabilities** — Developers trust installed plugins (WordPress, Joomla extensions) without auditing their query logic (Uber's Huge IT Video Gallery case).
 
-5. **Legacy codebases** — Old PHP 4/5 code predating PDO/MySQLi prepared statements, still running in production on acquired assets or regional subdomains.
+6. **Legacy codebases** — Old PHP 4/5 code predating PDO/MySQLi prepared statements, still running in production on acquired assets or regional subdomains.
 
-6. **Internal tools promoted to external** — Tools like Apache Airflow were designed for internal use with minimal security hardening, then exposed to authenticated external users.
+7. **Internal tools promoted to external** — Tools like Apache Airflow were designed for internal use with minimal security hardening, then exposed to authenticated external users.
 
-7. **NoSQL false sense of security** — Developers believe "we use MongoDB so no SQL injection" and skip input validation entirely, enabling object/operator injection.
+8. **NoSQL false sense of security** — Developers believe "we use MongoDB so no SQL injection" and skip input validation entirely, enabling object/operator injection.
 
-8. **Insufficient escaping of ORDER BY / GROUP BY** — These clauses cannot use bound parameters, so developers escape manually (and often incorrectly).
+9. **Insufficient escaping of ORDER BY / GROUP BY** — These clauses cannot use bound parameters, so developers escape manually (and often incorrectly).
 
-9. **HTTP header and non-obvious inputs** — `User-Agent`, `Referer`, `X-Forwarded-For` stored in DB without sanitization, assuming they're "trusted" server-side values.
+10. **HTTP header and non-obvious inputs** — `User-Agent`, `Referer`, `X-Forwarded-For` stored in DB without sanitization, assuming they're "trusted" server-side values.
 
 ---
 
@@ -403,25 +404,25 @@ Apache Airflow's web interface, deployed for workflow orchestration and accessib
 
 The following real, verified bug-bounty / CVE / coordinated-disclosure cases extend this skill with **modern** (2021-2024) examples emphasising NoSQL and ORM-bypass — the two SQLi families most under-represented in older bundles.
 
-9. **Rocket.Chat — Pre-auth blind NoSQL injection in `getPasswordPolicy` (CVE-2021-22911)** ([H1 #1130721](https://hackerone.com/reports/1130721) · [Sonar writeup](https://www.sonarsource.com/blog/nosql-injections-in-rocket-chat/))
+10. **Rocket.Chat — Pre-auth blind NoSQL injection in `getPasswordPolicy` (CVE-2021-22911)** ([H1 #1130721](https://hackerone.com/reports/1130721) · [Sonar writeup](https://www.sonarsource.com/blog/nosql-injections-in-rocket-chat/))
     - Subclass: NoSQL injection (MongoDB `$regex` operator) — pre-auth
     - Payload (Meteor DDP method call): `{"msg":"method","method":"getPasswordPolicy","params":[{"token":{"$regex":"^a"}}]}` — brute-force password-reset token character-by-character via response-time/boolean side-channel, then chain to admin password reset → RCE via integrations
     - Root cause: Meteor `methods` accepted raw object selectors; `getPasswordPolicy` did not validate that `token` was a string before passing it to Mongo `findOne`
     - Year: 2021 — H1 private bounty paired with CVE-2021-22911
 
-10. **Mongoose ORM — `$where` injection via `populate({match})` (CVE-2024-53900 + CVE-2025-23061)** ([GHSA-m7xq-9374-9rvx](https://github.com/advisories/GHSA-m7xq-9374-9rvx))
+11. **Mongoose ORM — `$where` injection via `populate({match})` (CVE-2024-53900 + CVE-2025-23061)** ([GHSA-m7xq-9374-9rvx](https://github.com/advisories/GHSA-m7xq-9374-9rvx))
     - Subclass: NoSQL injection — ORM raw-operator bypass (Mongoose Node.js)
     - Payload: `Model.find().populate({path:'author', match:{$where:"sleep(5000) || true"}})` — attacker-controlled JSON forwarded into `populate({match})` reached MongoDB `$where`, executing arbitrary server-side JavaScript → blind exfil + DoS
     - Root cause: Mongoose < 8.8.3 did not strip `$where` inside `match` filters; developers assumed ORM-level safety
     - Year: 2024 — reported via the Mongoose project / GitHub Security Lab IBB
 
-11. **Django — `QuerySet.values()` JSONField SQL Injection (CVE-2024-42005)** ([H1 #2646493](https://hackerone.com/reports/2646493) · [Commit](https://github.com/django/django/commit/c87bfaacf8fb84984243b5055dc70f97996cb115))
+12. **Django — `QuerySet.values()` JSONField SQL Injection (CVE-2024-42005)** ([H1 #2646493](https://hackerone.com/reports/2646493) · [Commit](https://github.com/django/django/commit/c87bfaacf8fb84984243b5055dc70f97996cb115))
     - Subclass: ORM raw-fragment SQLi (Django ORM — column-alias injection)
     - Payload: `Item.objects.values('data__"); DROP TABLE x;--')` — a crafted JSON-path key (passed as `*args` from a request parameter) was used as a SQL column alias without escaping; `.values()` emitted `SELECT (data->>'…') AS "…"; DROP TABLE x;--"`
     - Root cause: Django emitted unquoted column aliases derived from user-supplied JSONField key strings; assumed alias values were always developer-controlled
     - Year: 2024 — CVSS 9.8, reported by Eyal Gabay (EyalSec) through Django's HackerOne program → IBB award
 
-12. **Mozilla — Boolean-based blind SQLi on `mozilla.social` invite endpoint** ([H1 #2209130](https://hackerone.com/reports/2209130))
+13. **Mozilla — Boolean-based blind SQLi on `mozilla.social` invite endpoint** ([H1 #2209130](https://hackerone.com/reports/2209130))
     - Subclass: boolean-based blind SQLi on an authentication-adjacent endpoint
     - Payload: `POST /invite {"code":"abc' AND (SELECT COUNT(*) FROM information_schema.tables)>0--"}` — boolean differentiation between "invalid code" and "code accepted, redirect issued" allowed schema/table enumeration on the OIDC proxy Postgres backend
     - Root cause: invite-code lookup built a raw SQL string against the proxy's Postgres DB; developers assumed the code was short/opaque and skipped parameter binding

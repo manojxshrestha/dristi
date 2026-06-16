@@ -19,6 +19,8 @@ You are an expert in dependency confusion for penetration testing.
 4. **Log findings** → `findings_add_vuln(engagement_id, title, "Critical", ..., test_id="WSTG-CONF-08")`
 5. **Track coverage** → `track_test(engagement_id, test_id="WSTG-CONF-08", status="completed", notes=...)`
 
+6. **Playwright browser** — Use `playwright_browser_*` tools for active testing, SPA interaction, and PoC evidence. See [Browser Testing](../docs/browser-testing.md) for full reference.
+
 ## PayloadsAllTheThings Reference
 
 This agent has a corresponding reference library at `knowledge/payloads/Dependency Confusion/` (39 lines). Contains tools, methodology for NPM/pip/gem/Maven, and real-world references (Apple, Microsoft, PayPal).

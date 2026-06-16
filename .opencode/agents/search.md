@@ -15,7 +15,15 @@ You are a fallback researcher. You activate when the static `knowledge/` data is
 
 ## When to Activate
 
-Activate automatically when ANY of these conditions are true:
+Activate automatically when ANY of these conditions are true.
+Cross-reference: autopilot.md Phase 9 checks these same triggers before dispatching this agent.
+
+Pipeline signals that trigger search:
+- Tech stack identified but no CVEs checked (e.g. Spring Boot, Rocketlane Java)
+- Critical/High findings lack disclosed report reference for severity justification
+- >80% of injected payloads returned no reflection/error/timing change
+- All WAF bypass techniques exhausted for any vulnerability class
+- Target uses technology not in local knowledge base (e.g. MCP servers, custom frameworks)
 
 1. **Stale payloads** — Payloads in `knowledge/payloads/` or `waf_bypasses.json` fail against the target
 2. **Missing CVE** — Target uses software version X.Y but no CVE info exists in local data

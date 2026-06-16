@@ -20,11 +20,13 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
 
 3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **Business logic technique**: Use `burp_create_repeater_tab()` for manual multi-step workflow manipulation (pricing, currency, quantity). Use `burp_send_to_intruder()` (Pitchfork) for coupon/loyalty abuse and negative number injection. Compare responses in Organizer via `burp_get_organizer_items()`.
-4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
-5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="BUSL-01 through BUSL-10 (Business Logic)")`
-6. **Track coverage** → `track_test(engagement_id, test_id="BUSL-01 through BUSL-10 (Business Logic)", status="completed", notes=...)`
-7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
-8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
+4. **Playwright browser — multi-step workflow testing**: Use `playwright_browser_navigate` + `playwright_browser_fill_form` + `playwright_browser_click` to walk through multi-step business workflows (checkout, onboarding, subscription changes). Use `playwright_browser_snapshot` after each step to verify state mutations. Business logic flaws often require session state across steps that curl cannot maintain. See [Browser Testing](../docs/browser-testing.md).
+
+5. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
+6. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="BUSL-01 through BUSL-10 (Business Logic)")`
+7. **Track coverage** → `track_test(engagement_id, test_id="BUSL-01 through BUSL-10 (Business Logic)", status="completed", notes=...)`
+8. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
+9. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
 ## PayloadsAllTheThings Reference
 
@@ -88,19 +90,19 @@ Asset types that pay: checkout flows, subscription endpoints, callback/verificat
 
 ## Step-by-Step Hunting Methodology
 
-1. **Map all authentication boundaries.** Spider the target. Identify pages/endpoints that serve authenticated content (employee portals, premium features, order pages) and test each unauthenticated. Look for internal pages indexed in JS bundles or linked from robots.txt/sitemap.xml.
+2. **Map all authentication boundaries.** Spider the target. Identify pages/endpoints that serve authenticated content (employee portals, premium features, order pages) and test each unauthenticated. Look for internal pages indexed in JS bundles or linked from robots.txt/sitemap.xml.
 
-2. **Identify every verification flow.** Enumerate: email verification, phone/SMS verification, payment verification, CAPTCHA, age gates. For each, test: what happens if you skip the verification step entirely? What happens if you replay a valid token on a different account?
+3. **Identify every verification flow.** Enumerate: email verification, phone/SMS verification, payment verification, CAPTCHA, age gates. For each, test: what happens if you skip the verification step entirely? What happens if you replay a valid token on a different account?
 
-3. **Test rate-limiting controls on every form.** For every POST endpoint (subscribe, login, OTP, search), send 50+ rapid requests. Vary: remove cookies, rotate `X-Forwarded-For` / `X-Real-IP` headers, change `User-Agent`. Check if the server uses IP from headers rather than connection IP.
+4. **Test rate-limiting controls on every form.** For every POST endpoint (subscribe, login, OTP, search), send 50+ rapid requests. Vary: remove cookies, rotate `X-Forwarded-For` / `X-Real-IP` headers, change `User-Agent`. Check if the server uses IP from headers rather than connection IP.
 
-4. **Intercept and tamper with payment flows.** Use Burp Suite to intercept every request between your browser, the application, and the payment provider. Identify where price, currency, order ID, or status fields are set. Attempt to modify amounts to $0.01 or currency to a low-value currency. Look for POST-back/webhook endpoints that accept payment confirmation — test if they validate HMAC/signature.
+5. **Intercept and tamper with payment flows.** Use Burp Suite to intercept every request between your browser, the application, and the payment provider. Identify where price, currency, order ID, or status fields are set. Attempt to modify amounts to $0.01 or currency to a low-value currency. Look for POST-back/webhook endpoints that accept payment confirmation — test if they validate HMAC/signature.
 
-5. **Test phone/callback number verification.** Whenever a platform accepts a callback number, test: can you set it to a number you don't own? Does the platform call/text that number and grant trust based solely on submission? Try setting it to a victim's number.
+6. **Test phone/callback number verification.** Whenever a platform accepts a callback number, test: can you set it to a number you don't own? Does the platform call/text that number and grant trust based solely on submission? Try setting it to a victim's number.
 
-6. **Check for unprotected employee/internal surfaces.** Search Shodan, GitHub, JS bundles, and Wayback Machine for internal subdomain/path references. Test access without authentication. Check if these surfaces allow order placement, data access, or privilege escalation.
+7. **Check for unprotected employee/internal surfaces.** Search Shodan, GitHub, JS bundles, and Wayback Machine for internal subdomain/path references. Test access without authentication. Check if these surfaces allow order placement, data access, or privilege escalation.
 
-7. **Validate business impact.** For each finding, determine: does this result in financial loss, unauthorized access, or data exposure? Document the end-to-end chain.
+8. **Validate business impact.** For each finding, determine: does this result in financial loss, unauthorized access, or data exposure? Document the end-to-end chain.
 
 ---
 
@@ -171,19 +173,19 @@ grep -iE "x-forwarded-for|x-real-ip|cf-connecting-ip" src/ -r
 
 ## Common Root Causes
 
-1. **Server trusts client-supplied data for financial decisions.** Developers offload price calculation to the frontend or pass amount fields through forms/URLs without re-validating on the server against a canonical source (the product database).
+2. **Server trusts client-supplied data for financial decisions.** Developers offload price calculation to the frontend or pass amount fields through forms/URLs without re-validating on the server against a canonical source (the product database).
 
-2. **Verification is enforced only in the UI, not the API.** Frontend hides features behind a verification gate, but the backend API endpoints are fully functional without a verified status — any authenticated request succeeds.
+3. **Verification is enforced only in the UI, not the API.** Frontend hides features behind a verification gate, but the backend API endpoints are fully functional without a verified status — any authenticated request succeeds.
 
-3. **IP-based rate limiting reads from spoofable headers.** Developers implement rate limits using `request.headers['X-Forwarded-For']` instead of the actual connection IP, allowing trivial bypass by header manipulation.
+4. **IP-based rate limiting reads from spoofable headers.** Developers implement rate limits using `request.headers['X-Forwarded-For']` instead of the actual connection IP, allowing trivial bypass by header manipulation.
 
-4. **Payment webhooks lack signature validation.** Developers implement "success" webhooks without verifying the HMAC signature provided by the payment provider, allowing anyone to POST a fake success notification.
+5. **Payment webhooks lack signature validation.** Developers implement "success" webhooks without verifying the HMAC signature provided by the payment provider, allowing anyone to POST a fake success notification.
 
-5. **Internal/employee pages aren't access-controlled.** Internal tools are deployed to production domains without authentication middleware, either because developers assume obscurity (unlisted URL) or forgot to apply auth to a new route.
+6. **Internal/employee pages aren't access-controlled.** Internal tools are deployed to production domains without authentication middleware, either because developers assume obscurity (unlisted URL) or forgot to apply auth to a new route.
 
-6. **Phone/callback verification is advisory, not enforced.** Systems accept a phone number and grant trust to whoever submitted it, without confirming the submitter owns or controls that number.
+7. **Phone/callback verification is advisory, not enforced.** Systems accept a phone number and grant trust to whoever submitted it, without confirming the submitter owns or controls that number.
 
-7. **Draft/channel-specific storefronts inherit full order functionality.** Platforms like Shopify allow creating storefronts for specific channels (employee events) that are unlisted but still fully functional for order placement if the URL is known.
+8. **Draft/channel-specific storefronts inherit full order functionality.** Platforms like Shopify allow creating storefronts for specific channels (employee events) that are unlisted but still fully functional for order placement if the URL is known.
 
 ---
 
@@ -205,13 +207,13 @@ grep -iE "x-forwarded-for|x-real-ip|cf-connecting-ip" src/ -r
 
 Before writing any report, answer all three:
 
-1. **What can the attacker DO right now?**
+2. **What can the attacker DO right now?**
    Be specific: "An unauthenticated user can place an order for physical goods at $0 cost" or "An attacker can bypass email verification and monitor any email address without owning it" or "An attacker can send unlimited subscription emails to any address." Vague impact = reject.
 
-2. **What does the victim LOSE?**
+3. **What does the victim LOSE?**
    Identify a concrete, attributable loss: financial loss (free goods, fraudulent payments), privacy loss (phone number spoofed, unauthorized monitoring), service abuse (spam campaigns via rate-limit bypass), or security degradation (unverified identity trusted for sensitive actions). If the loss is purely theoretical, re-evaluate severity.
 
-3. **Can it be reproduced in 10 minutes from scratch?**
+4. **Can it be reproduced in 10 minutes from scratch?**
    Create a fresh account (or use no account). Follow your documented steps. Achieve the impact. If you can't reliably reproduce it end-to-end in under 10 minutes with the steps you've written, your methodology is incomplete — refine before submitting.
 
 ---
@@ -233,31 +235,31 @@ A breach-monitoring service required email verification before enabling monitori
 
 The following real, verified bug-bounty / coordinated-disclosure cases extend this skill. All five share a measurable financial-impact angle (actual $ loss demonstrated or quantifiable platform-wide exposure).
 
-8. **Stripe — Fee discount race redemption** ([H1 #1849626](https://hackerone.com/reports/1849626))
+9. **Stripe — Fee discount race redemption** ([H1 #1849626](https://hackerone.com/reports/1849626))
     - Subclass: coupon/discount race-multi-redemption + financial primitive
     - Payload: Stripe Support applied a one-time $20,000 fee-credit. Researcher captured the "accept-discount" POST and replayed it 30× in parallel via Burp Turbo Intruder, each acceptance crediting the account anew
     - Root cause: idempotency missing on discount-acceptance endpoint; no unique constraint on (account_id, discount_id)
     - Year: 2023 — **$5,000**, $600,000 of fee-free transactions accrued before fix (~$18,000 real Stripe loss at 3% take rate)
 
-9. **Reverb.com — Gift-card race multi-redemption** ([H1 #759247](https://hackerone.com/reports/759247))
+10. **Reverb.com — Gift-card race multi-redemption** ([H1 #759247](https://hackerone.com/reports/759247))
     - Subclass: gift-card / store-credit race-redemption
     - Payload: single valid gift card, parallel-POST to `/redeem` from 10 sockets via Turbo Intruder. Balance credits N× the face value
     - Root cause: no row-level lock on gift_card table; balance debit and credit live in separate transactions
     - Year: 2019 — **$1,500**
 
-10. **Upserve / OLO — Negative-quantity price manipulation** ([H1 #364843](https://hackerone.com/reports/364843))
+11. **Upserve / OLO — Negative-quantity price manipulation** ([H1 #364843](https://hackerone.com/reports/364843))
     - Subclass: negative-quantity-in-cart price tampering
     - Payload: `POST /api/order {"items":[{"id":1,"qty":1,"price":50},{"id":2,"qty":-3,"price":50}]}` — order total computes to `-$100`, floors to ~$0 at payment capture, food still fulfills
     - Root cause: server multiplies `qty * price` with no `qty >= 1` guard
     - Year: 2018 — textbook citation for the subclass (acknowledged-only program)
 
-11. **Krisp — Pay-less-per-seat via PUT tampering** ([H1 #1446090](https://hackerone.com/reports/1446090))
+12. **Krisp — Pay-less-per-seat via PUT tampering** ([H1 #1446090](https://hackerone.com/reports/1446090))
     - Subclass: price-per-unit mass-assignment / quantity-discount manipulation
     - Payload: `PUT /v2/seats` body includes a server-trusted `price` field. Set `price=1` instead of $60. Subscription updates, billing engine charges $1/seat for 100 seats
     - Root cause: server reads price from request body instead of looking it up by plan_id; classic mass-assignment
     - Year: 2021 — Stripe-billed SaaS pricing exposure
 
-12. **Stripe — Pay using archived price via mid-flow swap** ([H1 #1328278](https://hackerone.com/reports/1328278))
+13. **Stripe — Pay using archived price via mid-flow swap** ([H1 #1328278](https://hackerone.com/reports/1328278))
     - Subclass: cart-state TOCTOU / cancel-then-deliver (price-version race at checkout)
     - Payload: merchant archives an old price (e.g., $5 instead of new $50). Buyer starts checkout via the new payment-link, then mid-flow swaps `price_id` back to the archived one. Stripe charges $5; subscription provisions at the new tier
     - Root cause: payment-link validates "is active", price object validates "exists" — but the join "price.active AND price ∈ link.allowed_prices" is missing

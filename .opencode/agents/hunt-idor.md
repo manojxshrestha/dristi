@@ -20,11 +20,12 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
 
 3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **IDOR technique**: Use `burp_send_to_intruder()` (Pitchfork) with sequential integer and UUID payloads on path/body/query IDs. Compare responses in Organizer via `burp_get_organizer_items()` for data access differences. Use `burp_create_repeater_tab()` for multi-tenant boundary testing.
-4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
-5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-ATHZ-01")`
-6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-ATHZ-01", status="completed", notes=...)`
-7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
-8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
+4. **Playwright browser** — Use `playwright_browser_*` tools for active testing, SPA interaction, and PoC evidence. See [Browser Testing](../docs/browser-testing.md) for full reference.
+5. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
+6. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-ATHZ-01")`
+7. **Track coverage** → `track_test(engagement_id, test_id="WSTG-ATHZ-01", status="completed", notes=...)`
+8. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
+9. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
 ## PayloadsAllTheThings Reference
 
@@ -113,51 +114,51 @@ state.currentUser.organizationId
 
 ## Step-by-Step Hunting Methodology
 
-1. **Map all object references in the application**
+2. **Map all object references in the application**
    - Browse every feature authenticated as User A
    - Capture all requests in Burp Suite
    - Filter for requests containing: `id=`, `_id=`, `uuid=`, `/v1/{noun}/{id}`, query params with numeric/UUID values
 
-2. **Enumerate ID types**
+3. **Enumerate ID types**
    - Sequential integers → enumerate ±1, ±100
    - UUIDs → check if they appear in other responses or JS files
    - Hashed IDs → check if leaked in public endpoints, metadata, or GraphQL introspection
 
-3. **Create two separate accounts (same privilege level)**
+4. **Create two separate accounts (same privilege level)**
    - User A: resource owner
    - User B: attacker account
    - Log all IDs belonging to User A while authenticated as User A
 
-4. **Replay User A's resource IDs as User B**
+5. **Replay User A's resource IDs as User B**
    - Replace session cookie/token with User B's credentials
    - Send identical requests referencing User A's object IDs
    - Test ALL HTTP verbs: GET, POST, PUT, PATCH, DELETE on each endpoint
 
-5. **Test cross-tenant/cross-org scenarios**
+6. **Test cross-tenant/cross-org scenarios**
    - Create accounts in separate organizations/businesses
    - Test if Org B's session can reference Org A's IDs
    - Pay special attention to admin/management endpoints
 
-6. **Test GraphQL specifically**
+7. **Test GraphQL specifically**
    - Run introspection: `{ __schema { queryType { fields { name } } } }`
    - For every query/mutation taking an `id` argument, substitute another user's ID
    - Test both queries (read) and mutations (write/delete)
 
-7. **Test write/destructive operations, not just reads**
+8. **Test write/destructive operations, not just reads**
    - Can User B DELETE User A's resources?
    - Can User B MODIFY User A's content?
    - Can User B ADD themselves to User A's account?
 
-8. **Chain IDORs together**
+9. **Chain IDORs together**
    - Use one IDOR's leaked data (org IDs, user IDs) to fuel the next
    - IDOR → leaked ID → second IDOR → privilege escalation
 
-9. **Test state-changing edge cases**
+10. **Test state-changing edge cases**
    - Expired tokens/invites that can still be accepted
    - Race conditions on resource IDs
    - Indirect references: `?sort=id` or `?filter[user_id]=`
 
-10. **Document the exact differential**
+11. **Document the exact differential**
     - Confirm User B has NO legitimate access to User A's resource
     - Screenshot/log the 200 OK vs expected 403/404
 
@@ -252,7 +253,7 @@ done
 
 ## Common Root Causes
 
-1. **Missing ownership check in ORM queries**
+2. **Missing ownership check in ORM queries**
    ```javascript
    // VULNERABLE: fetches any record
    const invoice = await Invoice.findById(req.params.id);
@@ -261,30 +262,30 @@ done
    const invoice = await Invoice.findOne({ _id: req.params.id, userId: req.user.id });
    ```
 
-2. **Authorization at the route level, not object level**
+3. **Authorization at the route level, not object level**
    - Developer checks "is user logged in?" but not "does this user own this object?"
    - Middleware confirms authentication; individual handlers skip ownership validation
 
-3. **Trusting client-supplied IDs in request bodies**
+4. **Trusting client-supplied IDs in request bodies**
    - Mobile apps or SPAs send `org_id` in POST body; server uses it directly without verifying caller belongs to that org
 
-4. **GraphQL resolvers without field-level authorization**
+5. **GraphQL resolvers without field-level authorization**
    - Query resolvers fetch by ID from database without checking if the requesting user has permission
    - Especially common when resolvers are auto-generated from schema
 
-5. **Inconsistent authorization across HTTP verbs**
+6. **Inconsistent authorization across HTTP verbs**
    - GET endpoint is protected; POST/DELETE on same resource path is not
    - Common in APIs built incrementally by different developers
 
-6. **Indirect references exposed via related objects**
+7. **Indirect references exposed via related objects**
    - Object A (accessible) contains a reference to Object B (should be private)
    - Developer only protects direct access to B, not indirect references through A
 
-7. **Race conditions and state-based IDORs**
+8. **Race conditions and state-based IDORs**
    - Authorization checked at creation time, not at access time
    - Invites/tokens remain valid after the granting permission is revoked
 
-8. **Multi-tenant isolation failures**
+9. **Multi-tenant isolation failures**
    - Developers implement per-user access control but forget cross-org boundaries
    - `user_id` check present; `org_id` / `tenant_id` check absent
 
@@ -326,13 +327,13 @@ done
 
 Before writing the report, answer all three:
 
-1. **What can the attacker DO right now?**
+2. **What can the attacker DO right now?**
    Be specific: "Attacker with a valid account can send a GET request to `/api/v1/invoices/{victim_invoice_id}` and receive the victim's full billing document including name, address, and payment amount — without any relationship to that account."
 
-2. **What does the victim LOSE?**
+3. **What does the victim LOSE?**
    Map to CIA triad: confidentiality (data exposed), integrity (data modified), or availability (data deleted). "Victim loses confidentiality of private financial records" or "Victim's content is deleted by a third party" — vague answers fail.
 
-3. **Can it be reproduced in 10 minutes from scratch?**
+4. **Can it be reproduced in 10 minutes from scratch?**
    - Two fresh accounts created ✓
    - Exact HTTP request documented with victim's ID ✓
    - 200 OK response showing victim's data (or confirmed state change) ✓

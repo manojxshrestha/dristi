@@ -17,6 +17,7 @@ permission:
 2. **ALWAYS use scripts/tools/ wrappers.** Never invoke tool binaries directly (arjun, ffuf, nuclei, etc.). Use `bash scripts/tools/<name>.sh <target>` instead.
 3. **NO independent recon.** Do not re-run subdomain enum, crawl, or nuclei. Use the `endpoint_map_ranked` deliverable from Phase 5.
 4. **NEVER install wordlists.** `/usr/share/seclists/` or similar may not exist. Use scripts/tools/ which handle wordlist paths correctly.
+5. **Playwright browser FIRST** — For OAuth flows, SPA testing, and PoC evidence, use `playwright_browser_*` tools before falling back to curl/Burp. See [Browser Testing](../docs/browser-testing.md) for full reference and per-class usage.
 
 Coordinate specialized `@hunt-*` subagents based on surface findings.
 

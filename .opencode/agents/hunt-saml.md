@@ -20,11 +20,12 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
 
 3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **SAML technique**: Use `burp_create_repeater_tab()` for XML signature wrapping, assertion injection, and comment-injection in SAML responses. Use `burp_send_to_intruder()` (Sniper) for ReplayAttack with old assertions. Use `burp_base64_decode()` on SAMLResponse before editing, then `burp_base64_encode()` after.
-4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
-5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="ATHN-10 (SAML)")`
-6. **Track coverage** → `track_test(engagement_id, test_id="ATHN-10 (SAML)", status="completed", notes=...)`
-7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
-8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
+4. **Playwright browser** — Use `playwright_browser_*` tools for active testing, SPA interaction, and PoC evidence. See [Browser Testing](../docs/browser-testing.md) for full reference.
+5. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
+6. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="ATHN-10 (SAML)")`
+7. **Track coverage** → `track_test(engagement_id, test_id="ATHN-10 (SAML)", status="completed", notes=...)`
+8. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
+9. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
 ## PayloadsAllTheThings Reference
 
@@ -89,11 +90,11 @@ cat runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/$TARGET/urls.
 
 ### Attack 3: Signature Stripping
 ```
-1. Decode SAMLResponse: echo "BASE64" | base64 -d | xmllint --format - > saml.xml
-2. Delete the entire <Signature> element
-3. Change NameID to admin@company.com
-4. Re-encode: cat saml.xml | gzip | base64 -w0 (or just base64 -w0)
-5. Submit — if server doesn't verify signature presence = admin ATO
+2. Decode SAMLResponse: echo "BASE64" | base64 -d | xmllint --format - > saml.xml
+3. Delete the entire <Signature> element
+4. Change NameID to admin@company.com
+5. Re-encode: cat saml.xml | gzip | base64 -w0 (or just base64 -w0)
+6. Submit — if server doesn't verify signature presence = admin ATO
 ```
 
 ### Attack 4: XXE in SAML Assertion

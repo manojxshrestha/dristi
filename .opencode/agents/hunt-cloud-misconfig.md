@@ -20,11 +20,12 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
 
 3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **Cloud misconfig technique**: Use `burp_create_repeater_tab()` to probe S3/Azure Blob/GCP bucket listing, open cloud storage URLs, and cloud metadata endpoints (`169.254.169.254`). Use `burp_send_to_intruder()` (Sniper) for bucket name enumeration.
-4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
-5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="CONF-10 (Cloud Config)")`
-6. **Track coverage** → `track_test(engagement_id, test_id="CONF-10 (Cloud Config)", status="completed", notes=...)`
-7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
-8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
+4. **Playwright browser** — Use `playwright_browser_*` tools for active testing, SPA interaction, and PoC evidence. See [Browser Testing](../docs/browser-testing.md) for full reference.
+5. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
+6. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="CONF-10 (Cloud Config)")`
+7. **Track coverage** → `track_test(engagement_id, test_id="CONF-10 (Cloud Config)", status="completed", notes=...)`
+8. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
+9. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
 ## Scope Notice
 
@@ -198,13 +199,13 @@ No CVE assigned specifically to AWS RUM as of 2026-05. The attack class is docum
 
 ### Validation checklist (before reporting)
 
-1. Extract `identityPoolId` from page source.
-2. Confirm pool allows unauth identities (`get-id` succeeds without auth).
-3. Confirm `get-credentials-for-identity` returns STS creds.
-4. Run `aws sts get-caller-identity` and **screenshot the role ARN**.
-5. Run `enumerate-iam` / Pacu `iam__enum_permissions` — capture **at least one allowed action beyond `rum:PutRumEvents`**. Without this, the finding is Informational.
-6. Demonstrate at least one read/list against a real resource (S3 bucket list, DynamoDB scan, Lambda invoke).
-7. **Do not** modify/delete data even if permitted — read-only PoC only.
+2. Extract `identityPoolId` from page source.
+3. Confirm pool allows unauth identities (`get-id` succeeds without auth).
+4. Confirm `get-credentials-for-identity` returns STS creds.
+5. Run `aws sts get-caller-identity` and **screenshot the role ARN**.
+6. Run `enumerate-iam` / Pacu `iam__enum_permissions` — capture **at least one allowed action beyond `rum:PutRumEvents`**. Without this, the finding is Informational.
+7. Demonstrate at least one read/list against a real resource (S3 bucket list, DynamoDB scan, Lambda invoke).
+8. **Do not** modify/delete data even if permitted — read-only PoC only.
 
 ---
 

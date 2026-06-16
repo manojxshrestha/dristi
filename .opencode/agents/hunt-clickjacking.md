@@ -19,6 +19,8 @@ You are an expert in clickjacking for penetration testing.
 4. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-CLNT-09")`
 5. **Track coverage** → `track_test(engagement_id, test_id="WSTG-CLNT-09", status="completed", notes=...)`
 
+6. **Playwright browser — iframe PoC**: Create an HTML page with the target in an iframe (e.g. `<iframe src="https://target.com/action" style="opacity:0;position:absolute;top:0;left:0;width:100%;height:100%">`). Navigate to the PoC page via `playwright_browser_navigate`, then `playwright_browser_take_screenshot` showing the iframe overlay. Use `playwright_browser_evaluate("window.frames[0].document.body.innerHTML")` to confirm the target rendered inside the iframe. See [Browser Testing](../docs/browser-testing.md).
+
 ## PayloadsAllTheThings Reference
 
 This agent has a corresponding reference library at `knowledge/payloads/Clickjacking/` (256 lines). Contains methodology on UI redressing, invisible frames, button/form hijacking, framebusting bypass, and XSS filter evasion.

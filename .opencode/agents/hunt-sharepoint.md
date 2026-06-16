@@ -20,11 +20,12 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
 
 3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **SharePoint technique**: Use `burp_create_repeater_tab()` for web part manipulation, ViewState deserialization, and workflow abuse. Use `burp_send_to_intruder()` (Sniper) for `/_layouts/`, `/_vti_pvt/`, and `/SitePages/` path enumeration. Use `burp_base64_decode()` on ViewState to inspect serialized payload.
-4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
-5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="CONF-04 (SharePoint)")`
-6. **Track coverage** → `track_test(engagement_id, test_id="CONF-04 (SharePoint)", status="completed", notes=...)`
-7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
-8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
+4. **Playwright browser** — Use `playwright_browser_*` tools for active testing, SPA interaction, and PoC evidence. See [Browser Testing](../docs/browser-testing.md) for full reference.
+5. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
+6. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="CONF-04 (SharePoint)")`
+7. **Track coverage** → `track_test(engagement_id, test_id="CONF-04 (SharePoint)", status="completed", notes=...)`
+8. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
+9. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
 ## Scope Notice
 
@@ -39,9 +40,9 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 
 SharePoint Server (on-prem) is one of the richest enterprise attack surfaces in 2025-2026 bug bounty / red-team work. Three forces converge:
 
-1. **End-of-life unpatched code paths.** SharePoint Server 2013 reached extended-support EoL on 2023-04-11 (final build `15.0.5545.1000` / KB5002381). Every SharePoint CVE published after that date is **permanently unpatched** on SP2013 farms. SP2016 reaches EoL 2026-07-14; SP2019 reaches EoL 2026-07-14 (next 2 months as of May 2026); only SP Subscription Edition is currently in active support.
-2. **CVE-2025-53770 / 53771 "ToolShell"** — July 2025 emergency-out-of-band patch chain for SPE / SP2019 / SP2016. The vulnerable code path (anonymous `/_layouts/15/ToolPane.aspx?DisplayMode=Edit` + anonymous `__REQUESTDIGEST` + unencrypted ViewState) is present in **SP2013 too** and will never receive a fix.
-3. **Custom branded login pages forget legacy SOAP login.** `/_vti_bin/Authentication.asmx` with the `Login` SOAP op is the SharePoint equivalent of WordPress XMLRPC bypass — accepts native Forms credentials anonymously with no rate limit on most farms even when the branded UI has lockout.
+2. **End-of-life unpatched code paths.** SharePoint Server 2013 reached extended-support EoL on 2023-04-11 (final build `15.0.5545.1000` / KB5002381). Every SharePoint CVE published after that date is **permanently unpatched** on SP2013 farms. SP2016 reaches EoL 2026-07-14; SP2019 reaches EoL 2026-07-14 (next 2 months as of May 2026); only SP Subscription Edition is currently in active support.
+3. **CVE-2025-53770 / 53771 "ToolShell"** — July 2025 emergency-out-of-band patch chain for SPE / SP2019 / SP2016. The vulnerable code path (anonymous `/_layouts/15/ToolPane.aspx?DisplayMode=Edit` + anonymous `__REQUESTDIGEST` + unencrypted ViewState) is present in **SP2013 too** and will never receive a fix.
+4. **Custom branded login pages forget legacy SOAP login.** `/_vti_bin/Authentication.asmx` with the `Login` SOAP op is the SharePoint equivalent of WordPress XMLRPC bypass — accepts native Forms credentials anonymously with no rate limit on most farms even when the branded UI has lockout.
 
 **Highest-value SharePoint targets:**
 
@@ -128,7 +129,7 @@ HelpWindowKey('WSSEndUser_troubleshooting                  (anonymous error.aspx
 
 ## Step-by-Step Hunting Methodology
 
-1. **Fingerprint the SharePoint version.** Build number leaks anonymously through several paths. Map the result to the CVE matrix immediately.
+2. **Fingerprint the SharePoint version.** Build number leaks anonymously through several paths. Map the result to the CVE matrix immediately.
 
    ```bash
    # Method 1: _vti_inf.html (always anonymous, always present)
@@ -154,7 +155,7 @@ HelpWindowKey('WSSEndUser_troubleshooting                  (anonymous error.aspx
    | `16.0.10416.x` | SP2016 | EoL 2026-07-14 | depends on patch level |
    | `16.0.10417.x+` | SP2019 / SE | active | check Microsoft's monthly Patch Tuesday |
 
-2. **Anonymous-endpoint matrix probe.** Walk every endpoint in the table below in one pass. Anything anonymous becomes part of the attack chain.
+3. **Anonymous-endpoint matrix probe.** Walk every endpoint in the table below in one pass. Anything anonymous becomes part of the attack chain.
 
    ```
    /_vti_inf.html                                          → version disclosure
@@ -180,7 +181,7 @@ HelpWindowKey('WSSEndUser_troubleshooting                  (anonymous error.aspx
    /_api/web/CurrentUser                                   → 401 anon BUT WWW-Authenticate: NTLM leaks AD info (see hunt-ntlm-info)
    ```
 
-3. **Legacy SOAP login bypass via Authentication.asmx.** Cross-reference `auth-bypass-hunter` Legacy-Protocol Matrix. The standard probe:
+4. **Legacy SOAP login bypass via Authentication.asmx.** Cross-reference `auth-bypass-hunter` Legacy-Protocol Matrix. The standard probe:
 
    ```bash
    # First: confirm Mode = Forms (else this attack vector is N/A)
@@ -198,7 +199,7 @@ HelpWindowKey('WSSEndUser_troubleshooting                  (anonymous error.aspx
 
    **Severity:** Critical when anonymous + no rate limit + no lockout. Submit as bug-bounty even before demonstrating successful auth — the *unbounded credential validation* is the bug, not "I cracked X credential."
 
-4. **ToolShell precondition chain probe** (CVE-2025-53770 class). Three sub-requests:
+5. **ToolShell precondition chain probe** (CVE-2025-53770 class). Three sub-requests:
 
    ```bash
    # Sub-step a: anonymous GET on ToolPane.aspx
@@ -223,7 +224,7 @@ HelpWindowKey('WSSEndUser_troubleshooting                  (anonymous error.aspx
 
    **IMPORTANT:** Do NOT actually deliver a malicious ViewState payload. The precondition chain is sufficient evidence for the report. Public exploits (`ysoserial.net`, etc.) require `<machineKey>` recovery as a separate primitive.
 
-5. **NTLM Type-2 AD topology disclosure.** Cross-reference `ntlm-hunter` for full methodology. Quick check:
+6. **NTLM Type-2 AD topology disclosure.** Cross-reference `ntlm-hunter` for full methodology. Quick check:
 
    ```bash
    # Use Burp send_http1_request with keep-alive, or Python raw socket
@@ -234,7 +235,7 @@ HelpWindowKey('WSSEndUser_troubleshooting                  (anonymous error.aspx
 
    **Severity:** Medium when chained with internet exposure + default `WIN-XXXXXXXXXXX` hostname; Informational otherwise.
 
-6. **SafeControl enumeration via Picker.aspx.** Picker.aspx differentiates two error states by class existence:
+7. **SafeControl enumeration via Picker.aspx.** Picker.aspx differentiates two error states by class existence:
    - Type EXISTS but not whitelisted: `"Only PickerDialog types can be used with the dialog. The type should be configured as a safecontrol in this site."`
    - Type DOES NOT exist: `"Could not load type '<Class>' from assembly 'Microsoft.SharePoint, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c'."`
 
@@ -251,7 +252,7 @@ HelpWindowKey('WSSEndUser_troubleshooting                  (anonymous error.aspx
    done
    ```
 
-7. **`download.aspx` is NOT outbound SSRF — recognize and don't waste time.** SP's `/_layouts/15/download.aspx?SourceUrl=` is an **SP-internal path resolver**, not a generic URL fetcher. Behaviours:
+8. **`download.aspx` is NOT outbound SSRF — recognize and don't waste time.** SP's `/_layouts/15/download.aspx?SourceUrl=` is an **SP-internal path resolver**, not a generic URL fetcher. Behaviours:
    - External URL (`http://evil.example.com/x`) → 500 with `"The Web application at <URL> could not be found"` — server tried to resolve as an SP web app, didn't fetch.
    - Same-origin file URL → 500 with `"<nativehr>0x81070211</nativehr>...Cannot open file '<path>'"` — server tried SPFile.OpenBinary, file not found.
    - Files matching the extension blocklist (`.ashx`, `.asmx`, `.svc`, `.config`) → 500 with `"file blocked from this Web site by the server administrators"` regardless of whether the file exists.
@@ -261,7 +262,7 @@ HelpWindowKey('WSSEndUser_troubleshooting                  (anonymous error.aspx
 
    The extension blocklist also looks like a "file-existence oracle" (existing vs not-found returns different responses) but it's actually just the SP file-extension policy. Don't infer file presence from the blocklist response.
 
-8. **Custom-branding module enumeration.** Customer-customised SP installations almost always have a `/_layouts/15/<CustomerName>/` directory tree. Find the name from the login URL (e.g. `/_layouts/15/<CustomerName>/pages/login/customlogin.aspx` → customer name is `<CustomerName>`). Then probe:
+9. **Custom-branding module enumeration.** Customer-customised SP installations almost always have a `/_layouts/15/<CustomerName>/` directory tree. Find the name from the login URL (e.g. `/_layouts/15/<CustomerName>/pages/login/customlogin.aspx` → customer name is `<CustomerName>`). Then probe:
 
    ```bash
    for sub in pages Pages js Js JS css scripts handlers controls images config data services api; do
@@ -273,9 +274,9 @@ HelpWindowKey('WSSEndUser_troubleshooting                  (anonymous error.aspx
 
    JS bundles often contain hardcoded endpoint URLs, hidden routes, internal API paths. Pull each with proper `Referer` header (some are referer-gated).
 
-9. **Search service probe.** `/_api/Search` returns a small JSON descriptor anonymously. `/_api/search/query?querytext='X'` returns 500 with stack trace if the Search Service Application is not running — useful infra disclosure but not directly exploitable.
+10. **Search service probe.** `/_api/Search` returns a small JSON descriptor anonymously. `/_api/search/query?querytext='X'` returns 500 with stack trace if the Search Service Application is not running — useful infra disclosure but not directly exploitable.
 
-10. **Authenticated post-login surfaces** (if you have valid credentials):
+11. **Authenticated post-login surfaces** (if you have valid credentials):
     - `/_api/web/Lists` — enumerate lists
     - `/_api/web/SiteUsers` — enumerate users
     - `/_api/web/getfolderbyserverrelativeurl('/Shared Documents')/Files` — file enumeration
@@ -360,25 +361,25 @@ curl -sk "https://target.example/_layouts/15/Picker.aspx?PickerDialogType=Micros
 
 ## Common Root Causes
 
-1. **`/_vti_bin/Authentication.asmx` left enabled on the public-zone IIS binding.** SharePoint admins enable Forms auth on a custom login UI and don't realise the legacy SOAP Login endpoint is independently reachable.
+2. **`/_vti_bin/Authentication.asmx` left enabled on the public-zone IIS binding.** SharePoint admins enable Forms auth on a custom login UI and don't realise the legacy SOAP Login endpoint is independently reachable.
 
-2. **`viewStateEncryption="Auto"` on layouts pages.** SharePoint's default ViewState mode signs-only for pages without sensitive form fields. Pages like ToolPane.aspx have `__VIEWSTATEENCRYPTED=""` — exploitable if machineKey leaks.
+3. **`viewStateEncryption="Auto"` on layouts pages.** SharePoint's default ViewState mode signs-only for pages without sensitive form fields. Pages like ToolPane.aspx have `__VIEWSTATEENCRYPTED=""` — exploitable if machineKey leaks.
 
-3. **`/_api/contextinfo` POST accessible anonymously.** SharePoint Online and SPE 2024-07+ require auth on contextinfo. Earlier versions and most SP2013 farms allow anonymous POST → FormDigest token returned with 1800s validity. This is the second ToolShell precondition.
+4. **`/_api/contextinfo` POST accessible anonymously.** SharePoint Online and SPE 2024-07+ require auth on contextinfo. Earlier versions and most SP2013 farms allow anonymous POST → FormDigest token returned with 1800s validity. This is the second ToolShell precondition.
 
-4. **NTLM enabled on public-zone IIS binding.** Default dual-auth (Forms + NTLM) leaves NTLM Negotiate available to anonymous internet users. Type-2 challenge leaks AD topology.
+5. **NTLM enabled on public-zone IIS binding.** Default dual-auth (Forms + NTLM) leaves NTLM Negotiate available to anonymous internet users. Type-2 challenge leaks AD topology.
 
-5. **SP2013 farms past EoL still internet-exposed.** Microsoft extended support ended 2023-04-11. Every post-April-2023 SharePoint CVE is unpatched. Common in enterprise integrator scenarios (system-integrator inside corporate-parent AD, SI-managed dealer portals).
+6. **SP2013 farms past EoL still internet-exposed.** Microsoft extended support ended 2023-04-11. Every post-April-2023 SharePoint CVE is unpatched. Common in enterprise integrator scenarios (system-integrator inside corporate-parent AD, SI-managed dealer portals).
 
-6. **`<SafeControl>` whitelist in web.config trusted as the only gate.** Picker.aspx enforces an `instanceof PickerDialog` check, which is patched against the original CVE-2019-0604 vector — but the underlying SafeControl model itself is anonymously enumerable via the Picker.aspx error differential.
+7. **`<SafeControl>` whitelist in web.config trusted as the only gate.** Picker.aspx enforces an `instanceof PickerDialog` check, which is patched against the original CVE-2019-0604 vector — but the underlying SafeControl model itself is anonymously enumerable via the Picker.aspx error differential.
 
-7. **AWS ELB + SP IIS without explicit Transfer-Encoding normalization.** Default ELB forwards `Transfer-Encoding` to back-end IIS; IIS interprets `Content-Length` when both are present in a way that desyncs from ELB. Multiple TE-obfuscation variants bypass simple WAF rules.
+8. **AWS ELB + SP IIS without explicit Transfer-Encoding normalization.** Default ELB forwards `Transfer-Encoding` to back-end IIS; IIS interprets `Content-Length` when both are present in a way that desyncs from ELB. Multiple TE-obfuscation variants bypass simple WAF rules.
 
-8. **Default Windows-installer hostname (`WIN-XXXXXXXXXXX`) never renamed.** Signal of rushed provisioning; correlates with default service-account passwords on SQL backend, default farm-account passwords on Central Admin, etc.
+9. **Default Windows-installer hostname (`WIN-XXXXXXXXXXX`) never renamed.** Signal of rushed provisioning; correlates with default service-account passwords on SQL backend, default farm-account passwords on Central Admin, etc.
 
-9. **Custom-branding module (`/_layouts/15/<Customer>/`) JS bundles loaded with `?v=YYYYMMDD` query strings.** The query string reveals last-modified date — useful for "this app is actively maintained" vs "this app is abandoned" determination.
+10. **Custom-branding module (`/_layouts/15/<Customer>/`) JS bundles loaded with `?v=YYYYMMDD` query strings.** The query string reveals last-modified date — useful for "this app is actively maintained" vs "this app is abandoned" determination.
 
-10. **Cross-node ViewState MAC failures when AWS ELB doesn't pin session affinity to one WFE.** Operationally broken (users hit 500s on every POST); security-wise broadcasts farm topology in error messages.
+11. **Cross-node ViewState MAC failures when AWS ELB doesn't pin session affinity to one WFE.** Operationally broken (users hit 500s on every POST); security-wise broadcasts farm topology in error messages.
 
 ---
 
@@ -404,19 +405,19 @@ curl -sk "https://target.example/_layouts/15/Picker.aspx?PickerDialogType=Micros
 
 Before writing the report:
 
-1. **What can the attacker DO right now?**
+2. **What can the attacker DO right now?**
    - Authentication.asmx anonymous + no rate limit → **Critical** (unbounded credential validation; password spray + UPN format from NTLM = end-to-end ATO path)
    - Full ToolShell precondition chain (anon GET + anon FormDigest + anon POST + unencrypted VS) + EoL SP2013 → **Critical** (RCE via well-documented public exploit chain, no patch will ship)
    - NTLM Type-2 AD topology disclosure + default-Windows hostname → **Medium**
    - SP2013 EoL alone → **Medium-Low** (compliance / hygiene; bug-bounty programs vary — some accept, many reject)
    - `download.aspx` URL echo without confirmed Collaborator callback → **NOT SSRF — retract**
 
-2. **Have you reproduced the full chain to attacker-attainable impact?**
+3. **Have you reproduced the full chain to attacker-attainable impact?**
    - For Authentication.asmx: 10-burst test with uniform timing (proves no rate limit) is sufficient. Don't actually crack a credential.
    - For ToolShell: precondition chain (steps a+b+c) is sufficient. Don't deliver a malicious payload.
    - For NTLM: AV-pair decode showing AD-topology fields is sufficient.
 
-3. **Can you reproduce in <10 minutes from a clean shell?**
+4. **Can you reproduce in <10 minutes from a clean shell?**
    - Authentication.asmx: 2 curl commands.
    - ToolShell precondition: 3 curl commands.
    - NTLM Type-2: 1 Python snippet (the AV-pair decoder).
@@ -431,9 +432,9 @@ Target: `https://target-portal.example/` — SharePoint Server 2013 build `15.0.
 
 11 findings shipped: 3 Critical, 2 Medium, 6 Low/Info. The three Criticals:
 
-1. **Authentication.asmx anonymous credential brute-force** — 10-burst test showed uniform 0.6-0.9 s timing with no rate limit, no lockout, no CAPTCHA, no MFA challenge. Identical 431-byte responses.
-2. **HTTP request smuggling TE.CL** — 5/5 trials showed 12.18 s back-end hang vs 0.16 s baseline. 4 additional obfuscation variants (space-before-colon, trailing-space, lowercase, mixed-case) showed 6.16 s hang — each bypassing simple WAF rules.
-3. **ToolShell precondition chain** — anonymous GET ToolPane.aspx (200) + anonymous POST `/_api/contextinfo` (200, valid FormDigest) + anonymous POST ToolPane.aspx with digest (200, no auth challenge) + `__VIEWSTATEENCRYPTED=""`. Permanent zero-day on EoL SP2013.
+2. **Authentication.asmx anonymous credential brute-force** — 10-burst test showed uniform 0.6-0.9 s timing with no rate limit, no lockout, no CAPTCHA, no MFA challenge. Identical 431-byte responses.
+3. **HTTP request smuggling TE.CL** — 5/5 trials showed 12.18 s back-end hang vs 0.16 s baseline. 4 additional obfuscation variants (space-before-colon, trailing-space, lowercase, mixed-case) showed 6.16 s hang — each bypassing simple WAF rules.
+4. **ToolShell precondition chain** — anonymous GET ToolPane.aspx (200) + anonymous POST `/_api/contextinfo` (200, valid FormDigest) + anonymous POST ToolPane.aspx with digest (200, no auth challenge) + `__VIEWSTATEENCRYPTED=""`. Permanent zero-day on EoL SP2013.
 
 Plus Medium-tier: NTLM Type-2 disclosure of full AD topology (`customer.parent-corp.example`, `WIN-XXXXXXXXXXX`); SP2013 EoL exposure.
 

@@ -20,11 +20,13 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
 
 3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **Session technique**: Use `burp_send_to_intruder()` (Sniper) for cookie fixation (predictable session tokens), stay-logged-in cookie brute, and concurrent session handling. Use `burp_create_repeater_tab()` for session token manipulation. Use `burp_get_organizer_items()` to catalog and compare session tokens.
-4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
-5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-SESS-*")`
-6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-SESS-*", status="completed", notes=...)`
-7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
-8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
+4. **Playwright browser — cookie/session testing**: Set session cookies via `playwright_browser_evaluate("document.cookie='session=...'")`, navigate to the target, and use `playwright_browser_snapshot` to check if the session is accepted. Browser enforces SameSite, Secure, and HttpOnly flags — curl bypasses them. See [Browser Testing](../docs/browser-testing.md).
+
+5. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
+6. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-SESS-*")`
+7. **Track coverage** → `track_test(engagement_id, test_id="WSTG-SESS-*", status="completed", notes=...)`
+8. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
+9. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
 ## Scope Notice
 

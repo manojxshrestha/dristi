@@ -20,11 +20,12 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
 
 3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **MFA bypass technique**: Use `burp_send_to_intruder()` (Pitchfork) for 2FA/OTP code brute (0000-9999). Use `burp_create_repeater_tab()` for token reuse, backup code manipulation, and missing verification parameter tests. Use `burp_get_proxy_http_history()` to capture full auth flow for session analysis.
-4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
-5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-ATHN-09")`
-6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-ATHN-09", status="completed", notes=...)`
-7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
-8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
+4. **Playwright browser** — Use `playwright_browser_*` tools for active testing, SPA interaction, and PoC evidence. See [Browser Testing](../docs/browser-testing.md) for full reference.
+5. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
+6. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-ATHN-09")`
+7. **Track coverage** → `track_test(engagement_id, test_id="WSTG-ATHN-09", status="completed", notes=...)`
+8. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
+9. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
 ## Scope Notice
 
@@ -52,17 +53,17 @@ ffuf -u "https://target.com/api/verify-otp" \
 
 ### Pattern 2: OTP Not Invalidated After Use
 ```
-1. Login → receive OTP "123456" → enter it → success
-2. Logout → login again with same credentials
-3. Try OTP "123456" again
-4. If accepted → OTP never invalidated = ATO (attacker sniffs OTP once, reuses forever)
+2. Login → receive OTP "123456" → enter it → success
+3. Logout → login again with same credentials
+4. Try OTP "123456" again
+5. If accepted → OTP never invalidated = ATO (attacker sniffs OTP once, reuses forever)
 ```
 
 ### Pattern 3: Response Manipulation
 ```
-1. Enter wrong OTP → capture response in Burp
-2. Change {"success":false} → {"success":true} (or 401 → 200)
-3. Forward → if app proceeds → client-side only MFA check
+2. Enter wrong OTP → capture response in Burp
+3. Change {"success":false} → {"success":true} (or 401 → 200)
+4. Forward → if app proceeds → client-side only MFA check
 ```
 
 ### Pattern 4: Skip MFA Step (Workflow Bypass)
@@ -100,10 +101,10 @@ Also test: can backup codes be reused after exhaustion? Some apps regenerate pre
 
 ### Pattern 7: "Remember This Device" Trust Escalation
 ```
-1. Complete MFA once on Device A (attacker's browser)
-2. Capture the "remember device" cookie
-3. Present that cookie from a new IP/browser
-4. If MFA skipped = device trust not bound to IP/UA = ATO from any location
+2. Complete MFA once on Device A (attacker's browser)
+3. Capture the "remember device" cookie
+4. Present that cookie from a new IP/browser
+5. If MFA skipped = device trust not bound to IP/UA = ATO from any location
 ```
 
 ### MFA Chain Escalation

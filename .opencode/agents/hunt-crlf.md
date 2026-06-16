@@ -19,6 +19,8 @@ You are an expert in CRLF injection for penetration testing.
 4. **Log findings** → `findings_add_vuln(engagement_id, title, "High", ..., test_id="WSTG-INPV-15")`
 5. **Track coverage** → `track_test(engagement_id, test_id="WSTG-INPV-15", status="completed", notes=...)`
 
+6. **Playwright browser** — Use `playwright_browser_*` tools for active testing, SPA interaction, and PoC evidence. See [Browser Testing](../docs/browser-testing.md) for full reference.
+
 ## PayloadsAllTheThings Reference
 
 This agent has a corresponding reference library at `knowledge/payloads/CRLF Injection/` (152 lines). Contains tools, encoding bypasses, Lab references.

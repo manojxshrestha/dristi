@@ -55,14 +55,37 @@ mkdir -p runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>
 curl -sv <poc-command> 2>&1 > runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/evidence/<finding-id>/request.txt
 ```
 
-### Step 3: Screenshot (if DOM/visual bug)
-For reflected XSS, DOM XSS, clickjacking, or any visual proof:
-```bash
+### Step 3: Screenshot via Playwright (ALL findings — mandatory)
+
+Every finding gets browser evidence. Use Playwright, not curl screenshots:
+
+```python
 EVIDENCE_DIR="runtime/engagements/${ENGAGEMENT_ID:-default-engagement}/recon/<domain>/evidence/<finding-id>"
 mkdir -p "$EVIDENCE_DIR"
+
+# Navigate to the PoC URL or trigger
 playwright_browser_navigate(url=<poc-url>)
-playwright_browser_take_screenshot(type='png', filename="$EVIDENCE_DIR/screenshot.png")
-playwright_browser_close()
+
+# If the finding is authenticated, load cookies first (from Phase 2.5)
+# playwright_browser_navigate(url="https://app.target.com"  # session preserved from auth)
+
+# Screenshot showing visible evidence (URL bar, payload reflection, alert box)
+playwright_browser_take_screenshot(
+    type='png',
+    filename="$EVIDENCE_DIR/screenshot.png"
+)
+
+# Capture browser console for CSP violations, JS errors, XSS proof
+playwright_browser_console_messages(level='error')
+playwright_browser_console_messages(level='warning')
+
+# Capture network requests for HAR-style evidence
+playwright_browser_network_requests(static=False)
+```
+
+Also capture the raw HTTP exchange as backup:
+```bash
+curl -sv <poc-command> 2>&1 > "$EVIDENCE_DIR/request.txt"
 ```
 
 ### Step 4: Check OOB Interactions (if applicable)
@@ -83,6 +106,17 @@ Store the clean evidence as engagement deliverables:
 ```
 wstg_save_deliverable(deliverable_type='evidence', content=<clean-request+response>, producer_agent='capture')
 ```
+
+### Step 7: Generate PoC Report
+After all evidence is collected, generate the per-finding PoC report in the program-submission format:
+
+```
+bash scripts/generate_poc_report.sh <engagement-id> all
+```
+
+This creates `runtime/engagements/<engagement-id>/evidence/<finding-id>/poc-report.md` for every finding, pre-filled with the finding title, description, affected URL, evidence file list, and PoC output. Sections marked `[add ...]` require manual input — fill these in before submission.
+
+The PoC report follows the standard template at `templates/poc-report-template.md` with sections: Summary, Shops Used to Test, Relevant Request IDs, Steps To Reproduce, Supporting Material.
 
 ## Verification
 

@@ -19,6 +19,8 @@ You are an expert in prototype pollution for penetration testing.
 4. **Log findings** → `findings_add_vuln(engagement_id, title, "Critical|High", ..., test_id="WSTG-INPV-12")`
 5. **Track coverage** → `track_test(engagement_id, test_id="WSTG-INPV-12", status="completed", notes=...)`
 
+6. **Playwright browser — client-side PP testing**: Use `playwright_browser_evaluate` to test `__proto__` injection in the browser JS context. Client-side prototype pollution is browser-only — curl cannot interact with the JS runtime. Use `playwright_browser_console_messages` to catch errors from polluted Object prototypes. See [Browser Testing](../docs/browser-testing.md).
+
 ## PayloadsAllTheThings Reference
 
 This agent has a corresponding reference library at `knowledge/payloads/Prototype Pollution/` (191 lines). Contains detection techniques, JSON input and URL-based payloads, script gadgets, and server-side PP exploitation for RCE.

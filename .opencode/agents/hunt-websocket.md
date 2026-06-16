@@ -20,11 +20,13 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
 
 3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **WebSocket technique**: Use WebSocket History tab in Burp to capture WS messages, then send to Repeater via `burp_create_repeater_tab()` for message manipulation. Use `burp_generate_collaborator_payload()` in WS messages for blind callback. Test handshake via `burp_send_http1_request()` with `Upgrade: websocket` headers.
-4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
-5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-CLNT-11")`
-6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-CLNT-11", status="completed", notes=...)`
-7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
-8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
+4. **Playwright browser — WebSocket origin testing**: Use `playwright_browser_evaluate` to open a WebSocket from attacker origin: `new WebSocket('wss://target.com/socket')`. Check `playwright_browser_console_messages` for connection errors that reveal WAF/origin checks. WebSocket is browser-only — curl/wstg_burp_send_request cannot open WS connections from arbitrary origins. See [Browser Testing](../docs/browser-testing.md).
+
+5. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
+6. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-CLNT-11")`
+7. **Track coverage** → `track_test(engagement_id, test_id="WSTG-CLNT-11", status="completed", notes=...)`
+8. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
+9. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
 ## Scope Notice
 

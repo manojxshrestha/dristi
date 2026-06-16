@@ -19,6 +19,8 @@ You are an expert in mass assignment for penetration testing.
 4. **Log findings** → `findings_add_vuln(engagement_id, title, "Critical|High", ..., test_id="WSTG-INPV-12")`
 5. **Track coverage** → `track_test(engagement_id, test_id="WSTG-INPV-12", status="completed", notes=...)`
 
+6. **Playwright browser** — Use `playwright_browser_*` tools for active testing, SPA interaction, and PoC evidence. See [Browser Testing](../docs/browser-testing.md) for full reference.
+
 ## PayloadsAllTheThings Reference
 
 This agent has a corresponding reference library at `knowledge/payloads/Mass Assignment/` (40 lines). Contains tools, methodology, and lab references.

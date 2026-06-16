@@ -20,11 +20,12 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
 
 3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **NTLM info leak technique**: Use `burp_create_repeater_tab()` to send requests without `Authorization` header to capture WWW-Authenticate: NTLM challenge. Use `burp_generate_collaborator_payload()` in UNC paths (`\\COLLAB\share`) for relay coercion. Use `burp_send_to_intruder()` (Sniper) for endpoint discovery that triggers NTLM auth.
-4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
-5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="INFO-09 (NTLM Leak)")`
-6. **Track coverage** → `track_test(engagement_id, test_id="INFO-09 (NTLM Leak)", status="completed", notes=...)`
-7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
-8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
+4. **Playwright browser** — Use `playwright_browser_*` tools for active testing, SPA interaction, and PoC evidence. See [Browser Testing](../docs/browser-testing.md) for full reference.
+5. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
+6. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="INFO-09 (NTLM Leak)")`
+7. **Track coverage** → `track_test(engagement_id, test_id="INFO-09 (NTLM Leak)", status="completed", notes=...)`
+8. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
+9. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
 ## Scope Notice
 
@@ -89,20 +90,20 @@ WWW-Authenticate: Negotiate, NTLM
 
 ## Step-by-Step Hunting Methodology
 
-1. **Probe every anonymous endpoint for `WWW-Authenticate: NTLM`.** Send a vanilla GET and inspect response headers. If NTLM is offered, proceed.
+2. **Probe every anonymous endpoint for `WWW-Authenticate: NTLM`.** Send a vanilla GET and inspect response headers. If NTLM is offered, proceed.
 
-2. **Send a valid NTLMSSP Type-1 message anonymously.** The Type-1 base64 below requests NetBIOS-domain and Workstation info from the server:
+3. **Send a valid NTLMSSP Type-1 message anonymously.** The Type-1 base64 below requests NetBIOS-domain and Workstation info from the server:
    ```
    Authorization: NTLM TlRMTVNTUAABAAAAB4IIogAAAAAAAAAAAAAAAAAAAAAGAbEdAAAADw==
    ```
    This is the standard test Type-1 with negotiate flags `NTLMSSP_NEGOTIATE_UNICODE | NTLMSSP_NEGOTIATE_OEM | NTLMSSP_NEGOTIATE_NTLM | NTLMSSP_NEGOTIATE_ALWAYS_SIGN | NTLMSSP_NEGOTIATE_KEY_EXCH | NTLMSSP_NEGOTIATE_56 | NTLMSSP_NEGOTIATE_128 | NTLMSSP_NEGOTIATE_TARGET_INFO`. The `OS Version` field (`06 01 B1 1D 00 00 00 0F`) is Windows 7 build 7601 — accepted by virtually every NTLM responder.
 
-3. **Use a keep-alive raw socket, not Python requests / curl one-shot.** Most HTTP libraries close the connection between the Type-1 send and Type-2 reception. Use one of:
+4. **Use a keep-alive raw socket, not Python requests / curl one-shot.** Most HTTP libraries close the connection between the Type-1 send and Type-2 reception. Use one of:
    - Burp Repeater with `Connection: keep-alive` set explicitly
    - Burp `mcp__burp__send_http1_request` (handles keep-alive natively)
    - Python raw `socket` + `ssl.wrap_socket` (see Payload section)
 
-4. **Parse the Type-2 challenge from the `WWW-Authenticate: NTLM <base64>` response header.** Base64-decode the value. The structure is NTLMSSP per MS-NLMP:
+5. **Parse the Type-2 challenge from the `WWW-Authenticate: NTLM <base64>` response header.** Base64-decode the value. The structure is NTLMSSP per MS-NLMP:
    - Bytes 0-7: literal `NTLMSSP\0`
    - Bytes 8-11: MessageType = `\x02\x00\x00\x00`
    - Bytes 12-19: TargetName SecurityBuffer (len, alloc, offset)
@@ -111,7 +112,7 @@ WWW-Authenticate: Negotiate, NTLM
    - Bytes 40-47: TargetInfo SecurityBuffer (len, alloc, offset)
    - TargetInfo body: `AV_PAIRS` array of (AvId u16, AvLen u16, Value)
 
-5. **Decode the AV_PAIRS.** The AvIds you care about:
+6. **Decode the AV_PAIRS.** The AvIds you care about:
    - `1` = NetBIOS Computer Name
    - `2` = NetBIOS Domain Name
    - `3` = DNS Computer Name (FQDN of the responding server)
@@ -120,15 +121,15 @@ WWW-Authenticate: Negotiate, NTLM
    - `7` = Timestamp (FILETIME, useful for NTLMv2 hash relay / cracking)
    - `9` = Target Name (in newer NTLMSSP)
 
-6. **Map findings to severity tier:**
+7. **Map findings to severity tier:**
    - Internet-exposed + default `WIN-XXXXXXXXXXX` hostname + corporate-AD-tree disclosure → **Medium**
    - Internet-exposed + named-server hostname (`SPWEB01.corp.example`) + corporate-AD-tree → **Low-Medium**
    - Intranet-only + any disclosure → **Informational**
    - Combine with `auth-bypass-hunter` Legacy-Protocol Matrix findings on the same host → **upgrade the auth-bypass finding's severity** since the attacker has UPN/SAM format ready
 
-7. **Check the timestamp.** If `AV[7]` returns a current FILETIME within ~5s of `Date:` header, the system clock is synced — useful intel for Kerberos golden-ticket forging (out of bug-bounty scope but red-team relevant).
+8. **Check the timestamp.** If `AV[7]` returns a current FILETIME within ~5s of `Date:` header, the system clock is synced — useful intel for Kerberos golden-ticket forging (out of bug-bounty scope but red-team relevant).
 
-8. **Cross-reference with subdomain enum.** The DNS Tree name often reveals the *parent forest* — e.g. `customer.parent-corp.example` reveals the customer is a sub-domain INSIDE corporate-parent AD, not a separate tenant. This is a privacy / topology-disclosure escalation that programs sometimes accept as Medium.
+9. **Cross-reference with subdomain enum.** The DNS Tree name often reveals the *parent forest* — e.g. `customer.parent-corp.example` reveals the customer is a sub-domain INSIDE corporate-parent AD, not a separate tenant. This is a privacy / topology-disclosure escalation that programs sometimes accept as Medium.
 
 ---
 
@@ -208,17 +209,17 @@ if m:
 
 ## Common Root Causes
 
-1. **Dual-auth IIS bindings on the public zone.** Administrators leave NTLM enabled on the public-facing IIS site even when Forms auth is the intended entry point. Internal users get SSO; external attackers get the AD topology leak.
+2. **Dual-auth IIS bindings on the public zone.** Administrators leave NTLM enabled on the public-facing IIS site even when Forms auth is the intended entry point. Internal users get SSO; external attackers get the AD topology leak.
 
-2. **Default IIS Application Pool identity left as `ApplicationPoolIdentity`.** Combined with default hostname, signals provisioning never went past first-boot.
+3. **Default IIS Application Pool identity left as `ApplicationPoolIdentity`.** Combined with default hostname, signals provisioning never went past first-boot.
 
-3. **Server never renamed from Windows-installer-generated hostname.** Microsoft's default `WIN-XXXXXXXXXXX` 11-character pattern is the immediate tell. Sometimes also `WORKGROUP\WIN-...` in older boxes.
+4. **Server never renamed from Windows-installer-generated hostname.** Microsoft's default `WIN-XXXXXXXXXXX` 11-character pattern is the immediate tell. Sometimes also `WORKGROUP\WIN-...` in older boxes.
 
-4. **Sub-domain joined to corporate forest without zone-isolation.** European-integrator case: a a European importer's SharePoint test environment is a child domain inside a corporate global AD, disclosed via NTLM DNS Tree Name. The customer probably intends `customer.parent-corp.example` to be operationally separate but the NTLM Type-2 reveals the forest membership to anyone who probes.
+5. **Sub-domain joined to corporate forest without zone-isolation.** European-integrator case: a a European importer's SharePoint test environment is a child domain inside a corporate global AD, disclosed via NTLM DNS Tree Name. The customer probably intends `customer.parent-corp.example` to be operationally separate but the NTLM Type-2 reveals the forest membership to anyone who probes.
 
-5. **IIS Extended Protection NOT enabled.** When `<system.webServer><security><authentication><windowsAuthentication extendedProtection>` is `None` (the default), the NTLM challenge is sent to any anonymous client. When set to `Required`, NTLM is restricted to authenticated callers — and the AV-pair leak is mitigated.
+6. **IIS Extended Protection NOT enabled.** When `<system.webServer><security><authentication><windowsAuthentication extendedProtection>` is `None` (the default), the NTLM challenge is sent to any anonymous client. When set to `Required`, NTLM is restricted to authenticated callers — and the AV-pair leak is mitigated.
 
-6. **No `WindowsAuthentication` removed from `applicationHost.config` for internet-exposed sites.** SharePoint Central Admin sometimes leaves this enabled even when SP zone configuration only enables Forms.
+7. **No `WindowsAuthentication` removed from `applicationHost.config` for internet-exposed sites.** SharePoint Central Admin sometimes leaves this enabled even when SP zone configuration only enables Forms.
 
 ---
 
@@ -243,16 +244,16 @@ For the attacker: there's no "bypass" needed — the leak is the finding.
 
 Before writing the report, confirm:
 
-1. **What can the attacker do RIGHT NOW with this disclosure?**
+2. **What can the attacker do RIGHT NOW with this disclosure?**
    - Internet-exposed + default hostname + corporate forest disclosed → **Medium**: attacker has UPN format for `auth-bypass-hunter` matrix probes, plus knows server has likely-default service accounts.
    - Intranet-only or only NetBIOS name → **Informational**.
 
-2. **Does the program accept information-disclosure findings without a chained impact?**
+3. **Does the program accept information-disclosure findings without a chained impact?**
    - Many programs (Microsoft, large enterprise VDPs) DO accept this when the leaked info includes internal AD topology.
    - Many programs (Shopify, GitHub) reject info disclosure without a chained impact.
    - Read the program scope before submitting; if borderline, chain with a Tier-A finding from `auth-bypass-hunter`.
 
-3. **Can you reproduce in <5 minutes from a fresh shell?**
+4. **Can you reproduce in <5 minutes from a fresh shell?**
    - The Python snippet above is the canonical reproduction. Include it verbatim in the report.
 
 ---
@@ -275,9 +276,9 @@ Timestamp:              2026-05-13T15:55:37.922Z
 ```
 
 Three escalation paths:
-1. **Default Windows-installer hostname (`WIN-XXXXXXXXXXX`)** — server was never renamed after OS install; strong signal of lazy provisioning. Likely default service-account passwords on the SQL backend, default WSUS config, etc.
-2. **Sub-domain inside corporate-parent AD (`customer.parent-corp.example`)** — the customer is a child domain inside <ParentCorp>'s global Active Directory. A compromise of this test farm has potential cross-trust to corporate-parent.
-3. **UPN format known** — combined with `auth-bypass-hunter`'s discovery of an anonymous brute-force endpoint on `/_vti_bin/Authentication.asmx`, the attacker has both the credential format (`firstname.lastname@customer.parent-corp.example` or `<CustomerName>\firstname.lastname`) and the unlimited submission endpoint.
+2. **Default Windows-installer hostname (`WIN-XXXXXXXXXXX`)** — server was never renamed after OS install; strong signal of lazy provisioning. Likely default service-account passwords on the SQL backend, default WSUS config, etc.
+3. **Sub-domain inside corporate-parent AD (`customer.parent-corp.example`)** — the customer is a child domain inside <ParentCorp>'s global Active Directory. A compromise of this test farm has potential cross-trust to corporate-parent.
+4. **UPN format known** — combined with `auth-bypass-hunter`'s discovery of an anonymous brute-force endpoint on `/_vti_bin/Authentication.asmx`, the attacker has both the credential format (`firstname.lastname@customer.parent-corp.example` or `<CustomerName>\firstname.lastname`) and the unlimited submission endpoint.
 
 Reported severity: **Medium**, with a note that the chain with the Authentication.asmx anonymous brute-force makes the combined attack Critical.
 

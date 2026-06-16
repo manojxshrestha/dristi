@@ -60,6 +60,15 @@ Based on gate answers:
 wstg_update_finding(engagement_id=<eid>, finding_id=<id>, severity=<adjusted>, notes=<verdict>)
 ```
 
+### Step 5: Update PoC Report
+After validation and re-PoC, regenerate the PoC report with the final evidence and poc_output:
+
+```
+bash scripts/generate_poc_report.sh <engagement-id> <finding-id>
+```
+
+This overwrites `poc-report.md` with updated data (validated PoC output, evidence file list, verified severity). The report still has `[add ...]` placeholders for narrative sections — fill those in manually before submission.
+
 ## Verification
 
 - [ ] Every finding re-PoC'd via `wstg_validate_poc()` before gating

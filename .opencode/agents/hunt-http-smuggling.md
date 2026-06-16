@@ -20,11 +20,12 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
 
 3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **HTTP smuggling technique**: Use `burp_create_repeater_tab()` to craft CL.TE, TE.CL, and TE.TE obfuscation templates. Install HTTP Request Smuggler extension for automated detection. Use `burp_send_http1_request()` for precise request structure control.
-4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
-5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-INPV-17")`
-6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-INPV-17", status="completed", notes=...)`
-7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
-8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
+4. **Playwright browser** — Use `playwright_browser_*` tools for active testing, SPA interaction, and PoC evidence. See [Browser Testing](../docs/browser-testing.md) for full reference.
+5. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
+6. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-INPV-17")`
+7. **Track coverage** → `track_test(engagement_id, test_id="WSTG-INPV-17", status="completed", notes=...)`
+8. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
+9. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
 ## PayloadsAllTheThings Reference
 
@@ -61,9 +62,9 @@ SMUGGLED
 
 ### Detection
 ```
-1. Burp extension: HTTP Request Smuggler
-2. Right-click request → Extensions → HTTP Request Smuggler → Smuggle probe
-3. Manual timing: CL.TE probe + ~10s delay = backend waiting for rest of body
+2. Burp extension: HTTP Request Smuggler
+3. Right-click request → Extensions → HTTP Request Smuggler → Smuggle probe
+4. Manual timing: CL.TE probe + ~10s delay = backend waiting for rest of body
 ```
 
 ### Impact Chain

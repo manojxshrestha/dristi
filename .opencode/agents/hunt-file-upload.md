@@ -20,11 +20,13 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
 
 3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **File upload technique**: Use `burp_create_repeater_tab()` for Content-Type bypass (`image/jpeg`), extension blacklist bypass (`.php5`, `.shtml`, `.phar`, `.htaccess`), null-byte suffix (`%00.jpg`), and polyglot JPG+PHP payloads. Use `burp_send_to_intruder()` (Sniper) for extension fuzzing.
-4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
-5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-BUSL-07")`
-6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-BUSL-07", status="completed", notes=...)`
-7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
-8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
+4. **Playwright browser — SVG/HTML execution verification**: After uploading a crafted SVG or HTML file, use `playwright_browser_navigate` to the uploaded file URL. Use `playwright_browser_console_messages` to catch XSS alert() or JS execution. Use `playwright_browser_take_screenshot` for visual PoC. File-upload XSS only fires in a browser — curl cannot render SVG/HTML. See [Browser Testing](../docs/browser-testing.md).
+
+5. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
+6. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-BUSL-07")`
+7. **Track coverage** → `track_test(engagement_id, test_id="WSTG-BUSL-07", status="completed", notes=...)`
+8. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
+9. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
 ## PayloadsAllTheThings Reference
 

@@ -20,11 +20,12 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
 
 3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **Auth bypass technique**: Use `burp_send_to_intruder()` (Sniper) with `X-Original-URL`, `X-Forwarded-For`, and method override (`_method=POST`) payloads on restricted endpoints. Use `burp_create_repeater_tab()` for manual forced browsing and parameter pollution tests.
-4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
-5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-ATHZ-02")`
-6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-ATHZ-02", status="completed", notes=...)`
-7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
-8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
+4. **Playwright browser** — Use `playwright_browser_*` tools for active testing, SPA interaction, and PoC evidence. See [Browser Testing](../docs/browser-testing.md) for full reference.
+5. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
+6. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-ATHZ-02")`
+7. **Track coverage** → `track_test(engagement_id, test_id="WSTG-ATHZ-02", status="completed", notes=...)`
+8. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
+9. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
 ## Scope Notice
 
@@ -104,40 +105,40 @@ passport.js authenticate
 
 ## Step-by-Step Hunting Methodology
 
-1. **Map all authentication entry points**
+2. **Map all authentication entry points**
    - spider the target for every login surface: main login, admin login, API login, partner portal, mobile API endpoints
    - check `robots.txt`, JS files, and the wayback machine for forgotten endpoints like `/xmlrpc.php`
 
-2. **Identify the auth mechanism per entry point**
+3. **Identify the auth mechanism per entry point**
    - Is it forms-based, SAML, OAuth, API key, session token?
    - For WordPress: always probe `/xmlrpc.php` even if the main login is SSO-protected
 
-3. **Test XMLRPC independently of SSO**
+4. **Test XMLRPC independently of SSO**
    - If site uses SSO (e.g., OneLogin), manually POST to `/xmlrpc.php`
    - XMLRPC uses WordPress-native credentials, not SSO — test with `system.listMethods` first, then `wp.getUsersBlogs`
 
-4. **Enumerate SAML implementation**
+5. **Enumerate SAML implementation**
    - Capture a valid SAMLResponse via Burp
    - Decode the Base64 payload, inspect the XML
    - Test signature stripping, comment injection, and XML wrapping attacks
    - Test if SP validates the signature at all (send unsigned assertion)
 
-5. **Test cross-portal session/token reuse**
+6. **Test cross-portal session/token reuse**
    - Log into `partners.shopify.com` type portals
    - Attempt to use the issued token/cookie against the main admin portal
    - Look for shared cookie domains, shared JWT secrets, or API tokens that work across contexts
 
-6. **Fuzz auth parameters**
+7. **Fuzz auth parameters**
    - Null/empty passwords, `password[]=array`, SQL in username field
    - Try `admin`/`admin`, `test`/`test` on staging subdomains
    - Modify `role`, `is_admin`, `user_type` in JWTs (none algorithm, weak secret)
 
-7. **Check redirect and state parameters**
+8. **Check redirect and state parameters**
    - Does removing `state` from OAuth break anything?
    - Can you change `redirect_uri` to an open redirect target?
    - Does the `RelayState` in SAML get validated?
 
-8. **Verify impact by escalating privileges**
+9. **Verify impact by escalating privileges**
    - Don't stop at login — prove you can access admin functions, other users' data, or sensitive configuration
    - Screenshot the highest-privilege action you can perform
 
@@ -171,12 +172,12 @@ When a target has a custom, branded login UI (e.g. `customlogin.aspx`, `/auth/si
 | **Oracle EBS / PeopleSoft** | `/OA_HTML/AppsLogin`, `/psp/*/?cmd=login` | Native ERP credentials |
 
 **How to use:**
-1. Identify the tech stack from headers + paths (use `misc-hunter` Attack Surface Signals).
-2. Find the row above that matches.
-3. Probe the legacy endpoint anonymously to confirm it's reachable and not 403/404.
-4. Test with synthetic credentials to confirm it accepts native credential format and returns differential responses (success vs failure).
-5. Verify there is no rate limit, no lockout, no CAPTCHA — burst 10 requests at the same user, confirm uniform timing.
-6. Report as **Critical / High** depending on chain to ATO: an anonymous + unlimited credential brute-force endpoint is consistently Critical on bug-bounty programs.
+2. Identify the tech stack from headers + paths (use `misc-hunter` Attack Surface Signals).
+3. Find the row above that matches.
+4. Probe the legacy endpoint anonymously to confirm it's reachable and not 403/404.
+5. Test with synthetic credentials to confirm it accepts native credential format and returns differential responses (success vs failure).
+6. Verify there is no rate limit, no lockout, no CAPTCHA — burst 10 requests at the same user, confirm uniform timing.
+7. Report as **Critical / High** depending on chain to ATO: an anonymous + unlimited credential brute-force endpoint is consistently Critical on bug-bounty programs.
 
 **Lesson from a authorized engagement:** A an enterprise dealer portal on SharePoint 2013 had a custom branded `customlogin.aspx`. The hunt-auth-bypass skill was loaded but the matrix above did not exist in this document — and the WordPress XMLRPC pattern was not connected to the SharePoint equivalent. `/_vti_bin/Authentication.asmx` was reachable anonymously, accepted unlimited credential attempts with no rate limit and no lockout, and was the highest-impact finding in the engagement. Walking this matrix on the first pass would have surfaced it immediately.
 
@@ -274,17 +275,17 @@ grep -iE "(admin|partner|internal|sso|auth|login)" \
 
 ## Common Root Causes
 
-1. **SSO bypasses local auth entirely at the UI layer, but not at the API layer** — developers disable the login form but forget that API endpoints (`/xmlrpc.php`, REST API, mobile API) have their own auth handlers that still accept native credentials.
+2. **SSO bypasses local auth entirely at the UI layer, but not at the API layer** — developers disable the login form but forget that API endpoints (`/xmlrpc.php`, REST API, mobile API) have their own auth handlers that still accept native credentials.
 
-2. **SAML signature validation is skipped or optional** — library defaults often don't enforce signature checking; developers use `wantAssertionsSigned: false` or fail to configure the IdP certificate correctly.
+3. **SAML signature validation is skipped or optional** — library defaults often don't enforce signature checking; developers use `wantAssertionsSigned: false` or fail to configure the IdP certificate correctly.
 
-3. **Shared session infrastructure across different trust levels** — partner portals and admin portals reuse the same session cookie or JWT secret because they're built on the same internal framework, assuming access control at the application layer is sufficient.
+4. **Shared session infrastructure across different trust levels** — partner portals and admin portals reuse the same session cookie or JWT secret because they're built on the same internal framework, assuming access control at the application layer is sufficient.
 
-4. **Trust inheritance in multi-tenant architectures** — a token issued in a lower-privilege context (partner, reseller) is accepted in a higher-privilege context because the verification only checks signature validity, not the issuance context.
+5. **Trust inheritance in multi-tenant architectures** — a token issued in a lower-privilege context (partner, reseller) is accepted in a higher-privilege context because the verification only checks signature validity, not the issuance context.
 
-5. **Plugin/module auth is independent of application auth** — every WordPress plugin that handles auth (contact forms, REST API extensions, WooCommerce) may implement its own auth handler inconsistently with the main site's SSO.
+6. **Plugin/module auth is independent of application auth** — every WordPress plugin that handles auth (contact forms, REST API extensions, WooCommerce) may implement its own auth handler inconsistently with the main site's SSO.
 
-6. **XML parsing inconsistencies** — different XML parsers (used by SP vs. IdP) handle comments, namespaces, and whitespace differently, enabling confusion attacks where the signed content differs from the evaluated content.
+7. **XML parsing inconsistencies** — different XML parsers (used by SP vs. IdP) handle comments, namespaces, and whitespace differently, enabling confusion attacks where the signed content differs from the evaluated content.
 
 ---
 
@@ -324,13 +325,13 @@ grep -iE "(admin|partner|internal|sso|auth|login)" \
 
 Before writing any report, answer these three questions:
 
-1. **What can the attacker DO right now?**
+2. **What can the attacker DO right now?**
    Must be: authenticate as another user OR authenticate without valid credentials OR elevate to admin/privileged role. "Partial information disclosure" is not auth bypass.
 
-2. **What does the victim LOSE?**
+3. **What does the victim LOSE?**
    Must identify a concrete asset: account takeover of specific user, access to all admin functions, ability to read/modify other tenants' data, or access to privileged APIs. Abstract "security control bypass" without impact is not sufficient.
 
-3. **Can it be reproduced in 10 minutes from scratch?**
+4. **Can it be reproduced in 10 minutes from scratch?**
    You must be able to: (a) start from a fresh browser/session, (b) follow your exact steps, and (c) arrive at authenticated access to a protected resource. If reproduction requires special preconditions you can't re-create (a specific victim's active session, timing windows), the report needs more work.
 
 ---
@@ -352,49 +353,49 @@ An e-commerce platform's partner/reseller portal issued authentication tokens th
 
 The following real, verified bug-bounty / coordinated-disclosure cases extend this skill. Spans 4 SAML subclasses, 4 JWT subclasses, 1 legacy-protocol (XMLRPC), and 2 partner-portal cross-domain reuse patterns.
 
-5. **GitHub Enterprise Server — SAML XSW via parser differential (CVE-2025-25291/25292)** ([H1 #2579939](https://hackerone.com/reports/2579939) · [Blog](https://github.blog/security/sign-in-as-anyone-bypassing-saml-sso-authentication-with-parser-differentials/))
+6. **GitHub Enterprise Server — SAML XSW via parser differential (CVE-2025-25291/25292)** ([H1 #2579939](https://hackerone.com/reports/2579939) · [Blog](https://github.blog/security/sign-in-as-anyone-bypassing-saml-sso-authentication-with-parser-differentials/))
     - Subclass: SAML signature stripping / XSW (parser-differential variant)
     - Payload: signed SAML response; inject a sibling `<Assertion>` so REXML (signature-checker) and Nokogiri (business-logic reader) resolve different nodes via the same XPath. Signature validates against benign node; SP consumes attacker-controlled `<NameID>admin@target</NameID>`
     - Root cause: two XML parsers used for verification vs consumption return different elements for the same XPath
     - Year: 2025 — GitHub Security Lab bounty (program max class, internally rated Critical)
 
-6. **GitHub Enterprise — SAML signature bypass on encrypted assertions (CVE-2024-4985)** ([H1 #2475347](https://hackerone.com/reports/2475347) · [ProjectDiscovery advisory](https://projectdiscovery.io/blog/github-enterprise-saml-authentication-bypass))
+7. **GitHub Enterprise — SAML signature bypass on encrypted assertions (CVE-2024-4985)** ([H1 #2475347](https://hackerone.com/reports/2475347) · [ProjectDiscovery advisory](https://projectdiscovery.io/blog/github-enterprise-saml-authentication-bypass))
     - Subclass: SAML signature stripping (XSW family) when encrypted-assertions feature enabled
     - Payload: forge SAML response with attacker-controlled assertion; exploit improper signature verification on the encrypted-assertion code branch; provision arbitrary user including `site_admin`
     - Root cause: improper cryptographic signature verification on the encrypted-assertion code branch
     - Year: 2024 — bounty undisclosed, CVSS 10.0
 
-7. **Uber — SAML auth bypass on `uchat.uberinternal.com`** ([H1 #223014](https://hackerone.com/reports/223014))
+8. **Uber — SAML auth bypass on `uchat.uberinternal.com`** ([H1 #223014](https://hackerone.com/reports/223014))
     - Subclass: SAML signature stripping / improper assertion verification (OneLogin SP-side)
     - Payload: replay/modify SAML assertion with forged `NameID`; SP did not strictly validate signature scope, so attacker-controlled assertion accepted, granting OneLogin SSO session to internal chat
     - Root cause: improper SAML signature verification on SP implementation
     - Year: 2017 — **$8,500**
 
-8. **Uber — OneLogin SSO bypass via WordPress XMLRPC** ([H1 #138869](https://hackerone.com/reports/138869))
+9. **Uber — OneLogin SSO bypass via WordPress XMLRPC** ([H1 #138869](https://hackerone.com/reports/138869))
     - Subclass: WordPress XMLRPC bypassing SSO (legacy-auth path not gated) — canonical Legacy-Protocol Matrix case
     - Payload: OneLogin plugin auto-created WP users with literal password `@@@nopass@@@`. SSO plugin blocked `wp-login.php` only. POST `xmlrpc.php` with `wp.getUsersBlogs` + known shared password → authenticated as any previously-SSO'd user
     - Root cause: SSO enforcement applied at one auth surface (wp-login) but legacy XML-RPC path retained password auth with a guessable shared password
     - Year: 2016 — **$7,000**
 
-9. **Slack — SAML "confused-deputy" assertion reuse** ([Writeup](http://blog.intothesymmetry.com/2017/10/slack-saml-authentication-bypass.html))
+10. **Slack — SAML "confused-deputy" assertion reuse** ([Writeup](http://blog.intothesymmetry.com/2017/10/slack-saml-authentication-bypass.html))
     - Subclass: partner-portal / cross-IdP assertion reuse (audience-restriction not validated)
     - Payload: take an old expired GitHub-signed SAML assertion (different audience, different subject) → present to Slack ACS → Slack logs attacker in as the asserted username
     - Root cause: no audience-restriction nor freshness check; trust extended across IdPs
     - Year: 2017 — **$3,000**
 
-10. **HackerOne — SAML signup domain enforcement bypass via control characters** ([H1 #2101076](https://hackerone.com/reports/2101076))
+11. **HackerOne — SAML signup domain enforcement bypass via control characters** ([H1 #2101076](https://hackerone.com/reports/2101076))
     - Subclass: partner-portal / SAML domain-binding bypass via unicode control characters
     - Payload: new user sign-up at SAML-enforced org; append trailing control character (e.g., `\r`, ``) to email → domain comparison normalises away, signup proceeds → unauthorised access to the org
     - Root cause: inconsistent unicode/control-char normalisation between domain check and identity write
     - Year: 2024 — bounty awarded (amount undisclosed)
 
-11. **8x8 / Jitsi-Meet — JWT alg-confusion (asymmetric verifier accepts symmetric alg)** ([H1 #1210502](https://hackerone.com/reports/1210502))
+12. **8x8 / Jitsi-Meet — JWT alg-confusion (asymmetric verifier accepts symmetric alg)** ([H1 #1210502](https://hackerone.com/reports/1210502))
     - Subclass: JWT alg-confusion (RS256 → HS256 using public key as HMAC secret)
     - Payload: server publishes RS256 verification public key. Send a token with header `{"alg":"HS256"}` signed with that public key as the HMAC secret → Prosody module validates and admits attacker into authenticated/moderator room
     - Root cause: verifier did not enforce `alg=RS256`; allowed symmetric algorithm using the public key as shared secret
     - Year: 2021 — bounty undisclosed
 
-12. **Argo CD (Internet Bug Bounty) — JWT audience claim not validated (CVE-2023-22482)** ([H1 #1889161](https://hackerone.com/reports/1889161))
+13. **Argo CD (Internet Bug Bounty) — JWT audience claim not validated (CVE-2023-22482)** ([H1 #1889161](https://hackerone.com/reports/1889161))
     - Subclass: token-scope / audience check at issuance not at use (cross-audience token confusion)
     - Payload: obtain any RS256-signed token signed by the cluster's OIDC issuer but minted for a different `aud` (e.g., `kubernetes`) → present it as bearer to Argo CD API → API treats it as valid because it accepted the issuer's signature and skipped `aud` enforcement
     - Root cause: `aud` claim not enforced; signature-trust extended across audiences

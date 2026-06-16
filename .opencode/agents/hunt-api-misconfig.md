@@ -20,11 +20,12 @@ This agent works alongside the Dristi MCP server and WSTG methodology:
 2. **Deep testing** — See [Deep Testing](../docs/deep-testing.md) for request mutation, fuzzing, and entry point techniques. Run before class-specific payloads.
 
 3. **BurpSuite pro workflow — See [Burp Suite Flow](../docs/burp-flow.md) for full Burp MCP tool reference (proxy, repeater, intruder, collaborator, scanner, organizer) and per-phase workflow. **API misconfig technique**: Use `burp_send_to_intruder()` (Sniper) on endpoint paths, HTTP methods, and JSON body parameters to probe for mass assignment, rate limit gaps, and excessive data exposure. Use `burp_create_repeater_tab()` to manually test auth-bypass on non-production API endpoints.
-4. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
-5. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-APIT-02")`
-6. **Track coverage** → `track_test(engagement_id, test_id="WSTG-APIT-02", status="completed", notes=...)`
-7. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
-8. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
+4. **Playwright browser** — Use `playwright_browser_*` tools for active testing, SPA interaction, and PoC evidence. See [Browser Testing](../docs/browser-testing.md) for full reference.
+5. **Find vulnerabilities** → `log_finding()` or `findings_add_vuln()` to persist to SQLite
+6. **Log findings** → `findings_add_vuln(engagement_id, title, severity, ..., test_id="WSTG-APIT-02")`
+7. **Track coverage** → `track_test(engagement_id, test_id="WSTG-APIT-02", status="completed", notes=...)`
+8. **Chain findings** → `findings_add_chain()` to record multi-step attack paths
+9. **Generate report** → `findings_handoff()` for cross-session handoff or `generate_report()` for final output
 
 ## Scope Notice
 
@@ -195,11 +196,11 @@ Tools: `kiterunner` natively eats OpenAPI; `sj` (Swagger Jacker), `apidetector`,
 
 ### Detection checklist
 
-1. httpx-probe every path above across the full subdomain set; flag 200 with `Content-Type: application/json` AND body matching `"swagger"` or `"openapi"`.
-2. For every hit: `jq '.paths | keys' swagger.json` → feed to kiterunner / Autorize.
-3. `jq '.components.schemas' swagger.json` → mass-assignment field candidates.
-4. Banner the Swagger UI HTML for version string; map to the CVE-2018-25031 / DOM-XSS table.
-5. Test `?configUrl=` and `?url=` parameter handling on every Swagger UI hit.
+2. httpx-probe every path above across the full subdomain set; flag 200 with `Content-Type: application/json` AND body matching `"swagger"` or `"openapi"`.
+3. For every hit: `jq '.paths | keys' swagger.json` → feed to kiterunner / Autorize.
+4. `jq '.components.schemas' swagger.json` → mass-assignment field candidates.
+5. Banner the Swagger UI HTML for version string; map to the CVE-2018-25031 / DOM-XSS table.
+6. Test `?configUrl=` and `?url=` parameter handling on every Swagger UI hit.
 
 ---
 
