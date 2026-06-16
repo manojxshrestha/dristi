@@ -2,7 +2,7 @@
 
 ## Overview
 
-Dristi uses a **triage-first, reference-informed** testing strategy. Not every endpoint gets every test — the pipeline classifies endpoints by risk, checks disclosed report patterns for the target's tech stack, and dispatches per-class hunt agents with WSTG methodology, real-world report references, and WAF-aware payload selection.
+Dristi uses a **triage-first, reference-informed** testing strategy drawing from OWASP WSTG v4.2, OWASP Top 10, OWASP API Security Top 10, OWASP ASI, WAF/CRS bypass, CWE, MITRE ATT&CK, NIST, CVSS 3.1/4.0, PortSwigger Academy, and custom payload libraries. Not every endpoint gets every test — the pipeline classifies endpoints by risk, checks disclosed report patterns for the target's tech stack, and dispatches per-class hunt agents with methodology, real-world report references, and WAF-aware payload selection.
 
 87 agents total: 54 specialized `@hunt-*` agents + 33 pipeline/specialty agents.
 

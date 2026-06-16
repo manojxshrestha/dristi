@@ -8,12 +8,15 @@
   <br>
 </h1>
 
-<h4 align="center">Offensive security - OWASP WSTG knowledge base as an MCP server + vulnerability hunting agents</h4>
+<h4 align="center">Offensive security — OWASP WSTG · OWASP Top 10 · OWASP API Top 10 · OWASP ASI · WAF/CRS · CWE · MITRE ATT&CK · NIST · CVSS — as an MCP server + 87 vulnerability hunting agents</h4>
 
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+">
   <img src="https://img.shields.io/badge/license-Apache%202.0-green" alt="Apache 2.0">
   <img src="https://img.shields.io/badge/WSTG-v4.2-purple" alt="WSTG v4.2">
+  <img src="https://img.shields.io/badge/MITRE%20ATT%26CK-mapping-red" alt="MITRE ATT&CK">
+  <img src="https://img.shields.io/badge/CWE-mapping-blue" alt="CWE">
+  <img src="https://img.shields.io/badge/CVSS-3.1%2F4.0-orange" alt="CVSS">
   <img src="https://img.shields.io/badge/MCP%20tools-87-orange" alt="87 MCP Tools">
   <img src="https://img.shields.io/badge/H1%20reports-8.3k+-red" alt="8,300+ H1 Reports">
   <img src="https://img.shields.io/badge/agents-87-blueviolet" alt="87 Agents">
@@ -21,9 +24,11 @@
 </p>
 
 <p align="center">
-  Dristi is a self-contained OpenCode agent bundle + WSTG MCP server for bug hunting,
+  Dristi is a self-contained OpenCode agent bundle + MCP server for bug hunting,
   external red-team work, and authorized pentests — <b>87 agents</b> · <b>87 MCP tools</b> ·
-  OWASP WSTG v4.2 methodology across 25 vulnerability classes ·
+  OWASP WSTG v4.2 · OWASP Top 10 · OWASP API Security Top 10 · OWASP ASI ·
+  OWASP CRS/WAF bypass · CWE · MITRE ATT&CK · NIST · CVSS 3.1/4.0 ·
+  PortSwigger Academy · custom payload libraries ·
   enterprise identity + infrastructure attack matrices ·
   engagement management · Burp MCP integration ·
   <b>20 GF patterns</b> for parameter discovery.
@@ -33,7 +38,7 @@
 
 ## What is this?
 
-Dristi is an LLM-powered security toolkit that provides the complete OWASP Web Security Testing Guide methodology as an MCP server — 96 test cases across 12 categories, and the full pentest lifecycle. It pairs with Burp Suite's MCP server for request execution, or runs standalone as a reference knowledge base.
+Dristi is an LLM-powered security toolkit that provides the complete OWASP Web Security Testing Guide methodology + OWASP Top 10 · OWASP API Security Top 10 · OWASP ASI · WAF/CRS bypass · CWE · MITRE ATT&CK · NIST · CVSS as an MCP server — 96 WSTG test cases across 12 categories, payload libraries, and the full pentest lifecycle. It pairs with Burp Suite's MCP server for request execution, or runs standalone as a reference knowledge base.
 
 Four layers stack:
 

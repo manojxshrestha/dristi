@@ -13,7 +13,7 @@ Dristi is a dual-interface security testing platform: an **MCP server** (87 tool
 │  Dristi MCP      │    │  OpenCode Agents (87)    │
 │  Server (87 tools)│    │                         │
 │  ──────────────── │    │  ──────────────────────  │
-│  • WSTG v4.2     │    │  • hunt-xss, hunt-sqli   │
+│  • WSTG v4.2 · OWASP Top 10 · OWASP API Top 10 · OWASP ASI · WAF/CRS · CWE · MITRE ATT&CK · NIST · CVSS · PortSwigger · Payload libraries     │    │  • hunt-xss, hunt-sqli   │
 │  • WAF bypass    │    │  • triage-validation     │
 │  • Findings DB    │    │  • offensive-osint       │
 │  • Engagement     │    │  • m365-entra-attack     │
