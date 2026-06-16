@@ -2953,7 +2953,6 @@ def _get_phase_brainstorming(
     """Generate context-aware brainstorming suggestions for a completed phase."""
     suggestions: list[str] = []
     finding_titles = [f.get("title", "").lower() for f in findings]
-    has_oauth_issue = any("oauth" in t or "callback" in t or "500" in t for t in finding_titles)
     has_auth_broken = any("auth" in t and ("broken" in t or "bypass" in t or "500" in t) for t in finding_titles)
     skipped_tests = {tid: e for tid, e in tracked_tests.items() if e["status"] == "skipped"}
 
