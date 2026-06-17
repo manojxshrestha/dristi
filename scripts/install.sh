@@ -434,7 +434,7 @@ if is_wsl:
     bridge_script = os.path.join(repo, "scripts", "burp-mcp-bridge.py")
     mcp["burp"] = {
         "type": "local",
-        "command": ["bash", "-c", f"python3 {bridge_script}"]
+        "command": ["bash", "-c", f"cd {repo}/server && UV_PROJECT_ENVIRONMENT=venv exec uv run ../scripts/burp-mcp-bridge.py"]
     }
     sys.stderr.write("[install] WSL detected → Burp MCP via bridge script\n")
 else:
