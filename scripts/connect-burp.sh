@@ -43,7 +43,7 @@ PYEOF
 # ── Start WSTG server helper ─────────────────────────────────────────────────
 start_wstg_server() {
   info "Starting Dristi WSTG MCP server (background)..."
-  nohup bash -c "cd '$DST/server' && exec uv run server.py" \
+  nohup bash -c "cd '$DST/server' && UV_PROJECT_ENVIRONMENT=venv exec uv run server.py" \
     > "$HOME/.dristi/server.log" 2>&1 &
   sleep 2
   if kill -0 $! 2>/dev/null; then
@@ -321,7 +321,7 @@ PYEOF
 
 # ── Step 6: Restart WSTG server ──────────────────────────────────────────────
 info "Starting Dristi WSTG MCP server (background)..."
-nohup bash -c "cd '$DST/server' && exec uv run server.py" \
+nohup bash -c "cd '$DST/server' && UV_PROJECT_ENVIRONMENT=venv exec uv run server.py" \
   > "$HOME/.dristi/server.log" 2>&1 &
 sleep 2
 if kill -0 $! 2>/dev/null; then
